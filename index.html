@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ifpa-api" class="md-skip">
+        <a href="#ifpa-api-client" class="md-skip">
           Skip to content
         </a>
       
@@ -1331,41 +1331,50 @@
   
 
 
-<h1 id="ifpa-api">IFPA API<a class="headerlink" href="#ifpa-api" title="Permanent link">&para;</a></h1>
+<h1 id="ifpa-api-client">IFPA API Client<a class="headerlink" href="#ifpa-api-client" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>Note</strong>: This is an unofficial client library, not affiliated with or endorsed by IFPA.</p>
+</blockquote>
 <p>Welcome to the IFPA API documentation! This library provides a typed Python client for the <a href="https://api.ifpapinball.com/">IFPA (International Flipper Pinball Association) API</a>.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The IFPA API client enables Python developers to easily access pinball rankings, tournament data, player statistics, and more through a clean, modern interface. Whether you're building a tournament management system, a statistics dashboard, or analyzing player performance, this client provides all the tools you need.</p>
+<p>The IFPA API client enables Python developers to access pinball rankings, tournament data, and player statistics through a clean, modern interface. Whether you're building a tournament management system, statistics dashboard, or analyzing player performance, this client provides the tools you need.</p>
 <h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Fully Typed</strong>: Complete type hints for IDE autocompletion and type checking</li>
 <li><strong>Pydantic Models</strong>: Automatic request/response validation with detailed error messages</li>
-<li><strong>Resource-Oriented API</strong>: Intuitive access patterns matching the IFPA API structure</li>
-<li><strong>Comprehensive Coverage</strong>: All 46 IFPA API v2.1 endpoints implemented</li>
-<li><strong>Handle Pattern</strong>: Fluent interface for resource-specific operations</li>
+<li><strong>Resource-Oriented</strong>: Intuitive access patterns matching the IFPA API structure</li>
+<li><strong>Comprehensive Coverage</strong>: 36 IFPA API v2.1 endpoints across 6 resources</li>
+<li><strong>Fluent Interface</strong>: Chainable handle pattern for resource-specific operations</li>
 <li><strong>Pagination Support</strong>: Built-in support for paginated endpoints</li>
-<li><strong>Error Handling</strong>: Clear exception hierarchy for different failure scenarios</li>
-<li><strong>Well Tested</strong>: 98% test coverage with unit and integration tests</li>
+<li><strong>Clear Error Handling</strong>: Exception hierarchy for different failure scenarios</li>
+<li><strong>Well Tested</strong>: 99% test coverage with unit and integration tests</li>
 </ul>
+<blockquote>
+<p><strong>Alpha Release</strong>: This library is under active development. The API is stable but may evolve based on community feedback. Production use is supported, but you may encounter occasional updates to the interface.</p>
+</blockquote>
 <h2 id="quick-example">Quick Example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h2>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Initialize client (uses IFPA_API_KEY environment variable)</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">client</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Initialize client with API key</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">client</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;your-api-key-here&#39;</span><span class="p">)</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Get player information</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">player</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">player</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="p">(</span><span class="mi">2643</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Name: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">last_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current Rank: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">current_wppr_rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Country: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">country_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Get top WPPR rankings</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">rankings</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">wppr</span><span class="p">(</span><span class="n">start_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">rankings</span><span class="o">.</span><span class="n">rankings</span><span class="p">:</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">rankings</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">wppr</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">rankings</span><span class="o">.</span><span class="n">rankings</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Search for tournaments</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">tournaments</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">tournaments</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">city</span><span class="o">=</span><span class="s2">&quot;Portland&quot;</span><span class="p">,</span> <span class="n">stateprov</span><span class="o">=</span><span class="s2">&quot;OR&quot;</span><span class="p">)</span>
 </span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="k">for</span> <span class="n">tournament</span> <span class="ow">in</span> <span class="n">tournaments</span><span class="o">.</span><span class="n">tournaments</span><span class="p">:</span>
 </span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">tournament_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">event_date</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="c1"># Close the client when done</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </span></code></pre></div>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
 <p>Install the client using pip:</p>
@@ -1373,7 +1382,7 @@
 </span></code></pre></div>
 <p>Requires Python 3.11 or higher.</p>
 <h2 id="api-resources">API Resources<a class="headerlink" href="#api-resources" title="Permanent link">&para;</a></h2>
-<p>The client provides access to all IFPA API resources:</p>
+<p>The client provides access to 36 of 46 IFPA API endpoints:</p>
 <table>
 <thead>
 <tr>
@@ -1408,13 +1417,18 @@
 <td>Tournament series standings and statistics</td>
 <td>8</td>
 </tr>
+<tr>
+<td><strong>Reference</strong></td>
+<td>Countries and states lookup</td>
+<td>2</td>
+</tr>
 </tbody>
 </table>
 <h2 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Documentation</strong>: Browse the <a href="getting-started/installation/">Getting Started</a> guide</li>
 <li><strong>Examples</strong>: Check the <a href="usage/directors/">Usage Guide</a> for code examples</li>
-<li><strong>Issues</strong>: Report bugs on <a href="https://github.com/jscom/ifpa-api/issues">GitHub Issues</a></li>
+<li><strong>Issues</strong>: Report bugs on <a href="https://github.com/johnsosoka/ifpa-api-python/issues">GitHub Issues</a></li>
 <li><strong>API Reference</strong>: See the <a href="https://api.ifpapinball.com/docs">IFPA API docs</a></li>
 </ul>
 <h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
@@ -1425,9 +1439,9 @@
 <li><a href="usage/directors/">Usage Examples</a></li>
 </ul>
 <h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>This project is licensed under the MIT License. See the <a href="https://github.com/jscom/ifpa-api/blob/main/LICENSE">LICENSE</a> file for details.</p>
+<p>This project is licensed under the MIT License. See the <a href="https://github.com/johnsosoka/ifpa-api-python/blob/main/LICENSE">LICENSE</a> file for details.</p>
 <h2 id="acknowledgments">Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permanent link">&para;</a></h2>
-<p>Built by <a href="https://github.com/jscom">Commerce Architects</a> for the pinball community. Thanks to IFPA for providing the public API.</p>
+<p>Built by <a href="https://github.com/johnsosoka">John Sosoka</a> for the pinball community. Thanks to IFPA for providing the public API.</p>
 
 
 
