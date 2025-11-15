@@ -4,9 +4,16 @@
 [![PyPI version](https://img.shields.io/pypi/v/ifpa-api.svg)](https://pypi.org/project/ifpa-api/)
 [![Python versions](https://img.shields.io/pypi/pyversions/ifpa-api.svg)](https://pypi.org/project/ifpa-api/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/johnsosoka/ifpa-api-python/workflows/CI/badge.svg)](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/johnsosoka/ifpa-api-python/branch/main/graph/badge.svg)](https://codecov.io/gh/johnsosoka/ifpa-api-python)
+[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://johnsosoka.github.io/ifpa-api-python/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, statistics, and more with a clean, modern Python interface.
+**Note**: This is an unofficial client library, not affiliated with or endorsed by IFPA.
+
+**Full Documentation**: https://johnsosoka.github.io/ifpa-api-python/
+
+A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, and statistics through a clean, modern Python interface.
 
 > **Alpha Release**: This library is under active development. The API is stable but may evolve based on community feedback. Production use is supported, but you may encounter occasional updates to the interface.
 
@@ -14,11 +21,11 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 
 - **Fully Typed**: Complete type hints for IDE autocompletion and type checking
 - **Pydantic Models**: Automatic request/response validation with detailed error messages
-- **Resource-Oriented API**: Intuitive access patterns matching the IFPA API structure
-- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints implemented (7 player endpoints)
-- **Handle Pattern**: Fluent interface for resource-specific operations
+- **Resource-Oriented**: Intuitive access patterns matching the IFPA API structure
+- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints across 6 resources
+- **Fluent Interface**: Chainable handle pattern for resource-specific operations
 - **Pagination Support**: Built-in support for paginated endpoints
-- **Error Handling**: Clear exception hierarchy for different failure scenarios
+- **Clear Error Handling**: Exception hierarchy for different failure scenarios
 - **Well Tested**: 99% test coverage with unit and integration tests
 
 ## Installation
@@ -34,22 +41,22 @@ Requires Python 3.11 or higher.
 ```python
 from ifpa_api import IfpaClient
 
-# Initialize client (uses IFPA_API_KEY environment variable)
-client = IfpaClient()
+# Initialize client with API key
+client = IfpaClient(api_key='your-api-key-here')
 
 # Search for players
-players = client.players.search(name="John", city="Seattle")
-for player in players.players:
+result = client.players.search(name="Jason", country="US")
+for player in result.search[:5]:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
-# Get player details and rankings
-player = client.player(12345).get()
+# Get player details
+player = client.player(2643).get()
 print(f"Name: {player.first_name} {player.last_name}")
-print(f"Current WPPR Rank: {player.current_wppr_rank}")
+print(f"Country: {player.country_name}")
 
 # Get top WPPR rankings
-rankings = client.rankings.wppr(start_pos=0, count=100)
-for entry in rankings.rankings:
+rankings = client.rankings.wppr(count=100)
+for entry in rankings.rankings[:5]:
     print(f"{entry.rank}. {entry.player_name}: {entry.rating} WPPR")
 
 # Close the client when done
@@ -60,7 +67,17 @@ client.close()
 
 The client requires an IFPA API key. You can obtain one from the [IFPA API documentation](https://api.ifpapinball.com/docs).
 
-### Option 1: Environment Variable (Recommended)
+### Option 1: Constructor Parameter (Recommended)
+
+Pass the API key directly to the constructor:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient(api_key='your-api-key-here')
+```
+
+### Option 2: Environment Variable
 
 Set the `IFPA_API_KEY` environment variable:
 
@@ -76,17 +93,117 @@ from ifpa_api import IfpaClient
 client = IfpaClient()
 ```
 
-### Option 2: Constructor Parameter
+## Real-World Examples
 
-Pass the API key directly to the constructor:
+### Example 1: Player Deep Dive
+
+Get comprehensive information about a player including profile, tournament results, and ranking history:
+
+```python
+from ifpa_api import IfpaClient, RankingSystem, ResultType
+
+client = IfpaClient(api_key='your-api-key-here')
+
+# Get player profile
+player = client.player(2643).get()
+print(f"Player: {player.first_name} {player.last_name}")
+print(f"Country: {player.country_name}")
+
+# Get recent tournament results
+results = client.player(2643).results(
+    ranking_system=RankingSystem.MAIN,
+    result_type=ResultType.ACTIVE,
+    count=10
+)
+print(f"Active tournaments: {len(results.results)}")
+for result in results.results[:3]:
+    print(f"  - {result.tournament_name}: Position {result.position}")
+
+# Get ranking history
+history = client.player(2643).history()
+print(f"Rank history entries: {len(history.rank_history)}")
+if history.rank_history:
+    latest = history.rank_history[-1]
+    print(f"Latest: {latest.rank_date} - Rank {latest.rank_position}")
+
+client.close()
+```
+
+### Example 2: Tournament Analysis
+
+Analyze a tournament's details and results:
 
 ```python
 from ifpa_api import IfpaClient
 
 client = IfpaClient(api_key='your-api-key-here')
+
+# Get tournament details
+tournament = client.tournament(7070).get()
+print(f"Tournament: {tournament.tournament_name}")
+print(f"Date: {tournament.event_start_date}")
+print(f"Players: {tournament.player_count}")
+
+# Get tournament results
+results = client.tournament(7070).results()
+print(f"\nTop 3 finishers:")
+for result in results.results[:3]:
+    print(f"  {result.position}. {result.player_name}: {result.points} points")
+
+client.close()
 ```
 
-## Usage Examples
+### Example 3: Rankings Overview
+
+Compare global and country-specific rankings:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient(api_key='your-api-key-here')
+
+# Get global top 5
+global_top = client.rankings.wppr(count=5)
+print("World Top 5:")
+for entry in global_top.rankings:
+    print(f"  {entry.rank}. {entry.player_name}: {entry.rating}")
+
+# Get US-only top 5
+us_top = client.rankings.wppr(country="US", count=5)
+print("\nUS Top 5:")
+for entry in us_top.rankings:
+    print(f"  {entry.rank}. {entry.player_name}: {entry.rating}")
+
+client.close()
+```
+
+### Example 4: Player Search
+
+Search for players and get detailed information:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient(api_key='your-api-key-here')
+
+# Search for players
+result = client.players.search(name="Jason", country="US", count=3)
+print(f"Found {len(result.search)} players")
+
+if result.search:
+    first = result.search[0]
+    print(f"First result: {first.first_name} {first.last_name}")
+
+    # Get full details
+    player = client.player(first.player_id).get()
+    print(f"\nFull details:")
+    print(f"  Name: {player.first_name} {player.last_name}")
+    print(f"  Country: {player.country_name}")
+
+client.close()
+```
+
+## API Reference
 
 ### Directors
 
@@ -135,40 +252,37 @@ players = client.players.search(
 )
 
 # Get player profile
-player = client.player(12345).get()
+player = client.player(2643).get()
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Location: {player.city}, {player.stateprov}")
-print(f"Current Rank: {player.current_wppr_rank}")
-print(f"Rating: {player.current_wppr_value}")
-print(f"Active Events: {player.active_events}")
+print(f"Country: {player.country_name}")
 
 # Bulk fetch multiple players (up to 50)
-players = client.players.get_multiple([12345, 67890, 11111])
+players = client.players.get_multiple([2643, 50104, 7070])
 for player in players.player:
     print(f"{player.first_name} {player.last_name}")
 
 # Get player's tournament results (both parameters required)
-results = client.player(12345).results(
+results = client.player(2643).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE,
-    start_pos=0,
     count=50
 )
 for result in results.results:
     print(f"{result.tournament_name}: Placed {result.position}")
 
 # Compare two players head-to-head
-pvp = client.player(12345).pvp(67890)
+pvp = client.player(2643).pvp(50104)
 print(f"Player 1 Wins: {pvp.player1_wins}")
 print(f"Player 2 Wins: {pvp.player2_wins}")
 print(f"Ties: {pvp.ties}")
 
 # Get PVP summary for all competitors
-pvp_summary = client.player(12345).pvp_all()
+pvp_summary = client.player(2643).pvp_all()
 print(f"Competed against {pvp_summary.total_competitors} players")
 
 # Get player's ranking history (separate rank and rating arrays)
-history = client.player(12345).history()
+history = client.player(2643).history()
 for entry in history.rank_history:
     print(f"{entry.rank_date}: Rank {entry.rank_position}, WPPR {entry.wppr_points}")
 for entry in history.rating_history:
@@ -185,7 +299,7 @@ from ifpa_api import IfpaClient
 client = IfpaClient()
 
 # Get main WPPR rankings
-wppr = client.rankings.wppr(start_pos=0, count=100)
+wppr = client.rankings.wppr(count=100)
 for entry in wppr.rankings:
     print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
 
@@ -193,16 +307,16 @@ for entry in wppr.rankings:
 us_rankings = client.rankings.wppr(country="US", count=50)
 
 # Get women's rankings
-women = client.rankings.women(start_pos=0, count=50)
+women = client.rankings.women(count=50)
 
 # Get youth rankings
-youth = client.rankings.youth(start_pos=0, count=50)
+youth = client.rankings.youth(count=50)
 
 # Get professional circuit rankings
-pro = client.rankings.pro(start_pos=0, count=50)
+pro = client.rankings.pro(count=50)
 
 # Get virtual tournament rankings
-virtual = client.rankings.virtual(start_pos=0, count=50)
+virtual = client.rankings.virtual(count=50)
 
 # Get country rankings (filtered by country code or name)
 countries = client.rankings.by_country(country="US", count=25)
@@ -210,13 +324,13 @@ for entry in countries.country_rankings:
     print(f"{entry.rank}. {entry.country_name}: {entry.total_players} players")
 
 # Get age-based rankings
-under_18 = client.rankings.age_based("u18", start_pos=0, count=50)
+under_18 = client.rankings.age_based("u18", count=50)
 
 # Get custom ranking system
-custom = client.rankings.custom("regional-2024", start_pos=0, count=50)
+custom = client.rankings.custom("regional-2024", count=50)
 
 # Get group rankings
-group = client.rankings.group("northwest-league", start_pos=0, count=50)
+group = client.rankings.group("northwest-league", count=50)
 ```
 
 ### Tournaments
@@ -240,22 +354,22 @@ for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name} ({tournament.event_date})")
 
 # Get tournament details
-tournament = client.tournament(12345).get()
+tournament = client.tournament(7070).get()
 print(f"Name: {tournament.tournament_name}")
 print(f"Location: {tournament.city}, {tournament.stateprov}")
-print(f"Date: {tournament.event_date}")
+print(f"Date: {tournament.event_start_date}")
 print(f"Players: {tournament.player_count}")
 
 # Get tournament results
-results = client.tournament(12345).results()
+results = client.tournament(7070).results()
 for result in results.results:
     print(f"{result.position}. {result.player_name}: {result.points} points")
 
 # Get tournament formats
-formats = client.tournament(12345).formats()
+formats = client.tournament(7070).formats()
 
 # Get league information (if applicable)
-league = client.tournament(12345).league()
+league = client.tournament(7070).league()
 ```
 
 ### Series
@@ -276,12 +390,12 @@ for series in all_series.series:
 active_series = client.series.list(active_only=True)
 
 # Get series standings
-standings = client.series_handle("PAPA").standings(start_pos=0, count=50)
+standings = client.series_handle("PAPA").standings(count=50)
 for entry in standings.standings:
     print(f"{entry.position}. {entry.player_name}: {entry.points} points")
 
 # Get player's series card
-card = client.series_handle("PAPA").player_card(12345)
+card = client.series_handle("PAPA").player_card(2643)
 print(f"Position: {card.current_position}")
 print(f"Total Points: {card.total_points}")
 for event in card.events:
@@ -329,9 +443,7 @@ client = IfpaClient(
 
 ### Request Validation
 
-By default, the client validates request parameters using Pydantic models before sending requests to the API. This catches invalid parameters early with clear error messages.
-
-To disable validation:
+By default, the client validates request parameters using Pydantic models before sending to the API. This catches invalid parameters early with clear error messages. To disable:
 
 ```python
 client = IfpaClient(validate_requests=False)
@@ -350,10 +462,10 @@ from ifpa_api import (
     IfpaClientValidationError  # Request validation failed (when validate_requests=True)
 )
 
-client = IfpaClient()
+client = IfpaClient(api_key='your-api-key-here')
 
 try:
-    player = client.player(12345).get()
+    player = client.player(2643).get()
 except MissingApiKeyError:
     print("API key not configured")
 except IfpaApiError as e:
@@ -371,8 +483,8 @@ The client supports Python's context manager protocol for automatic resource cle
 ```python
 from ifpa_api import IfpaClient
 
-with IfpaClient() as client:
-    player = client.player(12345).get()
+with IfpaClient(api_key='your-api-key-here') as client:
+    player = client.player(2643).get()
     rankings = client.rankings.wppr(count=100)
     # Client automatically closed when exiting the context
 ```
@@ -476,28 +588,31 @@ Key points:
 
 ## API Coverage
 
-The client implements 36 endpoints from IFPA API v2.1:
+The client implements 36 of 46 IFPA API v2.1 endpoints:
 
-- **Directors**: 4 endpoints (search, details, tournaments)
-- **Players**: 7 endpoints (search, bulk fetch, profile, PvP comparison, PvP summary, results, history)
-- **Rankings**: 9 endpoints (WPPR, women, youth, virtual, pro, country, age-based, custom, group)
-- **Tournaments**: 6 endpoints (search, details, results, formats, league, submissions)
-- **Series**: 8 endpoints (list, standings, player cards, overview, regions, rules, stats, schedule)
-- **Reference**: 2 endpoints (countries, states)
+| Resource | Endpoints | Details |
+|----------|-----------|---------|
+| **Directors** | 4 | Search, details, tournaments |
+| **Players** | 7 | Search, bulk fetch, profile, PvP comparison, PvP summary, results, history |
+| **Rankings** | 9 | WPPR, women, youth, virtual, pro, country, age-based, custom, group |
+| **Tournaments** | 6 | Search, details, results, formats, league, submissions |
+| **Series** | 8 | List, standings, player cards, overview, regions, rules, stats, schedule |
+| **Reference** | 2 | Countries, states |
 
 ## Known Limitations
 
-**Stats Endpoints Not Available**: The IFPA API v2.1 specification includes 10 Stats endpoints (`/v2.1/stats/*`), but these endpoints currently return HTTP 404 from the live API server. As a result, they are not implemented in this client. These endpoints will be added in a future release when the IFPA API makes them available.
+**Stats Endpoints Not Available**: The IFPA API v2.1 specification includes 10 Stats endpoints (`/v2.1/stats/*`), but these currently return HTTP 404 from the live API. They are not implemented in this client and will be added when the IFPA API makes them available.
 
-This limitation does not affect any other functionality—all other documented endpoints are fully implemented and tested.
+This limitation does not affect any other functionality. All other documented endpoints are fully implemented and tested.
 
 ## Resources
 
-- **IFPA Website**: https://www.ifpapinball.com/
+- **Client Documentation**: https://johnsosoka.github.io/ifpa-api-python/
 - **IFPA API Documentation**: https://api.ifpapinball.com/docs
-- **Client Documentation**: https://github.com/johnsosoka/ifpa-api-python
+- **GitHub Repository**: https://github.com/johnsosoka/ifpa-api-python
 - **Issue Tracker**: https://github.com/johnsosoka/ifpa-api-python/issues
 - **PyPI Package**: https://pypi.org/project/ifpa-api/
+- **IFPA Website**: https://www.ifpapinball.com/
 
 ## License
 
@@ -505,9 +620,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Built by [John Sosoka](https://github.com/johnsosoka) for the pinball community
-- Thanks to IFPA for providing the public API
-- Special thanks to all contributors and users
+Built by [John Sosoka](https://github.com/johnsosoka) for the pinball community. Thanks to IFPA for providing the public API.
 
 ## Support
 
