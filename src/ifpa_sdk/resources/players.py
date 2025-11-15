@@ -8,10 +8,11 @@ from typing import TYPE_CHECKING, Any
 
 from ifpa_sdk.models.common import RankingSystem, ResultType
 from ifpa_sdk.models.player import (
+    MultiPlayerResponse,
     Player,
-    PlayerCard,
     PlayerResultsResponse,
     PlayerSearchResponse,
+    PvpAllCompetitors,
     PvpComparison,
     RankingHistory,
 )
@@ -68,24 +69,23 @@ class PlayerHandle:
                 return Player.model_validate(player_data[0])
         return Player.model_validate(response)
 
-    def rankings(self) -> list[dict[str, str | int | float | None]]:
-        """Get player's rankings across all ranking systems.
+    def pvp_all(self) -> PvpAllCompetitors:
+        """Get summary of all players this player has competed against.
 
         Returns:
-            List of rankings in different systems (Main, Women, Youth, etc.)
+            PvpAllCompetitors containing total count and metadata
 
         Raises:
             IfpaApiError: If the API request fails
 
         Example:
             ```python
-            rankings = client.player(12345).rankings()
-            for ranking in rankings:
-                print(f"{ranking['system']}: Rank {ranking['rank']}")
+            summary = client.player(2643).pvp_all()
+            print(f"Competed against {summary.total_competitors} players")
             ```
         """
-        response = self._http._request("GET", f"/player/{self._player_id}/rankings")
-        return response if isinstance(response, list) else []
+        response = self._http._request("GET", f"/player/{self._player_id}/pvp")
+        return PvpAllCompetitors.model_validate(response)
 
     def pvp(self, other_player_id: int | str) -> PvpComparison:
         """Get head-to-head comparison with another player.
@@ -112,16 +112,18 @@ class PlayerHandle:
 
     def results(
         self,
-        ranking_system: RankingSystem | None = None,
-        result_type: ResultType | None = None,
+        ranking_system: RankingSystem,
+        result_type: ResultType,
         start_pos: int | None = None,
         count: int | None = None,
     ) -> PlayerResultsResponse:
         """Get player's tournament results.
 
+        Both ranking_system and result_type are required by the API endpoint.
+
         Args:
-            ranking_system: Filter by ranking system (Main, Women, Youth, etc.)
-            result_type: Filter by result activity (active, nonactive, inactive)
+            ranking_system: Filter by ranking system (Main, Women, Youth, etc.) - REQUIRED
+            result_type: Filter by result activity (active, nonactive, inactive) - REQUIRED
             start_pos: Starting position for pagination
             count: Number of results to return
 
@@ -140,27 +142,21 @@ class PlayerHandle:
             )
 
             # Get paginated results
-            results = client.player(12345).results(start_pos=0, count=50)
+            results = client.player(12345).results(
+                ranking_system=RankingSystem.MAIN,
+                result_type=ResultType.ACTIVE,
+                start_pos=0,
+                count=50
+            )
             ```
         """
-        # Build path with optional ranking system and type
-        path_parts = [f"/player/{self._player_id}/results"]
+        # Both parameters are required - build path directly
+        system_value = (
+            ranking_system.value if isinstance(ranking_system, RankingSystem) else ranking_system
+        )
+        type_value = result_type.value if isinstance(result_type, ResultType) else result_type
 
-        if ranking_system is not None:
-            system_value = (
-                ranking_system.value
-                if isinstance(ranking_system, RankingSystem)
-                else ranking_system
-            )
-            path_parts.append(system_value)
-
-            if result_type is not None:
-                type_value = (
-                    result_type.value if isinstance(result_type, ResultType) else result_type
-                )
-                path_parts.append(type_value)
-
-        path = "/".join(path_parts)
+        path = f"/player/{self._player_id}/results/{system_value}/{type_value}"
 
         params = {}
         if start_pos is not None:
@@ -172,10 +168,10 @@ class PlayerHandle:
         return PlayerResultsResponse.model_validate(response)
 
     def history(self) -> RankingHistory:
-        """Get player's WPPR ranking history over time.
+        """Get player's WPPR ranking and rating history over time.
 
         Returns:
-            Historical ranking data
+            Historical ranking data with separate rank_history and rating_history arrays
 
         Raises:
             IfpaApiError: If the API request fails
@@ -183,30 +179,14 @@ class PlayerHandle:
         Example:
             ```python
             history = client.player(12345).history()
-            for entry in history.history:
-                print(f"{entry.date}: Rank {entry.rank}, WPPR {entry.rating}")
+            for entry in history.rank_history:
+                print(f"{entry.rank_date}: Rank {entry.rank_position}")
+            for entry in history.rating_history:
+                print(f"{entry.rating_date}: Rating {entry.rating}")
             ```
         """
         response = self._http._request("GET", f"/player/{self._player_id}/rank_history")
         return RankingHistory.model_validate(response)
-
-    def cards(self) -> PlayerCard:
-        """Get player's achievement cards and badges.
-
-        Returns:
-            Player cards and achievements
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            cards = client.player(12345).cards()
-            print(f"Cards earned: {len(cards.cards)}")
-            ```
-        """
-        response = self._http._request("GET", f"/player/{self._player_id}/cards")
-        return PlayerCard.model_validate(response)
 
 
 class PlayersClient:
@@ -238,18 +218,22 @@ class PlayersClient:
         city: str | None = None,
         stateprov: str | None = None,
         country: str | None = None,
+        tournament: str | None = None,
+        tourpos: int | None = None,
         start_pos: int | str | None = None,
         count: int | str | None = None,
     ) -> PlayerSearchResponse:
         """Search for players.
 
         Args:
-            name: Player name to search for (partial match)
+            name: Player name to search for (partial match, not case sensitive)
             first_name: Filter by first name
             last_name: Filter by last name
             city: Filter by city
-            stateprov: Filter by state/province
-            country: Filter by country code
+            stateprov: Filter by state/province (2-digit code)
+            country: Filter by country name or 2-digit code
+            tournament: Filter by tournament name (partial strings accepted)
+            tourpos: Filter by finishing position in tournament
             start_pos: Starting position for pagination
             count: Number of results to return
 
@@ -267,13 +251,16 @@ class PlayersClient:
             # Search by location
             results = client.players.search(city="Seattle", stateprov="WA")
 
+            # Search by tournament participation
+            results = client.players.search(tournament="PAPA", tourpos=1)
+
             # Paginated search
             results = client.players.search(name="Smith", start_pos=0, count=25)
             ```
         """
         params: dict[str, Any] = {}
         if name is not None:
-            params["q"] = name
+            params["name"] = name
         if first_name is not None:
             params["first_name"] = first_name
         if last_name is not None:
@@ -284,6 +271,10 @@ class PlayersClient:
             params["stateprov"] = stateprov
         if country is not None:
             params["country"] = country
+        if tournament is not None:
+            params["tournament"] = tournament
+        if tourpos is not None:
+            params["tourpos"] = tourpos
         if start_pos is not None:
             params["start_pos"] = start_pos
         if count is not None:
@@ -291,3 +282,37 @@ class PlayersClient:
 
         response = self._http._request("GET", "/player/search", params=params)
         return PlayerSearchResponse.model_validate(response)
+
+    def get_multiple(self, player_ids: list[int | str]) -> MultiPlayerResponse:
+        """Fetch multiple players in a single request.
+
+        Args:
+            player_ids: List of player IDs (max 50)
+
+        Returns:
+            MultiPlayerResponse containing the requested players
+
+        Raises:
+            IfpaClientValidationError: If more than 50 player IDs provided
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            # Fetch multiple players efficiently
+            result = client.players.get_multiple([123, 456, 789])
+            if isinstance(result.player, list):
+                for player in result.player:
+                    print(f"{player.first_name} {player.last_name}")
+            ```
+        """
+        from ifpa_sdk.exceptions import IfpaClientValidationError
+
+        if len(player_ids) > 50:
+            raise IfpaClientValidationError("Maximum 50 player IDs allowed per request")
+
+        # Join IDs with commas
+        players_param = ",".join(str(pid) for pid in player_ids)
+        params = {"players": players_param}
+
+        response = self._http._request("GET", "/player", params=params)
+        return MultiPlayerResponse.model_validate(response)

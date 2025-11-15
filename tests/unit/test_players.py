@@ -10,10 +10,11 @@ from ifpa_sdk.client import IfpaClient
 from ifpa_sdk.exceptions import IfpaApiError
 from ifpa_sdk.models.common import RankingSystem, ResultType
 from ifpa_sdk.models.player import (
+    MultiPlayerResponse,
     Player,
-    PlayerCard,
     PlayerResultsResponse,
     PlayerSearchResponse,
+    PvpAllCompetitors,
     PvpComparison,
     RankingHistory,
 )
@@ -126,6 +127,65 @@ class TestPlayersClient:
         assert "first_name=michael" in query
         assert "last_name=jordan" in query
 
+    def test_get_multiple(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test fetching multiple players at once."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player",
+            json={
+                "player": [
+                    {"player_id": 123, "first_name": "John", "last_name": "Smith"},
+                    {"player_id": 456, "first_name": "Jane", "last_name": "Doe"},
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.players.get_multiple([123, 456])
+
+        assert isinstance(result, MultiPlayerResponse)
+        assert result.player is not None
+        query = mock_requests.last_request.query
+        assert "players=123%2c456" in query.lower()
+
+    def test_get_multiple_max_validation(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that get_multiple raises error for more than 50 players."""
+        from ifpa_sdk.exceptions import IfpaClientValidationError
+
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(IfpaClientValidationError) as exc_info:
+            client.players.get_multiple(list(range(1, 52)))
+
+        assert "50 player ids" in str(exc_info.value).lower()
+
+    def test_search_parameter_mapping(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that name parameter maps to 'name' query param, not 'q'."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={"search": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.players.search(name="John")
+
+        query = mock_requests.last_request.query
+        assert "name=john" in query.lower()
+        assert "q=" not in query
+
+    def test_search_with_tournament_filters(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with new tournament and tourpos parameters."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={"search": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.players.search(tournament="PAPA", tourpos=1)
+
+        query = mock_requests.last_request.query
+        assert "tournament=papa" in query.lower()
+        assert "tourpos=1" in query
+
 
 class TestPlayerHandle:
     """Test cases for PlayerHandle resource-specific operations."""
@@ -183,37 +243,6 @@ class TestPlayerHandle:
 
         assert player.player_id == 12345
 
-    def test_rankings(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting player rankings across systems."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/12345/rankings",
-            json=[
-                {
-                    "ranking_system": "Main",
-                    "rank": 100,
-                    "rating": 450.5,
-                    "country_rank": 50,
-                    "active_events": 10,
-                },
-                {
-                    "ranking_system": "Women",
-                    "rank": 25,
-                    "rating": 380.2,
-                    "country_rank": 10,
-                    "active_events": 8,
-                },
-            ],
-        )
-
-        client = IfpaClient(api_key="test-key")
-        rankings = client.player(12345).rankings()
-
-        assert isinstance(rankings, list)
-        assert len(rankings) == 2
-        assert rankings[0]["ranking_system"] == "Main"
-        assert rankings[0]["rank"] == 100
-        assert rankings[1]["ranking_system"] == "Women"
-
     def test_pvp_comparison(self, mock_requests: requests_mock.Mocker) -> None:
         """Test head-to-head player comparison."""
         mock_requests.get(
@@ -245,7 +274,7 @@ class TestPlayerHandle:
     def test_results_basic(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting player tournament results."""
         mock_requests.get(
-            "https://api.ifpapinball.com/player/12345/results",
+            "https://api.ifpapinball.com/player/12345/results/main/active",
             json={
                 "player_id": 12345,
                 "results": [
@@ -265,7 +294,9 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        results = client.player(12345).results()
+        results = client.player(12345).results(
+            ranking_system=RankingSystem.MAIN, result_type=ResultType.ACTIVE
+        )
 
         assert isinstance(results, PlayerResultsResponse)
         assert results.player_id == 12345
@@ -277,7 +308,7 @@ class TestPlayerHandle:
     def test_results_with_ranking_system(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting player results filtered by ranking system."""
         mock_requests.get(
-            "https://api.ifpapinball.com/player/12345/results/main",
+            "https://api.ifpapinball.com/player/12345/results/main/active",
             json={
                 "player_id": 12345,
                 "results": [],
@@ -286,10 +317,12 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        results = client.player(12345).results(ranking_system=RankingSystem.MAIN)
+        results = client.player(12345).results(
+            ranking_system=RankingSystem.MAIN, result_type=ResultType.ACTIVE
+        )
 
         assert isinstance(results, PlayerResultsResponse)
-        assert "results/main" in mock_requests.last_request.path
+        assert "results/main/active" in mock_requests.last_request.path
 
     def test_results_with_ranking_system_and_type(
         self, mock_requests: requests_mock.Mocker
@@ -322,7 +355,7 @@ class TestPlayerHandle:
     def test_results_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting paginated player results."""
         mock_requests.get(
-            "https://api.ifpapinball.com/player/12345/results",
+            "https://api.ifpapinball.com/player/12345/results/main/active",
             json={
                 "player_id": 12345,
                 "results": [{"tournament_id": i, "tournament_name": f"T{i}"} for i in range(50)],
@@ -331,7 +364,12 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        results = client.player(12345).results(start_pos=0, count=50)
+        results = client.player(12345).results(
+            ranking_system=RankingSystem.MAIN,
+            result_type=ResultType.ACTIVE,
+            start_pos=0,
+            count=50,
+        )
 
         assert len(results.results) == 50
         query = mock_requests.last_request.query
@@ -344,21 +382,30 @@ class TestPlayerHandle:
             "https://api.ifpapinball.com/player/12345/rank_history",
             json={
                 "player_id": 12345,
-                "ranking_system": "Main",
-                "history": [
+                "system": "MAIN",
+                "active_flag": "Y",
+                "rank_history": [
                     {
-                        "date": "2024-01-01",
-                        "rank": 100,
-                        "rating": 450.5,
-                        "active_events": 10,
+                        "rank_date": "2024-01-01",
+                        "rank_position": "100",
+                        "wppr_points": "450.50",
+                        "tournaments_played_count": "10",
                     },
                     {
-                        "date": "2024-02-01",
-                        "rank": 95,
-                        "rating": 455.0,
-                        "active_events": 11,
-                        "rating_change": 4.5,
-                        "rank_change": -5,
+                        "rank_date": "2024-02-01",
+                        "rank_position": "95",
+                        "wppr_points": "455.00",
+                        "tournaments_played_count": "11",
+                    },
+                ],
+                "rating_history": [
+                    {
+                        "rating_date": "2024-01-01",
+                        "rating": "1500.5",
+                    },
+                    {
+                        "rating_date": "2024-02-01",
+                        "rating": "1505.0",
                     },
                 ],
             },
@@ -369,34 +416,36 @@ class TestPlayerHandle:
 
         assert isinstance(history, RankingHistory)
         assert history.player_id == 12345
-        assert history.ranking_system == "Main"
-        assert len(history.history) == 2
-        assert history.history[0].rank == 100
-        assert history.history[1].rank == 95
-        assert history.history[1].rank_change == -5
+        assert history.system == "MAIN"
+        assert history.active_flag == "Y"
+        assert len(history.rank_history) == 2
+        assert len(history.rating_history) == 2
+        assert history.rank_history[0].rank_position == "100"
+        assert history.rank_history[1].rank_position == "95"
+        assert history.rating_history[0].rating == "1500.5"
+        assert history.rating_history[1].rating == "1505.0"
 
-    def test_cards(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting player achievement cards."""
+    def test_pvp_all(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test getting PVP summary (all competitors)."""
         mock_requests.get(
-            "https://api.ifpapinball.com/player/12345/cards",
+            "https://api.ifpapinball.com/player/12345/pvp",
             json={
                 "player_id": 12345,
-                "player_name": "John Smith",
-                "cards": [
-                    {"card_id": 1, "card_name": "Tournament Winner", "earned_date": "2024-01-15"}
-                ],
-                "achievements": {"total_cards": 1, "total_points": 100},
+                "total_competitors": 42,
+                "system": "MAIN",
+                "type": "all",
+                "title": "",
             },
         )
 
         client = IfpaClient(api_key="test-key")
-        cards = client.player(12345).cards()
+        summary = client.player(12345).pvp_all()
 
-        assert isinstance(cards, PlayerCard)
-        assert cards.player_id == 12345
-        assert cards.player_name == "John Smith"
-        assert len(cards.cards) == 1
-        assert cards.achievements is not None
+        assert isinstance(summary, PvpAllCompetitors)
+        assert summary.player_id == 12345
+        assert summary.total_competitors == 42
+        assert summary.system == "MAIN"
+        assert summary.type == "all"
 
 
 class TestPlayersIntegration:

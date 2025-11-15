@@ -5,7 +5,7 @@ Models for players, their rankings, tournament results, and head-to-head compari
 
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from ifpa_sdk.models.common import IfpaBaseModel
 
@@ -67,6 +67,33 @@ class Player(IfpaBaseModel):
     player_stats: dict[str, Any] | None = None
     rankings: list[PlayerRanking] = Field(default_factory=list)
 
+    @field_validator("age", mode="before")
+    @classmethod
+    def validate_age(cls, v: Any) -> int | None:
+        """Convert empty strings to None, validate age range.
+
+        The IFPA API returns empty string for age when not provided.
+        This validator handles that case and validates reasonable age values.
+
+        Args:
+            v: The age value from the API (may be int, str, or None)
+
+        Returns:
+            The validated age as int, or None if not provided
+
+        Raises:
+            ValueError: If age is invalid or out of range
+        """
+        if v == "" or v is None:
+            return None
+        try:
+            age = int(v)
+            if age < 0 or age > 120:
+                raise ValueError(f"Age must be between 0 and 120, got {age}")
+            return age
+        except (ValueError, TypeError) as e:
+            raise ValueError(f"Invalid age value: {v}") from e
+
 
 class PlayerSearchResult(IfpaBaseModel):
     """Search result for a player.
@@ -102,6 +129,21 @@ class PlayerSearchResponse(IfpaBaseModel):
 
     query: str | None = None
     search: list[PlayerSearchResult] = Field(default_factory=list)
+
+
+class MultiPlayerResponse(IfpaBaseModel):
+    """Response for fetching multiple players by ID.
+
+    This represents the response from GET /player?players=123,456 endpoint.
+    The API spec shows a single "player" object, but this endpoint accepts
+    multiple IDs, so the actual structure may vary. This model is designed
+    to be flexible.
+
+    Attributes:
+        player: Player or list of players returned
+    """
+
+    player: Player | list[Player]
 
 
 class TournamentResult(IfpaBaseModel):
@@ -158,38 +200,75 @@ class PlayerResultsResponse(IfpaBaseModel):
     total_results: int | None = None
 
 
-class RankingHistoryEntry(IfpaBaseModel):
-    """Historical ranking entry for a player.
+class RankHistoryEntry(IfpaBaseModel):
+    """Historical rank position entry for a player.
 
     Attributes:
-        date: The date of this ranking snapshot
-        rank: Player's rank at this date
-        rating: Player's rating at this date
-        active_events: Number of active events at this date
-        rating_change: Change in rating from previous entry
-        rank_change: Change in rank from previous entry
+        rank_date: The date of this ranking snapshot
+        rank_position: Player's rank position at this date (string in API)
+        wppr_points: WPPR points at this date (string in API)
+        tournaments_played_count: Number of tournaments played (string in API)
     """
 
-    date: str
-    rank: int | None = None
-    rating: float | None = None
-    active_events: int | None = None
-    rating_change: float | None = None
-    rank_change: int | None = None
+    rank_date: str
+    rank_position: str
+    wppr_points: str
+    tournaments_played_count: str
+
+
+class RatingHistoryEntry(IfpaBaseModel):
+    """Historical rating entry for a player.
+
+    Attributes:
+        rating_date: The date of this rating snapshot
+        rating: Player's rating at this date (string in API)
+    """
+
+    rating_date: str
+    rating: str
 
 
 class RankingHistory(IfpaBaseModel):
-    """Player's ranking history over time.
+    """Player's ranking and rating history over time.
+
+    The IFPA API returns two separate arrays for ranking history:
+    - rank_history: Historical rank positions with WPPR points
+    - rating_history: Historical rating values
 
     Attributes:
         player_id: The player's ID
-        ranking_system: The ranking system (e.g., "Main", "Women")
-        history: List of historical ranking entries
+        system: The ranking system (e.g., "MAIN", "WOMEN", "YOUTH")
+        active_flag: Whether player is currently active ("Y"/"N")
+        rank_history: List of historical rank position entries
+        rating_history: List of historical rating entries
     """
 
     player_id: int
-    ranking_system: str
-    history: list[RankingHistoryEntry] = Field(default_factory=list)
+    system: str
+    active_flag: str
+    rank_history: list[RankHistoryEntry] = Field(default_factory=list)
+    rating_history: list[RatingHistoryEntry] = Field(default_factory=list)
+
+
+class PvpAllCompetitors(IfpaBaseModel):
+    """Summary of all competitors a player has faced.
+
+    This represents the response from GET /player/{id}/pvp endpoint,
+    which returns a high-level summary of PVP data.
+
+    Attributes:
+        player_id: The player's ID
+        total_competitors: Total number of competitors faced
+        system: Ranking system (e.g., "MAIN")
+        type: Type of PVP data (e.g., "all")
+        title: Title or description (may be empty)
+    """
+
+    player_id: int
+    total_competitors: int
+    system: str
+    type: str
+    title: str
 
 
 class PvpComparison(IfpaBaseModel):

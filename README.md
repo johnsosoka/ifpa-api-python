@@ -12,7 +12,7 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 - **Fully Typed**: Complete type hints for IDE autocompletion and type checking
 - **Pydantic Models**: Automatic request/response validation with detailed error messages
 - **Resource-Oriented API**: Intuitive access patterns matching the IFPA API structure
-- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints implemented
+- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints implemented (7 player endpoints)
 - **Handle Pattern**: Fluent interface for resource-specific operations
 - **Pagination Support**: Built-in support for paginated endpoints
 - **Error Handling**: Clear exception hierarchy for different failure scenarios
@@ -139,12 +139,12 @@ print(f"Current Rank: {player.current_wppr_rank}")
 print(f"Rating: {player.current_wppr_value}")
 print(f"Active Events: {player.active_events}")
 
-# Get player rankings across all systems
-rankings = client.player(12345).rankings()
-for ranking in rankings:
-    print(f"{ranking['system']}: Rank {ranking['rank']}")
+# Bulk fetch multiple players (up to 50)
+players = client.players.get_multiple([12345, 67890, 11111])
+for player in players.player:
+    print(f"{player.first_name} {player.last_name}")
 
-# Get player's tournament results
+# Get player's tournament results (both parameters required)
 results = client.player(12345).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE,
@@ -160,14 +160,16 @@ print(f"Player 1 Wins: {pvp.player1_wins}")
 print(f"Player 2 Wins: {pvp.player2_wins}")
 print(f"Ties: {pvp.ties}")
 
-# Get player's ranking history
-history = client.player(12345).history()
-for entry in history.history:
-    print(f"{entry.date}: Rank {entry.rank}, WPPR {entry.rating}")
+# Get PVP summary for all competitors
+pvp_summary = client.player(12345).pvp_all()
+print(f"Competed against {pvp_summary.total_competitors} players")
 
-# Get player's achievement cards
-cards = client.player(12345).cards()
-print(f"Total Cards: {len(cards.cards)}")
+# Get player's ranking history (separate rank and rating arrays)
+history = client.player(12345).history()
+for entry in history.rank_history:
+    print(f"{entry.rank_date}: Rank {entry.rank_position}, WPPR {entry.wppr_points}")
+for entry in history.rating_history:
+    print(f"{entry.rating_date}: Rating {entry.rating}")
 ```
 
 ### Rankings
@@ -474,13 +476,13 @@ Key points:
 The SDK implements 36 endpoints from IFPA API v2.1:
 
 - **Directors**: 4 endpoints (search, details, tournaments)
-- **Players**: 7 endpoints (search, profile, rankings, results, PvP, history, cards)
+- **Players**: 7 endpoints (search, bulk fetch, profile, PvP comparison, PvP summary, results, history)
 - **Rankings**: 9 endpoints (WPPR, women, youth, virtual, pro, country, age-based, custom, group)
 - **Tournaments**: 6 endpoints (search, details, results, formats, league, submissions)
 - **Series**: 8 endpoints (list, standings, player cards, overview, regions, rules, stats, schedule)
 - **Reference**: 2 endpoints (countries, states)
 
-**Note**: Stats endpoints are not implemented in v0.1.0 as they return 404 from the live API. These will be added in a future release when the API endpoints become available.
+**Note**: Stats endpoints are not implemented as they return 404 from the live API. These will be added when the API endpoints become available.
 
 ## Resources
 

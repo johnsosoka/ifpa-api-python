@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-11-14
+
+### Added
+- `PlayersClient.get_multiple()` method to fetch up to 50 players in a single request
+- `PlayerHandle.pvp_all()` method to get PVP competitor summary
+- `tournament` parameter to `PlayersClient.search()` for filtering by tournament name
+- `tourpos` parameter to `PlayersClient.search()` for filtering by tournament position
+
+### Changed
+- **BREAKING**: `PlayerHandle.results()` now requires both `ranking_system` and `result_type` parameters (were optional)
+- **BREAKING**: `PlayerHandle.history()` response structure now has separate `rank_history` and `rating_history` arrays (was single `history` array)
+- **BREAKING**: `RankingHistory` model field renamed: `ranking_system` → `system`
+- **BREAKING**: `RankingHistory` model now has `active_flag` field
+- Fixed critical bug: `PlayersClient.search()` parameter mapping (name now correctly maps to "name" query parameter)
+
+### Removed
+- **BREAKING**: `PlayerHandle.rankings()` method (endpoint returns 404 - not in API spec)
+- **BREAKING**: `PlayerHandle.cards()` method (endpoint returns 404 - not in API spec)
+
+### Migration Guide
+
+#### results() Method
+```python
+# Before (v0.1.x)
+results = client.player(123).results()
+
+# After (v0.2.0) - Both parameters required
+from ifpa_sdk.models.common import RankingSystem, ResultType
+results = client.player(123).results(
+    ranking_system=RankingSystem.MAIN,
+    result_type=ResultType.ACTIVE
+)
+```
+
+#### history() Method
+```python
+# Before (v0.1.x)
+history = client.player(123).history()
+for entry in history.history:
+    print(entry.rank, entry.rating)
+
+# After (v0.2.0) - Separate arrays
+history = client.player(123).history()
+for entry in history.rank_history:
+    print(entry.rank_position, entry.wppr_points)
+for entry in history.rating_history:
+    print(entry.rating)
+```
+
+#### Removed Methods
+```python
+# Before (v0.1.x)
+rankings = client.player(123).rankings()  # Will raise AttributeError in v0.2.0
+cards = client.player(123).cards()        # Will raise AttributeError in v0.2.0
+
+# After (v0.2.0) - No replacement
+# Player rankings data is available in the player profile
+profile = client.player(123).get()
+# Player cards are only available via series: client.series_handle("CODE").player_card(123)
+```
+
 ## [0.1.0] - 2025-11-14
 
 ### Added
@@ -79,14 +140,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /director/{director_id}/tournaments/past` - Get past tournaments
 - `GET /director/{director_id}/tournaments/upcoming` - Get upcoming tournaments
 
-**Players (7 endpoints)**:
+**Players (5 endpoints in v0.1.0)**:
 - `GET /player/search` - Search for players
 - `GET /player/{player_id}` - Get player profile
-- `GET /player/{player_id}/rankings` - Get player rankings
 - `GET /player/{player_id}/pvp/{other_player_id}` - Head-to-head comparison
 - `GET /player/{player_id}/results` - Tournament results history
 - `GET /player/{player_id}/rank_history` - WPPR ranking history
-- `GET /player/{player_id}/cards` - Player achievement cards
+
+**Note**: v0.1.0 incorrectly included `rankings()` and `cards()` methods that mapped to non-existent API endpoints. These were removed in v0.2.0.
 
 **Rankings (9 endpoints)**:
 - `GET /rankings/wppr` - Main WPPR rankings
@@ -133,5 +194,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/jscom/ifpa-sdk/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jscom/ifpa-sdk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jscom/ifpa-sdk/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jscom/ifpa-sdk/releases/tag/v0.1.0

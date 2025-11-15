@@ -23,15 +23,18 @@ from ifpa_sdk.models.director import (
     DirectorTournamentsResponse,
 )
 from ifpa_sdk.models.player import (
+    MultiPlayerResponse,
     Player,
     PlayerCard,
     PlayerRanking,
     PlayerResultsResponse,
     PlayerSearchResponse,
     PlayerSearchResult,
+    PvpAllCompetitors,
     PvpComparison,
+    RankHistoryEntry,
     RankingHistory,
-    RankingHistoryEntry,
+    RatingHistoryEntry,
     TournamentResult,
 )
 from ifpa_sdk.models.rankings import (
@@ -94,10 +97,13 @@ __all__ = [
     "PlayerRanking",
     "PlayerSearchResult",
     "PlayerSearchResponse",
+    "MultiPlayerResponse",
     "TournamentResult",
     "PlayerResultsResponse",
-    "RankingHistoryEntry",
+    "RankHistoryEntry",
     "RankingHistory",
+    "RatingHistoryEntry",
+    "PvpAllCompetitors",
     "PvpComparison",
     "PlayerCard",
     # Rankings

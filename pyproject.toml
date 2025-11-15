@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ifpa-sdk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
