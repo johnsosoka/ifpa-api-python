@@ -6,9 +6,9 @@ import pytest
 import requests
 import requests_mock
 
-from ifpa_sdk.config import Config
-from ifpa_sdk.exceptions import IfpaApiError
-from ifpa_sdk.http import _HttpClient
+from ifpa_api.config import Config
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.http import _HttpClient
 
 
 class TestHttpClientInitialization:
@@ -35,7 +35,7 @@ class TestHttpClientInitialization:
         assert "X-API-Key" in headers
         assert headers["X-API-Key"] == "test-key"
         assert headers["Accept"] == "application/json"
-        assert headers["User-Agent"] == "ifpa-sdk-python"
+        assert headers["User-Agent"] == "ifpa-api-python"
 
 
 class TestHttpClientRequest:
@@ -113,7 +113,7 @@ class TestHttpClientApiKeyHeader:
         mock_requests.get("https://api.ifpapinball.com/player/123", json={})
         client._request("GET", "/player/123")
 
-        assert mock_requests.last_request.headers["User-Agent"] == "ifpa-sdk-python"
+        assert mock_requests.last_request.headers["User-Agent"] == "ifpa-api-python"
 
 
 class TestHttpClientErrorHandling:

@@ -6,9 +6,9 @@ Tests the rankings resource client using mocked HTTP requests.
 import pytest
 import requests_mock
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.exceptions import IfpaApiError
-from ifpa_sdk.models.rankings import (
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.rankings import (
     CountryRankingsResponse,
     CustomRankingsResponse,
     RankingsResponse,
@@ -304,7 +304,7 @@ class TestRankingsClientCountryAndCustom:
         )
 
         client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.by_country()
+        rankings = client.rankings.by_country(country="US")
 
         assert isinstance(rankings, CountryRankingsResponse)
         assert len(rankings.country_rankings) == 2
@@ -312,6 +312,8 @@ class TestRankingsClientCountryAndCustom:
         assert rankings.country_rankings[0].country_code == "US"
         assert rankings.country_rankings[0].total_players == 10000
         assert rankings.total_countries == 100
+        # Verify country parameter was passed
+        assert "country=" in mock_requests.last_request.query
 
     def test_by_country_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
         """Test country rankings with pagination."""
@@ -331,10 +333,11 @@ class TestRankingsClientCountryAndCustom:
         )
 
         client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.by_country(start_pos=0, count=25)
+        rankings = client.rankings.by_country(country="US", start_pos=0, count=25)
 
         assert len(rankings.country_rankings) == 25
         query = mock_requests.last_request.query
+        assert "country=" in query
         assert "start_pos=0" in query
         assert "count=25" in query
 
@@ -462,7 +465,7 @@ class TestRankingsClientFieldMappings:
         )
 
         client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.by_country()
+        rankings = client.rankings.by_country(country="US")
 
         # Should be accessible via 'country_rankings'
         assert len(rankings.country_rankings) == 1

@@ -1,5 +1,19 @@
 name: Publish to PyPI
 
+# This workflow publishes the package to PyPI when a version tag is pushed.
+# It includes a MANUAL APPROVAL GATE before publishing to production PyPI.
+#
+# Workflow Steps:
+# 1. Validate version tag matches pyproject.toml
+# 2. Run full test suite (linting, type checking, unit tests, integration tests)
+# 3. Build package and verify with twine
+# 4. Publish to TestPyPI and verify installation
+# 5. PAUSE for manual approval (requires environment configuration)
+# 6. Publish to production PyPI (only after approval)
+# 7. Create GitHub release with changelog
+#
+# See "publish-pypi" job below for manual approval gate configuration instructions.
+
 on:
   push:
     tags:
@@ -72,7 +86,7 @@ jobs:
         run: poetry run mypy src
 
       - name: Run unit tests
-        run: poetry run pytest -v -m "not integration" --cov=ifpa_sdk --cov-report=term-missing
+        run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=term-missing
 
       - name: Run integration tests (if API key available)
         if: ${{ env.IFPA_API_KEY != '' }}
@@ -122,8 +136,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-version, build]
     environment:
-      name: test-pypi
-      url: https://test.pypi.org/project/ifpa-sdk/
+      name: pypi-test
+      url: https://test.pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -135,7 +149,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
           skip-existing: true
           verbose: true
 
@@ -148,16 +161,39 @@ jobs:
         env:
           VERSION: ${{ needs.validate-version.outputs.version }}
         run: |
-          python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "ifpa-sdk==${VERSION}"
-          python -c "import ifpa_sdk; print(f'Successfully imported ifpa_sdk version {ifpa_sdk.__version__}')"
+          python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "ifpa-api==${VERSION}"
+          python -c "import ifpa_api; print(f'Successfully imported ifpa_api version {ifpa_api.__version__}')"
 
   publish-pypi:
     name: Publish to PyPI
     runs-on: ubuntu-latest
     needs: [validate-version, publish-test-pypi]
+    # MANUAL APPROVAL GATE: This job uses the 'pypi-production' environment
+    # which requires manual approval before publishing to production PyPI.
+    #
+    # To configure the approval gate in GitHub:
+    # 1. Go to: Settings → Environments → New environment
+    # 2. Create environment named: "pypi-production"
+    # 3. Enable "Required reviewers" and add repo maintainers (e.g., John Sosoka)
+    # 4. Optionally set "Wait timer" (e.g., 0 minutes for immediate approval prompt)
+    # 5. Save protection rules
+    #
+    # Approval Flow:
+    # - When a version tag is pushed (e.g., v0.1.0), the workflow runs automatically
+    # - After tests pass and TestPyPI publish succeeds, this job PAUSES
+    # - Required reviewers receive a notification to review the deployment
+    # - Reviewers can inspect the build artifacts and TestPyPI installation
+    # - Once approved, the workflow resumes and publishes to production PyPI
+    # - If rejected, the workflow stops and PyPI is not updated
+    #
+    # Authentication:
+    # This workflow uses OpenID Connect (OIDC) Trusted Publishers for secure authentication.
+    # Configure Trusted Publishers on PyPI (no API tokens needed):
+    # - PyPI: https://pypi.org/manage/account/publishing/
+    # - TestPyPI: https://test.pypi.org/manage/account/publishing/
     environment:
-      name: pypi
-      url: https://pypi.org/project/ifpa-sdk/
+      name: pypi-production
+      url: https://pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -168,7 +204,6 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_TOKEN }}
           verbose: true
 
   create-release:
@@ -215,15 +250,15 @@ jobs:
             echo "## Installation"
             echo ""
             echo "\`\`\`bash"
-            echo "pip install ifpa-sdk==${VERSION}"
+            echo "pip install ifpa-api==${VERSION}"
             echo "\`\`\`"
             echo ""
             echo "## Links"
             echo ""
-            echo "- [PyPI Package](https://pypi.org/project/ifpa-sdk/${VERSION}/)"
-            echo "- [Documentation](https://github.com/jscom/ifpa-sdk#readme)"
+            echo "- [PyPI Package](https://pypi.org/project/ifpa-api/${VERSION}/)"
+            echo "- [Documentation](https://github.com/johnsosoka/ifpa-api-python#readme)"
             echo ""
-            echo "**Full Changelog**: https://github.com/jscom/ifpa-sdk/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
+            echo "**Full Changelog**: https://github.com/johnsosoka/ifpa-api-python/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
           } > changelog.md
 
       - name: Create GitHub Release
@@ -242,6 +277,6 @@ jobs:
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          echo "Successfully published ifpa-sdk v${VERSION} to PyPI"
-          echo "PyPI: https://pypi.org/project/ifpa-sdk/${VERSION}/"
+          echo "Successfully published ifpa-api v${VERSION} to PyPI"
+          echo "PyPI: https://pypi.org/project/ifpa-api/${VERSION}/"
           echo "GitHub Release: ${REPO_URL}/releases/tag/${TAG_NAME}"

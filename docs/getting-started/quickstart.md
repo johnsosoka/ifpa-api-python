@@ -1,12 +1,12 @@
 # Quick Start
 
-This guide will get you up and running with the IFPA SDK in just a few minutes.
+This guide will get you up and running with the IFPA API package in just a few minutes.
 
 ## Prerequisites
 
 Before you begin, ensure you have:
 
-1. [Installed the SDK](installation.md)
+1. [Installed the package](installation.md)
 2. [Obtained an API key](authentication.md)
 
 ## Your First Request
@@ -14,7 +14,7 @@ Before you begin, ensure you have:
 Here's a simple example to get you started:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Initialize the client (uses IFPA_API_KEY environment variable)
 client = IfpaClient()
@@ -32,7 +32,7 @@ print(f"WPPR Rating: {player.current_wppr_value}")
 ### Search for Players
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -52,7 +52,7 @@ results = client.players.search(
 ### Get Rankings
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -71,7 +71,7 @@ us_rankings = client.rankings.wppr(country="US", count=50)
 ### Find Tournaments
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -92,7 +92,7 @@ for tournament in tournaments.tournaments:
 ### Get Tournament Results
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -109,7 +109,7 @@ for result in results.results:
 ### Player Tournament History
 
 ```python
-from ifpa_sdk import IfpaClient, RankingSystem, ResultType
+from ifpa_api import IfpaClient, RankingSystem, ResultType
 
 client = IfpaClient()
 
@@ -126,7 +126,7 @@ for result in results.results:
 ### Compare Players
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -140,7 +140,7 @@ print(f"Ties: {pvp.ties}")
 ### Series Standings
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -160,7 +160,7 @@ for entry in standings.standings:
 The client supports Python's context manager protocol for automatic cleanup:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 with IfpaClient() as client:
     player = client.player(12345).get()
@@ -173,7 +173,7 @@ with IfpaClient() as client:
 Always handle potential errors when making API requests:
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaClient,
     IfpaApiError,
     MissingApiKeyError,
@@ -198,7 +198,7 @@ except IfpaClientValidationError as e:
 Many endpoints support pagination. Here's how to handle it:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -242,7 +242,7 @@ def get_all_rankings(max_results=1000):
 Customize the client behavior:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient(
     api_key='your-api-key',  # Explicit API key
@@ -254,10 +254,10 @@ client = IfpaClient(
 
 ## Working with Enums
 
-The SDK provides enums for common parameters:
+The package provides enums for common parameters:
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaClient,
     TimePeriod,  # PAST, FUTURE
     RankingSystem,  # MAIN, WOMEN, YOUTH, VIRTUAL, PRO
@@ -283,7 +283,7 @@ results = client.player(12345).results(
 Here's a complete example that demonstrates multiple features:
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient, IfpaApiError
 
 
 def analyze_player(player_id: int) -> None:

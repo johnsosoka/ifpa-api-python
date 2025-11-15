@@ -8,8 +8,8 @@ from typing import Any
 
 import requests
 
-from ifpa_sdk.config import Config
-from ifpa_sdk.exceptions import IfpaApiError
+from ifpa_api.config import Config
+from ifpa_api.exceptions import IfpaApiError
 
 
 class _HttpClient:
@@ -44,7 +44,7 @@ class _HttpClient:
             {
                 "X-API-Key": self._config.api_key,
                 "Accept": "application/json",
-                "User-Agent": "ifpa-sdk-python",
+                "User-Agent": "ifpa-api-python",
             }
         )
         return session

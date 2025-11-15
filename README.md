@@ -1,11 +1,14 @@
-# IFPA SDK
+# IFPA API Client
 
-[![PyPI version](https://img.shields.io/pypi/v/ifpa-sdk.svg)](https://pypi.org/project/ifpa-sdk/)
-[![Python versions](https://img.shields.io/pypi/pyversions/ifpa-sdk.svg)](https://pypi.org/project/ifpa-sdk/)
+[![Development Status](https://img.shields.io/badge/status-alpha-orange.svg)](https://github.com/johnsosoka/ifpa-api-python)
+[![PyPI version](https://img.shields.io/pypi/v/ifpa-api.svg)](https://pypi.org/project/ifpa-api/)
+[![Python versions](https://img.shields.io/pypi/pyversions/ifpa-api.svg)](https://pypi.org/project/ifpa-api/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, statistics, and more with a clean, modern Python interface.
+
+> **Alpha Release**: This library is under active development. The API is stable but may evolve based on community feedback. Production use is supported, but you may encounter occasional updates to the interface.
 
 ## Features
 
@@ -16,12 +19,12 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 - **Handle Pattern**: Fluent interface for resource-specific operations
 - **Pagination Support**: Built-in support for paginated endpoints
 - **Error Handling**: Clear exception hierarchy for different failure scenarios
-- **Well Tested**: 98% test coverage with unit and integration tests
+- **Well Tested**: 99% test coverage with unit and integration tests
 
 ## Installation
 
 ```bash
-pip install ifpa-sdk
+pip install ifpa-api
 ```
 
 Requires Python 3.11 or higher.
@@ -29,7 +32,7 @@ Requires Python 3.11 or higher.
 ## Quick Start
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Initialize client (uses IFPA_API_KEY environment variable)
 client = IfpaClient()
@@ -55,7 +58,7 @@ client.close()
 
 ## Authentication
 
-The SDK requires an IFPA API key. You can obtain one from the [IFPA API documentation](https://api.ifpapinball.com/docs).
+The client requires an IFPA API key. You can obtain one from the [IFPA API documentation](https://api.ifpapinball.com/docs).
 
 ### Option 1: Environment Variable (Recommended)
 
@@ -68,7 +71,7 @@ export IFPA_API_KEY='your-api-key-here'
 Then initialize the client without parameters:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 ```
@@ -78,7 +81,7 @@ client = IfpaClient()
 Pass the API key directly to the constructor:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient(api_key='your-api-key-here')
 ```
@@ -90,7 +93,7 @@ client = IfpaClient(api_key='your-api-key-here')
 Search for tournament directors and access their tournament history:
 
 ```python
-from ifpa_sdk import IfpaClient, TimePeriod
+from ifpa_api import IfpaClient, TimePeriod
 
 client = IfpaClient()
 
@@ -118,7 +121,7 @@ upcoming = client.director(1000).tournaments(TimePeriod.FUTURE)
 Access comprehensive player information, rankings, and tournament history:
 
 ```python
-from ifpa_sdk import IfpaClient, RankingSystem, ResultType
+from ifpa_api import IfpaClient, RankingSystem, ResultType
 
 client = IfpaClient()
 
@@ -177,7 +180,7 @@ for entry in history.rating_history:
 Access various IFPA ranking systems:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -201,8 +204,8 @@ pro = client.rankings.pro(start_pos=0, count=50)
 # Get virtual tournament rankings
 virtual = client.rankings.virtual(start_pos=0, count=50)
 
-# Get country rankings
-countries = client.rankings.by_country(start_pos=0, count=25)
+# Get country rankings (filtered by country code or name)
+countries = client.rankings.by_country(country="US", count=25)
 for entry in countries.country_rankings:
     print(f"{entry.rank}. {entry.country_name}: {entry.total_players} players")
 
@@ -221,7 +224,7 @@ group = client.rankings.group("northwest-league", start_pos=0, count=50)
 Search for tournaments and access detailed information:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -260,7 +263,7 @@ league = client.tournament(12345).league()
 Access tournament series standings, player cards, and statistics:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
@@ -314,7 +317,7 @@ for event in schedule.events:
 The `IfpaClient` constructor accepts several configuration options:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient(
     api_key='your-api-key',  # API key (or use IFPA_API_KEY env var)
@@ -326,7 +329,7 @@ client = IfpaClient(
 
 ### Request Validation
 
-By default, the SDK validates request parameters using Pydantic models before sending requests to the API. This catches invalid parameters early with clear error messages.
+By default, the client validates request parameters using Pydantic models before sending requests to the API. This catches invalid parameters early with clear error messages.
 
 To disable validation:
 
@@ -336,10 +339,10 @@ client = IfpaClient(validate_requests=False)
 
 ## Error Handling
 
-The SDK provides a clear exception hierarchy for different failure scenarios:
+The client provides a clear exception hierarchy for different failure scenarios:
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaClient,
     IfpaError,  # Base exception for all SDK errors
     MissingApiKeyError,  # No API key provided or found in environment
@@ -358,7 +361,7 @@ except IfpaApiError as e:
 except IfpaClientValidationError as e:
     print(f"Invalid request parameters: {e.message}")
 except IfpaError as e:
-    print(f"SDK error: {e}")
+    print(f"Client error: {e}")
 ```
 
 ## Context Manager
@@ -366,7 +369,7 @@ except IfpaError as e:
 The client supports Python's context manager protocol for automatic resource cleanup:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 with IfpaClient() as client:
     player = client.player(12345).get()
@@ -376,7 +379,7 @@ with IfpaClient() as client:
 
 ## Testing
 
-The SDK includes comprehensive unit and integration tests.
+The client includes comprehensive unit and integration tests.
 
 ### Running Unit Tests
 
@@ -398,7 +401,7 @@ poetry run pytest tests/integration/
 ### Running All Tests with Coverage
 
 ```bash
-poetry run pytest --cov=ifpa_sdk --cov-report=term-missing
+poetry run pytest --cov=ifpa_api --cov-report=term-missing
 ```
 
 ### Running Specific Test Markers
@@ -417,8 +420,8 @@ poetry run pytest -m integration
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/jscom/ifpa-sdk.git
-cd ifpa-sdk
+git clone https://github.com/johnsosoka/ifpa-api-python.git
+cd ifpa-api-python
 ```
 
 2. Install Poetry (if not already installed):
@@ -473,7 +476,7 @@ Key points:
 
 ## API Coverage
 
-The SDK implements 36 endpoints from IFPA API v2.1:
+The client implements 36 endpoints from IFPA API v2.1:
 
 - **Directors**: 4 endpoints (search, details, tournaments)
 - **Players**: 7 endpoints (search, bulk fetch, profile, PvP comparison, PvP summary, results, history)
@@ -482,15 +485,19 @@ The SDK implements 36 endpoints from IFPA API v2.1:
 - **Series**: 8 endpoints (list, standings, player cards, overview, regions, rules, stats, schedule)
 - **Reference**: 2 endpoints (countries, states)
 
-**Note**: Stats endpoints are not implemented as they return 404 from the live API. These will be added when the API endpoints become available.
+## Known Limitations
+
+**Stats Endpoints Not Available**: The IFPA API v2.1 specification includes 10 Stats endpoints (`/v2.1/stats/*`), but these endpoints currently return HTTP 404 from the live API server. As a result, they are not implemented in this client. These endpoints will be added in a future release when the IFPA API makes them available.
+
+This limitation does not affect any other functionality—all other documented endpoints are fully implemented and tested.
 
 ## Resources
 
 - **IFPA Website**: https://www.ifpapinball.com/
 - **IFPA API Documentation**: https://api.ifpapinball.com/docs
-- **SDK Documentation**: https://github.com/jscom/ifpa-sdk
-- **Issue Tracker**: https://github.com/jscom/ifpa-sdk/issues
-- **PyPI Package**: https://pypi.org/project/ifpa-sdk/
+- **Client Documentation**: https://github.com/johnsosoka/ifpa-api-python
+- **Issue Tracker**: https://github.com/johnsosoka/ifpa-api-python/issues
+- **PyPI Package**: https://pypi.org/project/ifpa-api/
 
 ## License
 
@@ -498,16 +505,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Built by [Commerce Architects](https://github.com/jscom) for the pinball community
+- Built by [John Sosoka](https://github.com/johnsosoka) for the pinball community
 - Thanks to IFPA for providing the public API
 - Special thanks to all contributors and users
 
 ## Support
 
-- **Bug Reports**: Open an issue on [GitHub Issues](https://github.com/jscom/ifpa-sdk/issues)
+- **Bug Reports**: Open an issue on [GitHub Issues](https://github.com/johnsosoka/ifpa-api-python/issues)
 - **Feature Requests**: Open an issue with the `enhancement` label
 - **Questions**: Check the [API documentation](https://api.ifpapinball.com/docs) or open a discussion
 
 ---
 
-Made with care for the pinball community by [Commerce Architects](https://github.com/jscom)
+Made with care for the pinball community by [John Sosoka](https://github.com/johnsosoka)

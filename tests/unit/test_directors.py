@@ -6,10 +6,10 @@ Tests the directors resource client and handle using mocked HTTP requests.
 import pytest
 import requests_mock
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.exceptions import IfpaApiError
-from ifpa_sdk.models.common import TimePeriod
-from ifpa_sdk.models.director import (
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import (
     CountryDirectorsResponse,
     Director,
     DirectorSearchResponse,

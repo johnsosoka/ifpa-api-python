@@ -1,6 +1,6 @@
 # Authentication
 
-The IFPA SDK requires an API key to authenticate with the IFPA API. This guide explains how to obtain and configure your API key.
+The IFPA API package requires an API key to authenticate with the IFPA API. This guide explains how to obtain and configure your API key.
 
 ## Obtaining an API Key
 
@@ -15,7 +15,7 @@ To use the IFPA API, you need to obtain an API key from IFPA:
 
 ## Configuration Methods
 
-There are two ways to provide your API key to the SDK:
+There are two ways to provide your API key to the package:
 
 ### Method 1: Environment Variable (Recommended)
 
@@ -69,7 +69,7 @@ Set the `IFPA_API_KEY` environment variable:
 
     ```python
     from dotenv import load_dotenv
-    from ifpa_sdk import IfpaClient
+    from ifpa_api import IfpaClient
 
     load_dotenv()  # Load .env file
     client = IfpaClient()  # Uses IFPA_API_KEY from environment
@@ -78,7 +78,7 @@ Set the `IFPA_API_KEY` environment variable:
 Then initialize the client without parameters:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()  # Automatically uses IFPA_API_KEY
 ```
@@ -88,7 +88,7 @@ client = IfpaClient()  # Automatically uses IFPA_API_KEY
 Pass the API key directly to the constructor:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient(api_key='your-api-key-here')
 ```
@@ -139,7 +139,7 @@ Maintain separate API keys for:
 Test that your API key is configured correctly:
 
 ```python
-from ifpa_sdk import IfpaClient, MissingApiKeyError
+from ifpa_api import IfpaClient, MissingApiKeyError
 
 try:
     client = IfpaClient()
@@ -275,7 +275,7 @@ from typing import Optional
 @dataclass
 class Config:
     """Application configuration."""
-    ifpa_sdk_key: str
+    ifpa_api_key: str
 
     @classmethod
     def from_env(cls) -> 'Config':
@@ -283,11 +283,11 @@ class Config:
         api_key = os.getenv('IFPA_API_KEY')
         if not api_key:
             raise ValueError("IFPA_API_KEY environment variable not set")
-        return cls(ifpa_sdk_key=api_key)
+        return cls(ifpa_api_key=api_key)
 
 # Usage
 config = Config.from_env()
-client = IfpaClient(api_key=config.ifpa_sdk_key)
+client = IfpaClient(api_key=config.ifpa_api_key)
 ```
 
 ## Next Steps

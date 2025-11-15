@@ -6,10 +6,10 @@ Tests the players resource client and handle using mocked HTTP requests.
 import pytest
 import requests_mock
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.exceptions import IfpaApiError
-from ifpa_sdk.models.common import RankingSystem, ResultType
-from ifpa_sdk.models.player import (
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.common import RankingSystem, ResultType
+from ifpa_api.models.player import (
     MultiPlayerResponse,
     Player,
     PlayerResultsResponse,
@@ -55,31 +55,6 @@ class TestPlayersClient:
         assert result.search[0].last_name == "Smith"
         assert result.search[0].wppr_rank == "100"
 
-    def test_search_with_location_filters(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching players by location."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={
-                "query": None,
-                "search": [
-                    {
-                        "player_id": 67890,
-                        "first_name": "Jane",
-                        "last_name": "Doe",
-                        "city": "Portland",
-                        "state": "OR",
-                        "country_code": "US",
-                    }
-                ],
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        result = client.players.search(city="Portland", stateprov="OR", country="US")
-
-        assert len(result.search) == 1
-        assert result.search[0].city == "Portland"
-
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching players with pagination parameters."""
         mock_requests.get(
@@ -101,31 +76,6 @@ class TestPlayersClient:
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=25" in query
-
-    def test_search_with_first_and_last_name(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching players by first and last name separately."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={
-                "query": None,
-                "search": [
-                    {
-                        "player_id": 11111,
-                        "first_name": "Michael",
-                        "last_name": "Jordan",
-                        "country_code": "US",
-                    }
-                ],
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        result = client.players.search(first_name="Michael", last_name="Jordan")
-
-        assert len(result.search) == 1
-        query = mock_requests.last_request.query
-        assert "first_name=michael" in query
-        assert "last_name=jordan" in query
 
     def test_get_multiple(self, mock_requests: requests_mock.Mocker) -> None:
         """Test fetching multiple players at once."""
@@ -149,7 +99,7 @@ class TestPlayersClient:
 
     def test_get_multiple_max_validation(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that get_multiple raises error for more than 50 players."""
-        from ifpa_sdk.exceptions import IfpaClientValidationError
+        from ifpa_api.exceptions import IfpaClientValidationError
 
         client = IfpaClient(api_key="test-key")
 

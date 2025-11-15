@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2025-11-14
+## [0.2.0] - 2024-11-14
 
 ### Added
 - `PlayersClient.get_multiple()` method to fetch up to 50 players in a single request
@@ -29,12 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Migration Guide
 
 #### results() Method
+
 ```python
 # Before (v0.1.x)
 results = client.player(123).results()
 
 # After (v0.2.0) - Both parameters required
-from ifpa_sdk.models.common import RankingSystem, ResultType
+from ifpa_api.models.common import RankingSystem, ResultType
+
 results = client.player(123).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
@@ -68,7 +70,7 @@ profile = client.player(123).get()
 # Player cards are only available via series: client.series_handle("CODE").player_card(123)
 ```
 
-## [0.1.0] - 2025-11-14
+## [0.1.0] - 2024-11-14
 
 ### Added
 
@@ -194,6 +196,6 @@ profile = client.player(123).get()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/jscom/ifpa-sdk/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/jscom/ifpa-sdk/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/jscom/ifpa-sdk/releases/tag/v0.1.0
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/johnsosoka/ifpa-api-python/releases/tag/v0.1.0

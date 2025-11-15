@@ -6,9 +6,9 @@ Tests the tournaments resource client and handle using mocked HTTP requests.
 import pytest
 import requests_mock
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.exceptions import IfpaApiError
-from ifpa_sdk.models.tournaments import (
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.tournaments import (
     Tournament,
     TournamentFormatsResponse,
     TournamentLeagueResponse,

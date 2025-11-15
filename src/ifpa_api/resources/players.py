@@ -6,8 +6,8 @@ head-to-head comparisons.
 
 from typing import TYPE_CHECKING, Any
 
-from ifpa_sdk.models.common import RankingSystem, ResultType
-from ifpa_sdk.models.player import (
+from ifpa_api.models.common import RankingSystem, ResultType
+from ifpa_api.models.player import (
     MultiPlayerResponse,
     Player,
     PlayerResultsResponse,
@@ -18,7 +18,7 @@ from ifpa_sdk.models.player import (
 )
 
 if TYPE_CHECKING:
-    from ifpa_sdk.http import _HttpClient
+    from ifpa_api.http import _HttpClient
 
 
 class PlayerHandle:
@@ -213,9 +213,6 @@ class PlayersClient:
     def search(
         self,
         name: str | None = None,
-        first_name: str | None = None,
-        last_name: str | None = None,
-        city: str | None = None,
         stateprov: str | None = None,
         country: str | None = None,
         tournament: str | None = None,
@@ -227,9 +224,6 @@ class PlayersClient:
 
         Args:
             name: Player name to search for (partial match, not case sensitive)
-            first_name: Filter by first name
-            last_name: Filter by last name
-            city: Filter by city
             stateprov: Filter by state/province (2-digit code)
             country: Filter by country name or 2-digit code
             tournament: Filter by tournament name (partial strings accepted)
@@ -261,12 +255,6 @@ class PlayersClient:
         params: dict[str, Any] = {}
         if name is not None:
             params["name"] = name
-        if first_name is not None:
-            params["first_name"] = first_name
-        if last_name is not None:
-            params["last_name"] = last_name
-        if city is not None:
-            params["city"] = city
         if stateprov is not None:
             params["stateprov"] = stateprov
         if country is not None:
@@ -305,7 +293,7 @@ class PlayersClient:
                     print(f"{player.first_name} {player.last_name}")
             ```
         """
-        from ifpa_sdk.exceptions import IfpaClientValidationError
+        from ifpa_api.exceptions import IfpaClientValidationError
 
         if len(player_ids) > 50:
             raise IfpaClientValidationError("Maximum 50 player IDs allowed per request")

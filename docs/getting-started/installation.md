@@ -1,6 +1,6 @@
 # Installation
 
-This guide covers how to install the IFPA SDK and verify your installation.
+This guide covers how to install the IFPA API package and verify your installation.
 
 ## Requirements
 
@@ -9,33 +9,33 @@ This guide covers how to install the IFPA SDK and verify your installation.
 
 ## Install from PyPI
 
-The simplest way to install the IFPA SDK is using pip:
+The simplest way to install the IFPA API package is using pip:
 
 ```bash
-pip install ifpa-sdk
+pip install ifpa-api
 ```
 
-This will install the latest stable version from [PyPI](https://pypi.org/project/ifpa-sdk/).
+This will install the latest stable version from [PyPI](https://pypi.org/project/ifpa-api/).
 
 ## Verify Installation
 
-After installation, verify that the SDK is installed correctly:
+After installation, verify that the package is installed correctly:
 
 ```python
-import ifpa_sdk
+import ifpa_api
 
-print(ifpa_sdk.__version__)  # Should print: 0.1.0
+print(ifpa_api.__version__)  # Should print: 0.2.0
 ```
 
 You can also check the installed version using pip:
 
 ```bash
-pip show ifpa-sdk
+pip show ifpa-api
 ```
 
 ## Install in a Virtual Environment (Recommended)
 
-It's recommended to install the SDK in a virtual environment to avoid dependency conflicts:
+It's recommended to install the package in a virtual environment to avoid dependency conflicts:
 
 ### Using venv (Standard Library)
 
@@ -49,8 +49,8 @@ source venv/bin/activate
 # On Windows:
 venv\Scripts\activate
 
-# Install the SDK
-pip install ifpa-sdk
+# Install the package
+pip install ifpa-api
 ```
 
 ### Using Poetry
@@ -59,11 +59,11 @@ If you're using Poetry for dependency management:
 
 ```bash
 # Add to your project
-poetry add ifpa-sdk
+poetry add ifpa-api
 
 # Or install in a new project
 poetry init
-poetry add ifpa-sdk
+poetry add ifpa-api
 poetry install
 ```
 
@@ -72,27 +72,27 @@ poetry install
 To install the latest development version from GitHub:
 
 ```bash
-pip install git+https://github.com/jscom/ifpa-sdk.git
+pip install git+https://github.com/jscom/ifpa-api.git
 ```
 
 Or clone the repository and install locally:
 
 ```bash
-git clone https://github.com/jscom/ifpa-sdk.git
-cd ifpa-sdk
+git clone https://github.com/jscom/ifpa-api.git
+cd ifpa-api
 pip install -e .
 ```
 
 ## Development Installation
 
-If you want to contribute to the SDK, follow the [Contributing Guide](../contributing.md) for development setup instructions.
+If you want to contribute to the package, follow the [Contributing Guide](../contributing.md) for development setup instructions.
 
 Quick version:
 
 ```bash
 # Clone the repository
-git clone https://github.com/jscom/ifpa-sdk.git
-cd ifpa-sdk
+git clone https://github.com/jscom/ifpa-api.git
+cd ifpa-api
 
 # Install Poetry
 curl -sSL https://install.python-poetry.org | python3 -
@@ -109,48 +109,48 @@ poetry run pre-commit install
 To upgrade to the latest version:
 
 ```bash
-pip install --upgrade ifpa-sdk
+pip install --upgrade ifpa-api
 ```
 
 With Poetry:
 
 ```bash
-poetry update ifpa-sdk
+poetry update ifpa-api
 ```
 
 ## Uninstalling
 
-To remove the SDK:
+To remove the package:
 
 ```bash
-pip uninstall ifpa-sdk
+pip uninstall ifpa-api
 ```
 
 With Poetry:
 
 ```bash
-poetry remove ifpa-sdk
+poetry remove ifpa-api
 ```
 
 ## Dependencies
 
-The SDK has minimal dependencies:
+The package has minimal dependencies:
 
 - **requests** (^2.31.0) - HTTP library for API requests
 - **pydantic** (^2.0.0) - Data validation and settings management
 
-These dependencies will be automatically installed when you install the SDK.
+These dependencies will be automatically installed when you install the package.
 
 ## Python Version Support
 
-The SDK requires Python 3.11 or higher. Support for Python versions follows the official Python release cycle:
+The package requires Python 3.11 or higher. Support for Python versions follows the official Python release cycle:
 
 - **Supported**: Python 3.11, 3.12
 - **Not Supported**: Python 3.10 and earlier
 
 ## Platform Support
 
-The SDK is platform-independent and works on:
+The package is platform-independent and works on:
 
 - macOS
 - Linux
@@ -158,11 +158,11 @@ The SDK is platform-independent and works on:
 
 ## Troubleshooting
 
-### "No module named 'ifpa_sdk'"
+### "No module named 'ifpa_api'"
 
 If you get this error, ensure:
 
-1. The SDK is installed in the correct environment
+1. The package is installed in the correct environment
 2. You're using the correct Python interpreter
 3. The installation completed successfully
 
@@ -171,8 +171,8 @@ If you get this error, ensure:
 which python3
 python3 --version
 
-# Check if SDK is installed
-pip list | grep ifpa-sdk
+# Check if package is installed
+pip list | grep ifpa-api
 ```
 
 ### Import Errors
@@ -181,10 +181,10 @@ If you encounter import errors with dependencies:
 
 ```bash
 # Reinstall with --force-reinstall
-pip install --force-reinstall ifpa-sdk
+pip install --force-reinstall ifpa-api
 
 # Or with --no-cache-dir
-pip install --no-cache-dir ifpa-sdk
+pip install --no-cache-dir ifpa-api
 ```
 
 ### Permission Denied
@@ -193,17 +193,17 @@ If you get permission errors during installation:
 
 ```bash
 # Install for current user only
-pip install --user ifpa-sdk
+pip install --user ifpa-api
 
 # Or use a virtual environment (recommended)
 python3 -m venv venv
 source venv/bin/activate
-pip install ifpa-sdk
+pip install ifpa-api
 ```
 
 ## Next Steps
 
-Now that you have the SDK installed:
+Now that you have the package installed:
 
 1. [Set up authentication](authentication.md)
 2. [Follow the quick start guide](quickstart.md)

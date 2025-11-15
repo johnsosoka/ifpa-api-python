@@ -2,12 +2,12 @@
 
 from typing import Any
 
-from ifpa_sdk import IfpaClient
-from ifpa_sdk.resources.directors import DirectorHandle, DirectorsClient
-from ifpa_sdk.resources.players import PlayerHandle, PlayersClient
-from ifpa_sdk.resources.rankings import RankingsClient
-from ifpa_sdk.resources.series import SeriesClient, SeriesHandle
-from ifpa_sdk.resources.tournaments import TournamentHandle, TournamentsClient
+from ifpa_api import IfpaClient
+from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
+from ifpa_api.resources.players import PlayerHandle, PlayersClient
+from ifpa_api.resources.rankings import RankingsClient
+from ifpa_api.resources.series import SeriesClient, SeriesHandle
+from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
 
 
 class TestIfpaClientInitialization:

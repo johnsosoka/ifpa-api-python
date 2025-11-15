@@ -7,7 +7,7 @@ Learn how to handle errors when using the IFPA SDK.
 The SDK provides a clear exception hierarchy:
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaError,  # Base exception
     MissingApiKeyError,  # No API key configured
     IfpaApiError,  # API returned error
@@ -18,7 +18,7 @@ from ifpa_sdk import (
 ## Handling API Errors
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient, IfpaApiError
 
 client = IfpaClient()
 
@@ -32,7 +32,7 @@ except IfpaApiError as e:
 ## Handling Missing API Key
 
 ```python
-from ifpa_sdk import IfpaClient, MissingApiKeyError
+from ifpa_api import IfpaClient, MissingApiKeyError
 
 try:
     client = IfpaClient()
@@ -43,7 +43,7 @@ except MissingApiKeyError:
 ## Handling Validation Errors
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaClientValidationError
+from ifpa_api import IfpaClient, IfpaClientValidationError
 
 client = IfpaClient(validate_requests=True)
 
@@ -58,7 +58,7 @@ except IfpaClientValidationError as e:
 ## Catch-All Error Handling
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaError
+from ifpa_api import IfpaClient, IfpaError
 
 client = IfpaClient()
 
@@ -74,7 +74,7 @@ except IfpaError as e:
 ### 1. Always Handle Authentication Errors
 
 ```python
-from ifpa_sdk import IfpaClient, MissingApiKeyError, IfpaApiError
+from ifpa_api import IfpaClient, MissingApiKeyError, IfpaApiError
 
 try:
     client = IfpaClient()
@@ -100,7 +100,7 @@ except IfpaApiError as e:
 
 ```python
 import time
-from ifpa_sdk import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient, IfpaApiError
 
 
 def get_player_with_retry(player_id: int, max_retries: int = 3):
@@ -118,4 +118,4 @@ def get_player_with_retry(player_id: int, max_retries: int = 3):
             raise
 ```
 
-For more examples, see the [README](https://github.com/jscom/ifpa-sdk#error-handling).
+For more examples, see the [README](https://github.com/jscom/ifpa-api#error-handling).

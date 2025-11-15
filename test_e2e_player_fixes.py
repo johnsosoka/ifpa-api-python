@@ -19,10 +19,10 @@ from collections.abc import Callable
 
 # Import from installed package (not source)
 try:
-    from ifpa_sdk import IfpaClient
-    from ifpa_sdk.models.common import RankingSystem, ResultType
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.common import RankingSystem, ResultType
 except ImportError as e:
-    print(f"❌ Failed to import ifpa_sdk: {e}")
+    print(f"❌ Failed to import ifpa_api: {e}")
     print("Make sure the package is installed: poetry install")
     sys.exit(1)
 

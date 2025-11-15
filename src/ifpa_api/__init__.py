@@ -5,7 +5,7 @@ enabling easy access to player rankings, tournament data, statistics, and more.
 
 Example:
     ```python
-    from ifpa_sdk import IfpaClient, TimePeriod, RankingSystem
+    from ifpa_api import IfpaClient, TimePeriod, RankingSystem
 
     # Initialize client (uses IFPA_API_KEY environment variable)
     client = IfpaClient()
@@ -33,16 +33,16 @@ Example:
     ```
 """
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.exceptions import (
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import (
     IfpaApiError,
     IfpaClientValidationError,
     IfpaError,
     MissingApiKeyError,
 )
-from ifpa_sdk.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
+from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     # Main client

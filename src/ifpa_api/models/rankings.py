@@ -5,7 +5,7 @@ Models for various IFPA ranking systems including WPPR, Women, Youth, Pro, etc.
 
 from pydantic import AliasChoices, Field
 
-from ifpa_sdk.models.common import IfpaBaseModel
+from ifpa_api.models.common import IfpaBaseModel
 
 
 class RankingEntry(IfpaBaseModel):

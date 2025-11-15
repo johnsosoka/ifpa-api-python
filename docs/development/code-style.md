@@ -129,8 +129,8 @@ import requests
 from pydantic import BaseModel
 
 # Local
-from ifpa_sdk.config import Config
-from ifpa_sdk.exceptions import IfpaError
+from ifpa_api.config import Config
+from ifpa_api.exceptions import IfpaError
 ```
 
 ## Editor Configuration

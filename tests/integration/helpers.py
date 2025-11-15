@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from ifpa_sdk.client import IfpaClient
+from ifpa_api.client import IfpaClient
 
 
 def skip_if_no_api_key() -> None:

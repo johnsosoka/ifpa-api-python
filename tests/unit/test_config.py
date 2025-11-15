@@ -4,8 +4,8 @@ from typing import Any
 
 import pytest
 
-from ifpa_sdk.config import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, Config
-from ifpa_sdk.exceptions import MissingApiKeyError
+from ifpa_api.config import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, Config
+from ifpa_api.exceptions import MissingApiKeyError
 
 
 class TestConfigApiKeyResolution:

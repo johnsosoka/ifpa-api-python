@@ -6,12 +6,15 @@ field mappings and response structures match our models.
 
 import pytest
 
-from ifpa_sdk import IfpaClient
-from ifpa_sdk.models.tournaments import (
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.tournaments import (
     Tournament,
     TournamentFormatsResponse,
+    TournamentLeagueResponse,
     TournamentResultsResponse,
     TournamentSearchResponse,
+    TournamentSubmissionsResponse,
 )
 
 
@@ -19,12 +22,12 @@ from ifpa_sdk.models.tournaments import (
 class TestTournamentsIntegration:
     """Integration tests for Tournaments resource against real API."""
 
-    def test_tournament_search_basic(self, api_key: str) -> None:
+    def test_tournament_search_basic(self, api_key: str, count_small: int) -> None:
         """Test basic tournament search returns valid results."""
         client = IfpaClient(api_key=api_key)
 
         # Search with a common term that should return results
-        results = client.tournaments.search(name="Championship", count=5)
+        results = client.tournaments.search(name="Championship", count=count_small)
 
         assert isinstance(results, TournamentSearchResponse)
         # Should have at least one result
@@ -37,12 +40,14 @@ class TestTournamentsIntegration:
             tournament_id = first_result.tournament_id
             print(f"Found tournament: {tournament_name} (ID: {tournament_id})")
 
-    def test_tournament_search_with_location(self, api_key: str) -> None:
+    def test_tournament_search_with_location(
+        self, api_key: str, country_code: str, count_medium: int
+    ) -> None:
         """Test tournament search with location filters."""
         client = IfpaClient(api_key=api_key)
 
-        # Search for US tournaments
-        results = client.tournaments.search(country="US", count=10)
+        # Search for tournaments by country
+        results = client.tournaments.search(country=country_code, count=count_medium)
 
         assert isinstance(results, TournamentSearchResponse)
         if results.tournaments:
@@ -56,6 +61,16 @@ class TestTournamentsIntegration:
                 # Verify stateprov field exists (not 'state')
                 if tournament.stateprov:
                     assert isinstance(tournament.stateprov, str)
+
+    def test_tournament_search_with_state_filter(self, api_key: str, count_small: int) -> None:
+        """Test tournament search with state filter."""
+        client = IfpaClient(api_key=api_key)
+
+        # Search California tournaments
+        result = client.tournaments.search(stateprov="CA", count=count_small)
+
+        assert isinstance(result, TournamentSearchResponse)
+        assert isinstance(result.tournaments, list)
 
     def test_tournament_details(self, api_key: str) -> None:
         """Test getting tournament details for a specific tournament."""
@@ -80,13 +95,9 @@ class TestTournamentsIntegration:
         print(f"  Director: {tournament.director_name}")
         print(f"  Players: {tournament.player_count}")
 
-    def test_tournament_results(self, api_key: str) -> None:
+    def test_tournament_results(self, api_key: str, tournament_id: int) -> None:
         """Test getting tournament results."""
         client = IfpaClient(api_key=api_key)
-
-        # Use a known tournament ID that should have results
-        # PAPA 17 (2014) - well-known tournament
-        tournament_id = 7070
 
         try:
             results = client.tournament(tournament_id).results()
@@ -99,32 +110,79 @@ class TestTournamentsIntegration:
                     # Verify field names are correct
                     assert result.position is not None
                     assert result.player_id is not None
-        except Exception as e:
-            # If this specific tournament doesn't exist, just log it
-            print(f"Could not get results for tournament {tournament_id}: {e}")
+        except IfpaApiError as e:
+            # Some tournaments may not have results data
+            if e.status_code in [404, 400]:
+                pytest.skip(f"Tournament {tournament_id} has no results data")
+            raise
 
-    def test_tournament_formats(self, api_key: str) -> None:
-        """Test getting tournament formats."""
+    def test_tournament_formats(self, api_key: str, tournament_id: int) -> None:
+        """Test getting tournament formats with real API."""
         client = IfpaClient(api_key=api_key)
 
-        # Search for a recent tournament
-        search_results = client.tournaments.search(count=5)
-        if not search_results.tournaments:
-            pytest.skip("No tournaments found to test formats")
+        try:
+            result = client.tournament(tournament_id).formats()
 
-        # Try to find one with formats
-        for tournament in search_results.tournaments:
-            try:
-                formats = client.tournament(tournament.tournament_id).formats()
-                assert isinstance(formats, TournamentFormatsResponse)
+            assert isinstance(result, TournamentFormatsResponse)
+            assert result is not None
+            # Tournament formats structure varies by tournament
+            if result.formats:
+                print(f"\nTournament {tournament_id} formats:")
+                for fmt in result.formats:
+                    print(f"  - {fmt.format_name}: {fmt.rounds} rounds")
+        except IfpaApiError as e:
+            # Some tournaments may not have formats data
+            if e.status_code in [404, 400]:
+                pytest.skip(f"Tournament {tournament_id} has no formats data")
+            raise
 
-                if formats.formats:
-                    print(f"\nTournament {tournament.tournament_name} formats:")
-                    for fmt in formats.formats:
-                        print(f"  - {fmt.format_name}: {fmt.rounds} rounds")
-                    break  # Found one with formats, we're done
-            except Exception:
-                continue  # Try next tournament
+    def test_tournament_league(self, api_key: str, tournament_id: int) -> None:
+        """Test getting tournament league data with real API."""
+        client = IfpaClient(api_key=api_key)
+
+        try:
+            result = client.tournament(tournament_id).league()
+
+            assert isinstance(result, TournamentLeagueResponse)
+            assert result is not None
+            # League data structure varies
+            if result.sessions:
+                print(f"\nTournament {tournament_id} league sessions:")
+                for session in result.sessions[:3]:
+                    print(f"  - {session.session_date}: {session.player_count} players")
+        except IfpaApiError as e:
+            # Many tournaments are not leagues
+            if e.status_code in [404, 400]:
+                pytest.skip(f"Tournament {tournament_id} is not a league")
+            raise
+
+    def test_tournament_submissions(self, api_key: str, tournament_id: int) -> None:
+        """Test getting tournament submissions with real API."""
+        client = IfpaClient(api_key=api_key)
+
+        try:
+            result = client.tournament(tournament_id).submissions()
+
+            assert isinstance(result, TournamentSubmissionsResponse)
+            assert result is not None
+            # Submissions structure varies
+            if result.submissions:
+                print(f"\nTournament {tournament_id} submissions:")
+                for submission in result.submissions[:3]:
+                    print(f"  - ID: {submission.submission_id}, Status: {submission.status}")
+        except IfpaApiError as e:
+            # Not all tournaments have submission data
+            if e.status_code in [404, 400]:
+                pytest.skip(f"Tournament {tournament_id} has no submissions data")
+            raise
+
+    def test_get_tournament_not_found(self, api_key: str) -> None:
+        """Test that getting non-existent tournament raises appropriate error."""
+        client = IfpaClient(api_key=api_key)
+
+        # API raises either IfpaApiError or validation error for non-existent tournament
+        with pytest.raises((IfpaApiError, ValueError)):
+            client.tournament(99999999).get()
 
     def test_field_names_consistency(self, api_key: str) -> None:
         """Test that field names match between search and details endpoints.

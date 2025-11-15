@@ -5,7 +5,7 @@ The IFPA SDK is organized into several key modules that work together to provide
 ## Module Structure
 
 ```
-ifpa_sdk/
+ifpa_api/
 ├── client.py          # Main IfpaClient facade
 ├── config.py          # Configuration management
 ├── exceptions.py      # Custom exceptions
@@ -51,7 +51,7 @@ The SDK exposes the following public API:
 ## Quick Reference
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaClient,
     TimePeriod,
     RankingSystem,

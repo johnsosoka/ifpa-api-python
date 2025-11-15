@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature or enhancement for the IFPA SDK
+about: Suggest a new feature or enhancement for the IFPA API client
 title: '[FEATURE] '
 labels: ['enhancement', 'needs-triage']
 assignees: ''
@@ -25,7 +25,7 @@ Describe how you envision this feature working. Include:
 
 ```python
 # Example of how you'd like to use this feature
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient()
 # Your proposed API usage

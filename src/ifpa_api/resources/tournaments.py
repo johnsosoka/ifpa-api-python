@@ -5,7 +5,7 @@ Provides access to tournament information, results, formats, and submissions.
 
 from typing import TYPE_CHECKING, Any
 
-from ifpa_sdk.models.tournaments import (
+from ifpa_api.models.tournaments import (
     Tournament,
     TournamentFormatsResponse,
     TournamentLeagueResponse,
@@ -15,7 +15,7 @@ from ifpa_sdk.models.tournaments import (
 )
 
 if TYPE_CHECKING:
-    from ifpa_sdk.http import _HttpClient
+    from ifpa_api.http import _HttpClient
 
 
 class TournamentHandle:

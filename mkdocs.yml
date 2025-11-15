@@ -1,10 +1,10 @@
-site_name: IFPA SDK Documentation
+site_name: IFPA API Documentation
 site_description: Typed Python client for the IFPA (International Flipper Pinball Association) API
 site_author: John Sosoka
-site_url: https://ifpa-sdk.readthedocs.io
+site_url: https://johnsosoka.github.io/ifpa-api-python/
 
-repo_name: jscom/ifpa-sdk
-repo_url: https://github.com/jscom/ifpa-sdk
+repo_name: johnsosoka/ifpa-api-python
+repo_url: https://github.com/johnsosoka/ifpa-api-python
 edit_uri: edit/main/docs/
 
 theme:
@@ -97,9 +97,9 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/jscom/ifpa-sdk
+      link: https://github.com/johnsosoka/ifpa-api-python
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/ifpa-sdk/
+      link: https://pypi.org/project/ifpa-api/
   version:
     provider: mike
 

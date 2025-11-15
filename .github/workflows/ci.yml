@@ -130,13 +130,13 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run unit tests (always)
-        run: poetry run pytest -v -m "not integration" --cov=ifpa_sdk --cov-report=xml --cov-report=term-missing
+        run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=xml --cov-report=term-missing
 
       - name: Run integration tests (if API key available)
         if: ${{ env.IFPA_API_KEY != '' }}
         env:
           IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
-        run: poetry run pytest -v -m "integration" --cov=ifpa_sdk --cov-append --cov-report=xml --cov-report=term-missing
+        run: poetry run pytest -v -m "integration" --cov=ifpa_api --cov-append --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'

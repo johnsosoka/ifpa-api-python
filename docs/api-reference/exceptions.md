@@ -46,7 +46,7 @@ This occurs during client initialization when:
 **Example:**
 
 ```python
-from ifpa_sdk import IfpaClient, MissingApiKeyError
+from ifpa_api import IfpaClient, MissingApiKeyError
 
 try:
     client = IfpaClient()
@@ -87,7 +87,7 @@ class IfpaApiError(IfpaError):
 **Example:**
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient, IfpaApiError
 
 client = IfpaClient()
 
@@ -127,7 +127,7 @@ This occurs when `validate_requests=True` and Pydantic model validation fails fo
 **Example:**
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaClientValidationError
+from ifpa_api import IfpaClient, IfpaClientValidationError
 
 client = IfpaClient(validate_requests=True)
 
@@ -146,7 +146,7 @@ except IfpaClientValidationError as e:
 Catch the most specific exception first:
 
 ```python
-from ifpa_sdk import (
+from ifpa_api import (
     IfpaClient,
     MissingApiKeyError,
     IfpaApiError,

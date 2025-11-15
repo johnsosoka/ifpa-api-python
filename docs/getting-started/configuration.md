@@ -1,13 +1,13 @@
 # Configuration
 
-This guide covers all configuration options available in the IFPA SDK.
+This guide covers all configuration options available in the IFPA API package.
 
 ## Client Configuration
 
 The `IfpaClient` constructor accepts several configuration parameters:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 client = IfpaClient(
     api_key='your-api-key',  # API key for authentication
@@ -107,7 +107,7 @@ client = IfpaClient(validate_requests=False)
 **Example with validation**:
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaClientValidationError
+from ifpa_api import IfpaClient, IfpaClientValidationError
 
 client = IfpaClient(validate_requests=True)
 
@@ -120,7 +120,7 @@ except IfpaClientValidationError as e:
 
 ## Environment Variables
 
-The SDK reads these environment variables:
+The package reads these environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -135,7 +135,7 @@ Future environment variables (not currently used):
 
 ```python
 import os
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Load from environment
 api_key = os.getenv('IFPA_API_KEY')
@@ -157,7 +157,7 @@ player = client.player(12345).get()
 ### Development Configuration
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Development: Longer timeout, strict validation
 dev_client = IfpaClient(
@@ -169,7 +169,7 @@ dev_client = IfpaClient(
 ### Production Configuration
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Production: Balanced timeout, optional validation
 prod_client = IfpaClient(
@@ -182,7 +182,7 @@ prod_client = IfpaClient(
 ### Testing Configuration
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Testing: Mock server, fast timeout
 test_client = IfpaClient(
@@ -201,10 +201,11 @@ For complex applications, create a configuration class:
 from dataclasses import dataclass
 from typing import Optional
 import os
+from ifpa_api import IfpaClient
 
 @dataclass
 class IfpaConfig:
-    """IFPA SDK configuration."""
+    """IFPA API client configuration."""
     api_key: str
     base_url: str = 'https://api.ifpapinball.com'
     timeout: float = 10.0
@@ -240,14 +241,14 @@ client = config.create_client()
 
 ## HTTP Session Configuration
 
-The SDK uses the `requests` library internally. The HTTP client:
+The package uses the `requests` library internally. The HTTP client:
 
 - Maintains a persistent session for connection pooling
 - Sets the `X-API-Key` header automatically
 - Handles timeouts and retries
 - Parses JSON responses
 
-**Connection pooling**: The SDK reuses HTTP connections for better performance. Always close the client when done:
+**Connection pooling**: The package reuses HTTP connections for better performance. Always close the client when done:
 
 ```python
 # Option 1: Manual close
@@ -291,7 +292,7 @@ Request validation has minimal performance impact (< 1ms per request). Keep it e
 If you're getting timeout errors:
 
 ```python
-from ifpa_sdk import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient, IfpaApiError
 
 client = IfpaClient(timeout=30.0)  # Increase timeout
 
@@ -319,7 +320,7 @@ rankings = client.rankings.wppr(count=250)  # Max allowed
 If you're having connection issues:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Check base URL
 client = IfpaClient()

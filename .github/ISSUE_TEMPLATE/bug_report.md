@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug or unexpected behavior in the IFPA SDK
+about: Report a bug or unexpected behavior in the IFPA API client
 title: '[BUG] '
 labels: ['bug', 'needs-triage']
 assignees: ''
@@ -12,7 +12,7 @@ A clear and concise description of the bug.
 
 ## Steps to Reproduce
 
-1. Install the SDK: `pip install ifpa-sdk`
+1. Install the package: `pip install ifpa-api`
 2. Run the following code:
 ```python
 # Your code here
@@ -33,7 +33,7 @@ Paste error message or stack trace here
 
 ## Environment
 
-- **IFPA SDK Version**: (e.g., 0.1.0)
+- **IFPA API Version**: (e.g., 0.2.0)
 - **Python Version**: (e.g., 3.11.5)
 - **Operating System**: (e.g., macOS 14.0, Ubuntu 22.04, Windows 11)
 - **Installation Method**: (e.g., pip, poetry)
@@ -50,7 +50,7 @@ Add any other context about the problem here, such as:
 If possible, provide a minimal, complete, and verifiable example that demonstrates the issue:
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Minimal code that reproduces the issue
 client = IfpaClient(api_key="your_key_here")

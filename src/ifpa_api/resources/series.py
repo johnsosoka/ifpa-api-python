@@ -6,7 +6,7 @@ and statistics.
 
 from typing import TYPE_CHECKING
 
-from ifpa_sdk.models.series import (
+from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
     SeriesOverview,
@@ -19,7 +19,7 @@ from ifpa_sdk.models.series import (
 )
 
 if TYPE_CHECKING:
-    from ifpa_sdk.http import _HttpClient
+    from ifpa_api.http import _HttpClient
 
 
 class SeriesHandle:

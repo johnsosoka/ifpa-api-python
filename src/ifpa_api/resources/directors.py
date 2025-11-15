@@ -6,8 +6,8 @@ and search capabilities.
 
 from typing import TYPE_CHECKING
 
-from ifpa_sdk.models.common import TimePeriod
-from ifpa_sdk.models.director import (
+from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import (
     CountryDirectorsResponse,
     Director,
     DirectorSearchResponse,
@@ -15,7 +15,7 @@ from ifpa_sdk.models.director import (
 )
 
 if TYPE_CHECKING:
-    from ifpa_sdk.http import _HttpClient
+    from ifpa_api.http import _HttpClient
 
 
 class DirectorHandle:

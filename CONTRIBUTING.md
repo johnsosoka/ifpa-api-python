@@ -13,7 +13,7 @@ This project welcomes contributions from everyone. We expect all contributors to
 
 ## How to Report Bugs
 
-If you find a bug in the SDK, please open an issue on [GitHub Issues](https://github.com/jscom/ifpa-sdk/issues) with:
+If you find a bug in the package, please open an issue on [GitHub Issues](https://github.com/jscom/ifpa-api/issues) with:
 
 1. **Clear Title**: Describe the bug in one sentence
 2. **Description**: Detailed description of the issue
@@ -43,12 +43,12 @@ Example:
 
 **Environment**:
 - Python 3.11.5
-- ifpa-sdk 0.1.0
+- ifpa-api 0.2.0
 - macOS 14.0
 
 **Code**:
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 client = IfpaClient()
 players = client.players.search(name="José")  # Fails
 ```
@@ -77,13 +77,13 @@ Feature requests are welcome! Please open an issue with the `enhancement` label 
 
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/ifpa-sdk.git
-   cd ifpa-sdk
+   git clone https://github.com/YOUR_USERNAME/ifpa-api.git
+   cd ifpa-api
    ```
 
 3. **Add upstream remote**:
    ```bash
-   git remote add upstream https://github.com/jscom/ifpa-sdk.git
+   git remote add upstream https://github.com/jscom/ifpa-api.git
    ```
 
 4. **Install Poetry** (if not already installed):
@@ -220,9 +220,9 @@ def get_player(player_id: int | str) -> Player:
 
 Follow the established project structure:
 
-- **Models** (`src/ifpa_sdk/models/`): Pydantic models for requests/responses
-- **Resources** (`src/ifpa_sdk/resources/`): Resource clients and handles
-- **Core** (`src/ifpa_sdk/`): Client, HTTP, config, exceptions
+- **Models** (`src/ifpa_api/models/`): Pydantic models for requests/responses
+- **Resources** (`src/ifpa_api/resources/`): Resource clients and handles
+- **Core** (`src/ifpa_api/`): Client, HTTP, config, exceptions
 
 Keep functions small and focused:
 - Single responsibility principle
@@ -240,7 +240,7 @@ Unit tests use `requests-mock` to mock API responses:
 ```python
 # tests/unit/test_players.py
 import requests_mock
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 
 def test_search_players():
@@ -266,7 +266,7 @@ Integration tests make real API calls and are marked with `@pytest.mark.integrat
 ```python
 # tests/integration/test_players_integration.py
 import pytest
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 
 @pytest.mark.integration
@@ -283,7 +283,7 @@ Integration tests use a fixture that provides a configured client (see `tests/in
 
 ```bash
 # Run all tests with coverage
-poetry run pytest --cov=ifpa_sdk --cov-report=term-missing
+poetry run pytest --cov=ifpa_api --cov-report=term-missing
 
 # Run only unit tests
 poetry run pytest tests/unit/
@@ -446,10 +446,10 @@ If IFPA adds new API endpoints, follow this process:
 
 ### 1. Update Models
 
-Add Pydantic models to the appropriate file in `src/ifpa_sdk/models/`:
+Add Pydantic models to the appropriate file in `src/ifpa_api/models/`:
 
 ```python
-# src/ifpa_sdk/models/player.py
+# src/ifpa_api/models/player.py
 from pydantic import BaseModel
 
 class NewFeatureResponse(BaseModel):
@@ -461,10 +461,10 @@ class NewFeatureResponse(BaseModel):
 
 ### 2. Add Resource Method
 
-Add the method to the appropriate resource client in `src/ifpa_sdk/resources/`:
+Add the method to the appropriate resource client in `src/ifpa_api/resources/`:
 
 ```python
-# src/ifpa_sdk/resources/players.py
+# src/ifpa_api/resources/players.py
 def new_feature(self, player_id: int) -> NewFeatureResponse:
     """Get new feature data for a player.
 

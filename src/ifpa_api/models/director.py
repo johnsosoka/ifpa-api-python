@@ -5,7 +5,7 @@ Models for tournament directors, their statistics, and tournament history.
 
 from pydantic import Field
 
-from ifpa_sdk.models.common import IfpaBaseModel
+from ifpa_api.models.common import IfpaBaseModel
 
 
 class DirectorFormat(IfpaBaseModel):

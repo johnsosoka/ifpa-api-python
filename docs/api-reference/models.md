@@ -157,4 +157,4 @@ Series information with:
 - `series_name`: str
 - `active`: bool
 
-For complete model definitions, see the source code in `src/ifpa_sdk/models/`.
+For complete model definitions, see the source code in `src/ifpa_api/models/`.

@@ -36,7 +36,7 @@ tests/
 
 ```bash
 # Run all tests with coverage
-poetry run pytest --cov=ifpa_sdk --cov-report=term-missing
+poetry run pytest --cov=ifpa_api --cov-report=term-missing
 
 # Run with verbose output
 poetry run pytest -v
@@ -83,10 +83,10 @@ The project maintains 98% test coverage. View coverage report:
 
 ```bash
 # Terminal report
-poetry run pytest --cov=ifpa_sdk --cov-report=term-missing
+poetry run pytest --cov=ifpa_api --cov-report=term-missing
 
 # HTML report
-poetry run pytest --cov=ifpa_sdk --cov-report=html
+poetry run pytest --cov=ifpa_api --cov-report=html
 open htmlcov/index.html
 ```
 
@@ -96,7 +96,7 @@ open htmlcov/index.html
 
 ```python
 import requests_mock
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 
 def test_search_players():
@@ -129,7 +129,7 @@ def test_search_players():
 
 ```python
 import pytest
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 
 @pytest.mark.integration

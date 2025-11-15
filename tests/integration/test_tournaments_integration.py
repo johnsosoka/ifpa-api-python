@@ -6,8 +6,8 @@ Run with: pytest -m integration
 
 import pytest
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.models.tournaments import Tournament, TournamentSearchResponse
+from ifpa_api.client import IfpaClient
+from ifpa_api.models.tournaments import Tournament, TournamentSearchResponse
 from tests.integration.helpers import get_test_tournament_id, skip_if_no_api_key
 
 

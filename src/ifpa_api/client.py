@@ -6,13 +6,13 @@ through a clean, typed interface.
 
 from typing import Any
 
-from ifpa_sdk.config import Config
-from ifpa_sdk.http import _HttpClient
-from ifpa_sdk.resources.directors import DirectorHandle, DirectorsClient
-from ifpa_sdk.resources.players import PlayerHandle, PlayersClient
-from ifpa_sdk.resources.rankings import RankingsClient
-from ifpa_sdk.resources.series import SeriesClient, SeriesHandle
-from ifpa_sdk.resources.tournaments import TournamentHandle, TournamentsClient
+from ifpa_api.config import Config
+from ifpa_api.http import _HttpClient
+from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
+from ifpa_api.resources.players import PlayerHandle, PlayersClient
+from ifpa_api.resources.rankings import RankingsClient
+from ifpa_api.resources.series import SeriesClient, SeriesHandle
+from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
 
 
 class IfpaClient:
@@ -28,7 +28,7 @@ class IfpaClient:
 
     Example:
         ```python
-        from ifpa_sdk import IfpaClient, TimePeriod
+        from ifpa_api import IfpaClient, TimePeriod
 
         # Initialize with API key from environment variable
         client = IfpaClient()

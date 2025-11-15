@@ -209,3 +209,10 @@ __marimo__/
 # IFPA SDK specific
 credentials
 llm_memory/
+
+# Development/documentation files (keep on filesystem, not in repo)
+CLAUDE.md
+api.json
+pinball_client_spec.md
+CICD_SETUP_SUMMARY.md
+QUICK_START_CICD.md

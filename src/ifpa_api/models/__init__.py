@@ -4,15 +4,15 @@ This package contains all Pydantic models used for request validation and
 response deserialization throughout the SDK.
 """
 
-from ifpa_sdk.models.calendar import CalendarEvent, CalendarResponse
-from ifpa_sdk.models.common import (
+from ifpa_api.models.calendar import CalendarEvent, CalendarResponse
+from ifpa_api.models.common import (
     IfpaBaseModel,
     RankingSystem,
     ResultType,
     TimePeriod,
     TournamentType,
 )
-from ifpa_sdk.models.director import (
+from ifpa_api.models.director import (
     CountryDirector,
     CountryDirectorsResponse,
     Director,
@@ -22,7 +22,7 @@ from ifpa_sdk.models.director import (
     DirectorTournament,
     DirectorTournamentsResponse,
 )
-from ifpa_sdk.models.player import (
+from ifpa_api.models.player import (
     MultiPlayerResponse,
     Player,
     PlayerCard,
@@ -37,7 +37,7 @@ from ifpa_sdk.models.player import (
     RatingHistoryEntry,
     TournamentResult,
 )
-from ifpa_sdk.models.rankings import (
+from ifpa_api.models.rankings import (
     CountryRankingEntry,
     CountryRankingsResponse,
     CustomRankingEntry,
@@ -45,7 +45,7 @@ from ifpa_sdk.models.rankings import (
     RankingEntry,
     RankingsResponse,
 )
-from ifpa_sdk.models.series import (
+from ifpa_api.models.series import (
     Series,
     SeriesListResponse,
     SeriesOverview,
@@ -60,7 +60,7 @@ from ifpa_sdk.models.series import (
     SeriesStandingsResponse,
     SeriesStats,
 )
-from ifpa_sdk.models.tournaments import (
+from ifpa_api.models.tournaments import (
     LeagueSession,
     Tournament,
     TournamentFormat,
@@ -72,7 +72,7 @@ from ifpa_sdk.models.tournaments import (
     TournamentSubmission,
     TournamentSubmissionsResponse,
 )
-from ifpa_sdk.models.tournaments import (
+from ifpa_api.models.tournaments import (
     TournamentResult as TournamentResultDetail,
 )
 

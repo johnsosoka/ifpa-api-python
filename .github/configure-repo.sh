@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# GitHub Repository Configuration Script for IFPA SDK
+# GitHub Repository Configuration Script for IFPA API
 #
 # This script provides instructions and automation for configuring the
-# jscom/ifpa-sdk GitHub repository with proper settings, branch protection,
+# jscom/ifpa-api GitHub repository with proper settings, branch protection,
 # secrets, and integrations.
 #
 # Usage:
@@ -28,7 +28,7 @@ NC='\033[0m' # No Color
 
 # Repository details
 REPO_OWNER="jscom"
-REPO_NAME="ifpa-sdk"
+REPO_NAME="ifpa-api"
 REPO_FULL="${REPO_OWNER}/${REPO_NAME}"
 
 # Flag to determine if we should apply changes
@@ -298,8 +298,8 @@ configure_repository_settings() {
 main() {
     echo ""
     echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║  IFPA SDK - GitHub Repository Configuration                 ║${NC}"
-    echo -e "${GREEN}║  Repository: ${REPO_FULL}                              ║${NC}"
+    echo -e "${GREEN}║  IFPA API - GitHub Repository Configuration                 ║${NC}"
+    echo -e "${GREEN}║  Repository: ${REPO_FULL}                               ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
 
     if [[ "$APPLY_CHANGES" == true ]]; then

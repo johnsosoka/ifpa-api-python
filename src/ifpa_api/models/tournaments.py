@@ -7,7 +7,7 @@ from typing import Any
 
 from pydantic import Field
 
-from ifpa_sdk.models.common import IfpaBaseModel
+from ifpa_api.models.common import IfpaBaseModel
 
 
 class Tournament(IfpaBaseModel):

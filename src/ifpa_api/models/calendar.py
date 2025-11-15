@@ -5,7 +5,7 @@ Models for calendar events and schedules (if supported by API).
 
 from pydantic import Field
 
-from ifpa_sdk.models.common import IfpaBaseModel
+from ifpa_api.models.common import IfpaBaseModel
 
 
 class CalendarEvent(IfpaBaseModel):

@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "ifpa-sdk"
+name = "ifpa-api"
 version = "0.2.0"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
 license = "MIT"
-homepage = "https://github.com/jscom/ifpa-sdk"
-repository = "https://github.com/jscom/ifpa-sdk"
+homepage = "https://github.com/johnsosoka/ifpa-api-python"
+repository = "https://github.com/johnsosoka/ifpa-api-python"
 keywords = ["ifpa", "pinball", "api", "client", "sdk"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-packages = [{include = "ifpa_sdk", from = "src"}]
+packages = [{include = "ifpa_api", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -54,7 +54,7 @@ select = ["E", "F", "I", "N", "UP", "W", "B", "C4", "PIE", "SIM", "RET"]
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = ["ifpa_sdk"]
+known-first-party = ["ifpa_api"]
 
 [tool.black]
 line-length = 100
@@ -75,7 +75,7 @@ python_functions = ["test_*"]
 markers = [
     "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
 ]
-addopts = "--cov=ifpa_sdk --cov-report=term-missing --cov-report=xml"
+addopts = "--cov=ifpa_api --cov-report=term-missing --cov-report=xml"
 
 [tool.coverage.run]
 source = ["src"]

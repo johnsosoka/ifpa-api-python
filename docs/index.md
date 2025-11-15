@@ -1,10 +1,10 @@
-# IFPA SDK
+# IFPA API
 
-Welcome to the IFPA SDK documentation! This library provides a typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/).
+Welcome to the IFPA API documentation! This library provides a typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/).
 
 ## Overview
 
-The IFPA SDK enables Python developers to easily access pinball rankings, tournament data, player statistics, and more through a clean, modern interface. Whether you're building a tournament management system, a statistics dashboard, or analyzing player performance, this SDK provides all the tools you need.
+The IFPA API client enables Python developers to easily access pinball rankings, tournament data, player statistics, and more through a clean, modern interface. Whether you're building a tournament management system, a statistics dashboard, or analyzing player performance, this client provides all the tools you need.
 
 ## Key Features
 
@@ -20,7 +20,7 @@ The IFPA SDK enables Python developers to easily access pinball rankings, tourna
 ## Quick Example
 
 ```python
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
 
 # Initialize client (uses IFPA_API_KEY environment variable)
 client = IfpaClient()
@@ -43,17 +43,17 @@ for tournament in tournaments.tournaments:
 
 ## Installation
 
-Install the SDK using pip:
+Install the client using pip:
 
 ```bash
-pip install ifpa-sdk
+pip install ifpa-api
 ```
 
 Requires Python 3.11 or higher.
 
 ## API Resources
 
-The SDK provides access to all IFPA API resources:
+The client provides access to all IFPA API resources:
 
 | Resource | Description | Endpoints |
 |----------|-------------|-----------|
@@ -67,19 +67,19 @@ The SDK provides access to all IFPA API resources:
 
 - **Documentation**: Browse the [Getting Started](getting-started/installation.md) guide
 - **Examples**: Check the [Usage Guide](usage/directors.md) for code examples
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/jscom/ifpa-sdk/issues)
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/jscom/ifpa-api/issues)
 - **API Reference**: See the [IFPA API docs](https://api.ifpapinball.com/docs)
 
 ## Next Steps
 
-- [Install the SDK](getting-started/installation.md)
+- [Install the client](getting-started/installation.md)
 - [Quick Start Guide](getting-started/quickstart.md)
 - [Authentication Setup](getting-started/authentication.md)
 - [Usage Examples](usage/directors.md)
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/jscom/ifpa-sdk/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/jscom/ifpa-api/blob/main/LICENSE) file for details.
 
 ## Acknowledgments
 

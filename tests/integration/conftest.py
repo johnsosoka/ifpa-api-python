@@ -4,7 +4,21 @@ from collections.abc import Generator
 
 import pytest
 
-from ifpa_sdk import IfpaClient
+from ifpa_api import IfpaClient
+
+# Import test data fixtures to make them available to all integration tests
+from tests.integration.test_data import (  # noqa: F401
+    count_large,
+    count_medium,
+    count_small,
+    country_code,
+    player_active_id,
+    player_ids_multiple,
+    player_inactive_id,
+    tournament_id,
+    year_end,
+    year_start,
+)
 
 
 @pytest.fixture  # type: ignore[misc]

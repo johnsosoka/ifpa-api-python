@@ -6,9 +6,10 @@ Run with: pytest -m integration
 
 import pytest
 
-from ifpa_sdk.client import IfpaClient
-from ifpa_sdk.models.common import TimePeriod
-from ifpa_sdk.models.director import Director, DirectorSearchResponse
+from ifpa_api.client import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import Director, DirectorSearchResponse
 from tests.integration.helpers import get_test_director_id, skip_if_no_api_key
 
 
@@ -27,21 +28,21 @@ class TestDirectorsClientIntegration:
         # API should return some directors
         assert result.directors is not None
 
-    def test_country_directors(self, api_key: str) -> None:
-        """Test getting country directors list with real API."""
+    def test_search_directors_with_filters(self, api_key: str, country_code: str) -> None:
+        """Test searching directors with country filter parameter."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.directors.country_directors()
+        # Search with country filter
+        result = client.directors.search(country=country_code)
 
-        assert result.country_directors is not None
-        # There should be at least some country directors
-        if len(result.country_directors) > 0:
-            # Verify structure of first entry
-            director = result.country_directors[0]
-            assert director.player_id > 0
+        assert result.directors is not None
+        assert isinstance(result.directors, list)
+        # Verify structure if results exist
+        if len(result.directors) > 0:
+            director = result.directors[0]
+            assert director.director_id > 0
             assert director.name is not None
-            assert director.country_code is not None
 
 
 @pytest.mark.integration
@@ -63,6 +64,18 @@ class TestDirectorHandleIntegration:
         assert isinstance(director, Director)
         assert director.director_id == director_id
         assert director.name is not None
+
+    def test_get_director_not_found(self, api_key: str) -> None:
+        """Test that getting non-existent director raises appropriate error."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        # Use very high ID that doesn't exist
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.director(99999999).get()
+
+        assert exc_info.value.status_code == 400
+        assert "not found" in exc_info.value.message.lower()
 
     def test_director_tournaments_past(self, api_key: str) -> None:
         """Test getting past tournaments for a director with real API."""

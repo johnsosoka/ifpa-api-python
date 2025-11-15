@@ -6,14 +6,14 @@ Youth, Pro, and custom rankings.
 
 from typing import TYPE_CHECKING
 
-from ifpa_sdk.models.rankings import (
+from ifpa_api.models.rankings import (
     CountryRankingsResponse,
     CustomRankingsResponse,
     RankingsResponse,
 )
 
 if TYPE_CHECKING:
-    from ifpa_sdk.http import _HttpClient
+    from ifpa_api.http import _HttpClient
 
 
 class RankingsClient:
@@ -238,12 +238,14 @@ class RankingsClient:
 
     def by_country(
         self,
+        country: str,
         start_pos: int | None = None,
         count: int | None = None,
     ) -> CountryRankingsResponse:
-        """Get country rankings.
+        """Get country rankings filtered by country code or name.
 
         Args:
+            country: Country code (e.g., "US") or country name (e.g., "United States")
             start_pos: Starting position for pagination
             count: Number of results to return
 
@@ -255,16 +257,20 @@ class RankingsClient:
 
         Example:
             ```python
-            rankings = client.rankings.by_country(start_pos=0, count=25)
+            # Using country code
+            rankings = client.rankings.by_country(country="US", count=25)
             for entry in rankings.country_rankings:
                 print(f"{entry.rank}. {entry.country_name}: {entry.total_players} players")
+
+            # Using country name
+            rankings = client.rankings.by_country(country="United States", count=10)
             ```
         """
-        params = {}
+        params = {"country": country}
         if start_pos is not None:
-            params["start_pos"] = start_pos
+            params["start_pos"] = str(start_pos)
         if count is not None:
-            params["count"] = count
+            params["count"] = str(count)
 
         response = self._http._request("GET", "/rankings/country", params=params)
         return CountryRankingsResponse.model_validate(response)
