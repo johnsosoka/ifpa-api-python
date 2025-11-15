@@ -120,4 +120,4 @@ Areas needing special review:
 
 ---
 
-**Note to maintainers:** This PR represents Commerce Architects' first public open source product. Please ensure code quality and documentation meet our professional standards.
+**Note to maintainers:** Please ensure code quality and documentation meet professional standards.

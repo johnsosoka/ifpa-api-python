@@ -118,4 +118,4 @@ def get_player_with_retry(player_id: int, max_retries: int = 3):
             raise
 ```
 
-For more examples, see the [README](https://github.com/jscom/ifpa-api#error-handling).
+For more examples, see the [README](https://github.com/johnsosoka/ifpa-api-python#error-handling).
