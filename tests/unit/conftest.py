@@ -1,0 +1,25 @@
+"""Fixtures for unit tests."""
+
+import pytest
+import requests_mock
+
+
+@pytest.fixture
+def mock_requests() -> requests_mock.Mocker:
+    """Provide requests_mock fixture for mocking HTTP requests.
+
+    Yields:
+        requests_mock.Mocker instance for mocking requests library calls
+
+    Example:
+        ```python
+        def test_something(mock_requests):
+            mock_requests.get(
+                "https://api.ifpapinball.com/player/123",
+                json={"player_id": 123, "first_name": "John"}
+            )
+            # Make request through the mocked session
+        ```
+    """
+    with requests_mock.Mocker() as m:
+        yield m
