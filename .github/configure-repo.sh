@@ -3,7 +3,7 @@
 # GitHub Repository Configuration Script for IFPA API
 #
 # This script provides instructions and automation for configuring the
-# jscom/ifpa-api GitHub repository with proper settings, branch protection,
+# johnsosoka/ifpa-api-python GitHub repository with proper settings, branch protection,
 # secrets, and integrations.
 #
 # Usage:
@@ -27,8 +27,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Repository details
-REPO_OWNER="jscom"
-REPO_NAME="ifpa-api"
+REPO_OWNER="johnsosoka"
+REPO_NAME="ifpa-api-python"
 REPO_FULL="${REPO_OWNER}/${REPO_NAME}"
 
 # Flag to determine if we should apply changes

@@ -72,14 +72,14 @@ poetry install
 To install the latest development version from GitHub:
 
 ```bash
-pip install git+https://github.com/jscom/ifpa-api.git
+pip install git+https://github.com/johnsosoka/ifpa-api-python.git
 ```
 
 Or clone the repository and install locally:
 
 ```bash
-git clone https://github.com/jscom/ifpa-api.git
-cd ifpa-api
+git clone https://github.com/johnsosoka/ifpa-api-python.git
+cd ifpa-api-python
 pip install -e .
 ```
 
@@ -91,8 +91,8 @@ Quick version:
 
 ```bash
 # Clone the repository
-git clone https://github.com/jscom/ifpa-api.git
-cd ifpa-api
+git clone https://github.com/johnsosoka/ifpa-api-python.git
+cd ifpa-api-python
 
 # Install Poetry
 curl -sSL https://install.python-poetry.org | python3 -

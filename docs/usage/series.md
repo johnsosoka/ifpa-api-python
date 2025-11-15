@@ -194,4 +194,4 @@ for rep in reps.representative:
         print(f"  Photo: {rep.profile_photo}")
 ```
 
-For complete examples, see the [README](https://github.com/jscom/ifpa-api#series).
+For complete examples, see the [README](https://github.com/johnsosoka/ifpa-api-python#series).

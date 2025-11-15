@@ -13,7 +13,7 @@ This project welcomes contributions from everyone. We expect all contributors to
 
 ## How to Report Bugs
 
-If you find a bug in the package, please open an issue on [GitHub Issues](https://github.com/jscom/ifpa-api/issues) with:
+If you find a bug in the package, please open an issue on [GitHub Issues](https://github.com/johnsosoka/ifpa-api-python/issues) with:
 
 1. **Clear Title**: Describe the bug in one sentence
 2. **Description**: Detailed description of the issue
@@ -83,7 +83,7 @@ Feature requests are welcome! Please open an issue with the `enhancement` label 
 
 3. **Add upstream remote**:
    ```bash
-   git remote add upstream https://github.com/jscom/ifpa-api.git
+   git remote add upstream https://github.com/johnsosoka/ifpa-api-python.git
    ```
 
 4. **Install Poetry** (if not already installed):

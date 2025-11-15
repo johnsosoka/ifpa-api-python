@@ -91,4 +91,6 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 ## Acknowledgments
 
-Built by [John Sosoka](https://github.com/johnsosoka) for the pinball community. Thanks to IFPA for providing the public API.
+Built by [John Sosoka](https://johnsosoka.com) for the pinball community. Thanks to IFPA for providing the public API.
+
+**Maintainer**: [open.source@sosoka.com](mailto:open.source@sosoka.com)
