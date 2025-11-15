@@ -11,6 +11,7 @@ from ifpa_api.http import _HttpClient
 from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
 from ifpa_api.resources.players import PlayerHandle, PlayersClient
 from ifpa_api.resources.rankings import RankingsClient
+from ifpa_api.resources.reference import ReferenceClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
 from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
 
@@ -96,6 +97,7 @@ class IfpaClient:
         self._directors_client: DirectorsClient | None = None
         self._players_client: PlayersClient | None = None
         self._rankings_client: RankingsClient | None = None
+        self._reference_client: ReferenceClient | None = None
         self._tournaments_client: TournamentsClient | None = None
         self._series_client: SeriesClient | None = None
 
@@ -158,6 +160,28 @@ class IfpaClient:
         if self._rankings_client is None:
             self._rankings_client = RankingsClient(self._http, self._config.validate_requests)
         return self._rankings_client
+
+    @property
+    def reference(self) -> ReferenceClient:
+        """Access reference data endpoints.
+
+        Provides access to lookup/reference data such as countries and states/provinces.
+
+        Returns:
+            ReferenceClient for accessing reference data.
+
+        Example:
+            ```python
+            # Get all countries
+            countries = client.reference.countries()
+
+            # Get states/provinces
+            state_provs = client.reference.state_provs()
+            ```
+        """
+        if self._reference_client is None:
+            self._reference_client = ReferenceClient(self._http)
+        return self._reference_client
 
     @property
     def tournaments(self) -> TournamentsClient:

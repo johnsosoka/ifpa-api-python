@@ -9,7 +9,9 @@ import requests_mock
 from ifpa_api.client import IfpaClient
 from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.tournaments import (
+    RelatedTournamentsResponse,
     Tournament,
+    TournamentFormatsListResponse,
     TournamentFormatsResponse,
     TournamentLeagueResponse,
     TournamentResultsResponse,
@@ -390,3 +392,77 @@ class TestTournamentsIntegration:
             client.tournament(99999).get()
 
         assert exc_info.value.status_code == 404
+
+
+def test_tournament_related(mock_requests: requests_mock.Mocker) -> None:
+    """Test related() method returns related tournaments."""
+    mock_requests.get(
+        "https://api.ifpapinball.com/tournament/12345/related",
+        json={
+            "tournament": [
+                {
+                    "tournament_id": 12344,
+                    "tournament_name": "Previous Event",
+                    "tournament_type": "Regular",
+                    "event_name": "Same Venue Series",
+                    "event_start_date": "2023-01-15",
+                    "event_end_date": "2023-01-15",
+                    "ranking_system": "WPPR",
+                    "winner": {
+                        "player_id": 100,
+                        "name": "John Doe",
+                        "country_name": "United States",
+                        "country_code": "US",
+                    },
+                },
+                {
+                    "tournament_id": 12346,
+                    "tournament_name": "Next Event",
+                    "tournament_type": None,
+                    "event_name": "Same Venue Series",
+                    "event_start_date": "2024-01-15",
+                    "event_end_date": "2024-01-15",
+                    "ranking_system": "WPPR",
+                    "winner": None,
+                },
+            ]
+        },
+    )
+
+    client = IfpaClient(api_key="test-key")
+    result = client.tournament(12345).related()
+
+    assert isinstance(result, RelatedTournamentsResponse)
+    assert len(result.tournament) == 2
+    assert result.tournament[0].tournament_id == 12344
+    assert result.tournament[0].winner is not None
+    assert result.tournament[0].winner.name == "John Doe"
+    assert result.tournament[1].winner is None
+
+
+def test_list_formats(mock_requests: requests_mock.Mocker) -> None:
+    """Test list_formats() method returns format lists."""
+    mock_requests.get(
+        "https://api.ifpapinball.com/tournament/formats",
+        json={
+            "qualifying_formats": [
+                {"format_id": 1, "name": "Best Game", "description": "Best single game"},
+                {"format_id": 2, "name": "Swiss", "description": None},
+            ],
+            "finals_formats": [
+                {"format_id": 10, "name": "Single Elimination", "description": "Bracket"},
+                {"format_id": 11, "name": "Best of 3", "description": None},
+            ],
+        },
+    )
+
+    client = IfpaClient(api_key="test-key")
+    result = client.tournaments.list_formats()
+
+    assert isinstance(result, TournamentFormatsListResponse)
+    assert len(result.qualifying_formats) == 2
+    assert len(result.finals_formats) == 2
+    assert result.qualifying_formats[0].format_id == 1
+    assert result.qualifying_formats[0].name == "Best Game"
+    assert result.qualifying_formats[1].description is None
+    assert result.finals_formats[0].name == "Single Elimination"

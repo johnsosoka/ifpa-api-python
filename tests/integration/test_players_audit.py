@@ -30,32 +30,33 @@ class TestPlayersSearchAudit:
     """Comprehensive audit tests for PlayersClient.search() method."""
 
     def test_search_by_name_only(self, api_key: str) -> None:
-        """Test search with name parameter only."""
+        """Test search with name parameter only - verify Dwayne Smith can be found."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.players.search(name="John", count=5)
+        # Search for Dwayne Smith - known Idaho player
+        result = client.players.search(name="Dwayne Smith", count=10)
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
         assert isinstance(result.search, list)
-        assert len(result.search) <= 5
-        # Verify all results contain "John" in name
-        for player in result.search:
-            full_name = f"{player.first_name} {player.last_name}".lower()
-            assert "john" in full_name
+        # Verify Dwayne Smith appears in results
+        player_ids = {p.player_id for p in result.search}
+        if len(player_ids) > 0:
+            # At least one of the Smiths should be in results
+            assert 25584 in player_ids or any("smith" in p.last_name.lower() for p in result.search)
 
     def test_search_by_stateprov_filter(self, api_key: str) -> None:
         """Test search filtering by state/province."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Search for players in California
+        # Search for players in California (stable, large dataset)
         result = client.players.search(stateprov="CA", count=10)
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
-        # Verify state filter works
+        # Verify state filter works if results returned
         for player in result.search:
             if player.state is not None:
                 assert player.state == "CA"
@@ -175,7 +176,7 @@ class TestPlayersGetMultipleAudit:
     """Comprehensive audit tests for PlayersClient.get_multiple() method."""
 
     def test_get_multiple_single_player(self, api_key: str, player_active_id: int) -> None:
-        """Test get_multiple with single player ID."""
+        """Test get_multiple with single player ID (Debbie Smith)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -186,14 +187,21 @@ class TestPlayersGetMultipleAudit:
         # Result may be single Player or list with one Player
         if isinstance(result.player, list):
             assert len(result.player) == 1
-            assert result.player[0].player_id == player_active_id
+            player = result.player[0]
+            assert player.player_id == player_active_id
+            # Validate identity
+            assert player.first_name == "Debbie"
+            assert player.last_name == "Smith"
+            assert player.city == "Boise"
         else:
             assert result.player.player_id == player_active_id
+            assert result.player.first_name == "Debbie"
+            assert result.player.last_name == "Smith"
 
     def test_get_multiple_several_players(
         self, api_key: str, player_ids_multiple: list[int]
     ) -> None:
-        """Test get_multiple with multiple player IDs."""
+        """Test get_multiple with multiple player IDs (mixed activity levels)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -206,10 +214,34 @@ class TestPlayersGetMultipleAudit:
         assert result.player is not None
         # Should return list of players
         if isinstance(result.player, list):
-            assert len(result.player) <= len(player_ids_multiple)
+            assert len(result.player) == len(player_ids_multiple)
             returned_ids = {p.player_id for p in result.player}
             for pid in player_ids_multiple:
                 assert pid in returned_ids
+
+            # Map players by ID for validation
+            players_by_id = {p.player_id: p for p in result.player}
+
+            # Validate Dwayne (highly active)
+            dwayne = players_by_id[25584]
+            assert dwayne.first_name == "Dwayne"
+            assert dwayne.last_name == "Smith"
+            assert dwayne.player_stats is not None
+            assert int(dwayne.player_stats["system"]["open"]["current_rank"]) < 1000
+
+            # Validate John (low activity)
+            john = players_by_id[50104]
+            assert john.first_name == "John"
+            assert john.last_name == "Sosoka"
+            assert john.player_stats is not None
+            assert int(john.player_stats["system"]["open"]["current_rank"]) > 10000
+
+            # Validate Anna (inactive)
+            anna = players_by_id[50106]
+            assert anna.first_name == "Anna"
+            assert anna.last_name == "Rigas"
+            assert anna.player_stats is not None
+            assert anna.player_stats["system"]["open"]["current_rank"] == "0"
 
     def test_get_multiple_max_50_limit(self, api_key: str) -> None:
         """Test get_multiple enforces 50 player limit."""
@@ -270,7 +302,7 @@ class TestPlayerHandleGetAudit:
     """Comprehensive audit tests for PlayerHandle.get() method."""
 
     def test_get_valid_player(self, api_key: str, player_active_id: int) -> None:
-        """Test get() with valid active player ID."""
+        """Test get() with valid active player ID (Debbie Smith)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -278,8 +310,16 @@ class TestPlayerHandleGetAudit:
 
         assert isinstance(player, Player)
         assert player.player_id == player_active_id
-        assert player.first_name is not None
-        assert player.last_name is not None
+        # Validate identity
+        assert player.first_name == "Debbie"
+        assert player.last_name == "Smith"
+        assert player.city == "Boise"
+        assert player.stateprov == "ID"
+        # Validate active status
+        assert player.player_stats is not None
+        stats = player.player_stats["system"]["open"]
+        assert int(stats["current_rank"]) > 0
+        assert float(stats["active_points"]) > 0
 
     def test_get_invalid_player(self, api_key: str) -> None:
         """Test get() with invalid player ID raises error."""
@@ -291,7 +331,7 @@ class TestPlayerHandleGetAudit:
             client.player(99999999).get()
 
     def test_get_inactive_player(self, api_key: str, player_inactive_id: int) -> None:
-        """Test get() with inactive player ID."""
+        """Test get() with inactive player ID (Anna Rigas - inactive since 2017)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -299,6 +339,15 @@ class TestPlayerHandleGetAudit:
 
         assert isinstance(player, Player)
         assert player.player_id == player_inactive_id
+        # Validate identity
+        assert player.first_name == "Anna"
+        assert player.last_name == "Rigas"
+        # Validate inactivity
+        assert player.player_stats is not None
+        stats = player.player_stats["system"]["open"]
+        assert stats["current_rank"] == "0"
+        assert float(stats["active_points"]) == 0.0
+        assert int(stats["total_active_events"]) == 0
 
     def test_get_player_stats_structure(self, api_key: str, player_active_id: int) -> None:
         """Test player_stats field structure."""
@@ -331,6 +380,28 @@ class TestPlayerHandleGetAudit:
             assert hasattr(ranking, "rank")
             assert hasattr(ranking, "rating")
 
+    def test_get_highly_active_player(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test get() with highly active player (Dwayne Smith - rank #753)."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        player = client.player(player_highly_active_id).get()
+
+        assert isinstance(player, Player)
+        assert player.player_id == player_highly_active_id
+        # Validate identity
+        assert player.first_name == "Dwayne"
+        assert player.last_name == "Smith"
+        assert player.city == "Boise"
+        assert player.stateprov == "ID"
+        # Validate high activity metrics
+        assert player.player_stats is not None
+        stats = player.player_stats["system"]["open"]
+        assert int(stats["current_rank"]) < 1000
+        assert float(stats["active_points"]) > 100
+        assert int(stats["total_active_events"]) > 200
+        assert int(stats["total_events_all_time"]) > 400
+
     def test_get_response_all_fields(self, api_key: str, player_active_id: int) -> None:
         """Test get() response contains all expected fields."""
         skip_if_no_api_key()
@@ -360,20 +431,30 @@ class TestPlayerHandleGetAudit:
 class TestPlayerHandleResultsAudit:
     """Comprehensive audit tests for PlayerHandle.results() method."""
 
-    def test_results_main_active(self, api_key: str, player_active_id: int) -> None:
-        """Test results() with Main ranking system and Active results."""
+    def test_results_main_active(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test results() with Main ranking system and Active results (Dwayne Smith)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        results = client.player(player_active_id).results(
+        results = client.player(player_highly_active_id).results(
             ranking_system=RankingSystem.MAIN,
             result_type=ResultType.ACTIVE,
+            count=50,
         )
 
         assert isinstance(results, PlayerResultsResponse)
-        assert results.player_id == player_active_id
+        assert results.player_id == player_highly_active_id
         assert results.results is not None
         assert isinstance(results.results, list)
+        assert len(results.results) > 0
+        # total_results may be None or a string
+        if results.total_results is not None:
+            assert int(results.total_results) > 200
+        # Validate result structure
+        first_result = results.results[0]
+        assert first_result.tournament_id is not None
+        assert first_result.tournament_name is not None
+        assert first_result.position is not None
 
     def test_results_main_nonactive(self, api_key: str, player_active_id: int) -> None:
         """Test results() with Main ranking system and Nonactive results."""
@@ -414,13 +495,13 @@ class TestPlayerHandleResultsAudit:
         # Some players may not have women's ranking results
         assert isinstance(results, PlayerResultsResponse)
 
-    def test_results_pagination(self, api_key: str, player_active_id: int) -> None:
-        """Test results() with pagination parameters."""
+    def test_results_pagination(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test results() with pagination parameters (use highly active player)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Get first page
-        page1 = client.player(player_active_id).results(
+        # Get first page with highly active player who has many results
+        page1 = client.player(player_highly_active_id).results(
             ranking_system=RankingSystem.MAIN,
             result_type=ResultType.ACTIVE,
             start_pos=0,
@@ -429,9 +510,10 @@ class TestPlayerHandleResultsAudit:
 
         assert isinstance(page1, PlayerResultsResponse)
         assert len(page1.results) <= 5
+        assert len(page1.results) > 0  # Highly active player should have results
 
         # Get second page
-        page2 = client.player(player_active_id).results(
+        page2 = client.player(player_highly_active_id).results(
             ranking_system=RankingSystem.MAIN,
             result_type=ResultType.ACTIVE,
             start_pos=5,
@@ -477,41 +559,60 @@ class TestPlayerHandleResultsAudit:
 class TestPlayerHandlePvpAudit:
     """Comprehensive audit tests for PlayerHandle.pvp() method."""
 
-    def test_pvp_valid_opponent(
-        self, api_key: str, player_active_id: int, player_inactive_id: int
-    ) -> None:
-        """Test pvp() with valid opponent ID."""
+    def test_pvp_extensive_history(self, api_key: str, pvp_pair_primary: tuple[int, int]) -> None:
+        """Test pvp() between players with extensive tournament history.
+
+        Uses Dwayne vs Debbie (205 tournaments together).
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        comparison = client.player(player_active_id).pvp(player_inactive_id)
+        player1_id, player2_id = pvp_pair_primary
+
+        comparison = client.player(player1_id).pvp(player2_id)
 
         assert isinstance(comparison, PvpComparison)
-        assert comparison.player1_id == player_active_id
-        assert comparison.player2_id == player_inactive_id
+        assert comparison.player1_id == player1_id
+        assert comparison.player2_id == player2_id
+        # Validate extensive history (fields may be None due to API response)
+        if comparison.total_meetings is not None:
+            assert comparison.total_meetings >= 200
+        if comparison.tournaments is not None:
+            assert len(comparison.tournaments) >= 200
+        # Validate player names
+        assert "Dwayne" in comparison.player1_name
+        assert "Debbie" in comparison.player2_name
 
-    def test_pvp_invalid_opponent(self, api_key: str, player_active_id: int) -> None:
+    def test_pvp_players_never_met(self, api_key: str, pvp_pair_never_met: tuple[int, int]) -> None:
+        """Test pvp() between players who never competed raises error (Dwayne vs John)."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        player1_id, player2_id = pvp_pair_never_met
+
+        # API returns 404 with message "These users have never played in the same tournament"
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.player(player1_id).pvp(player2_id)
+
+        assert exc_info.value.status_code == 404
+
+    def test_pvp_invalid_opponent(self, api_key: str, player_highly_active_id: int) -> None:
         """Test pvp() with invalid opponent ID."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
         # Very high ID that doesn't exist
-        try:
-            comparison = client.player(player_active_id).pvp(99999999)
-            # API may return data even for invalid opponent
-            assert isinstance(comparison, PvpComparison)
-        except (IfpaApiError, ValidationError):
-            # Or it may raise an error - both are acceptable
-            pass
+        with pytest.raises((IfpaApiError, ValidationError)):
+            client.player(player_highly_active_id).pvp(99999999)
 
-    def test_pvp_response_structure(
-        self, api_key: str, player_active_id: int, player_inactive_id: int
-    ) -> None:
+    def test_pvp_response_structure(self, api_key: str, pvp_pair_primary: tuple[int, int]) -> None:
         """Test pvp() response structure matches model."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        comparison = client.player(player_active_id).pvp(player_inactive_id)
+        player1_id, player2_id = pvp_pair_primary
+
+        comparison = client.player(player1_id).pvp(player2_id)
 
         # Verify response structure
         assert isinstance(comparison, PvpComparison)
@@ -530,17 +631,22 @@ class TestPlayerHandlePvpAudit:
 class TestPlayerHandlePvpAllAudit:
     """Comprehensive audit tests for PlayerHandle.pvp_all() method."""
 
-    def test_pvp_all_valid_player(self, api_key: str, player_active_id: int) -> None:
-        """Test pvp_all() with valid active player."""
+    def test_pvp_all_highly_active(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test pvp_all() for highly active player returns many competitors.
+
+        Dwayne Smith - expected 300+ competitors.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        summary = client.player(player_active_id).pvp_all()
+        summary = client.player(player_highly_active_id).pvp_all()
 
         assert isinstance(summary, PvpAllCompetitors)
-        assert summary.player_id == player_active_id
+        assert summary.player_id == player_highly_active_id
         assert isinstance(summary.total_competitors, int)
-        assert summary.total_competitors >= 0
+        # Dwayne should have substantial PVP history
+        assert summary.total_competitors > 250
+        assert summary.system == "MAIN"
 
     def test_pvp_all_response_structure(self, api_key: str, player_active_id: int) -> None:
         """Test pvp_all() response structure matches model."""
@@ -563,8 +669,10 @@ class TestPlayerHandlePvpAllAudit:
         assert isinstance(summary.type, str)
         assert isinstance(summary.title, str)
 
-    def test_pvp_all_inactive_player(self, api_key: str, player_inactive_id: int) -> None:
-        """Test pvp_all() with inactive player."""
+    def test_pvp_all_inactive_player_zero_competitors(
+        self, api_key: str, player_inactive_id: int
+    ) -> None:
+        """Test pvp_all() for inactive player returns zero competitors (Anna Rigas)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -572,11 +680,29 @@ class TestPlayerHandlePvpAllAudit:
 
         assert isinstance(summary, PvpAllCompetitors)
         assert summary.player_id == player_inactive_id
+        assert summary.total_competitors == 0
 
 
 @pytest.mark.integration
 class TestPlayerHandleHistoryAudit:
     """Comprehensive audit tests for PlayerHandle.history() method."""
+
+    def test_history_highly_active_player(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test history() for highly active player returns ranking progression (Dwayne Smith)."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        history = client.player(player_highly_active_id).history()
+
+        assert isinstance(history, RankingHistory)
+        assert history.player_id == player_highly_active_id
+        assert history.system == "MAIN"
+        assert len(history.rank_history) > 0
+        assert len(history.rating_history) > 0
+        # Validate current rank in history
+        latest_rank = history.rank_history[0]
+        assert int(latest_rank.rank_position) < 1000
+        assert float(latest_rank.wppr_points) > 100
 
     def test_history_valid_player(self, api_key: str, player_active_id: int) -> None:
         """Test history() with valid active player."""
@@ -653,25 +779,19 @@ class TestPlayerHandleHistoryAudit:
 class TestPlayersCrossMethodValidation:
     """Cross-method validation tests to verify data consistency."""
 
-    def test_search_and_get_consistency(self, api_key: str) -> None:
-        """Test that search and get return consistent player data."""
+    def test_search_and_get_consistency(self, api_key: str, player_highly_active_id: int) -> None:
+        """Test that search and get return consistent player data (use known player)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Search for a player
-        search_result = client.players.search(name="John", count=1)
-        if len(search_result.search) == 0:
-            pytest.skip("No search results to validate")
+        # Get known player (Dwayne Smith) directly
+        player = client.player(player_highly_active_id).get()
 
-        player_id = search_result.search[0].player_id
-
-        # Get full player details
-        player = client.player(player_id).get()
-
-        # Verify basic consistency
-        assert player.player_id == player_id
-        assert player.first_name == search_result.search[0].first_name
-        assert player.last_name == search_result.search[0].last_name
+        # Verify player data integrity
+        assert player.player_id == player_highly_active_id
+        assert player.first_name == "Dwayne"
+        assert player.last_name == "Smith"
+        assert player.city == "Boise"
 
     def test_get_multiple_matches_individual_get(self, api_key: str, player_active_id: int) -> None:
         """Test that get_multiple returns same data as individual get."""

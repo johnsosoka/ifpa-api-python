@@ -39,10 +39,11 @@ from ifpa_api.exceptions import (
     IfpaClientValidationError,
     IfpaError,
     MissingApiKeyError,
+    PlayersNeverMetError,
 )
 from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     # Main client
@@ -57,4 +58,5 @@ __all__ = [
     "IfpaApiError",
     "MissingApiKeyError",
     "IfpaClientValidationError",
+    "PlayersNeverMetError",
 ]

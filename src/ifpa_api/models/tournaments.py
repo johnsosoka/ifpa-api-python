@@ -265,3 +265,51 @@ class TournamentSearchResponse(IfpaBaseModel):
 
     tournaments: list[TournamentSearchResult] = Field(default_factory=list, alias="search")
     total_results: int | None = None
+
+
+class RelatedTournamentWinner(IfpaBaseModel):
+    """Winner information for a related tournament."""
+
+    player_id: int
+    name: str
+    country_name: str
+    country_code: str
+
+
+class RelatedTournament(IfpaBaseModel):
+    """A tournament related to the current tournament (same venue or series)."""
+
+    tournament_id: int
+    tournament_name: str
+    tournament_type: str | None = None
+    event_name: str
+    event_start_date: str
+    event_end_date: str
+    ranking_system: str | None = None
+    winner: RelatedTournamentWinner | None = None
+
+
+class RelatedTournamentsResponse(IfpaBaseModel):
+    """Response from GET /tournament/{id}/related endpoint."""
+
+    tournament: list[RelatedTournament] = Field(default_factory=list)
+
+
+class FormatDefinition(IfpaBaseModel):
+    """Definition of a tournament format type."""
+
+    format_id: int
+    name: str
+    description: str | None = None
+
+
+class TournamentFormatsListResponse(IfpaBaseModel):
+    """Response from GET /tournament/formats endpoint.
+
+    Formats are split into two categories:
+    - qualifying_formats: Formats used for qualifying rounds (11 types)
+    - finals_formats: Formats used for finals rounds (14 types)
+    """
+
+    qualifying_formats: list[FormatDefinition] = Field(default_factory=list)
+    finals_formats: list[FormatDefinition] = Field(default_factory=list)

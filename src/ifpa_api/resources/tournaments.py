@@ -6,7 +6,9 @@ Provides access to tournament information, results, formats, and submissions.
 from typing import TYPE_CHECKING, Any
 
 from ifpa_api.models.tournaments import (
+    RelatedTournamentsResponse,
     Tournament,
+    TournamentFormatsListResponse,
     TournamentFormatsResponse,
     TournamentLeagueResponse,
     TournamentResultsResponse,
@@ -142,6 +144,35 @@ class TournamentHandle:
         response = self._http._request("GET", f"/tournament/{self._tournament_id}/submissions")
         return TournamentSubmissionsResponse.model_validate(response)
 
+    def related(self) -> RelatedTournamentsResponse:
+        """Get tournaments related to this tournament.
+
+        Returns tournaments that are part of the same tournament series or held at
+        the same venue. This is useful for finding recurring events and historical
+        data for tournament series.
+
+        Returns:
+            RelatedTournamentsResponse with list of related tournaments.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get related tournaments
+            tournament = client.tournament(12345).get()
+            related = client.tournament(12345).related()
+
+            print(f"Found {len(related.tournament)} related tournaments")
+            for t in related.tournament:
+                print(f"  {t.event_start_date}: {t.tournament_name}")
+                if t.winner:
+                    print(f"    Winner: {t.winner.name}")
+            ```
+        """
+        response = self._http._request("GET", f"/tournament/{self._tournament_id}/related")
+        return RelatedTournamentsResponse.model_validate(response)
+
 
 class TournamentsClient:
     """Client for tournaments collection-level operations.
@@ -251,3 +282,40 @@ class TournamentsClient:
 
         response = self._http._request("GET", "/tournament/search", params=params)
         return TournamentSearchResponse.model_validate(response)
+
+    def list_formats(self) -> TournamentFormatsListResponse:
+        """Get list of all available tournament format types.
+
+        Returns a comprehensive list of format types used for tournament qualifying
+        and finals rounds. This reference data is useful for understanding format
+        options when creating or searching for tournaments.
+
+        Returns:
+            TournamentFormatsListResponse with qualifying and finals format lists.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get all tournament formats
+            formats = client.tournaments.list_formats()
+
+            print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
+            for fmt in formats.qualifying_formats:
+                print(f"  {fmt.format_id}: {fmt.name}")
+
+            print(f"\\nFinals formats ({len(formats.finals_formats)}):")
+            for fmt in formats.finals_formats:
+                print(f"  {fmt.format_id}: {fmt.name}")
+
+            # Find a specific format
+            swiss = next(
+                f for f in formats.qualifying_formats
+                if "swiss" in f.name.lower()
+            )
+            print(f"\\nSwiss format ID: {swiss.format_id}")
+            ```
+        """
+        response = self._http._request("GET", "/tournament/formats")
+        return TournamentFormatsListResponse.model_validate(response)

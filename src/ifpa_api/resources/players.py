@@ -87,28 +87,58 @@ class PlayerHandle:
         response = self._http._request("GET", f"/player/{self._player_id}/pvp")
         return PvpAllCompetitors.model_validate(response)
 
-    def pvp(self, other_player_id: int | str) -> PvpComparison:
-        """Get head-to-head comparison with another player.
+    def pvp(self, opponent_id: int | str) -> PvpComparison:
+        """Get head-to-head comparison between this player and another player.
+
+        Returns detailed head-to-head statistics including wins, losses, ties, and
+        a list of all tournaments where these players have competed against each other.
 
         Args:
-            other_player_id: The ID of the player to compare against
+            opponent_id: ID of the opponent player to compare against.
 
         Returns:
-            Head-to-head comparison data
+            PvpComparison with head-to-head statistics and tournament history.
 
         Raises:
-            IfpaApiError: If the API request fails
+            PlayersNeverMetError: If the two players have never competed in the same tournament.
+                Note: This exception is raised by the client to provide a clearer error message
+                when the IFPA API returns a 404 indicating no head-to-head data exists.
+            IfpaApiError: If the API request fails for other reasons.
 
         Example:
             ```python
-            comparison = client.player(12345).pvp(67890)
-            print(f"Wins: {comparison.player1_wins}")
-            print(f"Losses: {comparison.player2_wins}")
-            print(f"Ties: {comparison.ties}")
+            from ifpa_api.exceptions import PlayersNeverMetError
+
+            try:
+                # Compare two players
+                pvp = client.player(12345).pvp(67890)
+                print(f"Player 1 wins: {pvp.player1_wins}")
+                print(f"Player 2 wins: {pvp.player2_wins}")
+                print(f"Total meetings: {pvp.total_meetings}")
+
+                # List tournaments where they met
+                for tourney in pvp.tournaments:
+                    print(f"  {tourney.event_name}: Winner was player {tourney.winner_player_id}")
+            except PlayersNeverMetError:
+                print("These players have never competed together")
             ```
         """
-        response = self._http._request("GET", f"/player/{self._player_id}/pvp/{other_player_id}")
-        return PvpComparison.model_validate(response)
+        from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
+
+        try:
+            response = self._http._request("GET", f"/player/{self._player_id}/pvp/{opponent_id}")
+
+            # Check for error response (API returns HTTP 200 with error payload)
+            if isinstance(response, dict) and response.get("code") == "404":
+                raise PlayersNeverMetError(self._player_id, opponent_id)
+
+            return PvpComparison.model_validate(response)
+        except IfpaApiError as e:
+            # Check if this is a 404 indicating players never met
+            if e.status_code == 404:
+                raise PlayersNeverMetError(self._player_id, opponent_id) from e
+            # Re-raise for other API errors
+            raise
 
     def results(
         self,

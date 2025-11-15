@@ -10,7 +10,9 @@ from ifpa_api.client import IfpaClient
 from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
+    CustomRankingListResponse,
     CustomRankingsResponse,
+    RankingsCountryListResponse,
     RankingsResponse,
 )
 
@@ -485,3 +487,75 @@ class TestRankingsClientFieldMappings:
         # Should be accessible via 'rankings'
         assert len(rankings.rankings) == 1
         assert rankings.rankings[0].country_code == "US"
+
+
+class TestRankingsClientDiscoveryMethods:
+    """Test cases for discovery methods (country_list, custom_list)."""
+
+    def test_country_list(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test country_list() method returns list of countries."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/country_list",
+            json={
+                "count": 3,
+                "country": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": 5000,
+                    },
+                    {
+                        "country_name": "Canada",
+                        "country_code": "CA",
+                        "player_count": 800,
+                    },
+                    {
+                        "country_name": "United Kingdom",
+                        "country_code": "GB",
+                        "player_count": 600,
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.rankings.country_list()
+
+        assert isinstance(result, RankingsCountryListResponse)
+        assert result.count == 3
+        assert len(result.country) == 3
+        assert result.country[0].country_name == "United States"
+        assert result.country[0].country_code == "US"
+        assert result.country[0].player_count == 5000
+
+    def test_custom_list(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test custom_list() method returns list of custom rankings."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/custom/list",
+            json={
+                "total_count": 2,
+                "custom_view": [
+                    {
+                        "view_id": 100,
+                        "title": "Retro Rankings",
+                        "description": "Rankings for retro tournaments",
+                    },
+                    {
+                        "view_id": 101,
+                        "title": "Regional Circuit",
+                        "description": None,
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.rankings.custom_list()
+
+        assert isinstance(result, CustomRankingListResponse)
+        assert result.total_count == 2
+        assert len(result.custom_view) == 2
+        assert result.custom_view[0].view_id == 100
+        assert result.custom_view[0].title == "Retro Rankings"
+        assert result.custom_view[0].description == "Rankings for retro tournaments"
+        assert result.custom_view[1].description is None

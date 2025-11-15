@@ -104,3 +104,49 @@ class IfpaClientValidationError(IfpaError):
             f"IfpaClientValidationError(message={self.message!r}, "
             f"validation_errors={self.validation_errors!r})"
         )
+
+
+class PlayersNeverMetError(IfpaError):
+    """Raised when requesting PVP data for players who have never competed together.
+
+    This exception is raised by the client when the IFPA API returns a 404 error
+    indicating that the two players have never faced each other in any tournament.
+    This provides a clearer error message than a generic 404 response.
+
+    Attributes:
+        player_id: The first player's ID
+        opponent_id: The second player's ID
+        message: Error message explaining that the players have never met
+
+    Example:
+        ```python
+        from ifpa_api import IfpaClient
+        from ifpa_api.exceptions import PlayersNeverMetError
+
+        client = IfpaClient(api_key="your-key")
+
+        try:
+            pvp = client.player(12345).pvp(67890)
+        except PlayersNeverMetError as e:
+            print(f"Players {e.player_id} and {e.opponent_id} have never competed together")
+        ```
+    """
+
+    def __init__(
+        self, player_id: int | str, opponent_id: int | str, message: str | None = None
+    ) -> None:
+        """Initialize the PlayersNeverMetError.
+
+        Args:
+            player_id: The first player's ID
+            opponent_id: The second player's ID
+            message: Optional custom message (default will be generated)
+        """
+        self.player_id = player_id
+        self.opponent_id = opponent_id
+        if message is None:
+            message = (
+                f"Players {player_id} and {opponent_id} have never competed in the "
+                "same tournament. The IFPA API returns 404 when no head-to-head data exists."
+            )
+        super().__init__(message)

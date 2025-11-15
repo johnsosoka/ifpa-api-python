@@ -153,3 +153,55 @@ class CustomRankingsResponse(IfpaBaseModel):
     rankings: list[CustomRankingEntry] = Field(default_factory=list, alias="custom_view")
     ranking_name: str | None = Field(default=None, alias="title")
     description: str | None = None
+
+
+class CountryListEntry(IfpaBaseModel):
+    """A country with player count for rankings.
+
+    Attributes:
+        country_name: Full name of the country
+        country_code: ISO country code
+        player_count: Number of ranked players in this country
+    """
+
+    country_name: str
+    country_code: str
+    player_count: int
+
+
+class RankingsCountryListResponse(IfpaBaseModel):
+    """Response from GET /rankings/country_list endpoint.
+
+    Attributes:
+        count: Total number of countries returned
+        country: List of countries with player counts
+    """
+
+    count: int | None = None
+    country: list[CountryListEntry] = Field(default_factory=list)
+
+
+class CustomRankingInfo(IfpaBaseModel):
+    """Information about a custom ranking system.
+
+    Attributes:
+        view_id: Unique identifier for this custom ranking system
+        title: Display title of the custom ranking
+        description: Description of what this ranking measures (may be None)
+    """
+
+    view_id: int
+    title: str
+    description: str | None = None
+
+
+class CustomRankingListResponse(IfpaBaseModel):
+    """Response from GET /rankings/custom/list endpoint.
+
+    Attributes:
+        total_count: Total number of custom ranking systems
+        custom_view: List of available custom ranking systems
+    """
+
+    total_count: int | None = None
+    custom_view: list[CustomRankingInfo] = Field(default_factory=list)
