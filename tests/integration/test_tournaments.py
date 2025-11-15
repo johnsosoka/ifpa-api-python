@@ -72,18 +72,11 @@ class TestTournamentsIntegration:
         assert isinstance(result, TournamentSearchResponse)
         assert isinstance(result.tournaments, list)
 
-    def test_tournament_details(self, api_key: str) -> None:
+    def test_tournament_details(self, api_key: str, tournament_id: int) -> None:
         """Test getting tournament details for a specific tournament."""
         client = IfpaClient(api_key=api_key)
 
-        # First search for a tournament to get a valid ID
-        search_results = client.tournaments.search(count=1)
-        if not search_results.tournaments:
-            pytest.skip("No tournaments found to test details")
-
-        tournament_id = search_results.tournaments[0].tournament_id
-
-        # Get full tournament details
+        # Get full tournament details using known stable tournament ID
         tournament = client.tournament(tournament_id).get()
 
         assert isinstance(tournament, Tournament)
