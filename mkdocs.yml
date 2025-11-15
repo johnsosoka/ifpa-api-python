@@ -1,0 +1,109 @@
+site_name: IFPA API Documentation
+site_description: Typed Python client for the IFPA (International Flipper Pinball Association) API
+site_author: John Sosoka
+site_url: https://johnsosoka.github.io/ifpa-api-python/
+
+repo_name: johnsosoka/ifpa-api-python
+repo_url: https://github.com/johnsosoka/ifpa-api-python
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Authentication: getting-started/authentication.md
+      - Configuration: getting-started/configuration.md
+  - Usage Guide:
+      - Directors: usage/directors.md
+      - Players: usage/players.md
+      - Rankings: usage/rankings.md
+      - Tournaments: usage/tournaments.md
+      - Series: usage/series.md
+      - Error Handling: usage/error-handling.md
+  - API Reference:
+      - Overview: api-reference/overview.md
+      - Client: api-reference/client.md
+      - Models: api-reference/models.md
+      - Exceptions: api-reference/exceptions.md
+  - Development:
+      - Contributing: contributing.md
+      - Testing: development/testing.md
+      - Code Style: development/code-style.md
+  - Changelog: changelog.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/johnsosoka/ifpa-api-python
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ifpa-api/
+  version:
+    provider: mike
+
+extra_css:
+  - stylesheets/extra.css
+
+copyright: Copyright &copy; 2025 Commerce Architects

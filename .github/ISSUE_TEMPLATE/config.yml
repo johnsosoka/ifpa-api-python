@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/jscom/ifpa-api/discussions
+    about: Ask questions or discuss ideas with the community
+  - name: IFPA API Documentation
+    url: https://api.ifpapinball.com/docs
+    about: Official IFPA API documentation and reference
+  - name: Security Vulnerability
+    url: https://github.com/jscom/ifpa-api/security/advisories/new
+    about: Report a security vulnerability privately

@@ -1,0 +1,96 @@
+[tool.poetry]
+name = "ifpa-api"
+version = "0.2.0"
+description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
+authors = ["John Sosoka <im@johnsosoka.com>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/johnsosoka/ifpa-api-python"
+repository = "https://github.com/johnsosoka/ifpa-api-python"
+keywords = ["ifpa", "pinball", "api", "client", "sdk"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [{include = "ifpa_api", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+pydantic = "^2.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^4.1.0"
+requests-mock = "^1.11.0"
+ruff = "^0.3.0"
+black = "^24.0.0"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+mkdocs = "^1.5.0"
+mkdocs-material = "^9.5.0"
+datamodel-code-generator = "^0.25.0"
+types-requests = "^2.31.0"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^4.1.0"
+requests-mock = "^1.11.0"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "W", "B", "C4", "PIE", "SIM", "RET"]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["ifpa_api"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "integration: marks tests as integration tests (deselect with '-m \"not integration\"')",
+]
+addopts = "--cov=ifpa_api --cov-report=term-missing --cov-report=xml"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

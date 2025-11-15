@@ -1,0 +1,51 @@
+/* Custom styles for IFPA SDK documentation */
+
+/* Improve code block styling */
+.highlight {
+    border-radius: 4px;
+}
+
+/* Admonition styling */
+.admonition {
+    border-left: 4px solid;
+    border-radius: 4px;
+}
+
+/* Table improvements */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+table th {
+    background-color: var(--md-primary-fg-color);
+    color: var(--md-primary-bg-color);
+    font-weight: 600;
+}
+
+/* API reference improvements */
+.api-signature {
+    background-color: var(--md-code-bg-color);
+    padding: 1em;
+    border-radius: 4px;
+    font-family: var(--md-code-font-family);
+    margin: 1em 0;
+}
+
+/* Improve inline code */
+code {
+    background-color: var(--md-code-bg-color);
+    padding: 0.1em 0.3em;
+    border-radius: 2px;
+}
+
+/* Navigation improvements */
+.md-nav__title {
+    font-weight: 600;
+}
+
+/* Footer styling */
+.md-footer-meta {
+    background-color: var(--md-footer-bg-color);
+}

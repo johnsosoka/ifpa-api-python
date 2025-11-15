@@ -1,0 +1,208 @@
+name: Security Scanning
+
+on:
+  # Run weekly on Monday at 9:00 UTC
+  schedule:
+    - cron: "0 9 * * 1"
+
+  # Run on pull requests that modify dependencies
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "poetry.lock"
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same workflow and branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      issues: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Export requirements for pip-audit
+        run: poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+      - name: Run pip-audit on dependencies
+        uses: pypa/gh-action-pip-audit@v1.0.8
+        with:
+          inputs: requirements.txt
+          vulnerability-service: pypi
+          # Don't fail CI on vulnerabilities, create issues instead
+          require-hashes: false
+
+      - name: Run pip-audit and save output
+        id: pip-audit-report
+        continue-on-error: true
+        run: |
+          pip install pip-audit
+          pip-audit --requirement requirements.txt --format json > audit-report.json || true
+          pip-audit --requirement requirements.txt --format markdown > audit-report.md || true
+
+      - name: Upload audit report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: |
+            audit-report.json
+            audit-report.md
+          retention-days: 90
+
+      - name: Check for vulnerabilities
+        id: check-vulns
+        run: |
+          if [ -f audit-report.json ]; then
+            VULN_COUNT=$(python -c "import sys, json; data=json.load(open('audit-report.json')); print(len(data.get('vulnerabilities', [])))")
+            echo "vuln-count=${VULN_COUNT}" >> "$GITHUB_OUTPUT"
+
+            if [ "$VULN_COUNT" -gt 0 ]; then
+              echo "Found ${VULN_COUNT} vulnerabilities"
+              exit 1
+            else
+              echo "No vulnerabilities found"
+            fi
+          fi
+
+      - name: Create issue for vulnerabilities
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('audit-report.md', 'utf8');
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Security Alert: Vulnerabilities Detected in Dependencies',
+              body: `## Security Scan Results\n\nAutomated security scan detected vulnerabilities in project dependencies.\n\n### Audit Report\n\n${report}\n\n### Action Required\n\nPlease review the vulnerabilities and update affected dependencies.\n\n---\n*This issue was automatically created by the security workflow.*`,
+              labels: ['security', 'dependencies']
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+
+  code-security:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit security linter
+        continue-on-error: true
+        run: |
+          bandit -r src/ -f json -o bandit-report.json
+          bandit -r src/ -f txt -o bandit-report.txt || true
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: |
+            bandit-report.json
+            bandit-report.txt
+          retention-days: 90
+
+      - name: Display Bandit summary
+        if: always()
+        run: |
+          if [ -f bandit-report.txt ]; then
+            {
+              echo "### Bandit Security Report"
+              echo "\`\`\`"
+              cat bandit-report.txt
+              echo "\`\`\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SUMMARY: true
+
+      - name: Display results
+        if: always()
+        run: |
+          echo "Secret scanning completed"
+          echo "Check the Gitleaks action output for any detected secrets"
+
+  summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-audit, code-security, secret-scanning]
+    if: always()
+    steps:
+      - name: Generate security summary
+        env:
+          DEP_RESULT: ${{ needs.dependency-audit.result }}
+          CODE_RESULT: ${{ needs.code-security.result }}
+          SECRET_RESULT: ${{ needs.secret-scanning.result }}
+        run: |
+          {
+            echo "## Security Scan Summary"
+            echo ""
+            echo "Security scanning completed for IFPA SDK."
+            echo ""
+            echo "### Scan Results"
+            echo "- **Dependency Audit**: ${DEP_RESULT}"
+            echo "- **Code Security**: ${CODE_RESULT}"
+            echo "- **Secret Scanning**: ${SECRET_RESULT}"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${DEP_RESULT}" == "success" ] && [ "${CODE_RESULT}" == "success" ] && [ "${SECRET_RESULT}" == "success" ]; then
+            echo "All security checks passed" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Some security checks reported issues. Please review the artifacts and logs." >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -1,0 +1,282 @@
+name: Publish to PyPI
+
+# This workflow publishes the package to PyPI when a version tag is pushed.
+# It includes a MANUAL APPROVAL GATE before publishing to production PyPI.
+#
+# Workflow Steps:
+# 1. Validate version tag matches pyproject.toml
+# 2. Run full test suite (linting, type checking, unit tests, integration tests)
+# 3. Build package and verify with twine
+# 4. Publish to TestPyPI and verify installation
+# 5. PAUSE for manual approval (requires environment configuration)
+# 6. Publish to production PyPI (only after approval)
+# 7. Create GitHub release with changelog
+#
+# See "publish-pypi" job below for manual approval gate configuration instructions.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  validate-version:
+    name: Validate Version Tag
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      tag-version: ${{ steps.get-version.outputs.tag-version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag and pyproject.toml
+        id: get-version
+        run: |
+          # Get version from git tag (remove 'v' prefix)
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "tag-version=${TAG_VERSION}" >> "$GITHUB_OUTPUT"
+
+          # Get version from pyproject.toml
+          PROJECT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=${PROJECT_VERSION}" >> "$GITHUB_OUTPUT"
+
+          echo "Tag version: ${TAG_VERSION}"
+          echo "Project version: ${PROJECT_VERSION}"
+
+          # Validate versions match
+          if [ "${TAG_VERSION}" != "${PROJECT_VERSION}" ]; then
+            echo "ERROR: Tag version (${TAG_VERSION}) does not match pyproject.toml version (${PROJECT_VERSION})"
+            exit 1
+          fi
+
+  test:
+    name: Run Full Test Suite
+    runs-on: ubuntu-latest
+    needs: validate-version
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Run linting
+        run: |
+          poetry run ruff check src tests
+          poetry run black --check src tests
+
+      - name: Run type checking
+        run: poetry run mypy src
+
+      - name: Run unit tests
+        run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=term-missing
+
+      - name: Run integration tests (if API key available)
+        if: ${{ env.IFPA_API_KEY != '' }}
+        env:
+          IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
+        run: poetry run pytest -v -m "integration"
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.7.1
+
+      - name: Build package
+        run: poetry build
+
+      - name: Verify package contents
+        run: |
+          poetry run pip install twine
+          poetry run twine check dist/*
+
+          # List package contents
+          echo "Built packages:"
+          ls -lh dist/
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+          retention-days: 30
+
+  publish-test-pypi:
+    name: Publish to TestPyPI
+    runs-on: ubuntu-latest
+    needs: [validate-version, build]
+    environment:
+      name: pypi-test
+      url: https://test.pypi.org/project/ifpa-api/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+          verbose: true
+
+      - name: Wait for package availability on TestPyPI
+        run: |
+          echo "Waiting 60 seconds for package to be available on TestPyPI..."
+          sleep 60
+
+      - name: Test installation from TestPyPI
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: |
+          python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "ifpa-api==${VERSION}"
+          python -c "import ifpa_api; print(f'Successfully imported ifpa_api version {ifpa_api.__version__}')"
+
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [validate-version, publish-test-pypi]
+    # MANUAL APPROVAL GATE: This job uses the 'pypi-production' environment
+    # which requires manual approval before publishing to production PyPI.
+    #
+    # To configure the approval gate in GitHub:
+    # 1. Go to: Settings → Environments → New environment
+    # 2. Create environment named: "pypi-production"
+    # 3. Enable "Required reviewers" and add repo maintainers (e.g., John Sosoka)
+    # 4. Optionally set "Wait timer" (e.g., 0 minutes for immediate approval prompt)
+    # 5. Save protection rules
+    #
+    # Approval Flow:
+    # - When a version tag is pushed (e.g., v0.1.0), the workflow runs automatically
+    # - After tests pass and TestPyPI publish succeeds, this job PAUSES
+    # - Required reviewers receive a notification to review the deployment
+    # - Reviewers can inspect the build artifacts and TestPyPI installation
+    # - Once approved, the workflow resumes and publishes to production PyPI
+    # - If rejected, the workflow stops and PyPI is not updated
+    #
+    # Authentication:
+    # This workflow uses OpenID Connect (OIDC) Trusted Publishers for secure authentication.
+    # Configure Trusted Publishers on PyPI (no API tokens needed):
+    # - PyPI: https://pypi.org/manage/account/publishing/
+    # - TestPyPI: https://test.pypi.org/manage/account/publishing/
+    environment:
+      name: pypi-production
+      url: https://pypi.org/project/ifpa-api/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate-version, build, publish-pypi]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-packages
+          path: dist/
+
+      - name: Generate changelog
+        id: changelog
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 2 | tail -n 1)
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+
+          echo "Previous tag: ${PREVIOUS_TAG}"
+          echo "Current tag: ${CURRENT_TAG}"
+
+          # Generate changelog from commit messages
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log "${PREVIOUS_TAG}..${CURRENT_TAG}" --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log "${CURRENT_TAG}" --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Save to file for multiline handling
+          {
+            echo "## What's Changed"
+            echo ""
+            echo "${CHANGELOG}"
+            echo ""
+            echo "## Installation"
+            echo ""
+            echo "\`\`\`bash"
+            echo "pip install ifpa-api==${VERSION}"
+            echo "\`\`\`"
+            echo ""
+            echo "## Links"
+            echo ""
+            echo "- [PyPI Package](https://pypi.org/project/ifpa-api/${VERSION}/)"
+            echo "- [Documentation](https://github.com/johnsosoka/ifpa-api-python#readme)"
+            echo ""
+            echo "**Full Changelog**: https://github.com/johnsosoka/ifpa-api-python/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
+          } > changelog.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body_path: changelog.md
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+          generate_release_notes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Announce release
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          echo "Successfully published ifpa-api v${VERSION} to PyPI"
+          echo "PyPI: https://pypi.org/project/ifpa-api/${VERSION}/"
+          echo "GitHub Release: ${REPO_URL}/releases/tag/${TAG_NAME}"
