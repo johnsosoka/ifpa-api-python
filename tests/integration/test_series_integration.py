@@ -51,8 +51,7 @@ class TestSeriesHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         series_code = get_test_series_code(client)
-        if series_code is None:
-            pytest.skip("Could not find test series")
+        assert series_code is not None, "Could not find test series"
 
         standings = client.series_handle(series_code).standings(count=10)
 
@@ -65,8 +64,7 @@ class TestSeriesHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         series_code = get_test_series_code(client)
-        if series_code is None:
-            pytest.skip("Could not find test series")
+        assert series_code is not None, "Could not find test series"
 
         overview = client.series_handle(series_code).overview()
 

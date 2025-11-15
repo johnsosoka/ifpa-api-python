@@ -23,7 +23,7 @@ class TestPlayersClientIntegration:
         result = client.players.search(count=10)
 
         assert isinstance(result, PlayerSearchResponse)
-        assert result.players is not None
+        assert result.search is not None
 
     def test_search_players_with_filters(self, api_key: str) -> None:
         """Test searching players with location filter."""
@@ -33,10 +33,10 @@ class TestPlayersClientIntegration:
         result = client.players.search(country="US", count=5)
 
         assert isinstance(result, PlayerSearchResponse)
-        assert result.players is not None
+        assert result.search is not None
         # If results exist, verify they match filter
-        if len(result.players) > 0:
-            for player in result.players:
+        if len(result.search) > 0:
+            for player in result.search:
                 if player.country_code:
                     assert player.country_code == "US"
 
@@ -51,8 +51,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         player_id = get_test_player_id(client)
-        if player_id is None:
-            pytest.skip("Could not find test player")
+        assert player_id is not None, "Could not find test player"
 
         player = client.player(player_id).get()
 
@@ -67,8 +66,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         player_id = get_test_player_id(client)
-        if player_id is None:
-            pytest.skip("Could not find test player")
+        assert player_id is not None, "Could not find test player"
 
         rankings = client.player(player_id).rankings()
 
@@ -83,8 +81,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         player_id = get_test_player_id(client)
-        if player_id is None:
-            pytest.skip("Could not find test player")
+        assert player_id is not None, "Could not find test player"
 
         results = client.player(player_id).results(count=5)
 
@@ -97,8 +94,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         player_id = get_test_player_id(client)
-        if player_id is None:
-            pytest.skip("Could not find test player")
+        assert player_id is not None, "Could not find test player"
 
         history = client.player(player_id).history()
 

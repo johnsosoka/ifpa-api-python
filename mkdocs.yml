@@ -52,7 +52,6 @@ nav:
       - Rankings: usage/rankings.md
       - Tournaments: usage/tournaments.md
       - Series: usage/series.md
-      - Statistics: usage/stats.md
       - Error Handling: usage/error-handling.md
   - API Reference:
       - Overview: api-reference/overview.md

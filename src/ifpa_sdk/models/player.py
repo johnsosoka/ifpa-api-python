@@ -76,32 +76,32 @@ class PlayerSearchResult(IfpaBaseModel):
         first_name: Player's first name
         last_name: Player's last name
         city: City location
-        stateprov: State or province
+        state: State or province
         country_code: ISO country code
-        wppr_rank: Current WPPR rank
-        wppr_value: Current WPPR value
+        country_name: Full country name
+        wppr_rank: Current WPPR rank (as string)
     """
 
     player_id: int
     first_name: str
     last_name: str
     city: str | None = None
-    stateprov: str | None = None
+    state: str | None = None
     country_code: str | None = None
-    wppr_rank: int | None = None
-    wppr_value: float | None = None
+    country_name: str | None = None
+    wppr_rank: str | None = None
 
 
 class PlayerSearchResponse(IfpaBaseModel):
     """Response for player search query.
 
     Attributes:
-        players: List of matching players
-        total_results: Total number of results found
+        query: The search query string
+        search: List of matching players
     """
 
-    players: list[PlayerSearchResult] = Field(default_factory=list)
-    total_results: int | None = None
+    query: str | None = None
+    search: list[PlayerSearchResult] = Field(default_factory=list)
 
 
 class TournamentResult(IfpaBaseModel):

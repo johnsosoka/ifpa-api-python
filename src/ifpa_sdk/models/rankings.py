@@ -3,7 +3,7 @@
 Models for various IFPA ranking systems including WPPR, Women, Youth, Pro, etc.
 """
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from ifpa_sdk.models.common import IfpaBaseModel
 
@@ -47,7 +47,9 @@ class RankingEntry(IfpaBaseModel):
     country_name: str | None = None
     city: str | None = None
     stateprov: str | None = None
-    rating: float | None = Field(default=None, alias="rating_value")
+    rating: float | None = Field(
+        default=None, validation_alias=AliasChoices("rating_value", "rating")
+    )
     active_events: int | None = Field(default=None, alias="event_count")
     efficiency_value: float | None = Field(default=None, alias="efficiency_percent")
     best_finish: str | None = None
@@ -59,7 +61,9 @@ class RankingEntry(IfpaBaseModel):
     rating_change: float | None = None
     rank_change: int | None = None
     age: int | None = None
-    profile_photo: str | None = None
+    profile_photo: str | None = Field(
+        default=None, validation_alias=AliasChoices("profile_photo_url", "profile_photo")
+    )
     last_month_rank: int | None = None
     rating_deviation: int | None = None
 
@@ -143,10 +147,10 @@ class CustomRankingsResponse(IfpaBaseModel):
 
     Attributes:
         rankings: List of custom ranking entries
-        ranking_name: Name of the custom ranking
+        ranking_name: Name of the custom ranking (mapped from title field)
         description: Description of what this ranking measures
     """
 
-    rankings: list[CustomRankingEntry] = Field(default_factory=list)
-    ranking_name: str | None = None
+    rankings: list[CustomRankingEntry] = Field(default_factory=list, alias="custom_view")
+    ranking_name: str | None = Field(default=None, alias="title")
     description: str | None = None

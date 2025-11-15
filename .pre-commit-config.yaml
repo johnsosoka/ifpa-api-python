@@ -5,6 +5,7 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        exclude: mkdocs.yml
       - id: check-toml
       - id: check-added-large-files
       - id: check-merge-conflict
@@ -14,7 +15,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        language_version: python3.11
+        language_version: python3.13
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.3.7

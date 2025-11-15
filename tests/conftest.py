@@ -1,17 +1,19 @@
 """Shared pytest fixtures for all tests."""
 
 import os
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 
 
-def pytest_configure(config):
+def pytest_configure(config: Any) -> None:
     """Register custom markers for pytest."""
     config.addinivalue_line("markers", "integration: integration tests requiring API access")
 
 
-@pytest.fixture
-def api_key() -> str:
+@pytest.fixture  # type: ignore[misc]
+def api_key() -> Generator[str, None, None]:
     """Get API key from environment or credentials file.
 
     Resolution order:
@@ -19,7 +21,7 @@ def api_key() -> str:
     2. credentials file in current directory
     3. Skip test if neither is available
 
-    Returns:
+    Yields:
         The API key string
 
     Raises:
@@ -37,4 +39,5 @@ def api_key() -> str:
             pass
     if not key:
         pytest.skip("IFPA_API_KEY not found")
-    return key
+    assert key is not None
+    yield key

@@ -98,15 +98,24 @@ class SeriesPlayerEvent(IfpaBaseModel):
     Attributes:
         tournament_id: Unique tournament identifier
         tournament_name: Tournament name
-        event_date: Date of the event
-        position: Player's finishing position
-        points_earned: Points earned for this event
-        player_count: Number of participants
-        counting: Whether this event counts toward standings
+        event_name: Specific event name within tournament
+        event_end_date: End date of the event
+        wppr_points: WPPR points earned
+        region_event_rank: Player's rank in this region event
+        event_date: Date of the event (legacy field)
+        position: Player's finishing position (legacy field)
+        points_earned: Points earned for this event (legacy field)
+        player_count: Number of participants (legacy field)
+        counting: Whether this event counts toward standings (legacy field)
     """
 
     tournament_id: int
     tournament_name: str
+    event_name: str | None = None
+    event_end_date: str | None = None
+    wppr_points: float | None = None
+    region_event_rank: int | None = None
+    # Legacy fields for backwards compatibility
     event_date: str | None = None
     position: int | None = None
     points_earned: float | None = None
@@ -119,17 +128,24 @@ class SeriesPlayerCard(IfpaBaseModel):
 
     Attributes:
         series_code: The series code
+        region_code: Region code for this card
+        year: Year for this card
         player_id: The player's ID
         player_name: The player's name
-        current_position: Current position in standings
-        total_points: Total points earned
-        events: List of event results
-        statistics: Additional player statistics for this series
+        player_card: List of event results (mapped from 'player_card' API field)
+        current_position: Current position in standings (legacy field)
+        total_points: Total points earned (legacy field)
+        events: List of event results (legacy field)
+        statistics: Additional player statistics for this series (legacy field)
     """
 
-    series_code: str
+    series_code: str | None = None
+    region_code: str | None = None
+    year: int | None = None
     player_id: int
     player_name: str | None = None
+    player_card: list[SeriesPlayerEvent] = Field(default_factory=list)
+    # Legacy fields for backwards compatibility
     current_position: int | None = None
     total_points: float | None = None
     events: list[SeriesPlayerEvent] = Field(default_factory=list)
@@ -262,3 +278,33 @@ class SeriesScheduleResponse(IfpaBaseModel):
 
     series_code: str | None = None
     events: list[SeriesScheduleEvent] = Field(default_factory=list)
+
+
+class RegionRepresentative(IfpaBaseModel):
+    """Region representative information.
+
+    Attributes:
+        player_id: Representative's player ID
+        name: Representative's name
+        region_code: Region code they represent
+        region_name: Full region name
+        profile_photo: URL to representative's profile photo
+    """
+
+    player_id: int
+    name: str
+    region_code: str
+    region_name: str
+    profile_photo: str | None = None
+
+
+class RegionRepsResponse(IfpaBaseModel):
+    """Response for series region representatives.
+
+    Attributes:
+        series_code: The series code
+        representative: List of region representatives
+    """
+
+    series_code: str | None = None
+    representative: list[RegionRepresentative] = Field(default_factory=list)

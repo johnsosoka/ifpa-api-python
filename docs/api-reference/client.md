@@ -75,15 +75,6 @@ Returns the series resource client.
 def series(self) -> SeriesClient
 ```
 
-#### `stats`
-
-Returns the statistics resource client.
-
-```python
-@property
-def stats(self) -> StatsClient
-```
-
 ### Methods
 
 #### `director(director_id)`

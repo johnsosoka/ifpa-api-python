@@ -1,11 +1,12 @@
 """Unit tests for the main IfpaClient."""
 
+from typing import Any
+
 from ifpa_sdk import IfpaClient
 from ifpa_sdk.resources.directors import DirectorHandle, DirectorsClient
 from ifpa_sdk.resources.players import PlayerHandle, PlayersClient
 from ifpa_sdk.resources.rankings import RankingsClient
 from ifpa_sdk.resources.series import SeriesClient, SeriesHandle
-from ifpa_sdk.resources.stats import StatsClient
 from ifpa_sdk.resources.tournaments import TournamentHandle, TournamentsClient
 
 
@@ -17,7 +18,7 @@ class TestIfpaClientInitialization:
         client = IfpaClient(api_key="test-key")
         assert client._config.api_key == "test-key"
 
-    def test_client_initialization_from_environment(self, monkeypatch) -> None:
+    def test_client_initialization_from_environment(self, monkeypatch: Any) -> None:
         """Test that client initializes from environment variable."""
         monkeypatch.setenv("IFPA_API_KEY", "env-key")
         client = IfpaClient()
@@ -77,12 +78,6 @@ class TestIfpaClientResourceProperties:
         client = IfpaClient(api_key="test-key")
         series = client.series
         assert isinstance(series, SeriesClient)
-
-    def test_stats_property_returns_stats_client(self) -> None:
-        """Test that stats property returns StatsClient."""
-        client = IfpaClient(api_key="test-key")
-        stats = client.stats
-        assert isinstance(stats, StatsClient)
 
     def test_resource_properties_are_cached(self) -> None:
         """Test that resource clients are cached after first access."""

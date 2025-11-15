@@ -12,7 +12,6 @@ from ifpa_sdk.resources.directors import DirectorHandle, DirectorsClient
 from ifpa_sdk.resources.players import PlayerHandle, PlayersClient
 from ifpa_sdk.resources.rankings import RankingsClient
 from ifpa_sdk.resources.series import SeriesClient, SeriesHandle
-from ifpa_sdk.resources.stats import StatsClient
 from ifpa_sdk.resources.tournaments import TournamentHandle, TournamentsClient
 
 
@@ -99,7 +98,6 @@ class IfpaClient:
         self._rankings_client: RankingsClient | None = None
         self._tournaments_client: TournamentsClient | None = None
         self._series_client: SeriesClient | None = None
-        self._stats_client: StatsClient | None = None
 
     @property
     def directors(self) -> DirectorsClient:
@@ -201,29 +199,6 @@ class IfpaClient:
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
-
-    @property
-    def stats(self) -> StatsClient:
-        """Access the statistics resource client.
-
-        Returns:
-            StatsClient instance for accessing statistical data
-
-        Example:
-            ```python
-            # Get global statistics
-            global_stats = client.stats.global_stats()
-
-            # Get top countries
-            top_countries = client.stats.top_countries(limit=10)
-
-            # Get machine popularity
-            machines = client.stats.machine_popularity(period="year")
-            ```
-        """
-        if self._stats_client is None:
-            self._stats_client = StatsClient(self._http, self._config.validate_requests)
-        return self._stats_client
 
     def director(self, director_id: int | str) -> DirectorHandle:
         """Get a handle for a specific tournament director.

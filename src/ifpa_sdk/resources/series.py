@@ -7,6 +7,7 @@ and statistics.
 from typing import TYPE_CHECKING
 
 from ifpa_sdk.models.series import (
+    RegionRepsResponse,
     SeriesListResponse,
     SeriesOverview,
     SeriesPlayerCard,
@@ -80,11 +81,18 @@ class SeriesHandle:
         )
         return SeriesStandingsResponse.model_validate(response)
 
-    def player_card(self, player_id: int | str) -> SeriesPlayerCard:
+    def player_card(
+        self,
+        player_id: int | str,
+        region_code: str,
+        year: int | None = None,
+    ) -> SeriesPlayerCard:
         """Get a player's card for this series.
 
         Args:
             player_id: The player's unique identifier
+            region_code: Region code (e.g., "OH", "IL")
+            year: Year to fetch card for (defaults to current year if not specified)
 
         Returns:
             Player's series card with event results and statistics
@@ -94,15 +102,23 @@ class SeriesHandle:
 
         Example:
             ```python
-            card = client.series("PAPA").player_card(12345)
+            # Get current year card for player in Ohio region
+            card = client.series_handle("PAPA").player_card(12345, "OH")
             print(f"Position: {card.current_position}")
             print(f"Points: {card.total_points}")
-            for event in card.events:
+
+            # Get card for specific year
+            card_2023 = client.series_handle("PAPA").player_card(12345, "OH", year=2023)
+            for event in card_2023.events:
                 print(f"{event.tournament_name}: {event.points_earned} pts")
             ```
         """
+        params: dict[str, str | int] = {"region_code": region_code}
+        if year is not None:
+            params["year"] = int(year)
+
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/player_card/{player_id}"
+            "GET", f"/series/{self._series_code}/player_card/{player_id}", params=params
         )
         return SeriesPlayerCard.model_validate(response)
 
@@ -201,6 +217,25 @@ class SeriesHandle:
         """
         response = self._http._request("GET", f"/series/{self._series_code}/schedule")
         return SeriesScheduleResponse.model_validate(response)
+
+    def region_reps(self) -> RegionRepsResponse:
+        """Get region representatives for this series.
+
+        Returns:
+            List of region representatives
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            reps = client.series_handle("PAPA").region_reps()
+            for rep in reps.representative:
+                print(f"{rep.region_name}: {rep.name} (Player #{rep.player_id})")
+            ```
+        """
+        response = self._http._request("GET", f"/series/{self._series_code}/region_reps")
+        return RegionRepsResponse.model_validate(response)
 
 
 class SeriesClient:

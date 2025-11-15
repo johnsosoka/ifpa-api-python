@@ -17,15 +17,13 @@ ifpa_sdk/
 │   ├── rankings.py   # Rankings models
 │   ├── tournaments.py # Tournament models
 │   ├── series.py     # Series models
-│   ├── stats.py      # Statistics models
 │   └── calendar.py   # Calendar models
 └── resources/        # Resource clients and handles
     ├── directors.py  # DirectorsClient, DirectorHandle
     ├── players.py    # PlayersClient, PlayerHandle
     ├── rankings.py   # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle
-    ├── series.py     # SeriesClient, SeriesHandle
-    └── stats.py      # StatsClient
+    └── series.py     # SeriesClient, SeriesHandle
 ```
 
 ## Public API
@@ -75,7 +73,6 @@ from ifpa_sdk import (
 | `RankingsClient` | Access ranking systems |
 | `TournamentsClient` | Search tournaments |
 | `SeriesClient` | List series |
-| `StatsClient` | Global statistics |
 
 ## Resource Handles
 

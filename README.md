@@ -12,7 +12,7 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 - **Fully Typed**: Complete type hints for IDE autocompletion and type checking
 - **Pydantic Models**: Automatic request/response validation with detailed error messages
 - **Resource-Oriented API**: Intuitive access patterns matching the IFPA API structure
-- **Comprehensive Coverage**: All 46 IFPA API v2.1 endpoints implemented
+- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints implemented
 - **Handle Pattern**: Fluent interface for resource-specific operations
 - **Pagination Support**: Built-in support for paginated endpoints
 - **Error Handling**: Clear exception hierarchy for different failure scenarios
@@ -307,32 +307,6 @@ for event in schedule.events:
     print(f"{event.event_date}: {event.event_name}")
 ```
 
-### Statistics
-
-Access global pinball statistics and trends:
-
-```python
-from ifpa_sdk import IfpaClient
-
-client = IfpaClient()
-
-# Get global statistics
-global_stats = client.stats.global_stats()
-print(f"Total Players: {global_stats.total_players}")
-print(f"Total Tournaments: {global_stats.total_tournaments}")
-print(f"Total Countries: {global_stats.total_countries}")
-
-# Get top countries
-top_countries = client.stats.top_countries(limit=10)
-for country in top_countries.countries:
-    print(f"{country.country_name}: {country.player_count} players")
-
-# Get machine popularity
-machines = client.stats.machine_popularity(period="year")
-for machine in machines.machines:
-    print(f"{machine.machine_name}: {machine.play_count} plays")
-```
-
 ## Configuration
 
 The `IfpaClient` constructor accepts several configuration options:
@@ -497,15 +471,16 @@ Key points:
 
 ## API Coverage
 
-The SDK implements all 46 endpoints from IFPA API v2.1:
+The SDK implements 36 endpoints from IFPA API v2.1:
 
 - **Directors**: 4 endpoints (search, details, tournaments)
 - **Players**: 7 endpoints (search, profile, rankings, results, PvP, history, cards)
 - **Rankings**: 9 endpoints (WPPR, women, youth, virtual, pro, country, age-based, custom, group)
 - **Tournaments**: 6 endpoints (search, details, results, formats, league, submissions)
 - **Series**: 8 endpoints (list, standings, player cards, overview, regions, rules, stats, schedule)
-- **Stats**: 10 endpoints (global stats, counts, trends, machine popularity)
 - **Reference**: 2 endpoints (countries, states)
+
+**Note**: Stats endpoints are not implemented in v0.1.0 as they return 404 from the live API. These will be added in a future release when the API endpoints become available.
 
 ## Resources
 

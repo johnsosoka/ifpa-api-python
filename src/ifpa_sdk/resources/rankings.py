@@ -84,6 +84,7 @@ class RankingsClient:
 
     def women(
         self,
+        tournament_type: str = "OPEN",
         start_pos: int | str | None = None,
         count: int | str | None = None,
         country: str | None = None,
@@ -91,6 +92,8 @@ class RankingsClient:
         """Get women's rankings.
 
         Args:
+            tournament_type: Tournament type filter - "OPEN" for all tournaments or
+                "WOMEN" for women-only tournaments
             start_pos: Starting position for pagination
             count: Number of results to return (max 250)
             country: Filter by country code
@@ -103,7 +106,11 @@ class RankingsClient:
 
         Example:
             ```python
-            rankings = client.rankings.women(start_pos=0, count=50)
+            # Get women's rankings from all tournaments
+            rankings = client.rankings.women(tournament_type="OPEN", start_pos=0, count=50)
+
+            # Get women's rankings from women-only tournaments
+            women_only = client.rankings.women(tournament_type="WOMEN", count=50)
             ```
         """
         params = {}
@@ -114,7 +121,9 @@ class RankingsClient:
         if country is not None:
             params["country"] = country
 
-        response = self._http._request("GET", "/rankings/women", params=params)
+        response = self._http._request(
+            "GET", f"/rankings/women/{tournament_type.lower()}", params=params
+        )
         return RankingsResponse.model_validate(response)
 
     def youth(
@@ -189,12 +198,15 @@ class RankingsClient:
 
     def pro(
         self,
+        ranking_system: str = "OPEN",
         start_pos: int | None = None,
         count: int | None = None,
     ) -> RankingsResponse:
         """Get professional circuit rankings.
 
         Args:
+            ranking_system: Ranking system filter - "OPEN" for open division or
+                "WOMEN" for women's division
             start_pos: Starting position for pagination
             count: Number of results to return (max 250)
 
@@ -206,7 +218,11 @@ class RankingsClient:
 
         Example:
             ```python
-            rankings = client.rankings.pro(start_pos=0, count=50)
+            # Get open division pro rankings
+            rankings = client.rankings.pro(ranking_system="OPEN", start_pos=0, count=50)
+
+            # Get women's division pro rankings
+            women_pro = client.rankings.pro(ranking_system="WOMEN", count=50)
             ```
         """
         params = {}
@@ -215,7 +231,9 @@ class RankingsClient:
         if count is not None:
             params["count"] = count
 
-        response = self._http._request("GET", "/rankings/pro", params=params)
+        response = self._http._request(
+            "GET", f"/rankings/pro/{ranking_system.lower()}", params=params
+        )
         return RankingsResponse.model_validate(response)
 
     def by_country(
@@ -251,39 +269,6 @@ class RankingsClient:
         response = self._http._request("GET", "/rankings/country", params=params)
         return CountryRankingsResponse.model_validate(response)
 
-    def age_based(
-        self,
-        age_group: str,
-        start_pos: int | None = None,
-        count: int | None = None,
-    ) -> RankingsResponse:
-        """Get age-based rankings.
-
-        Args:
-            age_group: Age group identifier (e.g., "u18", "u21", "50plus")
-            start_pos: Starting position for pagination
-            count: Number of results to return (max 250)
-
-        Returns:
-            List of ranked players in the specified age group
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            rankings = client.rankings.age_based("u18", start_pos=0, count=50)
-            ```
-        """
-        params = {}
-        if start_pos is not None:
-            params["start_pos"] = start_pos
-        if count is not None:
-            params["count"] = count
-
-        response = self._http._request("GET", f"/rankings/age_based/{age_group}", params=params)
-        return RankingsResponse.model_validate(response)
-
     def custom(
         self,
         ranking_id: str | int,
@@ -316,36 +301,3 @@ class RankingsClient:
 
         response = self._http._request("GET", f"/rankings/custom/{ranking_id}", params=params)
         return CustomRankingsResponse.model_validate(response)
-
-    def group(
-        self,
-        group_id: str | int,
-        start_pos: int | None = None,
-        count: int | None = None,
-    ) -> RankingsResponse:
-        """Get group rankings.
-
-        Args:
-            group_id: Group identifier
-            start_pos: Starting position for pagination
-            count: Number of results to return (max 250)
-
-        Returns:
-            List of players in the group ranking
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            rankings = client.rankings.group("northwest-league", start_pos=0, count=50)
-            ```
-        """
-        params = {}
-        if start_pos is not None:
-            params["start_pos"] = start_pos
-        if count is not None:
-            params["count"] = count
-
-        response = self._http._request("GET", f"/rankings/group/{group_id}", params=params)
-        return RankingsResponse.model_validate(response)

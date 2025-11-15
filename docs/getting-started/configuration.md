@@ -327,7 +327,7 @@ print(f"Using base URL: {client._config.base_url}")
 
 # Test connectivity
 try:
-    stats = client.stats.global_stats()
+    rankings = client.rankings.wppr(count=1)
     print("Connection successful")
 except Exception as e:
     print(f"Connection failed: {e}")

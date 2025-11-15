@@ -1,12 +1,14 @@
 """Fixtures for integration tests."""
 
+from collections.abc import Generator
+
 import pytest
 
 from ifpa_sdk import IfpaClient
 
 
-@pytest.fixture
-def client(api_key: str) -> IfpaClient:
+@pytest.fixture  # type: ignore[misc]
+def client(api_key: str) -> Generator[IfpaClient, None, None]:
     """Create a real IfpaClient for integration tests.
 
     This fixture requires IFPA_API_KEY to be set. If not available,
@@ -15,7 +17,7 @@ def client(api_key: str) -> IfpaClient:
     Args:
         api_key: The IFPA API key from the api_key fixture
 
-    Returns:
+    Yields:
         An initialized IfpaClient instance
 
     Example:
@@ -26,4 +28,8 @@ def client(api_key: str) -> IfpaClient:
             assert player is not None
         ```
     """
-    return IfpaClient(api_key=api_key)
+    client_instance = IfpaClient(api_key=api_key)
+    try:
+        yield client_instance
+    finally:
+        client_instance.close()

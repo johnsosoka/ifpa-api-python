@@ -1,5 +1,7 @@
 """Unit tests for the config module."""
 
+from typing import Any
+
 import pytest
 
 from ifpa_sdk.config import DEFAULT_BASE_URL, DEFAULT_TIMEOUT, Config
@@ -15,14 +17,14 @@ class TestConfigApiKeyResolution:
         config = Config(api_key=api_key)
         assert config.api_key == api_key
 
-    def test_api_key_from_environment_variable(self, monkeypatch) -> None:
+    def test_api_key_from_environment_variable(self, monkeypatch: Any) -> None:
         """Test that API key is read from environment variable."""
         api_key = "env-key-54321"
         monkeypatch.setenv("IFPA_API_KEY", api_key)
         config = Config()
         assert config.api_key == api_key
 
-    def test_constructor_api_key_takes_precedence(self, monkeypatch) -> None:
+    def test_constructor_api_key_takes_precedence(self, monkeypatch: Any) -> None:
         """Test that constructor API key takes precedence over environment."""
         constructor_key = "constructor-key"
         env_key = "env-key"
@@ -30,13 +32,13 @@ class TestConfigApiKeyResolution:
         config = Config(api_key=constructor_key)
         assert config.api_key == constructor_key
 
-    def test_missing_api_key_raises_error(self, monkeypatch) -> None:
+    def test_missing_api_key_raises_error(self, monkeypatch: Any) -> None:
         """Test that MissingApiKeyError is raised when no key is available."""
         monkeypatch.delenv("IFPA_API_KEY", raising=False)
         with pytest.raises(MissingApiKeyError):
             Config()
 
-    def test_missing_api_key_error_message(self, monkeypatch) -> None:
+    def test_missing_api_key_error_message(self, monkeypatch: Any) -> None:
         """Test that MissingApiKeyError has helpful message."""
         monkeypatch.delenv("IFPA_API_KEY", raising=False)
         with pytest.raises(MissingApiKeyError) as exc_info:
@@ -127,7 +129,7 @@ class TestConfigIntegration:
         assert config.timeout == 20.0
         assert config.validate_requests is False
 
-    def test_minimal_config_with_environment_key(self, monkeypatch) -> None:
+    def test_minimal_config_with_environment_key(self, monkeypatch: Any) -> None:
         """Test minimal config relying on environment variable."""
         monkeypatch.setenv("IFPA_API_KEY", "env-key")
         config = Config()

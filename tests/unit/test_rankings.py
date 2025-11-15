@@ -126,7 +126,7 @@ class TestRankingsClientSpecialSystems:
     def test_women_rankings(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting women's rankings."""
         mock_requests.get(
-            "https://api.ifpapinball.com/rankings/women",
+            "https://api.ifpapinball.com/rankings/women/open",
             json={
                 "rankings": [
                     {
@@ -148,11 +148,12 @@ class TestRankingsClientSpecialSystems:
         assert isinstance(rankings, RankingsResponse)
         assert len(rankings.rankings) == 1
         assert rankings.ranking_system == "Women"
+        assert "women/open" in mock_requests.last_request.path
 
     def test_women_rankings_with_filters(self, mock_requests: requests_mock.Mocker) -> None:
         """Test women's rankings with pagination and country filter."""
         mock_requests.get(
-            "https://api.ifpapinball.com/rankings/women",
+            "https://api.ifpapinball.com/rankings/women/women",
             json={
                 "rankings": [{"player_id": i, "current_rank": i} for i in range(1, 26)],
                 "total_results": 500,
@@ -160,9 +161,12 @@ class TestRankingsClientSpecialSystems:
         )
 
         client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.women(start_pos=0, count=25, country="US")
+        rankings = client.rankings.women(
+            tournament_type="WOMEN", start_pos=0, count=25, country="US"
+        )
 
         assert len(rankings.rankings) == 25
+        assert "women/women" in mock_requests.last_request.path
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=25" in query
@@ -217,7 +221,7 @@ class TestRankingsClientSpecialSystems:
     def test_pro_rankings(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting professional circuit rankings."""
         mock_requests.get(
-            "https://api.ifpapinball.com/rankings/pro",
+            "https://api.ifpapinball.com/rankings/pro/open",
             json={
                 "rankings": [
                     {
@@ -236,9 +240,34 @@ class TestRankingsClientSpecialSystems:
         rankings = client.rankings.pro(start_pos=0, count=50)
 
         assert len(rankings.rankings) == 1
+        assert "pro/open" in mock_requests.last_request.path
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=50" in query
+
+    def test_pro_rankings_women_division(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test getting professional circuit women's division rankings."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/pro/women",
+            json={
+                "rankings": [
+                    {
+                        "player_id": 4002,
+                        "current_rank": 1,
+                        "name": "Top Women Pro Player",
+                        "rating_value": 1100.0,
+                    }
+                ],
+                "total_results": 1,
+                "ranking_system": "Pro",
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        rankings = client.rankings.pro(ranking_system="WOMEN")
+
+        assert len(rankings.rankings) == 1
+        assert "pro/women" in mock_requests.last_request.path
 
 
 class TestRankingsClientCountryAndCustom:
@@ -309,35 +338,12 @@ class TestRankingsClientCountryAndCustom:
         assert "start_pos=0" in query
         assert "count=25" in query
 
-    def test_age_based_rankings(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test age-based rankings."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/rankings/age_based/u18",
-            json={
-                "rankings": [
-                    {
-                        "player_id": 5001,
-                        "current_rank": 1,
-                        "name": "Under 18 Player",
-                        "age": 17,
-                    }
-                ],
-                "total_results": 1,
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.age_based("u18")
-
-        assert len(rankings.rankings) == 1
-        assert "age_based/u18" in mock_requests.last_request.path
-
     def test_custom_rankings(self, mock_requests: requests_mock.Mocker) -> None:
         """Test custom ranking system."""
         mock_requests.get(
             "https://api.ifpapinball.com/rankings/custom/regional-2024",
             json={
-                "rankings": [
+                "custom_view": [
                     {
                         "rank": 1,
                         "player_id": 6001,
@@ -346,7 +352,7 @@ class TestRankingsClientCountryAndCustom:
                         "details": {"region": "Northwest", "tournaments": 10},
                     }
                 ],
-                "ranking_name": "Regional Rankings 2024",
+                "title": "Regional Rankings 2024",
                 "description": "Rankings for regional circuit 2024",
             },
         )
@@ -365,8 +371,8 @@ class TestRankingsClientCountryAndCustom:
         mock_requests.get(
             "https://api.ifpapinball.com/rankings/custom/123",
             json={
-                "rankings": [],
-                "ranking_name": "Custom Ranking 123",
+                "custom_view": [],
+                "title": "Custom Ranking 123",
             },
         )
 
@@ -375,29 +381,6 @@ class TestRankingsClientCountryAndCustom:
 
         assert isinstance(rankings, CustomRankingsResponse)
         assert "custom/123" in mock_requests.last_request.path
-
-    def test_group_rankings(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test group rankings."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/rankings/group/northwest-league",
-            json={
-                "rankings": [
-                    {
-                        "player_id": 7001,
-                        "current_rank": 1,
-                        "name": "Group Leader",
-                        "rating_value": 400.0,
-                    }
-                ],
-                "total_results": 1,
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        rankings = client.rankings.group("northwest-league")
-
-        assert len(rankings.rankings) == 1
-        assert "group/northwest-league" in mock_requests.last_request.path
 
 
 class TestRankingsClientErrors:

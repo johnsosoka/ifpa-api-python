@@ -1,7 +1,10 @@
 """Unit tests for the HTTP client module."""
 
+from typing import Any
+
 import pytest
 import requests
+import requests_mock
 
 from ifpa_sdk.config import Config
 from ifpa_sdk.exceptions import IfpaApiError
@@ -38,23 +41,23 @@ class TestHttpClientInitialization:
 class TestHttpClientRequest:
     """Tests for HTTP request handling."""
 
-    def test_successful_get_request(self, mock_requests) -> None:
+    def test_successful_get_request(self, mock_requests: requests_mock.Mocker) -> None:
         """Test successful GET request returns parsed JSON."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
 
-        response_data = {"player_id": 123, "name": "John"}
+        response_data: dict[str, Any] = {"player_id": 123, "name": "John"}
         mock_requests.get("https://api.ifpapinball.com/player/123", json=response_data)
 
         result = client._request("GET", "/player/123")
         assert result == response_data
 
-    def test_request_with_query_parameters(self, mock_requests) -> None:
+    def test_request_with_query_parameters(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that query parameters are passed correctly."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
 
-        response_data = {"results": []}
+        response_data: dict[str, Any] = {"results": []}
         mock_requests.get(
             "https://api.ifpapinball.com/player/search?name=John&city=Seattle",
             json=response_data,
@@ -65,12 +68,14 @@ class TestHttpClientRequest:
         )
         assert result == response_data
 
-    def test_path_without_leading_slash_is_handled(self, mock_requests) -> None:
+    def test_path_without_leading_slash_is_handled(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
         """Test that paths without leading slash are handled correctly."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
 
-        response_data = {"player_id": 123}
+        response_data: dict[str, Any] = {"player_id": 123}
         mock_requests.get("https://api.ifpapinball.com/player/123", json=response_data)
 
         result = client._request("GET", "player/123")
@@ -80,7 +85,7 @@ class TestHttpClientRequest:
 class TestHttpClientApiKeyHeader:
     """Tests for API key header handling."""
 
-    def test_api_key_header_is_set(self, mock_requests) -> None:
+    def test_api_key_header_is_set(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that X-API-Key header is set correctly."""
         config = Config(api_key="my-secret-key")
         client = _HttpClient(config)
@@ -90,7 +95,7 @@ class TestHttpClientApiKeyHeader:
 
         assert mock_requests.last_request.headers["X-API-Key"] == "my-secret-key"
 
-    def test_accept_header_is_json(self, mock_requests) -> None:
+    def test_accept_header_is_json(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that Accept header is set to application/json."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -100,7 +105,7 @@ class TestHttpClientApiKeyHeader:
 
         assert mock_requests.last_request.headers["Accept"] == "application/json"
 
-    def test_user_agent_header_is_set(self, mock_requests) -> None:
+    def test_user_agent_header_is_set(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that User-Agent header is set."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -114,7 +119,7 @@ class TestHttpClientApiKeyHeader:
 class TestHttpClientErrorHandling:
     """Tests for error handling."""
 
-    def test_404_error_raises_ifpa_sdk_error(self, mock_requests) -> None:
+    def test_404_error_raises_ifpa_sdk_error(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that 404 response raises IfpaApiError."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -130,7 +135,7 @@ class TestHttpClientErrorHandling:
 
         assert exc_info.value.status_code == 404
 
-    def test_500_error_raises_ifpa_sdk_error(self, mock_requests) -> None:
+    def test_500_error_raises_ifpa_sdk_error(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that 500 response raises IfpaApiError."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -146,7 +151,7 @@ class TestHttpClientErrorHandling:
 
         assert exc_info.value.status_code == 500
 
-    def test_api_error_includes_status_code(self, mock_requests) -> None:
+    def test_api_error_includes_status_code(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that IfpaApiError includes status code."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -163,7 +168,9 @@ class TestHttpClientErrorHandling:
         error = exc_info.value
         assert error.status_code == 404
 
-    def test_api_error_includes_response_body_json(self, mock_requests) -> None:
+    def test_api_error_includes_response_body_json(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
         """Test that IfpaApiError includes JSON response body."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -181,7 +188,7 @@ class TestHttpClientErrorHandling:
         error = exc_info.value
         assert error.response_body == error_body
 
-    def test_api_error_message_from_response(self, mock_requests) -> None:
+    def test_api_error_message_from_response(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that error message is extracted from response."""
         config = Config(api_key="test-key")
         client = _HttpClient(config)
@@ -198,7 +205,7 @@ class TestHttpClientErrorHandling:
         error = exc_info.value
         assert "Player with ID 999 not found" in error.message
 
-    def test_timeout_raises_ifpa_sdk_error(self, mock_requests) -> None:
+    def test_timeout_raises_ifpa_sdk_error(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that timeout raises IfpaApiError."""
         config = Config(api_key="test-key", timeout=1.0)
         client = _HttpClient(config)

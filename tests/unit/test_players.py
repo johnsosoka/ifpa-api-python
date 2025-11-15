@@ -27,19 +27,19 @@ class TestPlayersClient:
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "query": "John",
+                "search": [
                     {
                         "player_id": 12345,
                         "first_name": "John",
                         "last_name": "Smith",
                         "city": "Seattle",
-                        "stateprov": "WA",
+                        "state": "WA",
                         "country_code": "US",
-                        "wppr_rank": 100,
-                        "wppr_value": 450.5,
+                        "country_name": "United States",
+                        "wppr_rank": "100",
                     }
                 ],
-                "total_results": 1,
             },
         )
 
@@ -47,55 +47,55 @@ class TestPlayersClient:
         result = client.players.search(name="John")
 
         assert isinstance(result, PlayerSearchResponse)
-        assert len(result.players) == 1
-        assert result.players[0].player_id == 12345
-        assert result.players[0].first_name == "John"
-        assert result.players[0].last_name == "Smith"
-        assert result.players[0].wppr_rank == 100
+        assert result.query == "John"
+        assert len(result.search) == 1
+        assert result.search[0].player_id == 12345
+        assert result.search[0].first_name == "John"
+        assert result.search[0].last_name == "Smith"
+        assert result.search[0].wppr_rank == "100"
 
     def test_search_with_location_filters(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching players by location."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "query": None,
+                "search": [
                     {
                         "player_id": 67890,
                         "first_name": "Jane",
                         "last_name": "Doe",
                         "city": "Portland",
-                        "stateprov": "OR",
+                        "state": "OR",
                         "country_code": "US",
                     }
                 ],
-                "total_results": 1,
             },
         )
 
         client = IfpaClient(api_key="test-key")
         result = client.players.search(city="Portland", stateprov="OR", country="US")
 
-        assert len(result.players) == 1
-        assert result.players[0].city == "Portland"
+        assert len(result.search) == 1
+        assert result.search[0].city == "Portland"
 
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching players with pagination parameters."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "query": "Test",
+                "search": [
                     {"player_id": i, "first_name": f"Player{i}", "last_name": "Test"}
                     for i in range(25)
                 ],
-                "total_results": 100,
             },
         )
 
         client = IfpaClient(api_key="test-key")
         result = client.players.search(name="Test", start_pos=0, count=25)
 
-        assert len(result.players) == 25
-        assert result.total_results == 100
+        assert len(result.search) == 25
 
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
@@ -106,7 +106,8 @@ class TestPlayersClient:
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "query": None,
+                "search": [
                     {
                         "player_id": 11111,
                         "first_name": "Michael",
@@ -114,14 +115,13 @@ class TestPlayersClient:
                         "country_code": "US",
                     }
                 ],
-                "total_results": 1,
             },
         )
 
         client = IfpaClient(api_key="test-key")
         result = client.players.search(first_name="Michael", last_name="Jordan")
 
-        assert len(result.players) == 1
+        assert len(result.search) == 1
         query = mock_requests.last_request.query
         assert "first_name=michael" in query
         assert "last_name=jordan" in query
@@ -408,15 +408,15 @@ class TestPlayersIntegration:
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "query": "John",
+                "search": [
                     {
                         "player_id": 12345,
                         "first_name": "John",
                         "last_name": "Smith",
-                        "wppr_rank": 100,
+                        "wppr_rank": "100",
                     }
                 ],
-                "total_results": 1,
             },
         )
 
@@ -440,10 +440,10 @@ class TestPlayersIntegration:
 
         # Search for player
         search_results = client.players.search(name="John")
-        assert len(search_results.players) == 1
+        assert len(search_results.search) == 1
 
         # Get full details using the ID from search
-        player_id = search_results.players[0].player_id
+        player_id = search_results.search[0].player_id
         full_player = client.player(player_id).get()
 
         assert full_player.player_id == 12345

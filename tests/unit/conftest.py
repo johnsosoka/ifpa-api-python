@@ -1,11 +1,13 @@
 """Fixtures for unit tests."""
 
+from collections.abc import Generator
+
 import pytest
 import requests_mock
 
 
-@pytest.fixture
-def mock_requests() -> requests_mock.Mocker:
+@pytest.fixture  # type: ignore[misc]
+def mock_requests() -> Generator[requests_mock.Mocker, None, None]:
     """Provide requests_mock fixture for mocking HTTP requests.
 
     Yields:

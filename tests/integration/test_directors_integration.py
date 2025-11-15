@@ -55,8 +55,7 @@ class TestDirectorHandleIntegration:
 
         # Find a director to test with
         director_id = get_test_director_id(client)
-        if director_id is None:
-            pytest.skip("Could not find test director")
+        assert director_id is not None, "Could not find test director"
 
         # Get director details
         director = client.director(director_id).get()
@@ -72,8 +71,7 @@ class TestDirectorHandleIntegration:
 
         # Find a director to test with
         director_id = get_test_director_id(client)
-        if director_id is None:
-            pytest.skip("Could not find test director")
+        assert director_id is not None, "Could not find test director"
 
         # Get past tournaments
         result = client.director(director_id).tournaments(TimePeriod.PAST)
@@ -93,8 +91,7 @@ class TestDirectorHandleIntegration:
 
         # Find a director to test with
         director_id = get_test_director_id(client)
-        if director_id is None:
-            pytest.skip("Could not find test director")
+        assert director_id is not None, "Could not find test director"
 
         # Get future tournaments (may be empty)
         result = client.director(director_id).tournaments(TimePeriod.FUTURE)

@@ -1,0 +1,5556 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "IFPA API",
+    "description": "This API allows you to extra data out of the IFPA Database and contains information about Players, Tournaments and Rankings\n ### If you are using /v1 or /v2 endpoints, please switch to the current endpoints. These versions are no longer supported or updated.\n ### Release Notes (2.1) : \n\t- 2025-08-11 - Updated tournament /results and /{id} info to reflect correct fields\n\t- 2025-08-01 - Updated this document to OpenAPI 3 \n\t- 2025-08-01 - Added missing fields and structures\n\t- 2025-08-01 - Added logic to better support upper and lower case with attributes that are passed.",
+    "contact": {
+      "email": "ifpapinball@gmail.com"
+    },
+    "version": "2.1"
+  },
+  "servers": [
+    {
+      "url": "https://api.ifpapinball.com/"
+    }
+  ],
+  "security": [
+    {
+      "api_key": []
+    }
+  ],
+  "paths": {
+    "/director/{id}": {
+      "get": {
+        "tags": [
+          "director"
+        ],
+        "summary": "Get information about Tournament Directors",
+        "description": "Returns data about Tournament Directors",
+        "operationId": "viewDirector",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Director",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "Josh Sharpe"
+                    },
+                    "profile_photo": {
+                      "type": "string",
+                      "example": "https://www.ifpapinball.com/images/profiles/directors/1000.jpg"
+                    },
+                    "director_id": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "city": {
+                      "type": "string",
+                      "example": "Chicago"
+                    },
+                    "stateprov": {
+                      "type": "string",
+                      "example": "IL"
+                    },
+                    "country_name": {
+                      "type": "string",
+                      "example": "United States"
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "example": "US"
+                    },
+                    "country_id": {
+                      "type": "number",
+                      "example": 168
+                    },
+                    "twitch_username": {
+                      "type": "string",
+                      "example": "jsharpe"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "unique_location_count": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "women_tournament_count": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "league_count": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "highest_value": {
+                          "type": "number",
+                          "example": 141
+                        },
+                        "average_value": {
+                          "type": "number",
+                          "example": 22
+                        },
+                        "total_player_count": {
+                          "type": "number",
+                          "example": 241
+                        },
+                        "unique_player_count": {
+                          "type": "number",
+                          "example": 123
+                        },
+                        "first_time_player_count": {
+                          "type": "number",
+                          "example": 100
+                        },
+                        "repeat_player_count": {
+                          "type": "number",
+                          "example": 123
+                        },
+                        "largest_event_count": {
+                          "type": "number",
+                          "example": 210
+                        },
+                        "single_format_count": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "multiple_format_count": {
+                          "type": "number",
+                          "example": 7
+                        },
+                        "unknown_format_count": {
+                          "type": "number",
+                          "example": 21
+                        },
+                        "formats": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "Strike Knockout"
+                            },
+                            "count": {
+                              "type": "number",
+                              "example": 15
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Director ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a director with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/director/{id}/tournaments/{time_period}": {
+      "get": {
+        "tags": [
+          "director"
+        ],
+        "summary": "Get information about past or future tournaments for a director",
+        "description": "Get information about past or future tournaments for a director",
+        "operationId": "viewDirectorTours",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the director",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "time_period",
+            "in": "path",
+            "description": "Past or Future tournaments (past, future)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PAST",
+                "FUTURE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "director_id": {
+                      "type": "number",
+                      "example": 1000
+                    },
+                    "tournament_count": {
+                      "type": "number",
+                      "example": 45
+                    },
+                    "tournaments": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 15161
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "ranking_system": {
+                          "type": "string",
+                          "example": "MAIN"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Denver"
+                        },
+                        "stateprov_code": {
+                          "type": "string",
+                          "example": "CO"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "event_start_date": {
+                          "type": "string",
+                          "example": "2024-05-01T00:00:00.000Z"
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-05-01T00:00:00.000Z"
+                        },
+                        "qualifying_format": {
+                          "type": "string",
+                          "example": "Matchplay"
+                        },
+                        "finals_format": {
+                          "type": "string",
+                          "example": "Single Elimination"
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 80
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Director ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a director with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/director/country": {
+      "get": {
+        "tags": [
+          "director"
+        ],
+        "summary": "Get a list of players who are country directors for the IFPA",
+        "description": "Get a list of players who are country directors for the IFPA",
+        "operationId": "viewCountryDirectors",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "example": 22
+                    },
+                    "country_directors": {
+                      "type": "object",
+                      "properties": {
+                        "player_profile": {
+                          "type": "object",
+                          "properties": {
+                            "player_id": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Josh Sharpe"
+                            },
+                            "country_code": {
+                              "type": "string",
+                              "example": "US"
+                            },
+                            "country_name": {
+                              "type": "string",
+                              "example": "United States"
+                            },
+                            "profile_photo": {
+                              "type": "string",
+                              "example": "https://www.ifpapinball.com/images/profiles/player/4.jpg"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/director/search": {
+      "get": {
+        "tags": [
+          "director"
+        ],
+        "summary": "Search for Directors by Name",
+        "description": "Search for Directors by Name",
+        "operationId": "searchDirectors",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of the Director (not case sensitive)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of results to return (default = 50)",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "search_term": {
+                      "type": "string",
+                      "example": "sharpe"
+                    },
+                    "count": {
+                      "type": "number",
+                      "example": 22
+                    },
+                    "directors": {
+                      "type": "object",
+                      "properties": {
+                        "director_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profiles/player/4.jpg"
+                        },
+                        "stats": {
+                          "type": "object",
+                          "properties": {
+                            "event_count": {
+                              "type": "number",
+                              "example": 5
+                            },
+                            "future_event_count": {
+                              "type": "number",
+                              "example": 125
+                            },
+                            "unique_player_count": {
+                              "type": "number",
+                              "example": 125
+                            },
+                            "total_player_count": {
+                              "type": "string",
+                              "example": "456"
+                            },
+                            "last_event_date": {
+                              "type": "string",
+                              "example": "2024-01-01T00:00:00.000Z"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/other/countries": {
+      "get": {
+        "tags": [
+          "other"
+        ],
+        "summary": "Get a list of Countries that can referenced by IFPA data",
+        "description": "Get a list of Countries that can referenced by IFPA data",
+        "operationId": "otherCountries",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "country_id": {
+                      "type": "number",
+                      "example": 168
+                    },
+                    "country_name": {
+                      "type": "string",
+                      "example": "United States"
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "example": "US"
+                    },
+                    "active_flag": {
+                      "type": "string",
+                      "example": "Y"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/other/stateprovs": {
+      "get": {
+        "tags": [
+          "other"
+        ],
+        "summary": "Get a list of States and Provinces that can referenced by IFPA data",
+        "description": "Get a list of States and Provinces that can referenced by IFPA data  (US, Canada and Australia only)",
+        "operationId": "otherStateProv",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "country_id": {
+                      "type": "number",
+                      "example": 168
+                    },
+                    "country_name": {
+                      "type": "string",
+                      "example": "United States"
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "example": "US"
+                    },
+                    "regions": {
+                      "type": "object",
+                      "properties": {
+                        "region_name": {
+                          "type": "string",
+                          "example": "Ohio"
+                        },
+                        "region_code": {
+                          "type": "string",
+                          "example": "OH"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Player Information for Multiple Players",
+        "description": "Returns information on the player based on the IDs provide (limit 50)",
+        "operationId": "viewPlayerMulti",
+        "parameters": [
+          {
+            "name": "players",
+            "in": "query",
+            "description": "ID of the players, comma delimited",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "initials": {
+                          "type": "string",
+                          "example": "JLS"
+                        },
+                        "excluded_flag": {
+                          "type": "boolean"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 48
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United Stated"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "ifpa_registered": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "womens_flag": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profile/players/4.jpg"
+                        },
+                        "matchplay_events": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number",
+                              "example": 1234
+                            },
+                            "rating": {
+                              "type": "number",
+                              "example": 4567
+                            },
+                            "rank": {
+                              "type": "number",
+                              "example": 45
+                            }
+                          }
+                        },
+                        "twitch_username": {
+                          "type": "string",
+                          "example": "jsharpe"
+                        },
+                        "pinside_username": {
+                          "type": "string",
+                          "example": "jsharpe"
+                        },
+                        "player_stats": {
+                          "type": "object",
+                          "properties": {
+                            "system": {
+                              "type": "object",
+                              "properties": {
+                                "MAIN": {
+                                  "type": "object",
+                                  "properties": {
+                                    "current_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_month_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_year_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "highest_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "current_points": {
+                                      "type": "number",
+                                      "example": 1234.11
+                                    },
+                                    "all_time_points": {
+                                      "type": "number",
+                                      "example": 2456.44
+                                    },
+                                    "active_points": {
+                                      "type": "number",
+                                      "example": 1123.33
+                                    },
+                                    "inactive_points": {
+                                      "type": "number",
+                                      "example": 2101.22
+                                    },
+                                    "best_finish": {
+                                      "type": "number",
+                                      "example": 1
+                                    },
+                                    "best_finish_count": {
+                                      "type": "number",
+                                      "example": 10
+                                    },
+                                    "average_finish": {
+                                      "type": "number",
+                                      "example": 11
+                                    },
+                                    "average_finish_last_year": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_events_all_time": {
+                                      "type": "number",
+                                      "example": 123
+                                    },
+                                    "total_active_events": {
+                                      "type": "number",
+                                      "example": 451
+                                    },
+                                    "total_events_away": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_wins_last_3_years": {
+                                      "type": "number",
+                                      "example": 4
+                                    },
+                                    "top_3_last_3_years": {
+                                      "type": "number",
+                                      "example": 14
+                                    },
+                                    "top_10_last_3_years": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "ratings_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "ratings_value": {
+                                      "type": "number",
+                                      "example": 1511.15
+                                    },
+                                    "efficiency_rank": {
+                                      "type": "number",
+                                      "example": 171
+                                    },
+                                    "efficiency_value": {
+                                      "type": "number",
+                                      "example": 56.76
+                                    }
+                                  }
+                                },
+                                "WOMEN": {
+                                  "type": "object",
+                                  "properties": {
+                                    "current_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_month_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_year_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "highest_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "current_points": {
+                                      "type": "number",
+                                      "example": 1234.11
+                                    },
+                                    "all_time_points": {
+                                      "type": "number",
+                                      "example": 2456.44
+                                    },
+                                    "active_points": {
+                                      "type": "number",
+                                      "example": 1123.33
+                                    },
+                                    "inactive_points": {
+                                      "type": "number",
+                                      "example": 2101.22
+                                    },
+                                    "best_finish": {
+                                      "type": "number",
+                                      "example": 1
+                                    },
+                                    "best_finish_count": {
+                                      "type": "number",
+                                      "example": 10
+                                    },
+                                    "average_finish": {
+                                      "type": "number",
+                                      "example": 11
+                                    },
+                                    "average_finish_last_year": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_events_all_time": {
+                                      "type": "number",
+                                      "example": 123
+                                    },
+                                    "total_active_events": {
+                                      "type": "number",
+                                      "example": 451
+                                    },
+                                    "total_events_away": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_wins_last_3_years": {
+                                      "type": "number",
+                                      "example": 4
+                                    },
+                                    "top_3_last_3_years": {
+                                      "type": "number",
+                                      "example": 14
+                                    },
+                                    "top_10_last_3_years": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "ratings_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "ratings_value": {
+                                      "type": "number",
+                                      "example": 1511.15
+                                    },
+                                    "efficiency_rank": {
+                                      "type": "number",
+                                      "example": 171
+                                    },
+                                    "efficiency_value": {
+                                      "type": "number",
+                                      "example": 56.76
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "series": {
+                          "type": "object",
+                          "properties": {
+                            "series_code": {
+                              "type": "string",
+                              "example": "NACS"
+                            },
+                            "region_code": {
+                              "type": "string",
+                              "example": "OH"
+                            },
+                            "year": {
+                              "type": "number",
+                              "example": 2024
+                            },
+                            "total_points": {
+                              "type": "number",
+                              "example": 123.45
+                            },
+                            "series_rank": {
+                              "type": "number",
+                              "example": 16
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/{id}": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get Player Information",
+        "description": "Returns information on the player based on the ID Provided",
+        "operationId": "viewPlayer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the player",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "initials": {
+                          "type": "string",
+                          "example": "JLS"
+                        },
+                        "excluded_flag": {
+                          "type": "boolean"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 48
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United Stated"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "ifpa_registered": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "womens_flag": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profile/players/4.jpg"
+                        },
+                        "matchplay_events": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "number",
+                              "example": 1234
+                            },
+                            "rating": {
+                              "type": "number",
+                              "example": 4567
+                            },
+                            "rank": {
+                              "type": "number",
+                              "example": 45
+                            }
+                          }
+                        },
+                        "twitch_username": {
+                          "type": "string",
+                          "example": "jsharpe"
+                        },
+                        "pinside_username": {
+                          "type": "string",
+                          "example": "jsharpe"
+                        },
+                        "player_stats": {
+                          "type": "object",
+                          "properties": {
+                            "system": {
+                              "type": "object",
+                              "properties": {
+                                "MAIN": {
+                                  "type": "object",
+                                  "properties": {
+                                    "current_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_month_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_year_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "highest_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "current_points": {
+                                      "type": "number",
+                                      "example": 1234.11
+                                    },
+                                    "all_time_points": {
+                                      "type": "number",
+                                      "example": 2456.44
+                                    },
+                                    "active_points": {
+                                      "type": "number",
+                                      "example": 1123.33
+                                    },
+                                    "inactive_points": {
+                                      "type": "number",
+                                      "example": 2101.22
+                                    },
+                                    "best_finish": {
+                                      "type": "number",
+                                      "example": 1
+                                    },
+                                    "best_finish_count": {
+                                      "type": "number",
+                                      "example": 10
+                                    },
+                                    "average_finish": {
+                                      "type": "number",
+                                      "example": 11
+                                    },
+                                    "average_finish_last_year": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_events_all_time": {
+                                      "type": "number",
+                                      "example": 123
+                                    },
+                                    "total_active_events": {
+                                      "type": "number",
+                                      "example": 451
+                                    },
+                                    "total_events_away": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_wins_last_3_years": {
+                                      "type": "number",
+                                      "example": 4
+                                    },
+                                    "top_3_last_3_years": {
+                                      "type": "number",
+                                      "example": 14
+                                    },
+                                    "top_10_last_3_years": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "ratings_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "ratings_value": {
+                                      "type": "number",
+                                      "example": 1511.15
+                                    },
+                                    "efficiency_rank": {
+                                      "type": "number",
+                                      "example": 171
+                                    },
+                                    "efficiency_value": {
+                                      "type": "number",
+                                      "example": 56.76
+                                    }
+                                  }
+                                },
+                                "WOMEN": {
+                                  "type": "object",
+                                  "properties": {
+                                    "current_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_month_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "last_year_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "highest_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "current_points": {
+                                      "type": "number",
+                                      "example": 1234.11
+                                    },
+                                    "all_time_points": {
+                                      "type": "number",
+                                      "example": 2456.44
+                                    },
+                                    "active_points": {
+                                      "type": "number",
+                                      "example": 1123.33
+                                    },
+                                    "inactive_points": {
+                                      "type": "number",
+                                      "example": 2101.22
+                                    },
+                                    "best_finish": {
+                                      "type": "number",
+                                      "example": 1
+                                    },
+                                    "best_finish_count": {
+                                      "type": "number",
+                                      "example": 10
+                                    },
+                                    "average_finish": {
+                                      "type": "number",
+                                      "example": 11
+                                    },
+                                    "average_finish_last_year": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_events_all_time": {
+                                      "type": "number",
+                                      "example": 123
+                                    },
+                                    "total_active_events": {
+                                      "type": "number",
+                                      "example": 451
+                                    },
+                                    "total_events_away": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "total_wins_last_3_years": {
+                                      "type": "number",
+                                      "example": 4
+                                    },
+                                    "top_3_last_3_years": {
+                                      "type": "number",
+                                      "example": 14
+                                    },
+                                    "top_10_last_3_years": {
+                                      "type": "number",
+                                      "example": 15
+                                    },
+                                    "ratings_rank": {
+                                      "type": "number",
+                                      "example": 25
+                                    },
+                                    "ratings_value": {
+                                      "type": "number",
+                                      "example": 1511.15
+                                    },
+                                    "efficiency_rank": {
+                                      "type": "number",
+                                      "example": 171
+                                    },
+                                    "efficiency_value": {
+                                      "type": "number",
+                                      "example": 56.76
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "series": {
+                          "type": "object",
+                          "properties": {
+                            "series_code": {
+                              "type": "string",
+                              "example": "NACS"
+                            },
+                            "region_code": {
+                              "type": "string",
+                              "example": "OH"
+                            },
+                            "year": {
+                              "type": "number",
+                              "example": 2024
+                            },
+                            "total_points": {
+                              "type": "number",
+                              "example": 123.45
+                            },
+                            "series_rank": {
+                              "type": "number",
+                              "example": 16
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/{id}/pvp": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get High Level PVP Information",
+        "description": "Returns PVP records against other players",
+        "operationId": "viewPlayerPVP",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the player",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player_id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "total_competitors": {
+                      "type": "number",
+                      "example": 1011
+                    },
+                    "system": {
+                      "type": "string",
+                      "example": "MAIN"
+                    },
+                    "pvp": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 7
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Zach"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "win_count": {
+                          "type": "number",
+                          "example": 150
+                        },
+                        "loss_count": {
+                          "type": "number",
+                          "example": 150
+                        },
+                        "tie_count": {
+                          "type": "number",
+                          "example": 150
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 12
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Player ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a player with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/player/{id}/pvp/{id2}": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get High Level PVP Information",
+        "description": "Returns PVP records against other players",
+        "operationId": "viewPlayerPVPToPlayer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the 1st player to compare",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "id2",
+            "in": "path",
+            "description": "ID of the 2nd player to compare",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player_1": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "excluded_flag": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profiles/player/4.jpg"
+                        }
+                      }
+                    },
+                    "player_2": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 8
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Zach"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "excluded_flag": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profiles/player/8.jpg"
+                        }
+                      }
+                    },
+                    "pvp": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Pinball Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 1001
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "finish_position": {
+                          "type": "object",
+                          "properties": {
+                            "player_1": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "player_2": {
+                              "type": "number",
+                              "example": 5
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Player ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a player with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/player/{id}/rank_history": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Gets ranking and rating history for the player",
+        "description": "Returns ranking and rating history for the player",
+        "operationId": "viewPlayerRankHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the player",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player_id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "system": {
+                      "type": "string",
+                      "example": "MAIN"
+                    },
+                    "active_flag": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "rank_history": {
+                      "type": "object",
+                      "properties": {
+                        "rank_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "rank_postiion": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1551.11
+                        },
+                        "tournaments_played_count": {
+                          "type": "number",
+                          "example": 2
+                        }
+                      }
+                    },
+                    "rating_history": {
+                      "type": "object",
+                      "properties": {
+                        "rating_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "rating": {
+                          "type": "number",
+                          "example": 1561.55
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Player ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a player with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/player/{id}/results/{ranking_system}/{type}": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Get tournament results for a player",
+        "description": "Returns tournament results for a player based on the ranking system provided (main, women, youth)",
+        "operationId": "viewPlayerActiveResults",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the player",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "ranking_system",
+            "in": "path",
+            "description": "ranking system",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAIN",
+                "WOMEN",
+                "YOUTH"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of result. active, nonactive, inactive",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "NONACTIVE",
+                "INACTIVE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "player_id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "results_type": {
+                      "type": "string",
+                      "example": "ACTIVE"
+                    },
+                    "results_count": {
+                      "type": "number",
+                      "example": 15
+                    },
+                    "system": {
+                      "type": "string",
+                      "example": "MAIN"
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Pinball Championships"
+                        },
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 1001
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "event_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "position": {
+                          "type": "number",
+                          "example": 2
+                        },
+                        "original_points": {
+                          "type": "number",
+                          "example": 123.45
+                        },
+                        "current_points": {
+                          "type": "number",
+                          "example": 75.15
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Player ID or Rank System provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find player or ranking system data",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/player/search": {
+      "get": {
+        "tags": [
+          "player"
+        ],
+        "summary": "Search for players",
+        "description": "Returns a list of players based on specific criteria",
+        "operationId": "searchPlayers",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Name of the player (not case sensitive)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Country Name or 2-digit code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stateprov",
+            "in": "query",
+            "description": "2 digit State or Providence Code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tournament",
+            "in": "query",
+            "description": "Name of tournament that a player may have played in. Partial Strings are accepted",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tourpos",
+            "in": "query",
+            "description": "The position the player finished in",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "search_filter": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "tournament": {
+                          "type": "string",
+                          "example": "PAPA"
+                        },
+                        "tournament_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "include_unranked": {
+                          "type": "string",
+                          "example": "Y"
+                        }
+                      }
+                    },
+                    "count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_results": {
+                      "type": "number",
+                      "example": 451
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "wppr_rank": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "rating_value": {
+                          "type": "number",
+                          "example": 1234.56
+                        },
+                        "profile_photo_url": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profile/players/4.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Search Criteria provided",
+            "content": {}
+          },
+          "404": {
+            "description": "No results found",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/rankings/youth": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Ranking of Players who are under the age of 18",
+        "description": "Ranking of Players who are under the age of 18",
+        "operationId": "rankingYouth",
+        "parameters": [
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "youth"
+                    },
+                    "start_position": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 1561
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Joshie Sharpe"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 13
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/134.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "current_wppr_rank": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "last_month_rank": {
+                          "type": "number",
+                          "example": 16
+                        },
+                        "rating_value": {
+                          "type": "number",
+                          "example": 2311
+                        },
+                        "rating_deviation": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 68.1
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 151
+                        },
+                        "best_finish": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_finish_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_tournament_id": {
+                          "type": "number",
+                          "example": 15611
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/wppr": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Ranking of Players who play in tournament submitted to the WPPR System",
+        "description": "Ranking of Players who play in tournament submitted to the WPPR System",
+        "operationId": "rankingWppr",
+        "parameters": [
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "wppr"
+                    },
+                    "start_position": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 1561
+                    },
+                    "sort_order": {
+                      "type": "string",
+                      "example": "wppr_points"
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 43
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/134.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "last_month_rank": {
+                          "type": "number",
+                          "example": 16
+                        },
+                        "rating_value": {
+                          "type": "number",
+                          "example": 2311
+                        },
+                        "rating_deviation": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 68.1
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 151
+                        },
+                        "best_finish": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_finish_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_tournament_id": {
+                          "type": "number",
+                          "example": 15611
+                        },
+                        "total_wins_last_3_years": {
+                          "type": "number",
+                          "example": 13
+                        },
+                        "top_3_last_3_years": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "top_10_last_3_years": {
+                          "type": "number",
+                          "example": 37
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/virtual": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Ranking of Players who play in VIRTUAL tournaments submitted to the WPPR System",
+        "description": "Ranking of Players who play in tournament submitted to the WPPR System",
+        "operationId": "rankingVirtual",
+        "parameters": [
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "virtual"
+                    },
+                    "start_position": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 1561
+                    },
+                    "sort_order": {
+                      "type": "string",
+                      "example": "wppr_points"
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 43
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/134.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "last_month_rank": {
+                          "type": "number",
+                          "example": 16
+                        },
+                        "rating_value": {
+                          "type": "number",
+                          "example": 2311
+                        },
+                        "rating_deviation": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 68.1
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 151
+                        },
+                        "best_finish": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_finish_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_tournament_id": {
+                          "type": "number",
+                          "example": 15611
+                        },
+                        "total_wins_last_3_years": {
+                          "type": "number",
+                          "example": 13
+                        },
+                        "top_3_last_3_years": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "top_10_last_3_years": {
+                          "type": "number",
+                          "example": 37
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/women/{tournament_type}": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Players ranked in the Women's ranking system based on Open Events",
+        "description": "RankingPlayers ranked in the Women's ranking system based on Open Events",
+        "operationId": "rankingWomenOpen",
+        "parameters": [
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "tournament_type",
+            "in": "path",
+            "description": "The type of tournament that are used in the rankings",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "women"
+                    },
+                    "tournament_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "start_pos": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 1561
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Susan Sharpe"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 43
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/134.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "rating_value": {
+                          "type": "number",
+                          "example": 2311
+                        },
+                        "rating_deviation": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 68.1
+                        },
+                        "best_finish": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_finish_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_tournament_id": {
+                          "type": "number",
+                          "example": 15611
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/pro/{ranking_system}": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Ranking Players in the Pro System",
+        "description": "Ranking Players in the Pro System",
+        "operationId": "rankingPro",
+        "parameters": [
+          {
+            "name": "ranking_system",
+            "in": "path",
+            "description": "System to get results for (open, women)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "pro"
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/134.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "pro_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "original_wppr_points": {
+                          "type": "number",
+                          "example": 2110.11
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 2110.11
+                        },
+                        "adj_efficiency_percent": {
+                          "type": "number",
+                          "example": 156.22
+                        },
+                        "excess_percent": {
+                          "type": "number",
+                          "example": 123.55
+                        },
+                        "wpprtunity": {
+                          "type": "number",
+                          "example": 2719.11
+                        },
+                        "wppr_adjustment": {
+                          "type": "number",
+                          "example": -310
+                        },
+                        "sos_percent": {
+                          "type": "number",
+                          "example": 45.18
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/country": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Ranking of Players based on the Country they are from",
+        "description": "Ranking of Players based on the Country they are from",
+        "operationId": "rankingCountry",
+        "parameters": [
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Country Name or Code to show (e.g. US, CA, NZ)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ranking_type": {
+                      "type": "string",
+                      "example": "country"
+                    },
+                    "start_position": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 1561
+                    },
+                    "rankings": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "age": {
+                          "type": "number",
+                          "example": 43
+                        },
+                        "profile_photo_url": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/profiles/players/4.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1710.11
+                        },
+                        "current_wppr_rank": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "current_rank": {
+                          "type": "number",
+                          "example": 15
+                        },
+                        "last_month_rank": {
+                          "type": "number",
+                          "example": 16
+                        },
+                        "rating": {
+                          "type": "number",
+                          "example": 2311
+                        },
+                        "rating_deviation": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "efficiency_percent": {
+                          "type": "number",
+                          "example": 68.1
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 151
+                        },
+                        "best_finish": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_finish_position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "best_tournament_id": {
+                          "type": "number",
+                          "example": 15611
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/country_list": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Get a list of Countries that currently have a ranking",
+        "description": "Get a list of Countries that currently have a ranking",
+        "operationId": "rankingCountryList",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "country_name": {
+                      "type": "string",
+                      "example": "United States"
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "example": "US"
+                    },
+                    "player_count": {
+                      "type": "number",
+                      "example": 151
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/custom/list": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Get a list of custom rankings",
+        "description": "Get a list of custom rankings",
+        "operationId": "rankingCustomList",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_count": {
+                      "type": "number",
+                      "example": 15
+                    },
+                    "custom_view": {
+                      "type": "object",
+                      "properties": {
+                        "view_id": {
+                          "type": "number",
+                          "example": 11
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "Rankings for 2023"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Description Goes Here"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings/custom/{id}": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Get data for a specific custom ranking",
+        "description": "Get data for a specific custom ranking",
+        "operationId": "rankingCustomID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID for the custom ranking",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Starting Position within results (for pagination)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "How many Results to return",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "view_id": {
+                      "type": "number",
+                      "example": 15
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Rankings for 2023"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Description goes Here"
+                    },
+                    "start_position": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "return_count": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "total_count": {
+                      "type": "number",
+                      "example": 250
+                    },
+                    "custom_view": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 11
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "wppr_rank": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 2131.11
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 110
+                        },
+                        "position": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/list": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get a list of regions that are being tracked",
+        "description": "Get a list of regions that are being tracked",
+        "operationId": "seriesList",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "NACS"
+                        },
+                        "title": {
+                          "type": "string",
+                          "example": "North American Championship Series"
+                        },
+                        "years": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/regions": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "List of Regions within a specific Series",
+        "description": "List of Regions within a specific Series",
+        "operationId": "seriesRegions",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NACS",
+                "WNACSO",
+                "WNACSW",
+                "ACS"
+              ]
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Speific Year for the Series (defaults to current year)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "series_code": {
+                      "type": "string",
+                      "example": "NACS"
+                    },
+                    "active_regions": {
+                      "type": "object",
+                      "properties": {
+                        "region_name": {
+                          "type": "string",
+                          "example": "Ohio"
+                        },
+                        "region_code": {
+                          "type": "string",
+                          "example": "OH"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/player_card/{player_id}": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the tournaments for a player for a given region",
+        "description": "Get the tournaments for a player for a given region",
+        "operationId": "seriesPlayersCard",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "player_id",
+            "in": "path",
+            "description": "Player ID to fetch",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Which year of the series to lookup (default is current year)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "region_code",
+            "in": "query",
+            "description": "Which region to get the player's card from (e.g. OH)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "number"
+                    },
+                    "region_code": {
+                      "type": "string",
+                      "example": "IL"
+                    },
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "player_id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "player_name": {
+                      "type": "string",
+                      "example": "Josh Sharpe"
+                    },
+                    "player_card": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 123
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-05-01T00:00:00.000Z"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1711.11
+                        },
+                        "region_event_rank": {
+                          "type": "number",
+                          "example": 14
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/region_reps": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the players who are representives for a given region",
+        "description": "Get the players who are representives for a given region",
+        "operationId": "seriesRegionReps",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "number"
+                    },
+                    "representative": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "region_code": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "region_name": {
+                          "type": "string",
+                          "example": "Illinois"
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profiles/players/4.jpg"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/overall_standings": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the overall standings for all regions of a series",
+        "description": "Get the overall standings for all regions of a series",
+        "operationId": "seriesRegionOverallStandings",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Which year of the series to lookup (default is current year)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "string",
+                      "example": "NACS"
+                    },
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "overall_results": {
+                      "type": "object",
+                      "properties": {
+                        "region_code": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "region_name": {
+                          "type": "string",
+                          "example": "Illinois"
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "unique_player_count": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 12
+                        },
+                        "current_leader": {
+                          "type": "object",
+                          "properties": {
+                            "player_id": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "player_name": {
+                              "type": "string",
+                              "example": "Josh Sharpe"
+                            }
+                          }
+                        },
+                        "prize_fund": {
+                          "type": "number",
+                          "example": 123.51
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/standings": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the standings for a series region",
+        "description": "Get the standings for a series region",
+        "operationId": "seriesRegionRegionStandings",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Which year of the series to lookup (default is current year)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "region_code",
+            "in": "query",
+            "description": "Code of the region for the standings to be returned",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "string",
+                      "example": "NACS"
+                    },
+                    "region_code": {
+                      "type": "string",
+                      "example": "OH"
+                    },
+                    "region_name": {
+                      "type": "string",
+                      "example": "Ohio"
+                    },
+                    "prize_fund": {
+                      "type": "number",
+                      "example": 1251.12
+                    },
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "standings": {
+                      "type": "object",
+                      "properties": {
+                        "series_rank": {
+                          "type": "number",
+                          "example": 5
+                        },
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "player_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov_code": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1234.56
+                        },
+                        "event_count": {
+                          "type": "number",
+                          "example": 20
+                        },
+                        "win_count": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/stats": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the stats for a series region",
+        "description": "Get the stats for a series region",
+        "operationId": "seriesRegionRegionStats",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Which year of the series to lookup (default is current year)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "region_code",
+            "in": "query",
+            "description": "Code of the region for the standings to be returned",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "string",
+                      "example": "NACS"
+                    },
+                    "region_code": {
+                      "type": "string",
+                      "example": "OH"
+                    },
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "monthly_stats": {
+                      "type": "object",
+                      "properties": {
+                        "month": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 59
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 500
+                        },
+                        "unique_player_count": {
+                          "type": "number",
+                          "example": 100
+                        },
+                        "prize_fund": {
+                          "type": "number",
+                          "example": 5141.11
+                        }
+                      }
+                    },
+                    "yearly_stats": {
+                      "type": "object",
+                      "properties": {
+                        "player_count": {
+                          "type": "number",
+                          "example": 1000
+                        },
+                        "unique_player_count": {
+                          "type": "number",
+                          "example": 100
+                        },
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "prize_fund": {
+                          "type": "number",
+                          "example": 1234.56
+                        },
+                        "field_size": {
+                          "type": "number",
+                          "example": 16
+                        }
+                      }
+                    },
+                    "payouts": {
+                      "type": "object",
+                      "properties": {
+                        "position": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "prize_fund": {
+                          "type": "number",
+                          "example": 123.45
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/series/{series_code}/tournaments": {
+      "get": {
+        "tags": [
+          "series"
+        ],
+        "summary": "Get the tournaments for a series region",
+        "description": "Get the tournaments for a series region",
+        "operationId": "seriesRegionTour",
+        "parameters": [
+          {
+            "name": "series_code",
+            "in": "path",
+            "description": "Code for the Series",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Which year of the series to lookup (default is current year)",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "region_code",
+            "in": "query",
+            "description": "Code of the region for the standings to be returned",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "series_code": {
+                      "type": "string",
+                      "example": "NACS"
+                    },
+                    "region_code": {
+                      "type": "string",
+                      "example": "OH"
+                    },
+                    "year": {
+                      "type": "number",
+                      "example": 2024
+                    },
+                    "submitted_tournaments": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 101
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1234.56
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 80
+                        },
+                        "winner": {
+                          "type": "object",
+                          "properties": {
+                            "player_id": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Josh Sharpe"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unsubmitted_tournaments": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 101
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "Submitted"
+                        },
+                        "director_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        }
+                      }
+                    },
+                    "future_tournament": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 101
+                        },
+                        "event_start_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "Submitted"
+                        },
+                        "director_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/country_players": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Player Count by Country",
+        "description": "List of all countries and the number of players registered",
+        "operationId": "statsCountryPlayerCount",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Players by Country"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "count": {
+                          "type": "number",
+                          "example": 5000
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/state_players": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Player Count by each State or Province",
+        "description": "List of all States or Provinces and the number of players registered",
+        "operationId": "statsStatePlayerCount",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Players by State/Province"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "stateprov_code": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "count": {
+                          "type": "string",
+                          "example": "50"
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/state_tournaments": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Tournament Count by each State or Province",
+        "description": "List of all states or Province and the number of tournaments held",
+        "operationId": "statsStateTourCount",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "State/Province Stats"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "stateprov_code": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "count": {
+                          "type": "string",
+                          "example": "100"
+                        },
+                        "total_points_all": {
+                          "type": "number",
+                          "example": 12345.67
+                        },
+                        "total_points_tournament_value": {
+                          "type": "number",
+                          "example": 12345
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/events_by_year": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Stats about number of events per year",
+        "description": "Get Stats about number of events per year",
+        "operationId": "statsEventsByYear",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "description": "Filters down to a specific country",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Events by year"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer",
+                          "example": 2024
+                        },
+                        "country_count": {
+                          "type": "integer",
+                          "example": 26
+                        },
+                        "player_count": {
+                          "type": "integer",
+                          "example": 123456
+                        },
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 1234
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/players_by_year": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Stats about number of players that have played per year",
+        "description": "Get Stats about number of players that have played per year",
+        "operationId": "statsPlayerByYear",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Players by year"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer",
+                          "example": 2024
+                        },
+                        "current_year_count": {
+                          "type": "integer",
+                          "example": 12345
+                        },
+                        "previous_year_count": {
+                          "type": "integer",
+                          "example": 1234
+                        },
+                        "previous_2_year_count": {
+                          "type": "integer",
+                          "example": 123
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/largest_tournaments": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "List of top 50 tournaments based on player count",
+        "description": "List of top 50 tournaments based on player count",
+        "operationId": "statsLargestTournaments",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "description": "Filters to specific countries",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Largest Tournaments"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 1000
+                        },
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 5601
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "Pinburgh"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "tournament_date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/lucrative_tournaments": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "List of top 25 tournaments based on tournament value",
+        "description": "List of top 25 tournaments based on tournament value",
+        "operationId": "statsLucrativeTours",
+        "parameters": [
+          {
+            "name": "major",
+            "in": "query",
+            "description": "Set to 'N' to exclude Major Tournaments [default is 'Y']",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "description": "Filters to specific countries",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Lucrative Tournaments"
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 125151
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "Josh World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "tournament_date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "tournament_value": {
+                          "type": "number",
+                          "example": 451.11
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats/points_given_period": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "List of players with total accumulative points",
+        "description": "List of players with total accumulative points over a period of time (default 1 year)",
+        "operationId": "statsPointsPeriod",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "description": "Filters to specific countries",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "Start Date of period range",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "End date of period range",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Total number to of records to return",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Points Given Period"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2024-01-01"
+                    },
+                    "end_date": {
+                      "type": "string",
+                      "format": "date",
+                      "example": "2024-12-31"
+                    },
+                    "return_count": {
+                      "type": "integer",
+                      "example": 50
+                    },
+                    "rank_type": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "wppr_points": {
+                          "type": "number",
+                          "example": 1234.56
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Parameters Provided",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/stats/events_attended_period": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "List of players with total accumulative events",
+        "description": "List of players with total accumulative events over a period of time (default 1 year)",
+        "operationId": "statsEventPeriod",
+        "parameters": [
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "description": "Filters to specific countries",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "Start Date of period range",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "End Date of period range",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Total number to of records to return",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Events attended over a period of time"
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "end_date": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "return_count": {
+                      "type": "integer",
+                      "example": 50
+                    },
+                    "system_code": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "number",
+                          "example": 4
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Josh"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Sharpe"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "tournament_count": {
+                          "type": "integer",
+                          "example": 123
+                        },
+                        "stats_rank": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Parameters Provided",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/stats/overall": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Overall WPPR Stats",
+        "description": "Collection of stats about the WPPR System",
+        "operationId": "statsOverall",
+        "parameters": [
+          {
+            "name": "system_code",
+            "in": "query",
+            "description": "Pull stats for specific ranking types. Default is OPEN",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "OPEN",
+                "WOMEN"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "example": "Overall Stats"
+                    },
+                    "system_code": {
+                      "type": "string",
+                      "example": "OPEN"
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "overall_player_count": {
+                          "type": "number",
+                          "example": 51515
+                        },
+                        "active_player_count": {
+                          "type": "number",
+                          "example": 44145
+                        },
+                        "tournament_count": {
+                          "type": "number",
+                          "example": 1241
+                        },
+                        "tournament_count_last_month": {
+                          "type": "number",
+                          "example": 161
+                        },
+                        "tournament_count_this_year": {
+                          "type": "number",
+                          "example": 1616
+                        },
+                        "tournament_player_count": {
+                          "type": "number",
+                          "example": 51516
+                        },
+                        "tournament_player_count_average": {
+                          "type": "number",
+                          "example": 11241
+                        },
+                        "age_gender": {
+                          "type": "object",
+                          "properties": {
+                            "age_under_18": {
+                              "type": "integer",
+                              "example": 145
+                            },
+                            "age_18_to_29": {
+                              "type": "integer",
+                              "example": 616
+                            },
+                            "age_30_to_39": {
+                              "type": "integer",
+                              "example": 12414
+                            },
+                            "age_40_to_49": {
+                              "type": "integer",
+                              "example": 26712
+                            },
+                            "age_50_to_99": {
+                              "type": "integer",
+                              "example": 1451
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tournament/formats": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List of tournament formats that IFPA endorses",
+        "description": "List of tournament formats that IFPA endorses",
+        "operationId": "tourFormats",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "qualifying_formats": {
+                      "type": "object",
+                      "properties": {
+                        "format_id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Strike Knockout"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "A Strikes Based Tournament"
+                        }
+                      }
+                    },
+                    "finals_formats": {
+                      "type": "object",
+                      "properties": {
+                        "format_id": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Strike Knockout"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "A Strikes Based Tournament"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tournament/{id}": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Find a Tournament by ID",
+        "description": "Returns information regarding a specific Tournament",
+        "operationId": "tourInfo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Tournament",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tournament_id": {
+                      "type": "number",
+                      "example": 123
+                    },
+                    "tournament_name": {
+                      "type": "string",
+                      "example": "IFPA World Championships"
+                    },
+                    "tournament_type": {
+                      "type": "string",
+                      "example": "Tournamnet"
+                    },
+                    "private_flag": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "address1": {
+                      "type": "string",
+                      "example": "123 main st"
+                    },
+                    "address2": {
+                      "type": "string",
+                      "example": "Room C"
+                    },
+                    "city": {
+                      "type": "string",
+                      "example": "Chicago"
+                    },
+                    "stateprov": {
+                      "type": "string",
+                      "example": "IL"
+                    },
+                    "postal_code": {
+                      "type": "string",
+                      "example": "43031"
+                    },
+                    "latitude": {
+                      "type": "number",
+                      "example": 16.16161
+                    },
+                    "longitude": {
+                      "type": "number",
+                      "example": -14.15151
+                    },
+                    "country_name": {
+                      "type": "string",
+                      "example": "United States"
+                    },
+                    "country_code": {
+                      "type": "string",
+                      "example": "US"
+                    },
+                    "raw_address": {
+                      "type": "string",
+                      "example": "100 Main St Chicago IL 43031"
+                    },
+                    "director_id": {
+                      "type": "number",
+                      "example": 4
+                    },
+                    "director_name": {
+                      "type": "string",
+                      "example": "Josh Sharpe"
+                    },
+                    "website": {
+                      "type": "string",
+                      "example": "https://www.ifpapinball.com"
+                    },
+                    "profile_photo": {
+                      "type": "string",
+                      "example": "https://www.ifpapinball.com/images/ifpa_gray.jpg"
+                    },
+                    "event_name": {
+                      "type": "string",
+                      "example": "Main Tournament"
+                    },
+                    "event_start_date": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    },
+                    "event_end_date": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    },
+                    "ratings_strength": {
+                      "type": "number",
+                      "example": 101.11
+                    },
+                    "rankings_strength": {
+                      "type": "number",
+                      "example": 105.11
+                    },
+                    "base_value": {
+                      "type": "number",
+                      "example": 50
+                    },
+                    "tournament_percentage_grade": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "tournament_value": {
+                      "type": "number",
+                      "example": 125
+                    },
+                    "qualify_flag": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "qualify_hours": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "unlimited_qualify_flag": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "eligible_player_count": {
+                      "type": "integer",
+                      "example": 50
+                    },
+                    "player_count": {
+                      "type": "integer",
+                      "example": 61
+                    },
+                    "ranking_system": {
+                      "type": "string",
+                      "example": "Open"
+                    },
+                    "details": {
+                      "type": "string",
+                      "example": "Lots of text here"
+                    },
+                    "qualifying_format": {
+                      "type": "string",
+                      "example": "Matchplay"
+                    },
+                    "finals_format": {
+                      "type": "string",
+                      "example": "Strike Knockout"
+                    },
+                    "player_limit": {
+                      "type": "number",
+                      "example": 80
+                    },
+                    "registration_date": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    },
+                    "matchplay_id": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Tournament ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a Tournament with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/tournament/{id}/related": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List of events related to the tournament provided",
+        "description": "List of events related to the tournament provided",
+        "operationId": "tourRelated",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Tournament",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tournament": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 1245
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "tournament_type": {
+                          "type": "string",
+                          "example": "Tournament"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "event_start_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "ranking_system": {
+                          "type": "string",
+                          "example": "MAIN"
+                        },
+                        "winner": {
+                          "type": "object",
+                          "properties": {
+                            "player_id": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Josh Sharpe"
+                            },
+                            "country_name": {
+                              "type": "string",
+                              "example": "United States"
+                            },
+                            "country_code": {
+                              "type": "string",
+                              "example": "US"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Tournament ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a Tournament with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/tournament/{id}/results": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Results for a tournament",
+        "description": "Returns detailed results regarding a specific Tournament",
+        "operationId": "viewTournamentResults",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the Tournament",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tournament_id": {
+                      "type": "number",
+                      "example": 1235
+                    },
+                    "ranking_system": {
+                      "type": "string",
+                      "example": "MAIN"
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "player_id": {
+                          "type": "string",
+                          "example": "4"
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "profile_photo": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com/images/profiles/player/4.jpg"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "position": {
+                          "type": "integer",
+                          "example": 2
+                        },
+                        "points": {
+                          "type": "number",
+                          "example": 123.45
+                        },
+                        "wppr_rank": {
+                          "type": "number",
+                          "example": 25
+                        },
+                        "ratings_value": {
+                          "type": "number",
+                          "example": 1711.11
+                        },
+                        "excluded_flag": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "player_tournament_count": {
+                          "type": "integer",
+                          "example": 125
+                        },
+                        "wppr_pro_rank": {
+                          "type": "integer",
+                          "example": 75
+                        },
+                        "efficiency_value": {
+                          "type": "number",
+                          "example": 18.9500
+                        },
+                        "post_rank_pos": {
+                          "type": "number",
+                          "example": 3561
+                        },
+                        "post_rating_value": {
+                          "type": "number",
+                          "example": 1471.5790
+                        },
+                        "post_efficiency_value": {
+                          "type": "integer",
+                          "example": 19.151
+                        },
+                        "post_wppr_pro_rank": {
+                          "type": "integer",
+                          "example": 65
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Tournament ID provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find a Tournament with the provided ID",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/tournament/leagues/{time_period}": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "League Information",
+        "description": "Returns information about Past, Current and Future Leagues.",
+        "operationId": "viewLeagueInfo",
+        "parameters": [
+          {
+            "name": "time_period",
+            "in": "path",
+            "description": "Time Period for the League",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "HISTORY",
+                "UPCOMING"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_entries": {
+                      "type": "number",
+                      "example": 1235
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "ACTIVE"
+                    },
+                    "results": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "string",
+                          "example": "4"
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "Chicago Pinball League"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Pittsburgh"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "PA"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "latitude": {
+                          "type": "string",
+                          "example": "76.125"
+                        },
+                        "longitude": {
+                          "type": "string",
+                          "example": "-56.161"
+                        },
+                        "event_start_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "event_end_date": {
+                          "type": "number"
+                        },
+                        "private_flag": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "director_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "director_id": {
+                          "type": "number",
+                          "example": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tournament/search": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Search for Tournaments or Leagues",
+        "description": "Returns information about tournaments and leagues based on the parameters provided",
+        "operationId": "tourSearch",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Search based on text string against Tournament Names",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Search based on the Country of the Tournament",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "stateprov",
+            "in": "query",
+            "description": "Search based on the State/Provience/Region of the Tournament",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "Narrow search to only include results beyond a date. If used, end_date is required",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "Narrow search to only include results up to a certain date",
+            "schema": {
+              "type": "string",
+              "format": "YYYY-MM-DD"
+            }
+          },
+          {
+            "name": "rank_type",
+            "in": "query",
+            "description": "Search only calendar entries for specific ranking systems",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MAIN",
+                "WOMEN"
+              ]
+            }
+          },
+          {
+            "name": "event_type",
+            "in": "query",
+            "description": "Search only calendar entries for specific event type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Tournament",
+                "Keague"
+              ]
+            }
+          },
+          {
+            "name": "start_pos",
+            "in": "query",
+            "description": "Start a specific position in the list that is returned. Default is position",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "total",
+            "in": "query",
+            "description": "Total number of calendar entries to return",
+            "schema": {
+              "maximum": 250,
+              "minimum": 1,
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "name": "director_name",
+            "in": "query",
+            "description": "Narrow search to only include tournaments for a particular director",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pre_registration",
+            "in": "query",
+            "description": "Narrow search to only include tournaments that requires preregistration",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Y",
+                "N"
+              ]
+            }
+          },
+          {
+            "name": "only_with_results",
+            "in": "query",
+            "description": "Narrow search to only include tournaments that have submitted results",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Y",
+                "N"
+              ]
+            }
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "Narrow search to a region, based on latitude and longitude with radius and distance unit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "Narrow search to a region, based on latitude and longitude with radius and distance unit",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "description": "Narrow search to a region, based on latitude and longitude with radius and distance unit",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "distance_unit",
+            "in": "query",
+            "description": "Narrow search to a region, based on latitude and longitude with radius and distance unit",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "k for Kilometers",
+                "m for Miles"
+              ]
+            }
+          },
+          {
+            "name": "min_points",
+            "in": "query",
+            "description": "Minimum Number of Points a Tournament must be worth",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_points",
+            "in": "query",
+            "description": "Maximum Number of Points a Tournament can be worth",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "point_filter",
+            "in": "query",
+            "description": "Flag to indicate the search should use the points range values",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Y",
+                "N (default)"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "search_filter": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "country": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "OH"
+                        },
+                        "start_date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "end_date": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "rank_type": {
+                          "type": "string",
+                          "example": "MAIN"
+                        },
+                        "sort_mode": {
+                          "type": "string",
+                          "example": "START_DATE"
+                        },
+                        "sort_order": {
+                          "type": "string",
+                          "example": "ASC"
+                        },
+                        "director_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "event_type": {
+                          "type": "string",
+                          "example": "Tournament"
+                        },
+                        "distance_unit": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "radius": {
+                          "type": "number",
+                          "example": 50
+                        },
+                        "latitude": {
+                          "type": "string",
+                          "example": "76.5151"
+                        },
+                        "longitude": {
+                          "type": "string",
+                          "example": "17.15151"
+                        }
+                      }
+                    },
+                    "total_results": {
+                      "type": "integer",
+                      "example": 151
+                    },
+                    "tournaments": {
+                      "type": "object",
+                      "properties": {
+                        "tournament_id": {
+                          "type": "number",
+                          "example": 123
+                        },
+                        "tournament_name": {
+                          "type": "string",
+                          "example": "IFPA World Championships"
+                        },
+                        "event_name": {
+                          "type": "string",
+                          "example": "Main Tournament"
+                        },
+                        "event_type": {
+                          "type": "string",
+                          "example": "Tournament"
+                        },
+                        "address1": {
+                          "type": "string",
+                          "example": "123 main st"
+                        },
+                        "city": {
+                          "type": "string",
+                          "example": "Chicago"
+                        },
+                        "stateprov": {
+                          "type": "string",
+                          "example": "IL"
+                        },
+                        "country_name": {
+                          "type": "string",
+                          "example": "United States"
+                        },
+                        "country_code": {
+                          "type": "string",
+                          "example": "US"
+                        },
+                        "event_start_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "event_end_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "latitude": {
+                          "type": "string",
+                          "example": "-17.151"
+                        },
+                        "longitude": {
+                          "type": "string",
+                          "example": "14.616"
+                        },
+                        "raw_address": {
+                          "type": "string",
+                          "example": "123 Main st, Chicago IL 43031"
+                        },
+                        "private_flag": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "ranking_system": {
+                          "type": "string",
+                          "example": "MAIN"
+                        },
+                        "preregistration_date": {
+                          "type": "string",
+                          "example": "2024-01-01T00:00:00.000Z"
+                        },
+                        "player_count": {
+                          "type": "number",
+                          "example": 100
+                        },
+                        "qualifying_format": {
+                          "type": "string",
+                          "example": "Strike Knockout"
+                        },
+                        "finals_format": {
+                          "type": "string",
+                          "example": "Matchplay"
+                        },
+                        "director_id": {
+                          "type": "number",
+                          "example": 1004
+                        },
+                        "director_name": {
+                          "type": "string",
+                          "example": "Josh Sharpe"
+                        },
+                        "website": {
+                          "type": "string",
+                          "example": "https://www.ifpapinball.com"
+                        },
+                        "certified_flag": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "winner": {
+                          "type": "object",
+                          "properties": {
+                            "player_id": {
+                              "type": "number",
+                              "example": 4
+                            },
+                            "player_name": {
+                              "type": "string",
+                              "example": "Josh Sharpe"
+                            },
+                            "wppr_points": {
+                              "type": "number",
+                              "example": 123.33
+                            },
+                            "profile_photo": {
+                              "type": "string",
+                              "example": "https://www.ifpapinball.com/images/profiles/player/4.jpg"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided",
+            "content": {}
+          },
+          "404": {
+            "description": "Cannot find any Tournaments based on the parameters provided",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header"
+      }
+    }
+  },
+  "x-original-swagger-version": "2.0"
+}

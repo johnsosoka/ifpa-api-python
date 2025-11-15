@@ -9,6 +9,7 @@ import requests_mock
 from ifpa_sdk.client import IfpaClient
 from ifpa_sdk.exceptions import IfpaApiError
 from ifpa_sdk.models.series import (
+    RegionRepsResponse,
     SeriesListResponse,
     SeriesOverview,
     SeriesPlayerCard,
@@ -148,45 +149,47 @@ class TestSeriesHandle:
             "https://api.ifpapinball.com/series/PAPA/player_card/12345",
             json={
                 "series_code": "PAPA",
+                "region_code": "OH",
+                "year": 2024,
                 "player_id": 12345,
                 "player_name": "John Smith",
-                "current_position": 15,
-                "total_points": 350.0,
-                "events": [
+                "player_card": [
                     {
                         "tournament_id": 10001,
                         "tournament_name": "PAPA Event 1",
-                        "event_date": "2024-01-15",
-                        "position": 3,
-                        "points_earned": 100.0,
-                        "player_count": 64,
-                        "counting": True,
+                        "event_name": "Main Tournament",
+                        "event_end_date": "2024-01-15T00:00:00.000Z",
+                        "wppr_points": 100.0,
+                        "region_event_rank": 3,
                     },
                     {
                         "tournament_id": 10002,
                         "tournament_name": "PAPA Event 2",
-                        "event_date": "2024-02-20",
-                        "position": 5,
-                        "points_earned": 80.0,
-                        "player_count": 48,
-                        "counting": True,
+                        "event_name": "Finals",
+                        "event_end_date": "2024-02-20T00:00:00.000Z",
+                        "wppr_points": 80.0,
+                        "region_event_rank": 5,
                     },
                 ],
-                "statistics": {"average_finish": 4.0, "best_finish": 3},
             },
         )
 
         client = IfpaClient(api_key="test-key")
-        card = client.series_handle("PAPA").player_card(12345)
+        card = client.series_handle("PAPA").player_card(12345, "OH")
 
         assert isinstance(card, SeriesPlayerCard)
         assert card.series_code == "PAPA"
+        assert card.region_code == "OH"
+        assert card.year == 2024
         assert card.player_id == 12345
-        assert card.current_position == 15
-        assert card.total_points == 350.0
-        assert len(card.events) == 2
-        assert card.events[0].tournament_name == "PAPA Event 1"
-        assert card.events[0].points_earned == 100.0
+        assert len(card.player_card) == 2
+        assert card.player_card[0].tournament_name == "PAPA Event 1"
+        assert card.player_card[0].wppr_points == 100.0
+        assert card.player_card[0].region_event_rank == 3
+
+        # Verify query parameters
+        query = mock_requests.last_request.query
+        assert "region_code=oh" in query
 
     def test_player_card_with_string_id(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that player ID can be a string in player_card."""
@@ -194,15 +197,46 @@ class TestSeriesHandle:
             "https://api.ifpapinball.com/series/PAPA/player_card/12345",
             json={
                 "series_code": "PAPA",
+                "region_code": "IL",
                 "player_id": 12345,
                 "player_name": "John Smith",
+                "player_card": [],
             },
         )
 
         client = IfpaClient(api_key="test-key")
-        card = client.series_handle("PAPA").player_card("12345")
+        card = client.series_handle("PAPA").player_card("12345", "IL")
 
         assert card.player_id == 12345
+
+    def test_player_card_with_year(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test getting a player's card for a specific year."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/series/PAPA/player_card/12345",
+            json={
+                "series_code": "PAPA",
+                "region_code": "OH",
+                "year": 2023,
+                "player_id": 12345,
+                "player_name": "John Smith",
+                "player_card": [
+                    {
+                        "tournament_id": 10001,
+                        "tournament_name": "PAPA Event 2023",
+                        "wppr_points": 75.0,
+                        "region_event_rank": 2,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        card = client.series_handle("PAPA").player_card(12345, "OH", year=2023)
+
+        assert card.year == 2023
+        query = mock_requests.last_request.query
+        assert "region_code=oh" in query
+        assert "year=2023" in query
 
     def test_overview(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting series overview."""
@@ -345,6 +379,42 @@ class TestSeriesHandle:
         assert len(schedule.events) == 2
         assert schedule.events[0].event_name == "PAPA Event 3"
         assert schedule.events[0].status == "scheduled"
+
+    def test_region_reps(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test getting series region representatives."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/series/PAPA/region_reps",
+            json={
+                "series_code": "PAPA",
+                "representative": [
+                    {
+                        "player_id": 4,
+                        "name": "Josh Sharpe",
+                        "region_code": "IL",
+                        "region_name": "Illinois",
+                        "profile_photo": "https://www.ifpapinball.com/images/profiles/players/4.jpg",
+                    },
+                    {
+                        "player_id": 100,
+                        "name": "Jane Doe",
+                        "region_code": "OH",
+                        "region_name": "Ohio",
+                        "profile_photo": "https://www.ifpapinball.com/images/profiles/players/100.jpg",
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        reps = client.series_handle("PAPA").region_reps()
+
+        assert isinstance(reps, RegionRepsResponse)
+        assert reps.series_code == "PAPA"
+        assert len(reps.representative) == 2
+        assert reps.representative[0].player_id == 4
+        assert reps.representative[0].name == "Josh Sharpe"
+        assert reps.representative[0].region_code == "IL"
+        assert reps.representative[0].region_name == "Illinois"
 
 
 class TestSeriesErrors:

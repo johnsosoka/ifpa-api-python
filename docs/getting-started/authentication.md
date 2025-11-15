@@ -144,8 +144,8 @@ from ifpa_sdk import IfpaClient, MissingApiKeyError
 try:
     client = IfpaClient()
     # Make a simple request
-    stats = client.stats.global_stats()
-    print(f"Authentication successful! Total players: {stats.total_players}")
+    rankings = client.rankings.wppr(count=1)
+    print(f"Authentication successful! Retrieved rankings: {len(rankings.rankings)} entries")
 except MissingApiKeyError:
     print("Error: API key not configured")
 except Exception as e:

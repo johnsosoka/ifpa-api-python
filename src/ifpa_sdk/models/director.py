@@ -89,14 +89,22 @@ class Director(IfpaBaseModel):
 class DirectorTournament(IfpaBaseModel):
     """Tournament information in a director's history.
 
+    Note: The API may return event_date, event_start_date, or both depending on context.
+    This model handles both field names for maximum compatibility.
+
     Attributes:
         tournament_id: Unique tournament identifier
         tournament_name: Tournament name
-        event_date: Date of the tournament
+        event_date: Date of the tournament (legacy field, maps to event_start_date)
+        event_start_date: Tournament start date (ISO 8601 format)
+        event_end_date: Tournament end date (ISO 8601 format)
         event_name: Event name (if different from tournament)
+        ranking_system: Ranking system used (e.g., "MAIN", "PRO")
+        qualifying_format: Format used for qualifying rounds
+        finals_format: Format used for finals
         location_name: Venue name
         city: Tournament city
-        stateprov: State or province
+        stateprov: State or province (alias: stateprov_code)
         country_name: Country name
         country_code: ISO country code
         value: Tournament rating/value
@@ -106,16 +114,22 @@ class DirectorTournament(IfpaBaseModel):
 
     tournament_id: int
     tournament_name: str
-    event_date: str | None = None
+    # Support both event_date (legacy) and event_start_date (spec)
+    event_date: str | None = Field(default=None, alias="event_start_date")
+    event_end_date: str | None = None
     event_name: str | None = None
+    ranking_system: str | None = None
+    qualifying_format: str | None = None
+    finals_format: str | None = None
     location_name: str | None = None
     city: str | None = None
-    stateprov: str | None = None
+    # Support both stateprov and stateprov_code
+    stateprov: str | None = Field(default=None, alias="stateprov_code")
     country_name: str | None = None
     country_code: str | None = None
     value: float | None = None
     player_count: int | None = None
-    women_only: bool | None = Field(default=None, alias="women_only")
+    women_only: bool | None = None
 
 
 class DirectorTournamentsResponse(IfpaBaseModel):
@@ -142,7 +156,9 @@ class DirectorSearchResult(IfpaBaseModel):
         name: Director's full name
         city: City location
         stateprov: State or province
+        country_name: Full country name
         country_code: ISO country code
+        profile_photo: URL to profile photo
         tournament_count: Number of tournaments directed
     """
 
@@ -150,43 +166,59 @@ class DirectorSearchResult(IfpaBaseModel):
     name: str
     city: str | None = None
     stateprov: str | None = None
+    country_name: str | None = None
     country_code: str | None = None
+    profile_photo: str | None = None
     tournament_count: int | None = None
 
 
 class DirectorSearchResponse(IfpaBaseModel):
     """Response for director search query.
 
+    Note: The API spec shows search_term and count fields, but the actual API
+    may also return total_results. This model supports both patterns.
+
     Attributes:
+        search_term: The search term used (from API spec)
+        count: Number of results returned (from API spec, alias: total_results)
         directors: List of matching directors
-        total_results: Total number of results found
     """
 
+    search_term: str | None = None
+    count: int | None = Field(default=None, alias="total_results")
     directors: list[DirectorSearchResult] = Field(default_factory=list)
-    total_results: int | None = None
 
 
 class CountryDirector(IfpaBaseModel):
     """Country director information.
+
+    Note: The API spec shows a nested player_profile structure, but the actual API
+    returns a flat structure with the 'directors' key instead of 'country_directors'.
 
     Attributes:
         player_id: The player ID of the country director
         name: Director's full name
         country_code: ISO country code
         country_name: Full country name
+        profile_photo: URL to profile photo
     """
 
     player_id: int
     name: str
     country_code: str
     country_name: str
+    profile_photo: str | None = None
 
 
 class CountryDirectorsResponse(IfpaBaseModel):
     """Response for country directors list.
 
+    Note: The API returns 'directors' instead of 'country_directors' as shown in spec.
+
     Attributes:
-        country_directors: List of country directors
+        count: Total number of country directors
+        country_directors: List of country directors (API returns as 'directors')
     """
 
+    count: int | None = None
     country_directors: list[CountryDirector] = Field(default_factory=list, alias="directors")

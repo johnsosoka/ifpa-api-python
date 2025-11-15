@@ -62,7 +62,6 @@ The SDK provides access to all IFPA API resources:
 | **Rankings** | WPPR, women, youth, pro, and custom rankings | 9 |
 | **Tournaments** | Search tournaments, view results and details | 6 |
 | **Series** | Tournament series standings and statistics | 8 |
-| **Stats** | Global statistics, trends, machine popularity | 10 |
 
 ## Getting Help
 

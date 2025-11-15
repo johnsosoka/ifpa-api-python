@@ -51,8 +51,7 @@ class TestTournamentHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         tournament_id = get_test_tournament_id(client)
-        if tournament_id is None:
-            pytest.skip("Could not find test tournament")
+        assert tournament_id is not None, "Could not find test tournament"
 
         tournament = client.tournament(tournament_id).get()
 
@@ -66,8 +65,7 @@ class TestTournamentHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         tournament_id = get_test_tournament_id(client)
-        if tournament_id is None:
-            pytest.skip("Could not find test tournament")
+        assert tournament_id is not None, "Could not find test tournament"
 
         results = client.tournament(tournament_id).results()
 

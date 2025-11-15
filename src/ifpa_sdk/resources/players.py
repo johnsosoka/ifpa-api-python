@@ -273,7 +273,7 @@ class PlayersClient:
         """
         params: dict[str, Any] = {}
         if name is not None:
-            params["name"] = name
+            params["q"] = name
         if first_name is not None:
             params["first_name"] = first_name
         if last_name is not None:
