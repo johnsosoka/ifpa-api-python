@@ -76,20 +76,96 @@ class SeriesStandingEntry(IfpaBaseModel):
     events_counted: int | None = None
 
 
+class RegionOverview(IfpaBaseModel):
+    """Overview of one region's standings in a series.
+
+    Attributes:
+        region_code: Region code (e.g., "AB", "OH")
+        region_name: Full region name
+        player_count: Total number of players in region (as string)
+        unique_player_count: Number of unique players (as string)
+        tournament_count: Number of tournaments in region (as string)
+        current_leader: Dictionary with player_id and player_name of current leader
+        prize_fund: Prize fund amount for this region
+    """
+
+    region_code: str
+    region_name: str
+    player_count: str
+    unique_player_count: str | None = None
+    tournament_count: str | None = None
+    current_leader: dict[str, str]
+    prize_fund: float
+
+
 class SeriesStandingsResponse(IfpaBaseModel):
-    """Response for series standings.
+    """Response for series overall standings across all regions.
+
+    This is returned by the /overall_standings endpoint and provides
+    an overview of all regions participating in the series.
 
     Attributes:
         series_code: The series code
-        series_name: The series name
-        standings: List of standings entries
-        total_players: Total number of players in standings
+        year: Year of the standings
+        championship_prize_fund: Total championship prize fund
+        overall_results: List of region overviews with standings summary
     """
 
-    series_code: str | None = None
-    series_name: str | None = None
-    standings: list[SeriesStandingEntry] = Field(default_factory=list)
-    total_players: int | None = None
+    series_code: str
+    year: int
+    championship_prize_fund: float
+    overall_results: list[RegionOverview] = Field(default_factory=list)
+
+
+class RegionStandingEntry(IfpaBaseModel):
+    """One player's standing entry in a specific region.
+
+    Attributes:
+        series_rank: Player's rank in the region
+        player_id: Player's unique identifier
+        player_name: Player's full name
+        city: City where player is located
+        stateprov_code: State or province code
+        country_code: ISO country code
+        country_name: Full country name
+        wppr_points: WPPR points earned in this region
+        event_count: Number of events participated in
+        win_count: Number of wins
+    """
+
+    series_rank: int
+    player_id: int
+    player_name: str
+    city: str | None = None
+    stateprov_code: str | None = None
+    country_code: str
+    country_name: str
+    wppr_points: float
+    event_count: int
+    win_count: int
+
+
+class SeriesRegionStandingsResponse(IfpaBaseModel):
+    """Response for series region-specific standings.
+
+    This is returned by the /standings endpoint when a region_code is provided
+    and shows detailed player standings for that specific region.
+
+    Attributes:
+        series_code: The series code
+        region_code: The region code
+        region_name: Full region name
+        prize_fund: Prize fund for this region (as string)
+        year: Year of the standings
+        standings: List of player standings in this region
+    """
+
+    series_code: str
+    region_code: str
+    region_name: str
+    prize_fund: str
+    year: int
+    standings: list[RegionStandingEntry] = Field(default_factory=list)
 
 
 class SeriesPlayerEvent(IfpaBaseModel):
@@ -152,32 +228,6 @@ class SeriesPlayerCard(IfpaBaseModel):
     statistics: dict[str, Any] | None = None
 
 
-class SeriesOverview(IfpaBaseModel):
-    """Overview information for a series.
-
-    Attributes:
-        series_code: The series code
-        series_name: The series name
-        description: Series description
-        total_events: Total number of events
-        total_players: Total unique players
-        start_date: Series start date
-        end_date: Series end date
-        rules_summary: Summary of series rules
-        current_leader: Current leader information
-    """
-
-    series_code: str
-    series_name: str
-    description: str | None = None
-    total_events: int | None = None
-    total_players: int | None = None
-    start_date: str | None = None
-    end_date: str | None = None
-    rules_summary: str | None = None
-    current_leader: dict[str, Any] | None = None
-
-
 class SeriesRegion(IfpaBaseModel):
     """Region information for a series.
 
@@ -195,35 +245,17 @@ class SeriesRegion(IfpaBaseModel):
 
 
 class SeriesRegionsResponse(IfpaBaseModel):
-    """Response for series regions.
+    """Response for series active regions.
 
     Attributes:
         series_code: The series code
-        regions: List of regions
+        year: Year of the regions listing
+        active_regions: List of active regions for this series/year
     """
 
     series_code: str | None = None
-    regions: list[SeriesRegion] = Field(default_factory=list)
-
-
-class SeriesRules(IfpaBaseModel):
-    """Rules for a series.
-
-    Attributes:
-        series_code: The series code
-        series_name: The series name
-        rules_text: Full rules text
-        scoring_system: Description of scoring system
-        events_counted: Number of events that count
-        eligibility: Eligibility requirements
-    """
-
-    series_code: str
-    series_name: str
-    rules_text: str | None = None
-    scoring_system: str | None = None
-    events_counted: int | None = None
-    eligibility: str | None = None
+    year: int | None = None
+    active_regions: list[SeriesRegion] = Field(default_factory=list)
 
 
 class SeriesStats(IfpaBaseModel):
@@ -244,40 +276,6 @@ class SeriesStats(IfpaBaseModel):
     total_participations: int | None = None
     average_event_size: float | None = None
     statistics: dict[str, Any] | None = None
-
-
-class SeriesScheduleEvent(IfpaBaseModel):
-    """Scheduled event in a series.
-
-    Attributes:
-        tournament_id: Tournament identifier (if available)
-        event_name: Event name
-        event_date: Event date
-        location: Event location
-        city: City
-        stateprov: State or province
-        status: Event status (scheduled, completed, etc.)
-    """
-
-    tournament_id: int | None = None
-    event_name: str
-    event_date: str | None = None
-    location: str | None = None
-    city: str | None = None
-    stateprov: str | None = None
-    status: str | None = None
-
-
-class SeriesScheduleResponse(IfpaBaseModel):
-    """Response for series schedule.
-
-    Attributes:
-        series_code: The series code
-        events: List of scheduled events
-    """
-
-    series_code: str | None = None
-    events: list[SeriesScheduleEvent] = Field(default_factory=list)
 
 
 class RegionRepresentative(IfpaBaseModel):
@@ -308,3 +306,35 @@ class RegionRepsResponse(IfpaBaseModel):
 
     series_code: str | None = None
     representative: list[RegionRepresentative] = Field(default_factory=list)
+
+
+class SeriesTournament(IfpaBaseModel):
+    """Tournament in a series region.
+
+    Attributes:
+        tournament_id: Unique tournament identifier
+        tournament_name: Tournament name
+        event_date: Date of the event
+        city: City where tournament is held
+        stateprov: State or province code
+    """
+
+    tournament_id: int
+    tournament_name: str
+    event_date: str | None = None
+    city: str | None = None
+    stateprov: str | None = None
+
+
+class SeriesTournamentsResponse(IfpaBaseModel):
+    """Response for series tournaments in a region.
+
+    Attributes:
+        series_code: The series code
+        region_code: The region code
+        tournaments: List of tournaments in the region
+    """
+
+    series_code: str | None = None
+    region_code: str | None = None
+    tournaments: list[SeriesTournament] = Field(default_factory=list)

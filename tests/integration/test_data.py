@@ -25,7 +25,7 @@ TEST_YEAR_START = 2020
 TEST_YEAR_END = 2024
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def player_active_id() -> int:
     """Known active player ID for testing.
 
@@ -45,7 +45,7 @@ def player_active_id() -> int:
     return TEST_PLAYER_ACTIVE_ID
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def player_inactive_id() -> int:
     """Known inactive player ID for testing.
 
@@ -65,7 +65,7 @@ def player_inactive_id() -> int:
     return TEST_PLAYER_INACTIVE_ID
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def player_ids_multiple() -> list[int]:
     """List of player IDs for testing get_multiple().
 
@@ -86,7 +86,7 @@ def player_ids_multiple() -> list[int]:
     return TEST_PLAYER_IDS_MULTIPLE
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def tournament_id() -> int:
     """Known tournament ID for testing.
 
@@ -106,7 +106,7 @@ def tournament_id() -> int:
     return TEST_TOURNAMENT_ID
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def country_code() -> str:
     """Default country code for testing.
 
@@ -126,7 +126,7 @@ def country_code() -> str:
     return TEST_COUNTRY_CODE
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def count_small() -> int:
     """Small count value for testing.
 
@@ -145,7 +145,7 @@ def count_small() -> int:
     return TEST_COUNT_SMALL
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def count_medium() -> int:
     """Medium count value for testing.
 
@@ -164,7 +164,7 @@ def count_medium() -> int:
     return TEST_COUNT_MEDIUM
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def count_large() -> int:
     """Large count value for testing.
 
@@ -183,7 +183,7 @@ def count_large() -> int:
     return TEST_COUNT_LARGE
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def year_start() -> int:
     """Start year for date range testing.
 
@@ -200,7 +200,7 @@ def year_start() -> int:
     return TEST_YEAR_START
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def year_end() -> int:
     """End year for date range testing.
 

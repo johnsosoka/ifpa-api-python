@@ -124,12 +124,13 @@ class TestRankingsClientIntegration:
         try:
             rankings = client.rankings.by_country(country=country_code, count=count_medium)
             assert isinstance(rankings, CountryRankingsResponse)
-            assert rankings.country_rankings is not None
-            # Should have some countries
-            if len(rankings.country_rankings) > 0:
-                first_country = rankings.country_rankings[0]
-                assert first_country.rank > 0
-                assert first_country.country_code is not None
+            assert rankings.rankings is not None
+            # Should have some players
+            if len(rankings.rankings) > 0:
+                first_player = rankings.rankings[0]
+                assert first_player.rank is not None
+                assert first_player.rank > 0
+                assert first_player.country_code is not None
         except (IfpaApiError, ValidationError) as e:
             # Country rankings may not be available or have data quality issues
             pytest.skip(f"Country rankings not available or data issue: {e}")

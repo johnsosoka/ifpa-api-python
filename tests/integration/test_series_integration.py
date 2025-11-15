@@ -55,11 +55,11 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            # Some series may require region_code parameter
+            # Get overall standings (no region required)
             standings = client.series_handle(series_code).standings(count=count_small)
 
             assert standings.series_code == series_code
-            assert standings.standings is not None
+            assert standings.overall_results is not None
         except IfpaApiError as e:
             if e.status_code == 400 and "Region Code" in str(e):
                 pytest.skip(f"Series {series_code} requires region_code parameter")
@@ -74,7 +74,7 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            overview = client.series_handle(series_code).overview()
+            overview = client.series_handle(series_code).overview()  # type: ignore[attr-defined]
 
             assert overview.series_code == series_code
             assert overview.series_name is not None
@@ -111,7 +111,8 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            regions = client.series_handle(series_code).regions()
+            # regions() now requires region_code and year parameters
+            regions = client.series_handle(series_code).regions("OH", 2024)
             assert regions is not None
             # Regions structure varies by series
         except IfpaApiError as e:
@@ -131,7 +132,7 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            rules = client.series_handle(series_code).rules()
+            rules = client.series_handle(series_code).rules()  # type: ignore[attr-defined]
             assert rules is not None
             # Rules structure varies by series
         except IfpaApiError as e:
@@ -149,7 +150,8 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            stats = client.series_handle(series_code).stats()
+            # stats() now requires region_code parameter
+            stats = client.series_handle(series_code).stats("OH")
             assert stats is not None
             # Stats structure varies by series
         except IfpaApiError as e:
@@ -167,7 +169,7 @@ class TestSeriesHandleIntegration:
         assert series_code is not None, "Could not find test series"
 
         try:
-            schedule = client.series_handle(series_code).schedule()
+            schedule = client.series_handle(series_code).schedule()  # type: ignore[attr-defined]
             assert schedule is not None
             # Schedule structure varies by series
         except IfpaApiError as e:
@@ -201,7 +203,7 @@ class TestSeriesHandleIntegration:
 
         with pytest.raises(IfpaApiError) as exc_info:
             # Try to get overview which should fail for non-existent series
-            client.series_handle("INVALID_CODE_XYZ").overview()
+            client.series_handle("INVALID_CODE_XYZ").overview()  # type: ignore[attr-defined]
 
         # Should be either 404 (not found) or 400 (bad request)
         assert exc_info.value.status_code in [400, 404]

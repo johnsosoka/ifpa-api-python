@@ -12,7 +12,7 @@ def pytest_configure(config: Any) -> None:
     config.addinivalue_line("markers", "integration: integration tests requiring API access")
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def api_key() -> Generator[str, None, None]:
     """Get API key from environment or credentials file.
 

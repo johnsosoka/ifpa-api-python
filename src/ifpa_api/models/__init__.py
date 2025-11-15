@@ -21,6 +21,7 @@ from ifpa_api.models.director import (
     DirectorStats,
     DirectorTournament,
     DirectorTournamentsResponse,
+    PlayerProfile,
 )
 from ifpa_api.models.player import (
     MultiPlayerResponse,
@@ -38,7 +39,6 @@ from ifpa_api.models.player import (
     TournamentResult,
 )
 from ifpa_api.models.rankings import (
-    CountryRankingEntry,
     CountryRankingsResponse,
     CustomRankingEntry,
     CustomRankingsResponse,
@@ -46,19 +46,22 @@ from ifpa_api.models.rankings import (
     RankingsResponse,
 )
 from ifpa_api.models.series import (
+    RegionOverview,
+    RegionRepresentative,
+    RegionRepsResponse,
+    RegionStandingEntry,
     Series,
     SeriesListResponse,
-    SeriesOverview,
     SeriesPlayerCard,
     SeriesPlayerEvent,
     SeriesRegion,
     SeriesRegionsResponse,
-    SeriesRules,
-    SeriesScheduleEvent,
-    SeriesScheduleResponse,
+    SeriesRegionStandingsResponse,
     SeriesStandingEntry,
     SeriesStandingsResponse,
     SeriesStats,
+    SeriesTournament,
+    SeriesTournamentsResponse,
 )
 from ifpa_api.models.tournaments import (
     LeagueSession,
@@ -92,6 +95,7 @@ __all__ = [
     "DirectorSearchResponse",
     "CountryDirector",
     "CountryDirectorsResponse",
+    "PlayerProfile",
     # Player
     "Player",
     "PlayerRanking",
@@ -109,7 +113,6 @@ __all__ = [
     # Rankings
     "RankingEntry",
     "RankingsResponse",
-    "CountryRankingEntry",
     "CountryRankingsResponse",
     "CustomRankingEntry",
     "CustomRankingsResponse",
@@ -132,13 +135,16 @@ __all__ = [
     "SeriesStandingsResponse",
     "SeriesPlayerEvent",
     "SeriesPlayerCard",
-    "SeriesOverview",
     "SeriesRegion",
     "SeriesRegionsResponse",
-    "SeriesRules",
     "SeriesStats",
-    "SeriesScheduleEvent",
-    "SeriesScheduleResponse",
+    "SeriesTournament",
+    "SeriesTournamentsResponse",
+    "RegionOverview",
+    "RegionRepresentative",
+    "RegionRepsResponse",
+    "RegionStandingEntry",
+    "SeriesRegionStandingsResponse",
     # Calendar
     "CalendarEvent",
     "CalendarResponse",

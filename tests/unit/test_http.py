@@ -93,6 +93,7 @@ class TestHttpClientApiKeyHeader:
         mock_requests.get("https://api.ifpapinball.com/player/123", json={})
         client._request("GET", "/player/123")
 
+        assert mock_requests.last_request is not None
         assert mock_requests.last_request.headers["X-API-Key"] == "my-secret-key"
 
     def test_accept_header_is_json(self, mock_requests: requests_mock.Mocker) -> None:
@@ -103,6 +104,7 @@ class TestHttpClientApiKeyHeader:
         mock_requests.get("https://api.ifpapinball.com/player/123", json={})
         client._request("GET", "/player/123")
 
+        assert mock_requests.last_request is not None
         assert mock_requests.last_request.headers["Accept"] == "application/json"
 
     def test_user_agent_header_is_set(self, mock_requests: requests_mock.Mocker) -> None:
@@ -113,6 +115,7 @@ class TestHttpClientApiKeyHeader:
         mock_requests.get("https://api.ifpapinball.com/player/123", json={})
         client._request("GET", "/player/123")
 
+        assert mock_requests.last_request is not None
         assert mock_requests.last_request.headers["User-Agent"] == "ifpa-api-python"
 
 

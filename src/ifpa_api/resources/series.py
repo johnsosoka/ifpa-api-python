@@ -9,13 +9,12 @@ from typing import TYPE_CHECKING
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
-    SeriesOverview,
     SeriesPlayerCard,
     SeriesRegionsResponse,
-    SeriesRules,
-    SeriesScheduleResponse,
+    SeriesRegionStandingsResponse,
     SeriesStandingsResponse,
     SeriesStats,
+    SeriesTournamentsResponse,
 )
 
 if TYPE_CHECKING:
@@ -51,23 +50,29 @@ class SeriesHandle:
         start_pos: int | None = None,
         count: int | None = None,
     ) -> SeriesStandingsResponse:
-        """Get current standings for this series.
+        """Get overall standings for this series across all regions.
+
+        Returns an overview of standings for all regions in the series, including
+        the current leader and prize fund for each region.
 
         Args:
-            start_pos: Starting position for pagination
-            count: Number of results to return
+            start_pos: Starting position for pagination (currently unused by API)
+            count: Number of results to return (currently unused by API)
 
         Returns:
-            List of player standings
+            Overall standings with region overviews
 
         Raises:
             IfpaApiError: If the API request fails
 
         Example:
             ```python
-            standings = client.series("PAPA").standings(start_pos=0, count=50)
-            for entry in standings.standings:
-                print(f"{entry.position}. {entry.player_name}: {entry.points} pts")
+            standings = client.series_handle("NACS").standings()
+            print(f"Series: {standings.series_code} ({standings.year})")
+            print(f"Total Prize Fund: ${standings.championship_prize_fund}")
+            for region in standings.overall_results:
+                print(f"{region.region_name}: {region.player_count} players")
+                print(f"  Leader: {region.current_leader['player_name']}")
             ```
         """
         params = {}
@@ -77,9 +82,51 @@ class SeriesHandle:
             params["count"] = count
 
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/standings", params=params
+            "GET", f"/series/{self._series_code}/overall_standings", params=params
         )
         return SeriesStandingsResponse.model_validate(response)
+
+    def region_standings(
+        self,
+        region_code: str,
+        start_pos: int | None = None,
+        count: int | None = None,
+    ) -> SeriesRegionStandingsResponse:
+        """Get detailed player standings for a specific region in this series.
+
+        Returns the full standings list with individual player rankings for
+        a specific region.
+
+        Args:
+            region_code: Region code (e.g., "OH", "IL", "CA")
+            start_pos: Starting position for pagination
+            count: Number of results to return
+
+        Returns:
+            Detailed region standings with player rankings
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            standings = client.series_handle("NACS").region_standings("OH")
+            print(f"Region: {standings.region_name}")
+            print(f"Prize Fund: ${standings.prize_fund}")
+            for player in standings.standings[:10]:
+                print(f"{player.series_rank}. {player.player_name}: {player.wppr_points} pts")
+            ```
+        """
+        params: dict[str, str | int] = {"region_code": region_code}
+        if start_pos is not None:
+            params["start_pos"] = start_pos
+        if count is not None:
+            params["count"] = count
+
+        response = self._http._request(
+            "GET", f"/series/{self._series_code}/standings", params=params
+        )
+        return SeriesRegionStandingsResponse.model_validate(response)
 
     def player_card(
         self,
@@ -122,101 +169,82 @@ class SeriesHandle:
         )
         return SeriesPlayerCard.model_validate(response)
 
-    def overview(self) -> SeriesOverview:
-        """Get overview information for this series.
+    def regions(self, region_code: str, year: int) -> SeriesRegionsResponse:
+        """Get active regions in this series for a specific year.
+
+        Note: The region_code parameter is required by the API but the endpoint
+        returns all active regions for the specified year regardless of the
+        region_code value provided.
+
+        Args:
+            region_code: Region code (e.g., "OH", "IL", "CA") - required by API
+                but not used for filtering
+            year: Year to fetch regions for
 
         Returns:
-            Series overview with description and statistics
+            List of all active regions for the specified year
 
         Raises:
             IfpaApiError: If the API request fails
 
         Example:
             ```python
-            overview = client.series("PAPA").overview()
-            print(f"Series: {overview.series_name}")
-            print(f"Total Events: {overview.total_events}")
-            print(f"Total Players: {overview.total_players}")
+            regions = client.series_handle("NACS").regions("OH", 2025)
+            for region in regions.active_regions:
+                print(f"{region.region_name} ({region.region_code})")
             ```
         """
-        response = self._http._request("GET", f"/series/{self._series_code}/overview")
-        return SeriesOverview.model_validate(response)
-
-    def regions(self) -> SeriesRegionsResponse:
-        """Get regions participating in this series.
-
-        Returns:
-            List of regions with player and event counts
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            regions = client.series("PAPA").regions()
-            for region in regions.regions:
-                print(f"{region.region_name}: {region.player_count} players")
-            ```
-        """
-        response = self._http._request("GET", f"/series/{self._series_code}/regions")
+        params = {"region_code": region_code, "year": year}
+        response = self._http._request("GET", f"/series/{self._series_code}/regions", params=params)
         return SeriesRegionsResponse.model_validate(response)
 
-    def rules(self) -> SeriesRules:
-        """Get rules for this series.
+    def stats(self, region_code: str) -> SeriesStats:
+        """Get statistics for a specific region in this series.
+
+        Args:
+            region_code: Region code (e.g., "OH", "IL", "CA")
 
         Returns:
-            Series rules and scoring system information
+            Series statistics including totals and averages for the region
 
         Raises:
             IfpaApiError: If the API request fails
 
         Example:
             ```python
-            rules = client.series("PAPA").rules()
-            print(f"Scoring System: {rules.scoring_system}")
-            print(f"Events Counted: {rules.events_counted}")
-            ```
-        """
-        response = self._http._request("GET", f"/series/{self._series_code}/rules")
-        return SeriesRules.model_validate(response)
-
-    def stats(self) -> SeriesStats:
-        """Get statistics for this series.
-
-        Returns:
-            Series statistics including totals and averages
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            stats = client.series("PAPA").stats()
+            stats = client.series_handle("NACS").stats("OH")
             print(f"Total Events: {stats.total_events}")
             print(f"Average Event Size: {stats.average_event_size}")
             ```
         """
-        response = self._http._request("GET", f"/series/{self._series_code}/stats")
+        params = {"region_code": region_code}
+        response = self._http._request("GET", f"/series/{self._series_code}/stats", params=params)
         return SeriesStats.model_validate(response)
 
-    def schedule(self) -> SeriesScheduleResponse:
-        """Get schedule for this series.
+    def tournaments(self, region_code: str) -> SeriesTournamentsResponse:
+        """Get tournaments for a specific region in this series.
+
+        Args:
+            region_code: Region code (e.g., "OH", "IL", "CA")
 
         Returns:
-            List of scheduled events
+            List of tournaments in the specified region
 
         Raises:
             IfpaApiError: If the API request fails
 
         Example:
             ```python
-            schedule = client.series("PAPA").schedule()
-            for event in schedule.events:
-                print(f"{event.event_date}: {event.event_name} in {event.city}")
+            tournaments = client.series_handle("NACS").tournaments("OH")
+            for tournament in tournaments.tournaments:
+                print(f"{tournament.tournament_name} on {tournament.event_date}")
             ```
         """
-        response = self._http._request("GET", f"/series/{self._series_code}/schedule")
-        return SeriesScheduleResponse.model_validate(response)
+        params = {"region_code": region_code}
+        response = self._http._request(
+            "GET", f"/series/{self._series_code}/tournaments", params=params
+        )
+        return SeriesTournamentsResponse.model_validate(response)
 
     def region_reps(self) -> RegionRepsResponse:
         """Get region representatives for this series.

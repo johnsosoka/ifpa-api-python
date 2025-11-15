@@ -255,10 +255,13 @@ class TournamentSearchResult(IfpaBaseModel):
 class TournamentSearchResponse(IfpaBaseModel):
     """Response for tournament search query.
 
+    Note:
+        The API returns tournament data under the 'search' key, not 'tournaments'.
+
     Attributes:
         tournaments: List of matching tournaments
         total_results: Total number of results found
     """
 
-    tournaments: list[TournamentSearchResult] = Field(default_factory=list)
+    tournaments: list[TournamentSearchResult] = Field(default_factory=list, alias="search")
     total_results: int | None = None

@@ -183,8 +183,8 @@ class TournamentsClient:
             city: Filter by city
             stateprov: Filter by state/province
             country: Filter by country code
-            start_date: Filter by start date (YYYY-MM-DD)
-            end_date: Filter by end date (YYYY-MM-DD)
+            start_date: Filter by start date (YYYY-MM-DD). Must be provided with end_date.
+            end_date: Filter by end date (YYYY-MM-DD). Must be provided with start_date.
             tournament_type: Filter by tournament type (open, women, etc.)
             start_pos: Starting position for pagination
             count: Number of results to return
@@ -193,14 +193,19 @@ class TournamentsClient:
             List of matching tournaments
 
         Raises:
+            ValueError: If only one of start_date or end_date is provided
             IfpaApiError: If the API request fails
+
+        Note:
+            The API requires start_date and end_date to be provided together.
+            Providing only one will result in a ValueError.
 
         Example:
             ```python
             # Search by name
             results = client.tournaments.search(name="Pinball")
 
-            # Search by location and date range
+            # Search by location and date range (must provide BOTH dates)
             results = client.tournaments.search(
                 city="Portland",
                 stateprov="OR",
@@ -216,6 +221,14 @@ class TournamentsClient:
             )
             ```
         """
+        # Validate that start_date and end_date are provided together
+        if (start_date is not None) != (end_date is not None):
+            raise ValueError(
+                "start_date and end_date must be provided together. "
+                "The IFPA API requires both dates or neither. "
+                f"Received start_date={start_date}, end_date={end_date}"
+            )
+
         params: dict[str, Any] = {}
         if name is not None:
             params["name"] = name

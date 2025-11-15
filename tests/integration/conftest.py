@@ -21,7 +21,7 @@ from tests.integration.test_data import (  # noqa: F401
 )
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def client(api_key: str) -> Generator[IfpaClient, None, None]:
     """Create a real IfpaClient for integration tests.
 

@@ -73,6 +73,7 @@ class TestPlayersClient:
 
         assert len(result.search) == 25
 
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=25" in query
@@ -94,6 +95,7 @@ class TestPlayersClient:
 
         assert isinstance(result, MultiPlayerResponse)
         assert result.player is not None
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "players=123%2c456" in query.lower()
 
@@ -118,6 +120,7 @@ class TestPlayersClient:
         client = IfpaClient(api_key="test-key")
         client.players.search(name="John")
 
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "name=john" in query.lower()
         assert "q=" not in query
@@ -132,6 +135,7 @@ class TestPlayersClient:
         client = IfpaClient(api_key="test-key")
         client.players.search(tournament="PAPA", tourpos=1)
 
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "tournament=papa" in query.lower()
         assert "tourpos=1" in query
@@ -272,6 +276,7 @@ class TestPlayerHandle:
         )
 
         assert isinstance(results, PlayerResultsResponse)
+        assert mock_requests.last_request is not None
         assert "results/main/active" in mock_requests.last_request.path
 
     def test_results_with_ranking_system_and_type(
@@ -300,6 +305,7 @@ class TestPlayerHandle:
         )
 
         assert len(results.results) == 1
+        assert mock_requests.last_request is not None
         assert "results/main/active" in mock_requests.last_request.path
 
     def test_results_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
@@ -322,6 +328,7 @@ class TestPlayerHandle:
         )
 
         assert len(results.results) == 50
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=50" in query

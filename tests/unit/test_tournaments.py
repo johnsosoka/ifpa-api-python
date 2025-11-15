@@ -72,6 +72,7 @@ class TestTournamentsClient:
         result = client.tournaments.search(city="Portland", stateprov="OR", country="US")
 
         assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "city=portland" in query
         assert "stateprov=or" in query
@@ -97,6 +98,7 @@ class TestTournamentsClient:
         result = client.tournaments.search(start_date="2024-07-01", end_date="2024-07-31")
 
         assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_date=2024-07-01" in query
         assert "end_date=2024-07-31" in query
@@ -121,6 +123,7 @@ class TestTournamentsClient:
         result = client.tournaments.search(tournament_type="women")
 
         assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
         assert "tournament_type=women" in mock_requests.last_request.query
 
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
@@ -139,6 +142,7 @@ class TestTournamentsClient:
         result = client.tournaments.search(start_pos=0, count=50)
 
         assert len(result.tournaments) == 50
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=50" in query

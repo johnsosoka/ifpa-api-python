@@ -6,7 +6,7 @@ import pytest
 import requests_mock
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def mock_requests() -> Generator[requests_mock.Mocker, None, None]:
     """Provide requests_mock fixture for mocking HTTP requests.
 
