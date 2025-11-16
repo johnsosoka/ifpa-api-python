@@ -42,13 +42,17 @@ response: PlayerSearchResponse = client.players.search(
     tourpos=1
 )
 
-# Paginated search
+# Search with count limit
 response: PlayerSearchResponse = client.players.search(
     name="Smith",
-    start_pos=0,
     count=25
 )
 ```
+
+!!! warning "Pagination Limitations"
+    The IFPA API's player search pagination is currently non-functional. Using `start_pos` parameter
+    may cause errors or return 0 results. For best results, use only the `count` parameter to limit
+    results and avoid `start_pos` entirely.
 
 ### Search Parameters
 
@@ -59,8 +63,10 @@ response: PlayerSearchResponse = client.players.search(
 | `country` | `str` | Country name or 2-digit code |
 | `tournament` | `str` | Tournament name (partial strings accepted) |
 | `tourpos` | `int` | Finishing position in tournament |
-| `start_pos` | `int \| str` | Starting position for pagination |
-| `count` | `int \| str` | Number of results to return |
+| `count` | `int \| str` | Number of results to return (recommended: use without start_pos) |
+
+!!! note "Deprecated Parameter"
+    The `start_pos` parameter is documented but non-functional in the API. Avoid using it.
 
 ## Get Player Profile
 
@@ -96,6 +102,23 @@ Player profiles include:
 - **Statistics**: Additional player statistics in `player_stats` dictionary
 - **Profile**: Profile photo URL, exclusion flag
 
+### Invalid Player IDs
+
+When requesting a non-existent player, the SDK raises an error:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+
+client: IfpaClient = IfpaClient()
+
+try:
+    player = client.player(99999999).get()
+except IfpaApiError as e:
+    if e.status_code == 404:
+        print("Player not found")
+```
+
 ## Get Multiple Players
 
 Fetch multiple players in a single request for efficient batch operations:
@@ -129,6 +152,7 @@ else:
 - Maximum 50 player IDs per request
 - Raises `IfpaClientValidationError` if more than 50 IDs provided
 - Response may contain a single `Player` or list of `Player` objects depending on API response
+- Invalid player IDs will cause the entire request to fail with a 404 error
 
 ## Tournament Results
 
@@ -186,31 +210,10 @@ inactive: PlayerResultsResponse = client.player(12345).results(
 )
 ```
 
-### Paginate Results
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.common import RankingSystem, ResultType
-from ifpa_api.models.player import PlayerResultsResponse
-
-client: IfpaClient = IfpaClient()
-
-# Get first 50 results
-results: PlayerResultsResponse = client.player(12345).results(
-    ranking_system=RankingSystem.MAIN,
-    result_type=ResultType.ACTIVE,
-    start_pos=0,
-    count=50
-)
-
-# Get next 50
-next_results: PlayerResultsResponse = client.player(12345).results(
-    ranking_system=RankingSystem.MAIN,
-    result_type=ResultType.ACTIVE,
-    start_pos=50,
-    count=50
-)
-```
+!!! warning "Pagination Not Supported"
+    While the API accepts `start_pos` and `count` parameters for results, they are currently
+    ignored by the API. Requesting a specific page size or offset will not work as expected.
+    The API returns all results regardless of these parameters.
 
 ### Parameters
 
@@ -218,8 +221,9 @@ next_results: PlayerResultsResponse = client.player(12345).results(
 |-----------|------|-------------|
 | `ranking_system` | `RankingSystem` | Ranking system filter (REQUIRED) |
 | `result_type` | `ResultType` | Result activity type (REQUIRED) |
-| `start_pos` | `int` | Starting position for pagination |
-| `count` | `int` | Number of results to return |
+
+!!! note "Deprecated Parameters"
+    `start_pos` and `count` parameters are non-functional in the current API.
 
 ### Ranking Systems
 
@@ -241,30 +245,57 @@ Compare two players' tournament history:
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.player import PvpComparison
+from ifpa_api.exceptions import PlayersNeverMetError
 
 client: IfpaClient = IfpaClient()
 
-# Compare player 12345 vs player 67890
-pvp: PvpComparison = client.player(12345).pvp(67890)
+try:
+    # Compare player 12345 vs player 67890
+    pvp: PvpComparison = client.player(12345).pvp(67890)
 
-print(f"Player 1: {pvp.player1_name}")
-print(f"Player 2: {pvp.player2_name}")
-print(f"\nHead-to-Head Record:")
-print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
-print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
-print(f"  Ties: {pvp.ties}")
-print(f"  Total meetings: {pvp.total_meetings}")
+    print(f"Player 1: {pvp.player1_name}")
+    print(f"Player 2: {pvp.player2_name}")
+    print(f"\nHead-to-Head Record:")
+    print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
+    print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
+    print(f"  Ties: {pvp.ties}")
+    print(f"  Total meetings: {pvp.total_meetings}")
 
-# Show tournament-by-tournament breakdown
-for match in pvp.tournaments:
-    print(f"\nTournament: {match}")
+    # Show tournament-by-tournament breakdown
+    for match in pvp.tournaments:
+        winner = "Player 1" if match.winner_player_id == pvp.player1_id else "Player 2"
+        print(f"\n{match.tournament_name} ({match.event_date})")
+        print(f"  {pvp.player1_name}: Position {match.player_1_position}")
+        print(f"  {pvp.player2_name}: Position {match.player_2_position}")
+        print(f"  Winner: {winner}")
+
+except PlayersNeverMetError:
+    print("These players have never competed in the same tournament")
+```
+
+### Exception Handling
+
+The `pvp()` method raises `PlayersNeverMetError` when two players have never competed together:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import PlayersNeverMetError, IfpaApiError
+
+client: IfpaClient = IfpaClient()
+
+try:
+    comparison = client.player(12345).pvp(67890)
+except PlayersNeverMetError as e:
+    print(f"Players {e.player1_id} and {e.player2_id} have never met")
+except IfpaApiError as e:
+    print(f"API error: {e}")
 ```
 
 ### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `other_player_id` | `int \| str` | ID of player to compare against |
+| `opponent_id` | `int \| str` | ID of player to compare against |
 
 ## PvP All Competitors
 
@@ -329,6 +360,10 @@ The history response contains two separate arrays:
 
 - **rank_history**: Historical rank positions with WPPR points and tournament counts
 - **rating_history**: Historical rating values
+
+!!! note "String Values"
+    The API returns numeric fields as strings in history data. Convert them using `int()` or
+    `float()` when performing calculations.
 
 ### Visualize Ranking Trends
 
@@ -402,13 +437,13 @@ def analyze_player(player_id: int) -> None:
         print(f"\nRecent Tournament Results:")
         results: PlayerResultsResponse = client.player(player_id).results(
             ranking_system=RankingSystem.MAIN,
-            result_type=ResultType.ACTIVE,
-            count=10
+            result_type=ResultType.ACTIVE
         )
 
         for result in results.results[:5]:
-            finish = f"{result.position}/{result.player_count}"
-            print(f"  {result.tournament_name}: {finish} ({result.wppr_points:.2f} pts)")
+            finish = f"{result.position}/{result.player_count}" if result.player_count else str(result.position)
+            points = f"{result.wppr_points:.2f}" if result.wppr_points else "N/A"
+            print(f"  {result.tournament_name}: {finish} ({points} pts)")
 
         # Ranking trend
         history: RankingHistory = client.player(player_id).history()
@@ -424,7 +459,7 @@ def analyze_player(player_id: int) -> None:
 
     except IfpaApiError as e:
         print(f"API Error: {e}")
-        if hasattr(e, 'status_code'):
+        if e.status_code:
             print(f"Status Code: {e.status_code}")
 
 
@@ -448,7 +483,7 @@ client: IfpaClient = IfpaClient()
 try:
     player: Player = client.player(999999).get()
 except IfpaApiError as e:
-    if hasattr(e, 'status_code') and e.status_code == 404:
+    if e.status_code == 404:
         print("Player not found")
     else:
         print(f"API error: {e}")
@@ -520,8 +555,25 @@ def get_many_players(player_ids: list[int]) -> list[Player]:
     return all_players
 ```
 
+## Known Limitations
+
+### API Pagination Issues
+
+The IFPA API has several known pagination issues:
+
+1. **Player Search Pagination**: Using `start_pos` may cause SQL errors or return 0 results
+2. **Results Pagination**: The `count` and `start_pos` parameters are ignored by the API
+3. **State/Province Filter**: May return players from incorrect states/countries
+
+These are API-level issues, not SDK bugs. For the most reliable experience:
+
+- Avoid using `start_pos` in player searches
+- Don't rely on pagination for player results
+- Be cautious with state/province filters - verify results manually
+
 ## Related Resources
 
 - [Rankings](rankings.md) - View rankings across all players
 - [Tournaments](tournaments.md) - View tournament results
 - [Error Handling](error-handling.md) - Handle API errors
+- [Exceptions Reference](../api-reference/exceptions.md) - Exception types

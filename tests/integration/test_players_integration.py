@@ -14,7 +14,6 @@ Updated to use Idaho Pinball Museum community players as test fixtures:
 from typing import cast
 
 import pytest
-from pydantic import ValidationError
 
 from ifpa_api.client import IfpaClient
 from ifpa_api.models.common import RankingSystem, ResultType
@@ -201,15 +200,19 @@ class TestPlayerHandleIntegration:
         """Test that getting non-existent player raises appropriate error.
 
         Uses a very high player ID that is extremely unlikely to exist.
-        The API returns None for non-existent players, which Pydantic
-        validates as an error.
+        The API returns None for non-existent players, which the HTTP
+        client detects and raises IfpaApiError with 404 status code.
         """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
+        from ifpa_api.exceptions import IfpaApiError
 
-        # Use very high ID that doesn't exist - API returns None which fails validation
-        with pytest.raises(ValidationError):
+        # Use very high ID that doesn't exist - API returns None which triggers 404 error
+        with pytest.raises(IfpaApiError) as exc_info:
             client.player(99999999).get()
+
+        # Verify it's a 404 error
+        assert exc_info.value.status_code == 404
 
     def test_inactive_player(self, api_key: str, player_inactive_id: int) -> None:
         """Test getting an inactive player still returns valid data."""

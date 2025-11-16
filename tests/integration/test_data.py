@@ -39,7 +39,8 @@ TEST_PVP_PAIR_ALT_1 = (25584, 52913)  # Dwayne vs Dave (305 tournaments)
 TEST_PVP_PAIR_ALT_2 = (47585, 52913)  # Debbie vs Dave (197 tournaments)
 
 # Players who have never competed (for PlayersNeverMetError testing)
-TEST_PVP_NEVER_MET = (25584, 50104)  # Dwayne vs John
+# NOTE: Previous pair (25584, 50104) was incorrect - they competed in 3 tournaments
+TEST_PVP_NEVER_MET = (50104, 1)  # John Sosoka vs World #1 (never met)
 
 # === PLAYER GROUPS ===
 
@@ -224,18 +225,21 @@ def pvp_pair_never_met() -> tuple[int, int]:
     """PVP pair that have never competed together.
 
     Returns:
-        Tuple (25584, 50104) - Dwayne Smith vs John Sosoka
+        Tuple (50104, 1) - John Sosoka vs World #1 player
         - Have never competed in same tournament
-        - Should raise PlayersNeverMetError
+        - API returns 200 with error message in body
 
-    Use this fixture for testing PlayersNeverMetError exception handling.
+    Use this fixture for testing API error handling when players never met.
+
+    Note: API returns HTTP 200 with body:
+    {"message":"These users have never played in the same tournament","code":"404"}
 
     Example:
         ```python
         def test_pvp_never_met_error(client, pvp_pair_never_met):
-            from ifpa_api.exceptions import PlayersNeverMetError
+            from ifpa_api.exceptions import IfpaApiError
             player1_id, player2_id = pvp_pair_never_met
-            with pytest.raises(PlayersNeverMetError):
+            with pytest.raises(IfpaApiError):
                 client.player(player1_id).pvp(player2_id)
         ```
     """

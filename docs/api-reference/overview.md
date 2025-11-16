@@ -17,13 +17,15 @@ ifpa_api/
 │   ├── rankings.py   # Rankings models
 │   ├── tournaments.py # Tournament models
 │   ├── series.py     # Series models
+│   ├── reference.py  # Reference data models
 │   └── calendar.py   # Calendar models
 └── resources/        # Resource clients and handles
     ├── directors.py  # DirectorsClient, DirectorHandle
     ├── players.py    # PlayersClient, PlayerHandle
     ├── rankings.py   # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle
-    └── series.py     # SeriesClient, SeriesHandle
+    ├── series.py     # SeriesClient, SeriesHandle
+    └── reference.py  # ReferenceClient
 ```
 
 ## Public API
@@ -73,6 +75,7 @@ from ifpa_api import (
 | `RankingsClient` | Access ranking systems |
 | `TournamentsClient` | Search tournaments |
 | `SeriesClient` | List series |
+| `ReferenceClient` | Get countries and state/province data |
 
 ## Resource Handles
 

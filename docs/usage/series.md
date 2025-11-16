@@ -1,6 +1,6 @@
 # Series
 
-Access tournament series information, standings, and player performance.
+Access tournament series information, standings, player cards, and regional data.
 
 ## List All Series
 
@@ -27,35 +27,69 @@ for series in all_series.series:
 active_series: SeriesListResponse = client.series.list(active_only=True)
 ```
 
-## Get Series Standings
+## Get Overall Series Standings
 
-Get current standings for a specific series with optional pagination.
+Get overall standings overview for a series across all regions. This returns a summary
+of each region with current leader and prize fund information.
 
 **Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `start_pos` | `int` | No | Starting position for pagination |
-| `count` | `int` | No | Number of results to return |
+| `start_pos` | `int` | No | Starting position for pagination (currently unused by API) |
+| `count` | `int` | No | Number of results to return (currently unused by API) |
 
 ```python
 from ifpa_api.models.series import SeriesStandingsResponse
 
-# Get standings for a specific series
-standings: SeriesStandingsResponse = client.series_handle("PAPA").standings(
+# Get overall standings overview for all regions
+standings: SeriesStandingsResponse = client.series_handle("NACS").standings()
+
+print(f"Series: {standings.series_code} ({standings.year})")
+print(f"Total Prize Fund: ${standings.championship_prize_fund}")
+
+for region in standings.overall_results:
+    print(f"{region.region_name}: {region.player_count} players")
+    print(f"  Leader: {region.current_leader['player_name']}")
+    print(f"  Prize Fund: ${region.prize_fund}")
+```
+
+## Get Region-Specific Standings
+
+Get detailed player standings for a specific region in a series.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `region_code` | `str` | Yes | Region code (e.g., "OH", "IL", "CA") |
+| `start_pos` | `int` | No | Starting position for pagination |
+| `count` | `int` | No | Number of results to return |
+
+```python
+from ifpa_api.models.series import SeriesRegionStandingsResponse
+
+# Get detailed standings for Ohio region
+standings: SeriesRegionStandingsResponse = client.series_handle("NACS").region_standings("OH")
+
+print(f"Region: {standings.region_name}")
+print(f"Prize Fund: ${standings.prize_fund}")
+
+for player in standings.standings[:10]:
+    print(f"{player.series_rank}. {player.player_name}: {player.wppr_points} pts")
+    print(f"  Events: {player.event_count} | Wins: {player.win_count}")
+
+# Paginated region standings
+standings_page: SeriesRegionStandingsResponse = client.series_handle("NACS").region_standings(
+    region_code="OH",
     start_pos=0,
     count=50
 )
-
-for entry in standings.standings:
-    print(f"{entry.position}. {entry.player_name}: {entry.points} points")
-    print(f"  Events Played: {entry.events_played}")
-    print(f"  Best Finish: {entry.best_finish}")
 ```
 
 ## Get Player's Series Card
 
-Get a player's performance card for a specific series. Requires a region code and optionally accepts a year.
+Get a player's performance card for a specific series and region.
 
 **Parameters:**
 
@@ -73,12 +107,15 @@ card: SeriesPlayerCard = client.series_handle("PAPA").player_card(
     player_id=12345,
     region_code="OH"
 )
+
+print(f"Player: {card.player_name}")
 print(f"Position: {card.current_position}")
 print(f"Total Points: {card.total_points}")
 
 for event in card.player_card:
     print(f"{event.tournament_name}: {event.wppr_points} pts")
-    print(f"  Rank: {event.region_event_rank}")
+    if event.region_event_rank:
+        print(f"  Rank: {event.region_event_rank}")
 
 # Get card for specific year
 card_2023: SeriesPlayerCard = client.series_handle("PAPA").player_card(
@@ -88,95 +125,80 @@ card_2023: SeriesPlayerCard = client.series_handle("PAPA").player_card(
 )
 ```
 
-## Get Series Overview
+## Get Active Regions
 
-Get overview information and statistics for a series.
+Get list of active regions in a series for a specific year.
 
-**Parameters:** None
+!!! note "API Behavior"
+    The `region_code` parameter is required by the API but the endpoint returns all
+    active regions for the year regardless of the `region_code` value provided.
 
-```python
-from ifpa_api.models.series import SeriesOverview
+**Parameters:**
 
-# Get series overview and statistics
-overview: SeriesOverview = client.series_handle("PAPA").overview()
-print(f"Series: {overview.series_name}")
-print(f"Description: {overview.description}")
-print(f"Total Events: {overview.total_events}")
-print(f"Total Players: {overview.total_players}")
-print(f"Start Date: {overview.start_date}")
-print(f"End Date: {overview.end_date}")
-```
-
-## Get Series Regions
-
-Get list of regions participating in a series with player and event counts.
-
-**Parameters:** None
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `region_code` | `str` | Yes | Region code (required by API but not used for filtering) |
+| `year` | `int` | Yes | Year to fetch regions for |
 
 ```python
 from ifpa_api.models.series import SeriesRegionsResponse
 
-# Get regions for a series
-regions: SeriesRegionsResponse = client.series_handle("PAPA").regions()
-for region in regions.regions:
+# Get all active regions for 2025
+regions: SeriesRegionsResponse = client.series_handle("NACS").regions("OH", 2025)
+
+for region in regions.active_regions:
     print(f"{region.region_name} ({region.region_code})")
-    print(f"  Players: {region.player_count}")
-    print(f"  Events: {region.event_count}")
-```
-
-## Get Series Rules
-
-Get rules and scoring system information for a series.
-
-**Parameters:** None
-
-```python
-from ifpa_api.models.series import SeriesRules
-
-# Get series rules and scoring system
-rules: SeriesRules = client.series_handle("PAPA").rules()
-print(f"Series: {rules.series_name}")
-print(f"Scoring System: {rules.scoring_system}")
-print(f"Events Counted: {rules.events_counted}")
-print(f"Eligibility: {rules.eligibility}")
-print(f"\nRules:\n{rules.rules_text}")
+    if region.player_count:
+        print(f"  Players: {region.player_count}")
+    if region.event_count:
+        print(f"  Events: {region.event_count}")
 ```
 
 ## Get Series Statistics
 
-Get aggregate statistics for a series including totals and averages.
+Get aggregate statistics for a specific region in a series.
 
-**Parameters:** None
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `region_code` | `str` | Yes | Region code (e.g., "OH", "IL", "CA") |
 
 ```python
 from ifpa_api.models.series import SeriesStats
 
-# Get series statistics
-stats: SeriesStats = client.series_handle("PAPA").stats()
+# Get statistics for Ohio region
+stats: SeriesStats = client.series_handle("NACS").stats("OH")
+
 print(f"Total Events: {stats.total_events}")
 print(f"Total Players: {stats.total_players}")
 print(f"Total Participations: {stats.total_participations}")
 print(f"Average Event Size: {stats.average_event_size}")
 ```
 
-## Get Series Schedule
+## Get Series Tournaments
 
-Get the schedule of upcoming and past events for a series.
+Get tournaments for a specific region in a series.
 
-**Parameters:** None
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `region_code` | `str` | Yes | Region code (e.g., "OH", "IL", "CA") |
 
 ```python
-from ifpa_api.models.series import SeriesScheduleResponse
+from ifpa_api.models.series import SeriesTournamentsResponse
 
-# Get series schedule
-schedule: SeriesScheduleResponse = client.series_handle("PAPA").schedule()
-for event in schedule.events:
-    print(f"{event.event_date}: {event.event_name}")
-    print(f"  Location: {event.city}, {event.stateprov}")
-    print(f"  Status: {event.status}")
+# Get tournaments for Ohio region
+tournaments: SeriesTournamentsResponse = client.series_handle("NACS").tournaments("OH")
+
+for tournament in tournaments.tournaments:
+    print(f"{tournament.tournament_name}")
+    print(f"  Date: {tournament.event_date}")
+    print(f"  Location: {tournament.city}, {tournament.stateprov}")
 ```
 
-## Get Series Region Representatives
+## Get Region Representatives
 
 Get list of region representatives for a series.
 
@@ -187,6 +209,7 @@ from ifpa_api.models.series import RegionRepsResponse
 
 # Get region representatives
 reps: RegionRepsResponse = client.series_handle("PAPA").region_reps()
+
 for rep in reps.representative:
     print(f"{rep.region_name} ({rep.region_code}): {rep.name}")
     print(f"  Player ID: {rep.player_id}")
@@ -194,4 +217,61 @@ for rep in reps.representative:
         print(f"  Photo: {rep.profile_photo}")
 ```
 
-For complete examples, see the [README](https://github.com/johnsosoka/ifpa-api-python#series).
+## Complete Example: Series Analysis
+
+Here's a complete example analyzing a series across regions:
+
+```python
+from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api.models.series import (
+    SeriesStandingsResponse,
+    SeriesRegionStandingsResponse,
+    SeriesStats,
+)
+
+
+def analyze_series(series_code: str, region_code: str) -> None:
+    """Analyze a series and specific region."""
+    with IfpaClient() as client:
+        try:
+            # Get overall standings
+            overall: SeriesStandingsResponse = client.series_handle(series_code).standings()
+
+            print(f"{series_code} Series - {overall.year}")
+            print(f"Championship Prize Fund: ${overall.championship_prize_fund}")
+            print(f"\nRegions ({len(overall.overall_results)}):")
+
+            for region in overall.overall_results[:5]:
+                print(f"  {region.region_name}: {region.player_count} players")
+                print(f"    Leader: {region.current_leader['player_name']}")
+
+            # Get detailed region standings
+            region_standings: SeriesRegionStandingsResponse = (
+                client.series_handle(series_code).region_standings(region_code)
+            )
+
+            print(f"\n{region_standings.region_name} Region Standings:")
+            for player in region_standings.standings[:10]:
+                print(f"  {player.series_rank}. {player.player_name}: {player.wppr_points} pts")
+
+            # Get region statistics
+            stats: SeriesStats = client.series_handle(series_code).stats(region_code)
+
+            print(f"\n{region_code} Region Statistics:")
+            print(f"  Total Events: {stats.total_events}")
+            print(f"  Total Players: {stats.total_players}")
+            print(f"  Average Event Size: {stats.average_event_size:.1f}")
+
+        except IfpaApiError as e:
+            print(f"Error: {e}")
+
+
+if __name__ == "__main__":
+    analyze_series("NACS", "OH")
+```
+
+## Related Resources
+
+- [Tournaments](tournaments.md) - Search and view tournament details
+- [Players](players.md) - View player profiles and results
+- [Rankings](rankings.md) - View player rankings

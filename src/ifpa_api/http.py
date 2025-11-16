@@ -4,6 +4,7 @@ This module provides the internal HTTP client that handles request/response
 cycles, authentication, error mapping, and session management.
 """
 
+import contextlib
 from typing import Any
 
 import requests
@@ -90,8 +91,14 @@ class _HttpClient:
             # Check for HTTP errors
             response.raise_for_status()
 
-            # Parse and return JSON response
-            return response.json()
+            # Parse JSON response
+            response_data = response.json()
+
+            # Check for error indicators in response body
+            # Some IFPA API endpoints return HTTP 200 with errors in the body
+            self._check_response_errors(response_data, response.status_code)
+
+            return response_data
 
         except requests.exceptions.HTTPError as exc:
             # Map HTTP errors to IfpaApiError
@@ -109,6 +116,52 @@ class _HttpClient:
                 status_code=None,
                 response_body=None,
             ) from exc
+
+    def _check_response_errors(self, response_data: Any, status_code: int) -> None:
+        """Check for error indicators in response body.
+
+        The IFPA API sometimes returns HTTP 200 with error details in the
+        response body instead of using proper HTTP error codes.
+
+        Args:
+            response_data: Parsed JSON response data
+            status_code: HTTP status code from response
+
+        Raises:
+            IfpaApiError: If error indicators are found in response body
+        """
+        # Check for null/None response (often indicates invalid ID or not found)
+        if response_data is None:
+            raise IfpaApiError(
+                message="API returned null response (resource not found or invalid ID)",
+                status_code=404,
+                response_body=None,
+            )
+
+        if not isinstance(response_data, dict):
+            return
+
+        # Check for {"error": "..."} pattern
+        if "error" in response_data:
+            error_message = response_data["error"]
+            raise IfpaApiError(
+                message=error_message,
+                status_code=status_code,
+                response_body=response_data,
+            )
+
+        # Check for {"message": "...", "code": "404"} pattern
+        if "message" in response_data and "code" in response_data:
+            error_message = response_data["message"]
+            error_code = response_data["code"]
+            # Use the code from the body if it looks like an HTTP status
+            with contextlib.suppress(ValueError, TypeError):
+                status_code = int(error_code)
+            raise IfpaApiError(
+                message=error_message,
+                status_code=status_code,
+                response_body=response_data,
+            )
 
     def _handle_http_error(self, exc: requests.exceptions.HTTPError) -> None:
         """Map requests.HTTPError to IfpaApiError with detailed information.

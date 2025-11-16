@@ -23,8 +23,12 @@ client = IfpaClient()
 player = client.player(12345).get()
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Country: {player.country_name}")
-print(f"Current Rank: {player.current_wppr_rank}")
-print(f"WPPR Rating: {player.current_wppr_value}")
+
+# Access rankings from the rankings list
+for ranking in player.rankings:
+    if ranking.ranking_system == "Main":
+        print(f"Current Rank: {ranking.rank}")
+        print(f"WPPR Rating: {ranking.rating}")
 ```
 
 ## Common Patterns
@@ -38,14 +42,14 @@ client = IfpaClient()
 
 # Search by name
 results = client.players.search(name="John")
-for player in results.players:
+for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
 # Search with filters
 results = client.players.search(
     name="Smith",
-    city="Portland",
-    stateprov="OR"
+    stateprov="OR",
+    country="US"
 )
 ```
 
@@ -57,9 +61,9 @@ from ifpa_api import IfpaClient
 client = IfpaClient()
 
 # Get top 100 WPPR rankings
-rankings = client.rankings.wppr(start_pos=0, count=100)
+rankings = client.rankings.wppr(count=100)
 for entry in rankings.rankings:
-    print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
+    print(f"{entry.rank}. {entry.player_name}: {entry.wppr_points}")
 
 # Get women's rankings
 women = client.rankings.women(count=50)
@@ -78,15 +82,13 @@ client = IfpaClient()
 # Search for tournaments
 tournaments = client.tournaments.search(
     name="Pinball",
-    city="Seattle",
     stateprov="WA"
 )
 
-for tournament in tournaments.tournaments:
+for tournament in tournaments.tournament:
     print(f"{tournament.tournament_name}")
     print(f"  Date: {tournament.event_date}")
     print(f"  Location: {tournament.city}, {tournament.stateprov}")
-    print(f"  Players: {tournament.player_count}")
 ```
 
 ### Get Tournament Results
@@ -103,7 +105,7 @@ print(f"Tournament: {tournament.tournament_name}")
 # Get results
 results = client.tournament(12345).results()
 for result in results.results:
-    print(f"{result.position}. {result.player_name}: {result.points} points")
+    print(f"{result.position}. {result.player_name}")
 ```
 
 ### Player Tournament History
@@ -146,13 +148,31 @@ client = IfpaClient()
 
 # List all series
 all_series = client.series.list()
-for series in all_series.series:
-    print(f"{series.series_code}: {series.series_name}")
+for series_item in all_series.series:
+    print(f"{series_item.series_code}: {series_item.series_name}")
 
 # Get series standings
-standings = client.series_handle("PAPA").standings(count=50)
+standings = client.series_handle("PAPA").standings()
 for entry in standings.standings:
-    print(f"{entry.position}. {entry.player_name}: {entry.points} points")
+    print(f"{entry.position}. {entry.player_name}")
+```
+
+### Reference Data
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient()
+
+# Get all countries
+countries = client.reference.countries()
+for country in countries.country[:5]:
+    print(f"{country.country_name} ({country.country_code})")
+
+# Get states/provinces for a country
+state_provs = client.reference.state_provs()
+us_regions = next(c for c in state_provs.stateprov if c.country_code == "US")
+print(f"US has {len(us_regions.regions)} states")
 ```
 
 ## Using Context Manager
@@ -294,21 +314,21 @@ def analyze_player(player_id: int) -> None:
             player = client.player(player_id).get()
             print(f"\n=== {player.first_name} {player.last_name} ===")
             print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
-            print(f"Current Rank: #{player.current_wppr_rank}")
-            print(f"WPPR Rating: {player.current_wppr_value}")
-            print(f"Active Events: {player.active_events}")
 
             # Get rankings across all systems
             print("\n--- Rankings ---")
-            rankings = client.player(player_id).rankings()
-            for ranking in rankings:
-                print(f"{ranking['system']}: Rank {ranking['rank']}")
+            for ranking in player.rankings:
+                print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
 
             # Get recent tournament results
             print("\n--- Recent Results ---")
-            results = client.player(player_id).results(count=10)
+            from ifpa_api.models.common import RankingSystem, ResultType
+            results = client.player(player_id).results(
+                ranking_system=RankingSystem.MAIN,
+                result_type=ResultType.ACTIVE
+            )
             for result in results.results[:5]:
-                print(f"{result.tournament_name}: Placed {result.position}/{result.total_players}")
+                print(f"{result.tournament_name}: Placed {result.position}")
 
         except IfpaApiError as e:
             print(f"Error fetching player data: {e}")

@@ -11,7 +11,7 @@ import pytest
 from pydantic import ValidationError
 
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError, IfpaClientValidationError
+from ifpa_api.exceptions import IfpaApiError, IfpaClientValidationError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
     MultiPlayerResponse,
@@ -46,8 +46,17 @@ class TestPlayersSearchAudit:
             # At least one of the Smiths should be in results
             assert 25584 in player_ids or any("smith" in p.last_name.lower() for p in result.search)
 
+    @pytest.mark.skip(
+        reason="API stateprov filter is unreliable - returns players from wrong countries"
+    )
     def test_search_by_stateprov_filter(self, api_key: str) -> None:
-        """Test search filtering by state/province."""
+        """Test search filtering by state/province.
+
+        SKIPPED: API's stateprov filter is unreliable and returns players from
+        incorrect states/countries. For example, searching for "CA" (California)
+        returns players from New Zealand with state="Can" (Canterbury).
+        See llm_memory/api_behavior_audit_findings.md for details.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -99,8 +108,17 @@ class TestPlayersSearchAudit:
         assert result.search is not None
         assert isinstance(result.search, list)
 
+    @pytest.mark.skip(
+        reason="API pagination is non-functional (returns 0 results or SQL errors with start_pos)"
+    )
     def test_search_pagination_start_pos(self, api_key: str, country_code: str) -> None:
-        """Test search pagination with start_pos parameter."""
+        """Test search pagination with start_pos parameter.
+
+        SKIPPED: API has critical bug where start_pos parameter causes:
+        - start_pos=0: SQL syntax error (tries to use -1 in LIMIT clause)
+        - start_pos>0: Returns 0 results
+        See llm_memory/api_behavior_audit_findings.md for details.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -121,8 +139,13 @@ class TestPlayersSearchAudit:
             # Pages should have different players
             assert page1_ids != page2_ids
 
+    @pytest.mark.skip(reason="API ignores count parameter and pagination is non-functional")
     def test_search_pagination_count_limit(self, api_key: str, country_code: str) -> None:
-        """Test search with count parameter limits results."""
+        """Test search with count parameter limits results.
+
+        SKIPPED: API ignores count parameter and returns 0 results without proper filter.
+        See llm_memory/api_behavior_audit_findings.md for details.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -255,15 +278,24 @@ class TestPlayersGetMultipleAudit:
         assert "Maximum 50 player IDs" in str(exc_info.value)
 
     def test_get_multiple_invalid_player_id(self, api_key: str) -> None:
-        """Test get_multiple with invalid player ID."""
+        """Test get_multiple with invalid player ID.
+
+        Note: API returns HTTP 200 with JSON null for invalid player IDs.
+        SDK detects null response and raises IfpaApiError with 404 status.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Very high ID that doesn't exist
-        result = client.players.get_multiple([99999999])
+        # Very high ID that doesn't exist - SDK raises exception
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.players.get_multiple([99999999])
 
-        # API may return empty result or None - verify graceful handling
-        assert isinstance(result, MultiPlayerResponse)
+        # SDK converts null response to 404 error
+        assert exc_info.value.status_code == 404
+        assert (
+            "null response" in str(exc_info.value).lower()
+            or "not found" in str(exc_info.value).lower()
+        )
 
     def test_get_multiple_mixed_valid_invalid(self, api_key: str, player_active_id: int) -> None:
         """Test get_multiple with mix of valid and invalid IDs."""
@@ -322,13 +354,19 @@ class TestPlayerHandleGetAudit:
         assert float(stats["active_points"]) > 0
 
     def test_get_invalid_player(self, api_key: str) -> None:
-        """Test get() with invalid player ID raises error."""
+        """Test get() with invalid player ID raises error.
+
+        Note: API returns HTTP 200 with JSON null for invalid player IDs.
+        SDK detects null response and raises IfpaApiError with 404 status.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Very high ID that doesn't exist
-        with pytest.raises(ValidationError):
+        # Very high ID that doesn't exist - SDK raises IfpaApiError
+        with pytest.raises(IfpaApiError) as exc_info:
             client.player(99999999).get()
+
+        assert exc_info.value.status_code == 404
 
     def test_get_inactive_player(self, api_key: str, player_inactive_id: int) -> None:
         """Test get() with inactive player ID (Anna Rigas - inactive since 2017)."""
@@ -495,8 +533,15 @@ class TestPlayerHandleResultsAudit:
         # Some players may not have women's ranking results
         assert isinstance(results, PlayerResultsResponse)
 
+    @pytest.mark.skip(reason="API ignores count and start_pos parameters")
     def test_results_pagination(self, api_key: str, player_highly_active_id: int) -> None:
-        """Test results() with pagination parameters (use highly active player)."""
+        """Test results() with pagination parameters (use highly active player).
+
+        SKIPPED: API ignores both count and start_pos parameters:
+        - Requesting count=5 returns ~15 results
+        - Different start_pos values return identical result sets
+        See llm_memory/api_behavior_audit_findings.md for details.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -584,17 +629,22 @@ class TestPlayerHandlePvpAudit:
         assert "Debbie" in comparison.player2_name
 
     def test_pvp_players_never_met(self, api_key: str, pvp_pair_never_met: tuple[int, int]) -> None:
-        """Test pvp() between players who never competed raises error (Dwayne vs John)."""
+        """Test pvp() between players who never competed raises error.
+
+        Note: API returns HTTP 200 with error in body:
+        {"message": "These users have never played in the same tournament", "code": "404"}
+        SDK detects this and raises PlayersNeverMetError.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
         player1_id, player2_id = pvp_pair_never_met
 
-        # API returns 404 with message "These users have never played in the same tournament"
-        with pytest.raises(IfpaApiError) as exc_info:
+        # SDK converts IfpaApiError to PlayersNeverMetError for better semantic meaning
+        with pytest.raises(PlayersNeverMetError) as exc_info:
             client.player(player1_id).pvp(player2_id)
 
-        assert exc_info.value.status_code == 404
+        assert "never competed" in str(exc_info.value).lower()
 
     def test_pvp_invalid_opponent(self, api_key: str, player_highly_active_id: int) -> None:
         """Test pvp() with invalid opponent ID."""

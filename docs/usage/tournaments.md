@@ -4,15 +4,22 @@ Search for tournaments and access detailed tournament information, results, form
 
 ## Search for Tournaments
 
-Search for tournaments by name, location, date range, or tournament type:
+Search for tournaments by name, location, date range, or tournament type.
+
+!!! warning "Date Range Requirement"
+    When using date filters, you **must** provide both `start_date` and `end_date` together.
+    The API requires both dates or neither. Providing only one will result in a `ValueError`.
+
+### Basic Search
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client = IfpaClient()
 
 # Simple name search
-tournaments = client.tournaments.search(name="Pinball")
+tournaments: TournamentSearchResponse = client.tournaments.search(name="Pinball")
 for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name} ({tournament.event_date})")
     print(f"  Location: {tournament.city}, {tournament.stateprov}")
@@ -24,12 +31,12 @@ for tournament in tournaments.tournaments:
 Narrow down results with location, date range, and tournament type filters:
 
 ```python
-from ifpa_api import IfpaClient, TournamentType
+from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client = IfpaClient()
 
-# Search by location and date range
+# Search by location and date range (BOTH dates required)
 results: TournamentSearchResponse = client.tournaments.search(
     city="Portland",
     stateprov="OR",
@@ -39,7 +46,7 @@ results: TournamentSearchResponse = client.tournaments.search(
 
 # Search women's tournaments only
 women_tournaments: TournamentSearchResponse = client.tournaments.search(
-    tournament_type=TournamentType.WOMEN.value,
+    tournament_type="women",
     country="US"
 )
 
@@ -53,17 +60,19 @@ results: TournamentSearchResponse = client.tournaments.search(
 
 ### Search Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `name` | `str` | Tournament name (partial match) |
-| `city` | `str` | Filter by city |
-| `stateprov` | `str` | Filter by state/province code |
-| `country` | `str` | Filter by country code (e.g., "US") |
-| `start_date` | `str` | Filter by start date (YYYY-MM-DD format) |
-| `end_date` | `str` | Filter by end date (YYYY-MM-DD format) |
-| `tournament_type` | `str` | Filter by type ("open", "women") |
-| `start_pos` | `int` | Starting position for pagination |
-| `count` | `int` | Number of results to return |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `name` | `str` | No | Tournament name (partial match) |
+| `city` | `str` | No | Filter by city |
+| `stateprov` | `str` | No | Filter by state/province code |
+| `country` | `str` | No | Filter by country code (e.g., "US") |
+| `start_date` | `str` | No* | Filter by start date (YYYY-MM-DD format) |
+| `end_date` | `str` | No* | Filter by end date (YYYY-MM-DD format) |
+| `tournament_type` | `str` | No | Filter by type ("open", "women", etc.) |
+| `start_pos` | `int` | No | Starting position for pagination |
+| `count` | `int` | No | Number of results to return |
+
+*Must be provided together - both required or both omitted
 
 ## Get Tournament Details
 
@@ -136,7 +145,7 @@ Each result includes:
 
 ## Get Tournament Formats
 
-Retrieve format information for tournaments:
+Retrieve format information for a specific tournament:
 
 ```python
 from ifpa_api import IfpaClient
@@ -170,6 +179,55 @@ Format data includes:
 - **Participation**: Player count for this format
 - **Machines**: List of machines used
 - **Additional Details**: Format-specific rules and notes
+
+## List All Format Types
+
+Get a comprehensive list of all available tournament format types:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentFormatsListResponse
+
+client = IfpaClient()
+
+# Get all tournament formats
+formats: TournamentFormatsListResponse = client.tournaments.list_formats()
+
+print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
+for fmt in formats.qualifying_formats:
+    print(f"  {fmt.format_id}: {fmt.name}")
+
+print(f"\nFinals formats ({len(formats.finals_formats)}):")
+for fmt in formats.finals_formats:
+    print(f"  {fmt.format_id}: {fmt.name}")
+
+# Find a specific format
+swiss = next(
+    f for f in formats.qualifying_formats
+    if "swiss" in f.name.lower()
+)
+print(f"\nSwiss format ID: {swiss.format_id}")
+```
+
+## Get Related Tournaments
+
+Find tournaments related to a specific tournament (same venue or series):
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import RelatedTournamentsResponse
+
+client = IfpaClient()
+
+# Get related tournaments
+related: RelatedTournamentsResponse = client.tournament(12345).related()
+
+print(f"Found {len(related.tournament)} related tournaments")
+for t in related.tournament:
+    print(f"  {t.event_start_date}: {t.tournament_name}")
+    if t.winner:
+        print(f"    Winner: {t.winner.name} ({t.winner.country_name})")
+```
 
 ## Get League Information
 
@@ -309,7 +367,7 @@ if __name__ == "__main__":
 
 ### Date Range Searches
 
-When searching by date, use ISO format (YYYY-MM-DD):
+When searching by date, always provide both dates in ISO format (YYYY-MM-DD):
 
 ```python
 from ifpa_api import IfpaClient
@@ -317,12 +375,18 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client = IfpaClient()
 
-# Get tournaments for a specific year
+# CORRECT: Both dates provided
 results: TournamentSearchResponse = client.tournaments.search(
     start_date="2024-01-01",
     end_date="2024-12-31",
     country="US"
 )
+
+# INCORRECT: Only one date - raises ValueError
+try:
+    results = client.tournaments.search(start_date="2024-01-01")
+except ValueError as e:
+    print(f"Error: {e}")
 
 # Get upcoming tournaments
 from datetime import datetime, timedelta
@@ -353,26 +417,6 @@ except IfpaApiError as e:
         print("Tournament not found")
     else:
         print(f"API error: {e}")
-```
-
-### Tournament Type Filtering
-
-Use the TournamentType enum for type safety:
-
-```python
-from ifpa_api import IfpaClient, TournamentType
-from ifpa_api.models.tournaments import TournamentSearchResponse
-
-client = IfpaClient()
-
-# Filter by tournament type
-open_tournaments: TournamentSearchResponse = client.tournaments.search(
-    tournament_type=TournamentType.OPEN.value
-)
-
-women_tournaments: TournamentSearchResponse = client.tournaments.search(
-    tournament_type=TournamentType.WOMEN.value
-)
 ```
 
 ### Pagination for Large Result Sets
