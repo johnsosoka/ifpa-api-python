@@ -149,7 +149,7 @@ client = IfpaClient(
 )
 
 # Use the client
-player = client.player(12345).get()
+player = client.player(12345).details()
 ```
 
 ## Configuration Patterns
@@ -254,13 +254,13 @@ The package uses the `requests` library internally. The HTTP client:
 # Option 1: Manual close
 client = IfpaClient()
 try:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 finally:
     client.close()
 
 # Option 2: Context manager (recommended)
 with IfpaClient() as client:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 ```
 
 ## Performance Considerations

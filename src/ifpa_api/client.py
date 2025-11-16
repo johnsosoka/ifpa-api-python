@@ -9,7 +9,7 @@ from typing import Any
 from ifpa_api.config import Config
 from ifpa_api.http import _HttpClient
 from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
-from ifpa_api.resources.players import PlayerHandle, PlayersClient
+from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
@@ -38,7 +38,7 @@ class IfpaClient:
         client = IfpaClient(api_key="your-api-key")
 
         # Access resources
-        player = client.player(12345).get()
+        player = client.player(12345).details()
         rankings = client.rankings.wppr(start_pos=0, count=100)
         tournaments = client.director(1000).tournaments(TimePeriod.PAST)
 
@@ -95,7 +95,7 @@ class IfpaClient:
 
         # Initialize resource clients (lazy-loaded via properties)
         self._directors_client: DirectorsClient | None = None
-        self._players_client: PlayersClient | None = None
+        self._player_client: PlayerClient | None = None
         self._rankings_client: RankingsClient | None = None
         self._reference_client: ReferenceClient | None = None
         self._tournaments_client: TournamentsClient | None = None
@@ -122,21 +122,27 @@ class IfpaClient:
         return self._directors_client
 
     @property
-    def players(self) -> PlayersClient:
-        """Access the players resource client.
+    def player(self) -> PlayerClient:
+        """Access the player resource client.
 
         Returns:
-            PlayersClient instance for searching and accessing players
+            PlayerClient instance for player operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for players
-            results = client.players.search(name="John", city="Seattle")
+            # Collection-level: Search for players
+            results = client.player.search(name="John", stateprov="WA")
+
+            # Resource-level: Get player details
+            player = client.player(12345).details()
+
+            # Resource-level: Get PVP comparison
+            pvp = client.player(12345).pvp(67890)
             ```
         """
-        if self._players_client is None:
-            self._players_client = PlayersClient(self._http, self._config.validate_requests)
-        return self._players_client
+        if self._player_client is None:
+            self._player_client = PlayerClient(self._http, self._config.validate_requests)
+        return self._player_client
 
     @property
     def rankings(self) -> RankingsClient:
@@ -245,35 +251,6 @@ class IfpaClient:
         """
         return DirectorHandle(self._http, director_id, self._config.validate_requests)
 
-    def player(self, player_id: int | str) -> PlayerHandle:
-        """Get a handle for a specific player.
-
-        Args:
-            player_id: The player's unique identifier
-
-        Returns:
-            PlayerHandle instance for accessing player-specific operations
-
-        Example:
-            ```python
-            # Get player details
-            player = client.player(12345).get()
-
-            # Get player rankings
-            rankings = client.player(12345).rankings()
-
-            # Get tournament results
-            results = client.player(12345).results()
-
-            # Compare with another player
-            pvp = client.player(12345).pvp(67890)
-
-            # Get ranking history
-            history = client.player(12345).history()
-            ```
-        """
-        return PlayerHandle(self._http, player_id, self._config.validate_requests)
-
     def tournament(self, tournament_id: int | str) -> TournamentHandle:
         """Get a handle for a specific tournament.
 
@@ -337,7 +314,7 @@ class IfpaClient:
             client = IfpaClient()
             try:
                 # Use client
-                player = client.player(12345).get()
+                player = client.player(12345).details()
             finally:
                 client.close()
             ```
@@ -350,7 +327,7 @@ class IfpaClient:
         Example:
             ```python
             with IfpaClient() as client:
-                player = client.player(12345).get()
+                player = client.player(12345).details()
                 rankings = client.rankings.wppr(count=100)
             # Automatically closed
             ```

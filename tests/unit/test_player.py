@@ -45,7 +45,7 @@ class TestPlayersClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.players.search(name="John")
+        result = client.player.search(name="John")
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.query == "John"
@@ -69,7 +69,7 @@ class TestPlayersClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.players.search(name="Test", start_pos=0, count=25)
+        result = client.player.search(name="Test", start_pos=0, count=25)
 
         assert len(result.search) == 25
 
@@ -91,7 +91,7 @@ class TestPlayersClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.players.get_multiple([123, 456])
+        result = client.player.get_multiple([123, 456])
 
         assert isinstance(result, MultiPlayerResponse)
         assert result.player is not None
@@ -106,7 +106,7 @@ class TestPlayersClient:
         client = IfpaClient(api_key="test-key")
 
         with pytest.raises(IfpaClientValidationError) as exc_info:
-            client.players.get_multiple(list(range(1, 52)))
+            client.player.get_multiple(list(range(1, 52)))
 
         assert "50 player ids" in str(exc_info.value).lower()
 
@@ -118,7 +118,7 @@ class TestPlayersClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.players.search(name="John")
+        client.player.search(name="John")
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -133,7 +133,7 @@ class TestPlayersClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.players.search(tournament="PAPA", tourpos=1)
+        client.player.search(tournament="PAPA", tourpos=1)
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -167,7 +167,7 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        player = client.player(12345).get()
+        player = client.player(12345).details()
 
         assert isinstance(player, Player)
         assert player.player_id == 12345
@@ -193,7 +193,7 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        player = client.player("12345").get()
+        player = client.player("12345").details()
 
         assert player.player_id == 12345
 
@@ -587,12 +587,12 @@ class TestPlayersIntegration:
         client = IfpaClient(api_key="test-key")
 
         # Search for player
-        search_results = client.players.search(name="John")
+        search_results = client.player.search(name="John")
         assert len(search_results.search) == 1
 
         # Get full details using the ID from search
         player_id = search_results.search[0].player_id
-        full_player = client.player(player_id).get()
+        full_player = client.player(player_id).details()
 
         assert full_player.player_id == 12345
         assert full_player.city == "Seattle"
@@ -608,6 +608,6 @@ class TestPlayersIntegration:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.player(99999).get()
+            client.player(99999).details()
 
         assert exc_info.value.status_code == 404

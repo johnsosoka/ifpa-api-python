@@ -1,4 +1,4 @@
-"""Players resource client and handle.
+"""Players resource client with callable pattern.
 
 Provides access to player profiles, rankings, tournament results, and
 head-to-head comparisons.
@@ -6,6 +6,7 @@ head-to-head comparisons.
 
 from typing import TYPE_CHECKING, Any
 
+from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
     MultiPlayerResponse,
@@ -21,11 +22,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class PlayerHandle:
-    """Handle for interacting with a specific player.
+class _PlayerContext:
+    """Context for interacting with a specific player.
 
-    This class provides methods for accessing information about a specific
-    player identified by their player ID.
+    This internal class provides resource-specific methods for a player
+    identified by their player ID. Instances are returned by calling
+    PlayerClient with a player ID.
 
     Attributes:
         _http: The HTTP client instance
@@ -34,7 +36,7 @@ class PlayerHandle:
     """
 
     def __init__(self, http: "_HttpClient", player_id: int | str, validate_requests: bool) -> None:
-        """Initialize a player handle.
+        """Initialize a player context.
 
         Args:
             http: The HTTP client instance
@@ -45,7 +47,7 @@ class PlayerHandle:
         self._player_id = player_id
         self._validate_requests = validate_requests
 
-    def get(self) -> Player:
+    def details(self) -> Player:
         """Get detailed information about this player.
 
         Returns:
@@ -56,7 +58,7 @@ class PlayerHandle:
 
         Example:
             ```python
-            player = client.player(12345).get()
+            player = client.player(12345).details()
             print(f"{player.first_name} {player.last_name}")
             print(f"Country: {player.country_name}")
             ```
@@ -123,7 +125,6 @@ class PlayerHandle:
                 print("These players have never competed together")
             ```
         """
-        from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
 
         try:
             response = self._http._request("GET", f"/player/{self._player_id}/pvp/{opponent_id}")
@@ -219,19 +220,32 @@ class PlayerHandle:
         return RankingHistory.model_validate(response)
 
 
-class PlayersClient:
-    """Client for players collection-level operations.
+class PlayerClient:
+    """Callable client for player operations.
 
-    This client provides methods for searching players and accessing
-    collection-level player information.
+    This client provides both collection-level methods (search, get_multiple) and
+    resource-level access via the callable pattern. Call with a player ID to get
+    a context for player-specific operations.
 
     Attributes:
         _http: The HTTP client instance
         _validate_requests: Whether to validate request parameters
+
+    Example:
+        ```python
+        # Collection-level operations
+        results = client.player.search(name="John")
+        players = client.player.get_multiple([123, 456])
+
+        # Resource-level operations
+        player = client.player(12345).details()
+        pvp = client.player(12345).pvp(67890)
+        results = client.player(12345).results(RankingSystem.MAIN, ResultType.ACTIVE)
+        ```
     """
 
     def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
-        """Initialize the players client.
+        """Initialize the player client.
 
         Args:
             http: The HTTP client instance
@@ -239,6 +253,25 @@ class PlayersClient:
         """
         self._http = http
         self._validate_requests = validate_requests
+
+    def __call__(self, player_id: int | str) -> _PlayerContext:
+        """Get a context for a specific player.
+
+        Args:
+            player_id: The player's unique identifier
+
+        Returns:
+            _PlayerContext instance for accessing player-specific operations
+
+        Example:
+            ```python
+            # Get player context and access methods
+            player = client.player(12345).details()
+            pvp = client.player(12345).pvp(67890)
+            history = client.player(12345).history()
+            ```
+        """
+        return _PlayerContext(self._http, player_id, self._validate_requests)
 
     def search(
         self,
@@ -270,16 +303,16 @@ class PlayersClient:
         Example:
             ```python
             # Search by name
-            results = client.players.search(name="John")
+            results = client.player.search(name="John")
 
             # Search by location
-            results = client.players.search(city="Seattle", stateprov="WA")
+            results = client.player.search(stateprov="WA", country="US")
 
             # Search by tournament participation
-            results = client.players.search(tournament="PAPA", tourpos=1)
+            results = client.player.search(tournament="PAPA", tourpos=1)
 
             # Paginated search
-            results = client.players.search(name="Smith", start_pos=0, count=25)
+            results = client.player.search(name="Smith", start_pos=0, count=25)
             ```
         """
         params: dict[str, Any] = {}
@@ -317,7 +350,7 @@ class PlayersClient:
         Example:
             ```python
             # Fetch multiple players efficiently
-            result = client.players.get_multiple([123, 456, 789])
+            result = client.player.get_multiple([123, 456, 789])
             if isinstance(result.player, list):
                 for player in result.player:
                     print(f"{player.first_name} {player.last_name}")

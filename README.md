@@ -46,7 +46,7 @@ from ifpa_api import IfpaClient
 client = IfpaClient(api_key='your-api-key-here')
 
 # Get player details
-player = client.player(2643).get()
+player = client.player(2643).details()
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Country: {player.country_name}")
 

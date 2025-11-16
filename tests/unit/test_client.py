@@ -4,7 +4,7 @@ from typing import Any
 
 from ifpa_api import IfpaClient
 from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
-from ifpa_api.resources.players import PlayerHandle, PlayersClient
+from ifpa_api.resources.player import PlayerClient, _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
 from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
@@ -55,11 +55,11 @@ class TestIfpaClientResourceProperties:
         directors = client.directors
         assert isinstance(directors, DirectorsClient)
 
-    def test_players_property_returns_players_client(self) -> None:
-        """Test that players property returns PlayersClient."""
+    def test_player_property_returns_player_client(self) -> None:
+        """Test that player property returns PlayerClient."""
         client = IfpaClient(api_key="test-key")
-        players = client.players
-        assert isinstance(players, PlayersClient)
+        player = client.player
+        assert isinstance(player, PlayerClient)
 
     def test_rankings_property_returns_rankings_client(self) -> None:
         """Test that rankings property returns RankingsClient."""
@@ -103,18 +103,18 @@ class TestIfpaClientHandleFactory:
         handle = client.director(director_id)
         assert handle._director_id == director_id
 
-    def test_player_method_returns_player_handle(self) -> None:
-        """Test that player() method returns PlayerHandle."""
+    def test_player_callable_returns_player_context(self) -> None:
+        """Test that player() callable returns _PlayerContext."""
         client = IfpaClient(api_key="test-key")
-        handle = client.player(12345)
-        assert isinstance(handle, PlayerHandle)
+        context = client.player(12345)
+        assert isinstance(context, _PlayerContext)
 
-    def test_player_handle_stores_id(self) -> None:
-        """Test that player handle stores the player ID."""
+    def test_player_context_stores_id(self) -> None:
+        """Test that player context stores the player ID."""
         client = IfpaClient(api_key="test-key")
         player_id = 12345
-        handle = client.player(player_id)
-        assert handle._player_id == player_id
+        context = client.player(player_id)
+        assert context._player_id == player_id
 
     def test_tournament_method_returns_tournament_handle(self) -> None:
         """Test that tournament() method returns TournamentHandle."""
@@ -149,11 +149,11 @@ class TestIfpaClientHandleFactory:
         assert director_handle._director_id == "1000"
 
     def test_handles_are_independent(self) -> None:
-        """Test that each call to handle factory creates a new instance."""
+        """Test that each call to handle/callable factory creates a new instance."""
         client = IfpaClient(api_key="test-key")
-        handle1 = client.player(123)
-        handle2 = client.player(123)
-        assert handle1 is not handle2
+        context1 = client.player(123)
+        context2 = client.player(123)
+        assert context1 is not context2
 
 
 class TestIfpaClientContextManager:

@@ -25,7 +25,7 @@ Catch this to handle any SDK-related error:
 
 ```python
 try:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 except IfpaError as e:
     print(f"SDK error: {e}")
 ```
@@ -93,7 +93,7 @@ from ifpa_api import IfpaClient, IfpaApiError
 client = IfpaClient()
 
 try:
-    player = client.player(999999).get()
+    player = client.player(999999).details()
 except IfpaApiError as e:
     print(f"Error [{e.status_code}]: {e.message}")
 
@@ -157,7 +157,7 @@ from ifpa_api import (
 
 try:
     client = IfpaClient()
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 except MissingApiKeyError:
     print("API key not configured")
 except IfpaClientValidationError as e:
@@ -172,7 +172,7 @@ except IfpaError as e:
 
 ```python
 try:
-    player = client.player(player_id).get()
+    player = client.player(player_id).details()
 except IfpaApiError as e:
     if e.status_code == 404:
         return None  # Player not found
@@ -181,7 +181,7 @@ except IfpaApiError as e:
     elif e.status_code >= 500:
         # Retry on server errors
         time.sleep(1)
-        player = client.player(player_id).get()
+        player = client.player(player_id).details()
 ```
 
 ### 3. Log Errors Appropriately
@@ -192,7 +192,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 except IfpaApiError as e:
     logger.error(
         "API error",

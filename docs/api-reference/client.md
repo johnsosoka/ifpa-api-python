@@ -39,13 +39,25 @@ Returns the directors resource client.
 def directors(self) -> DirectorsClient
 ```
 
-#### `players`
+#### `player`
 
-Returns the players resource client.
+Returns the players resource client. Supports both collection operations and callable pattern for individual player access.
 
 ```python
 @property
-def players(self) -> PlayersClient
+def player(self) -> PlayersClient
+```
+
+**Usage:**
+
+```python
+# Collection operations
+results = client.player.search(name="Smith", stateprov="ID")  # Search Idaho Smiths
+players = client.player.get_multiple([25584, 47585, 52913])  # Get multiple Idaho players
+
+# Individual player operations (callable pattern)
+player = client.player(25584).details()  # Get Dwayne Smith's details
+pvp = client.player(25584).pvp(47585)    # Compare Dwayne vs Debbie
 ```
 
 #### `rankings`
@@ -102,21 +114,22 @@ def director(self, director_id: int | str) -> DirectorHandle
 
 - `DirectorHandle`: Handle for director-specific operations
 
-#### `player(player_id)`
+#### Accessing Individual Players
 
-Get a handle for a specific player.
+Individual player operations are accessed through the callable pattern on the `player` property:
 
 ```python
-def player(self, player_id: int | str) -> PlayerHandle
+# Access via callable pattern - Example with Dwayne Smith (25584)
+player_handle = client.player(25584)
+
+# Then call methods on the handle
+player = player_handle.details()  # Get player profile
+results = player_handle.results(RankingSystem.MAIN, ResultType.ACTIVE)  # Get tournament results
+pvp = player_handle.pvp(47585)  # Compare with Debbie Smith
+history = player_handle.history()  # Get ranking history
 ```
 
-**Parameters:**
-
-- `player_id` (int | str): The player's unique identifier
-
-**Returns:**
-
-- `PlayerHandle`: Handle for player-specific operations
+**Note:** The `client.player` property returns a `PlayersClient` which is callable, providing a unified interface for both collection and resource-specific operations.
 
 #### `tournament(tournament_id)`
 
@@ -171,7 +184,7 @@ def __exit__(self, exc_type, exc_val, exc_tb) -> None
 
 ```python
 with IfpaClient() as client:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
 # Client automatically closed
 ```
 

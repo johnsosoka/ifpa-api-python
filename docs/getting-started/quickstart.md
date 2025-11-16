@@ -19,8 +19,8 @@ from ifpa_api import IfpaClient
 # Initialize the client (uses IFPA_API_KEY environment variable)
 client = IfpaClient()
 
-# Get information about a player
-player = client.player(12345).get()
+# Get information about a player - Dwayne Smith, highly active player from Boise, ID
+player = client.player(25584).details()
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Country: {player.country_name}")
 
@@ -29,6 +29,12 @@ for ranking in player.rankings:
     if ranking.ranking_system == "Main":
         print(f"Current Rank: {ranking.rank}")
         print(f"WPPR Rating: {ranking.rating}")
+
+# Output:
+# Name: Dwayne Smith
+# Country: United States
+# Current Rank: 753
+# WPPR Rating: 65.42
 ```
 
 ## Common Patterns
@@ -40,16 +46,21 @@ from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
-# Search by name
-results = client.players.search(name="John")
+# Search by name - Find players named "Smith" in Idaho
+results = client.player.search(name="Smith", stateprov="ID")
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
-# Search with filters
-results = client.players.search(
-    name="Smith",
-    stateprov="OR",
-    country="US"
+# Output:
+# 25584: Dwayne Smith
+# 47585: Debbie Smith
+
+# Search with filters - Find players named "John" in Idaho
+results = client.player.search(
+    name="John",
+    stateprov="ID",
+    country="US",
+    count=5
 )
 ```
 
@@ -183,7 +194,7 @@ The client supports Python's context manager protocol for automatic cleanup:
 from ifpa_api import IfpaClient
 
 with IfpaClient() as client:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
     rankings = client.rankings.wppr(count=100)
     # Client automatically closed when exiting
 ```
@@ -203,7 +214,7 @@ from ifpa_api import (
 client = IfpaClient()
 
 try:
-    player = client.player(12345).get()
+    player = client.player(12345).details()
     print(f"Found player: {player.first_name} {player.last_name}")
 except MissingApiKeyError:
     print("Error: No API key configured")
@@ -311,7 +322,7 @@ def analyze_player(player_id: int) -> None:
     with IfpaClient() as client:
         try:
             # Get player details
-            player = client.player(player_id).get()
+            player = client.player(player_id).details()
             print(f"\n=== {player.first_name} {player.last_name} ===")
             print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
 

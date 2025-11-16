@@ -21,7 +21,7 @@ ifpa_api/
 │   └── calendar.py   # Calendar models
 └── resources/        # Resource clients and handles
     ├── directors.py  # DirectorsClient, DirectorHandle
-    ├── players.py    # PlayersClient, PlayerHandle
+    ├── player.py     # PlayerClient
     ├── rankings.py   # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle
     ├── series.py     # SeriesClient, SeriesHandle

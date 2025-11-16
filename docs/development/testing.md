@@ -15,7 +15,7 @@ tests/
 │   ├── test_directors.py
 │   ├── test_exceptions.py
 │   ├── test_http.py
-│   ├── test_players.py
+│   ├── test_player.py
 │   ├── test_rankings.py
 │   ├── test_series.py
 │   ├── test_stats.py
@@ -24,7 +24,7 @@ tests/
     ├── conftest.py
     ├── helpers.py
     ├── test_directors_integration.py
-    ├── test_players_integration.py
+    ├── test_player_integration.py
     ├── test_rankings_integration.py
     ├── test_series_integration.py
     └── test_tournaments_integration.py
@@ -68,13 +68,13 @@ poetry run pytest -m "not integration"
 ### Run Specific Test File
 
 ```bash
-poetry run pytest tests/unit/test_players.py
+poetry run pytest tests/unit/test_player.py
 ```
 
 ### Run Specific Test
 
 ```bash
-poetry run pytest tests/unit/test_players.py::test_search_players
+poetry run pytest tests/unit/test_player.py::test_search_players
 ```
 
 ## Coverage
@@ -118,7 +118,7 @@ def test_search_players():
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.players.search(name="John")
+        result = client.player.search(name="John")
 
         assert len(result.players) == 1
         assert result.players[0].player_id == 12345
@@ -135,7 +135,7 @@ from ifpa_api import IfpaClient
 @pytest.mark.integration
 def test_search_players_integration(client: IfpaClient):
     """Test searching for real players."""
-    result = client.players.search(name="Josh")
+    result = client.player.search(name="Josh")
 
     assert len(result.players) > 0
     assert all(hasattr(p, "player_id") for p in result.players)

@@ -83,7 +83,7 @@ def get_test_player_id(client: IfpaClient) -> int | None:
         client = IfpaClient()
         player_id = get_test_player_id(client)
         if player_id:
-            player = client.player(player_id).get()
+            player = client.player(player_id).details()
         ```
     """
     try:

@@ -45,7 +45,7 @@ def client(api_key: str) -> Generator[IfpaClient, None, None]:
         ```python
         @pytest.mark.integration
         def test_get_player(client):
-            player = client.player(123456).get()
+            player = client.player(123456).details()
             assert player is not None
         ```
     """

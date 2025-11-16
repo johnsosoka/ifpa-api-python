@@ -108,7 +108,7 @@ def player_highly_active_id() -> int:
     Example:
         ```python
         def test_highly_active_player(client, player_highly_active_id):
-            player = client.player(player_highly_active_id).get()
+            player = client.player(player_highly_active_id).details()
             assert int(player.player_stats["system"]["open"]["current_rank"]) < 1000
         ```
     """
@@ -133,7 +133,7 @@ def player_active_id() -> int:
     Example:
         ```python
         def test_get_active_player(client, player_active_id):
-            player = client.player(player_active_id).get()
+            player = client.player(player_active_id).details()
             assert player.player_id == player_active_id
         ```
     """
@@ -158,8 +158,8 @@ def player_active_id_2() -> int:
     Example:
         ```python
         def test_compare_active_players(client, player_active_id, player_active_id_2):
-            player1 = client.player(player_active_id).get()
-            player2 = client.player(player_active_id_2).get()
+            player1 = client.player(player_active_id).details()
+            player2 = client.player(player_active_id_2).details()
             assert player1.player_id != player2.player_id
         ```
     """
@@ -184,7 +184,7 @@ def player_inactive_id() -> int:
     Example:
         ```python
         def test_handle_inactive_player(client, player_inactive_id):
-            player = client.player(player_inactive_id).get()
+            player = client.player(player_inactive_id).details()
             stats = player.player_stats["system"]["open"]
             assert stats["current_rank"] == "0"
             assert float(stats["active_points"]) == 0.0
@@ -261,7 +261,7 @@ def player_ids_multiple() -> list[int]:
     Example:
         ```python
         def test_get_multiple_mixed(client, player_ids_multiple):
-            result = client.players.get_multiple(player_ids_multiple)
+            result = client.player.get_multiple(player_ids_multiple)
             assert len(result.player) == len(player_ids_multiple)
         ```
     """
@@ -281,7 +281,7 @@ def player_ids_active() -> list[int]:
     Example:
         ```python
         def test_get_multiple_active(client, player_ids_active):
-            result = client.players.get_multiple(player_ids_active)
+            result = client.player.get_multiple(player_ids_active)
             for player in result.player:
                 assert int(player.player_stats["system"]["open"]["current_rank"]) > 0
         ```
@@ -305,7 +305,7 @@ def search_idaho_smiths() -> dict[str, str | int]:
     Example:
         ```python
         def test_search_smiths(client, search_idaho_smiths):
-            result = client.players.search(**search_idaho_smiths)
+            result = client.player.search(**search_idaho_smiths)
             assert len(result.search) == 2
             player_ids = {p.player_id for p in result.search}
             assert 25584 in player_ids
@@ -330,7 +330,7 @@ def search_idaho_johns() -> dict[str, str | int]:
     Example:
         ```python
         def test_search_johns_count(client, search_idaho_johns):
-            result = client.players.search(**search_idaho_johns)
+            result = client.player.search(**search_idaho_johns)
             assert len(result.search) == 5
             player_ids = {p.player_id for p in result.search}
             assert 50104 in player_ids  # John Sosoka
@@ -367,7 +367,7 @@ def country_code() -> str:
     Example:
         ```python
         def test_search_us_players(client, country_code):
-            result = client.players.search(country=country_code, count=5)
+            result = client.player.search(country=country_code, count=5)
             assert result.search is not None
         ```
     """

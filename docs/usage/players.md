@@ -12,12 +12,20 @@ from ifpa_api.models.player import PlayerSearchResponse, PlayerSearchResult
 
 client: IfpaClient = IfpaClient()
 
-# Simple name search
-response: PlayerSearchResponse = client.players.search(name="John")
+# Simple name search - Search for players named "Smith" in Idaho
+response: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
 for player in response.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
     print(f"  Location: {player.city}, {player.state}")
     print(f"  Current Rank: #{player.wppr_rank}")
+
+# Output:
+# 25584: Dwayne Smith
+#   Location: Boise, ID
+#   Current Rank: #753
+# 47585: Debbie Smith
+#   Location: Boise, ID
+#   Current Rank: #7078
 ```
 
 ### Search with Filters
@@ -30,22 +38,25 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Search by location
-response: PlayerSearchResponse = client.players.search(
-    stateprov="OR",
-    country="US"
+# Search by location - Idaho players
+response: PlayerSearchResponse = client.player.search(
+    stateprov="ID",
+    country="US",
+    count=10
 )
 
-# Search by tournament participation
-response: PlayerSearchResponse = client.players.search(
+# Search by tournament participation - PAPA winners
+response: PlayerSearchResponse = client.player.search(
     tournament="PAPA",
-    tourpos=1
+    tourpos=1,
+    count=10
 )
 
-# Search with count limit
-response: PlayerSearchResponse = client.players.search(
-    name="Smith",
-    count=25
+# Search with count limit - Limit to 5 players named "John" in Idaho
+response: PlayerSearchResponse = client.player.search(
+    name="John",
+    stateprov="ID",
+    count=5
 )
 ```
 
@@ -78,8 +89,8 @@ from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
 
-# Get player by ID
-player: Player = client.player(12345).get()
+# Get player by ID - Dwayne Smith (highly active player from Boise, ID)
+player: Player = client.player(25584).details()
 
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
@@ -90,6 +101,14 @@ print(f"Age: {player.age}")
 # Access rankings across systems
 for ranking in player.rankings:
     print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
+
+# Output:
+# Name: Dwayne Smith
+# Location: Boise, ID, United States
+# Player ID: 25584
+# IFPA Registered: True
+# Age: 55
+# Main: Rank 753, Rating 65.42
 ```
 
 ### Profile Information
@@ -113,7 +132,7 @@ from ifpa_api.exceptions import IfpaApiError
 client: IfpaClient = IfpaClient()
 
 try:
-    player = client.player(99999999).get()
+    player = client.player(99999999).details()
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Player not found")
@@ -129,16 +148,21 @@ from ifpa_api.models.player import MultiPlayerResponse, Player
 
 client: IfpaClient = IfpaClient()
 
-# Fetch up to 50 players at once
-response: MultiPlayerResponse = client.players.get_multiple([123, 456, 789])
+# Fetch up to 50 players at once - Get 3 Idaho players with mixed activity levels
+response: MultiPlayerResponse = client.player.get_multiple([25584, 50104, 50106])
 
 # Handle single or multiple players
 if isinstance(response.player, list):
     for player in response.player:
-        print(f"{player.first_name} {player.last_name}")
+        print(f"{player.first_name} {player.last_name} - Rank: {player.player_stats.get('current_wppr_rank', 'N/A')}")
 else:
     player: Player = response.player
     print(f"{player.first_name} {player.last_name}")
+
+# Output:
+# Dwayne Smith - Rank: 753 (highly active)
+# John Sosoka - Rank: 47572 (low activity)
+# Anna Rigas - Rank: N/A (inactive since 2017)
 ```
 
 ### Parameters
@@ -165,19 +189,28 @@ from ifpa_api.models.player import PlayerResultsResponse, TournamentResult
 
 client: IfpaClient = IfpaClient()
 
-# Get all active results (both parameters required)
-results: PlayerResultsResponse = client.player(12345).results(
+# Get all active results for Dwayne Smith (both parameters required)
+results: PlayerResultsResponse = client.player(25584).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
 
 print(f"Total results: {results.total_results}")
-for result in results.results:
+for result in results.results[:3]:  # Show first 3 results
     print(f"\n{result.tournament_name}")
     print(f"  Date: {result.event_date}")
     print(f"  Position: {result.position} of {result.player_count}")
     print(f"  WPPR Points: {result.wppr_points}")
     print(f"  Rating: {result.rating_value}")
+
+# Output:
+# Total results: 218
+#
+# Thursday night pinball
+#   Date: 2024-12-05
+#   Position: 4 of 11
+#   WPPR Points: 3.49
+#   Rating: 8.36
 ```
 
 ### Filter Results
@@ -191,20 +224,20 @@ from ifpa_api.models.player import PlayerResultsResponse
 
 client: IfpaClient = IfpaClient()
 
-# Main ranking active results
-active: PlayerResultsResponse = client.player(12345).results(
+# Main ranking active results for Dwayne Smith
+active: PlayerResultsResponse = client.player(25584).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
 
-# Women's ranking active results
-women: PlayerResultsResponse = client.player(12345).results(
+# Women's ranking active results for Debbie Smith
+women: PlayerResultsResponse = client.player(47585).results(
     ranking_system=RankingSystem.WOMEN,
     result_type=ResultType.ACTIVE
 )
 
-# All inactive results
-inactive: PlayerResultsResponse = client.player(12345).results(
+# All inactive results for Dwayne Smith
+inactive: PlayerResultsResponse = client.player(25584).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.INACTIVE
 )
@@ -250,8 +283,8 @@ from ifpa_api.exceptions import PlayersNeverMetError
 client: IfpaClient = IfpaClient()
 
 try:
-    # Compare player 12345 vs player 67890
-    pvp: PvpComparison = client.player(12345).pvp(67890)
+    # Compare Dwayne Smith vs Debbie Smith (they've played 205 tournaments together)
+    pvp: PvpComparison = client.player(25584).pvp(47585)
 
     print(f"Player 1: {pvp.player1_name}")
     print(f"Player 2: {pvp.player2_name}")
@@ -261,8 +294,8 @@ try:
     print(f"  Ties: {pvp.ties}")
     print(f"  Total meetings: {pvp.total_meetings}")
 
-    # Show tournament-by-tournament breakdown
-    for match in pvp.tournaments:
+    # Show tournament-by-tournament breakdown (first 3)
+    for match in pvp.tournaments[:3]:
         winner = "Player 1" if match.winner_player_id == pvp.player1_id else "Player 2"
         print(f"\n{match.tournament_name} ({match.event_date})")
         print(f"  {pvp.player1_name}: Position {match.player_1_position}")
@@ -271,6 +304,16 @@ try:
 
 except PlayersNeverMetError:
     print("These players have never competed in the same tournament")
+
+# Output:
+# Player 1: Dwayne Smith
+# Player 2: Debbie Smith
+#
+# Head-to-Head Record:
+#   Dwayne Smith wins: 139
+#   Debbie Smith wins: 66
+#   Ties: 0
+#   Total meetings: 205
 ```
 
 ### Exception Handling
@@ -284,11 +327,15 @@ from ifpa_api.exceptions import PlayersNeverMetError, IfpaApiError
 client: IfpaClient = IfpaClient()
 
 try:
-    comparison = client.player(12345).pvp(67890)
+    # John Sosoka (50104) vs World #1 player (1) - they've never met
+    comparison = client.player(50104).pvp(1)
 except PlayersNeverMetError as e:
     print(f"Players {e.player1_id} and {e.player2_id} have never met")
 except IfpaApiError as e:
     print(f"API error: {e}")
+
+# Output:
+# Players 50104 and 1 have never met
 ```
 
 ### Parameters
@@ -307,13 +354,19 @@ from ifpa_api.models.player import PvpAllCompetitors
 
 client: IfpaClient = IfpaClient()
 
-# Get summary of all competitors
-summary: PvpAllCompetitors = client.player(2643).pvp_all()
+# Get summary of all competitors for Dwayne Smith
+summary: PvpAllCompetitors = client.player(25584).pvp_all()
 
 print(f"Player ID: {summary.player_id}")
 print(f"Total competitors: {summary.total_competitors}")
 print(f"System: {summary.system}")
 print(f"Type: {summary.type}")
+
+# Output:
+# Player ID: 25584
+# Total competitors: 375
+# System: MAIN
+# Type: all
 ```
 
 ### Response Fields
@@ -336,22 +389,31 @@ from ifpa_api.models.player import RankingHistory
 
 client: IfpaClient = IfpaClient()
 
-# Get ranking history
-history: RankingHistory = client.player(12345).history()
+# Get ranking history for Dwayne Smith
+history: RankingHistory = client.player(25584).history()
 
 print(f"Player ID: {history.player_id}")
 print(f"System: {history.system}")
 print(f"Active: {history.active_flag}")
 
-print("\nRank History (last 10):")
-for entry in history.rank_history[-10:]:
+print("\nRank History (last 5):")
+for entry in history.rank_history[-5:]:
     print(f"{entry.rank_date}: Rank #{entry.rank_position}, "
           f"WPPR {entry.wppr_points}, "
           f"Tournaments: {entry.tournaments_played_count}")
 
-print("\nRating History (last 10):")
-for entry in history.rating_history[-10:]:
+print("\nRating History (last 5):")
+for entry in history.rating_history[-5:]:
     print(f"{entry.rating_date}: Rating {entry.rating}")
+
+# Output:
+# Player ID: 25584
+# System: MAIN
+# Active: Y
+#
+# Rank History (last 5):
+# 2024-11-01: Rank #765, WPPR 65.25, Tournaments: 432
+# 2024-12-01: Rank #753, WPPR 65.42, Tournaments: 433
 ```
 
 ### Response Fields
@@ -374,7 +436,8 @@ from ifpa_api import IfpaClient
 from ifpa_api.models.player import RankingHistory
 
 client: IfpaClient = IfpaClient()
-history: RankingHistory = client.player(12345).history()
+# Get history for Dwayne Smith - highly active player with long history
+history: RankingHistory = client.player(25584).history()
 
 # Extract dates and rankings (convert string values to numbers)
 rank_dates = [datetime.strptime(e.rank_date, "%Y-%m-%d") for e in history.rank_history]
@@ -386,7 +449,7 @@ fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
 
 ax1.plot(rank_dates, ranks)
 ax1.set_ylabel('World Rank')
-ax1.set_title(f'Player {history.player_id} - WPPR Ranking History')
+ax1.set_title(f'Dwayne Smith (Player {history.player_id}) - WPPR Ranking History')
 ax1.invert_yaxis()  # Lower rank number is better
 
 ax2.plot(rank_dates, wppr_points)
@@ -408,13 +471,16 @@ from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import Player, PlayerResultsResponse, RankingHistory
 
 
-def analyze_player(player_id: int) -> None:
-    """Comprehensive player analysis."""
+def analyze_player(player_id: int = 25584) -> None:
+    """Comprehensive player analysis.
+
+    Default player: Dwayne Smith (25584) - highly active player from Boise, ID
+    """
     client: IfpaClient = IfpaClient()
 
     try:
         # Get player profile
-        player: Player = client.player(player_id).get()
+        player: Player = client.player(player_id).details()
 
         print("=" * 60)
         print(f"{player.first_name} {player.last_name}")
@@ -464,7 +530,8 @@ def analyze_player(player_id: int) -> None:
 
 
 if __name__ == "__main__":
-    analyze_player(12345)
+    # Analyze Dwayne Smith - highly active player
+    analyze_player(25584)
 ```
 
 ## Best Practices
@@ -481,7 +548,8 @@ from ifpa_api.models.player import Player
 client: IfpaClient = IfpaClient()
 
 try:
-    player: Player = client.player(999999).get()
+    # Try to get a player with an invalid ID
+    player: Player = client.player(99999999).details()
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Player not found")
@@ -503,14 +571,14 @@ from ifpa_api.models.player import Player
 def get_cached_player(player_id: int) -> Player:
     """Get player with caching."""
     client: IfpaClient = IfpaClient()
-    return client.player(player_id).get()
+    return client.player(player_id).details()
 
 
 # First call fetches from API
-player: Player = get_cached_player(12345)
+player: Player = get_cached_player(25584)  # Dwayne Smith
 
 # Subsequent calls use cache
-player: Player = get_cached_player(12345)  # Instant
+player: Player = get_cached_player(25584)  # Instant - from cache
 ```
 
 ### Batch Operations
@@ -523,12 +591,12 @@ from ifpa_api.models.player import MultiPlayerResponse, Player
 
 client: IfpaClient = IfpaClient()
 
-# Efficient batch fetch (up to 50 at once)
-response: MultiPlayerResponse = client.players.get_multiple([12345, 67890, 11111])
+# Efficient batch fetch (up to 50 at once) - Get all active Idaho players
+response: MultiPlayerResponse = client.player.get_multiple([25584, 47585, 52913])
 
 if isinstance(response.player, list):
     for player in response.player:
-        print(f"{player.first_name} {player.last_name}")
+        print(f"{player.first_name} {player.last_name} - {player.city}, {player.stateprov}")
 ```
 
 For larger batches, chunk the requests:
@@ -545,7 +613,7 @@ def get_many_players(player_ids: list[int]) -> list[Player]:
     # Process in chunks of 50
     for i in range(0, len(player_ids), 50):
         chunk = player_ids[i:i+50]
-        response = client.players.get_multiple(chunk)
+        response = client.player.get_multiple(chunk)
 
         if isinstance(response.player, list):
             all_players.extend(response.player)

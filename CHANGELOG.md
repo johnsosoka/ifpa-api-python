@@ -122,7 +122,7 @@ cards = client.player(123).cards()        # Will raise AttributeError in v0.2.0
 
 # After (v0.2.0+) - No replacement
 # Player rankings data is available in the player profile
-profile = client.player(123).get()
+profile = client.player(123).details()
 # Player cards are only available via series: client.series_handle("CODE").player_card(123)
 ```
 
