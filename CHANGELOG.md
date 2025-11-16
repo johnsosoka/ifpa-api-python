@@ -30,8 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-**Phase 1 - Services Audit Critical Fixes**
-
 - **Rankings Resource**:
   - Fixed age field validation to handle empty string values returned by API
   - Fixed `by_country()` response model to correctly return player rankings (was incorrectly expecting country-level statistics)
