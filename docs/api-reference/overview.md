@@ -20,7 +20,7 @@ ifpa_api/
 │   ├── reference.py  # Reference data models
 │   └── calendar.py   # Calendar models
 └── resources/        # Resource clients and handles
-    ├── directors.py  # DirectorClient (callable pattern)
+    ├── director.py   # DirectorClient (callable pattern)
     ├── player.py     # PlayerClient (callable pattern)
     ├── rankings.py   # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle

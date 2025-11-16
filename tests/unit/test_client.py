@@ -3,7 +3,7 @@
 from typing import Any
 
 from ifpa_api import IfpaClient
-from ifpa_api.resources.directors import DirectorClient, _DirectorContext
+from ifpa_api.resources.director import DirectorClient, _DirectorContext
 from ifpa_api.resources.player import PlayerClient, _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
