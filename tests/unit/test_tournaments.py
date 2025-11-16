@@ -1,4 +1,4 @@
-"""Unit tests for TournamentsClient and TournamentHandle.
+"""Unit tests for TournamentClient.
 
 Tests the tournaments resource client and handle using mocked HTTP requests.
 """
@@ -21,7 +21,7 @@ from ifpa_api.models.tournaments import (
 
 
 class TestTournamentsClient:
-    """Test cases for TournamentsClient collection-level operations."""
+    """Test cases for TournamentClient collection-level operations."""
 
     def test_search_with_name_filter(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching tournaments by name."""
@@ -44,7 +44,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(name="Pinball")
+        result = client.tournament.search(name="Pinball")
 
         assert isinstance(result, TournamentSearchResponse)
         assert len(result.tournaments) == 1
@@ -71,7 +71,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(city="Portland", stateprov="OR", country="US")
+        result = client.tournament.search(city="Portland", stateprov="OR", country="US")
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -97,7 +97,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(start_date="2024-07-01", end_date="2024-07-31")
+        result = client.tournament.search(start_date="2024-07-01", end_date="2024-07-31")
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -122,7 +122,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(tournament_type="women")
+        result = client.tournament.search(tournament_type="women")
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -141,7 +141,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(start_pos=0, count=50)
+        result = client.tournament.search(start_pos=0, count=50)
 
         assert len(result.tournaments) == 50
         assert mock_requests.last_request is not None
@@ -176,7 +176,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament(12345).get()
+        tournament = client.tournament(12345).details()
 
         assert isinstance(tournament, Tournament)
         assert tournament.tournament_id == 12345
@@ -196,7 +196,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament("12345").get()
+        tournament = client.tournament("12345").details()
 
         assert tournament.tournament_id == 12345
 
@@ -335,7 +335,7 @@ class TestTournamentHandle:
 
 
 class TestTournamentsIntegration:
-    """Integration tests ensuring TournamentsClient and TournamentHandle work together."""
+    """Integration tests ensuring TournamentClient and TournamentHandle work together."""
 
     def test_search_then_get_tournament(self, mock_requests: requests_mock.Mocker) -> None:
         """Test workflow of searching then getting tournament details."""
@@ -368,12 +368,12 @@ class TestTournamentsIntegration:
         client = IfpaClient(api_key="test-key")
 
         # Search for tournament
-        search_results = client.tournaments.search(name="Championship")
+        search_results = client.tournament.search(name="Championship")
         assert len(search_results.tournaments) == 1
 
         # Get full details using the ID from search
         tournament_id = search_results.tournaments[0].tournament_id
-        full_tournament = client.tournament(tournament_id).get()
+        full_tournament = client.tournament(tournament_id).details()
 
         assert full_tournament.tournament_id == 12345
         assert full_tournament.location_name == "Pinball Paradise"
@@ -389,7 +389,7 @@ class TestTournamentsIntegration:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.tournament(99999).get()
+            client.tournament(99999).details()
 
         assert exc_info.value.status_code == 404
 
@@ -457,7 +457,7 @@ def test_list_formats(mock_requests: requests_mock.Mocker) -> None:
     )
 
     client = IfpaClient(api_key="test-key")
-    result = client.tournaments.list_formats()
+    result = client.tournament.list_formats()
 
     assert isinstance(result, TournamentFormatsListResponse)
     assert len(result.qualifying_formats) == 2

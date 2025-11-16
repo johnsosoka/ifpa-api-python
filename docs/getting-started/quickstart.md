@@ -91,7 +91,7 @@ from ifpa_api import IfpaClient
 client = IfpaClient()
 
 # Search for tournaments
-tournaments = client.tournaments.search(
+tournaments = client.tournament.search(
     name="Pinball",
     stateprov="WA"
 )
@@ -110,7 +110,7 @@ from ifpa_api import IfpaClient
 client = IfpaClient()
 
 # Get tournament details
-tournament = client.tournament(12345).get()
+tournament = client.tournament(12345).details()
 print(f"Tournament: {tournament.tournament_name}")
 
 # Get results
@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- Explore [resource-specific examples](../usage/directors.md)
+- Explore [resource-specific examples](../usage/director.md)
 - Learn about [error handling](../usage/error-handling.md)
 - Check the [API reference](../api-reference/overview.md)
 - Review [configuration options](configuration.md)

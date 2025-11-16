@@ -273,5 +273,5 @@ if __name__ == "__main__":
 ## Related Resources
 
 - [Tournaments](tournaments.md) - Search and view tournament details
-- [Players](players.md) - View player profiles and results
+- [Player](player.md) - View player profiles and results
 - [Rankings](rankings.md) - View player rankings

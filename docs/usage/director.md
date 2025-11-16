@@ -1,6 +1,6 @@
-# Directors
+# Director
 
-The Directors resource provides access to tournament director information, their tournament history, and country director assignments.
+The Director resource provides access to tournament director information, their tournament history, and country director assignments.
 
 ## Search for Directors
 
@@ -8,12 +8,11 @@ Search for tournament directors by name or location:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
 
 client = IfpaClient()
 
 # Simple name search - Find directors named "Josh"
-results: DirectorSearchResponse = client.director.search(name="Josh")
+results = client.director.search(name="Josh")
 print(f"Found {results.count} directors")
 
 for director in results.directors:
@@ -22,6 +21,7 @@ for director in results.directors:
     print(f"  Tournaments Directed: {director.tournament_count}")
 
 # Output example:
+# Found 26 directors
 # 1533: Josh Rainwater
 #   Location: Columbia, SC, United States
 #   Tournaments Directed: 13
@@ -33,24 +33,21 @@ Narrow down results with multiple filters:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
 
 client = IfpaClient()
 
 # Search by name and location
-results: DirectorSearchResponse = client.director.search(
+results = client.director.search(
     name="Josh",
     city="Columbia",
     stateprov="SC"
 )
 
 # Search by country
-results: DirectorSearchResponse = client.director.search(
-    country="US"
-)
+results = client.director.search(country="US")
 
 # Combine multiple filters
-results: DirectorSearchResponse = client.director.search(
+results = client.director.search(
     name="Smith",
     city="Chicago",
     stateprov="IL",
@@ -73,12 +70,11 @@ Retrieve detailed information about a specific tournament director:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import Director
 
 client = IfpaClient()
 
-# Get director by ID - Josh Rainwater from Columbia, SC
-director: Director = client.director(1533).details()
+# Get director by ID - Josh Rainwater (1533) from Columbia, SC
+director = client.director(1533).details()
 
 print(f"Name: {director.name}")
 print(f"Director ID: {director.director_id}")
@@ -129,13 +125,13 @@ Director profiles include:
 Access a director's tournament history:
 
 ```python
-from ifpa_api import IfpaClient, TimePeriod
-from ifpa_api.models.director import DirectorTournamentsResponse
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import TimePeriod
 
 client = IfpaClient()
 
-# Get past tournaments for Josh Rainwater
-past: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
+# Get past tournaments for Josh Rainwater (1533)
+past = client.director(1533).tournaments(TimePeriod.PAST)
 
 print(f"Director: {past.director_name}")
 print(f"Total past tournaments: {past.total_count}")
@@ -163,13 +159,13 @@ for tournament in past.tournaments[:3]:  # Show first 3
 ### Get Upcoming Tournaments
 
 ```python
-from ifpa_api import IfpaClient, TimePeriod
-from ifpa_api.models.director import DirectorTournamentsResponse
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import TimePeriod
 
 client = IfpaClient()
 
-# Get future tournaments for Josh Rainwater
-upcoming: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.FUTURE)
+# Get future tournaments for Josh Rainwater (1533)
+upcoming = client.director(1533).tournaments(TimePeriod.FUTURE)
 
 print(f"Upcoming tournaments: {upcoming.total_count}")
 
@@ -179,6 +175,50 @@ for tournament in upcoming.tournaments:
     print(f"  End: {tournament.event_end_date}")
     print(f"  Location: {tournament.location_name}")
     print(f"  Ranking System: {tournament.ranking_system}")
+```
+
+### Working with Highly Active Directors
+
+For directors with extensive history, use the same pattern:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import TimePeriod
+
+client = IfpaClient()
+
+# Get highly active director - Erik Thoren (1151)
+# 545 tournaments, 1,658 unique players, De Pere, WI
+director = client.director(1151).details()
+
+print(f"{director.name}")
+print(f"  Tournaments: {director.stats.tournament_count}")
+print(f"  Unique Players: {director.stats.unique_player_count}")
+print(f"  Highest Value: {director.stats.highest_value}")
+print(f"  Location: {director.city}, {director.stateprov}")
+
+# Get future events
+future = client.director(1151).tournaments(TimePeriod.FUTURE)
+print(f"  Upcoming Events: {future.total_count}")
+```
+
+### Handling Empty Results
+
+Some directors may have no future tournaments:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import TimePeriod
+
+client = IfpaClient()
+
+# Director with zero future tournaments - Cory Casella (1752)
+future = client.director(1752).tournaments(TimePeriod.FUTURE)
+
+if future.total_count == 0 or not future.tournaments:
+    print("No upcoming tournaments")
+else:
+    print(f"Found {future.total_count} upcoming tournaments")
 ```
 
 ### Tournament Parameters
@@ -204,12 +244,11 @@ Get the list of IFPA country directors:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import CountryDirectorsResponse
 
 client = IfpaClient()
 
 # Get all country directors
-country_dirs: CountryDirectorsResponse = client.director.country_directors()
+country_dirs = client.director.country_directors()
 
 print(f"Total country directors: {country_dirs.count}")
 
@@ -229,17 +268,19 @@ Each country director includes a nested `player_profile` with:
 - **Profile**: Profile photo URL
 
 Note: Access director information through the `player_profile` field:
+
 ```python
 profile = director.player_profile
 print(f"{profile.name} - {profile.country_name}")
+```
 
 ## Complete Example: Director Analysis
 
 Here's a complete example that analyzes a director's activity:
 
 ```python
-from ifpa_api import IfpaClient, TimePeriod, IfpaApiError
-from ifpa_api.models.director import Director, DirectorTournamentsResponse
+from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api.models.common import TimePeriod
 
 
 def analyze_director(director_id: int) -> None:
@@ -248,7 +289,7 @@ def analyze_director(director_id: int) -> None:
 
     try:
         # Get director profile
-        director: Director = client.director(director_id).details()
+        director = client.director(director_id).details()
 
         print("=" * 60)
         print(f"{director.name}")
@@ -285,21 +326,18 @@ def analyze_director(director_id: int) -> None:
                     print(f"  {fmt.name}: {fmt.count} tournaments")
 
         # Get recent past tournaments
-        past: DirectorTournamentsResponse = client.director(director_id).tournaments(
-            TimePeriod.PAST
-        )
+        past = client.director(director_id).tournaments(TimePeriod.PAST)
 
-        print(f"\nRecent Past Tournaments:")
+        print(f"\nRecent Past Tournaments ({past.total_count} total):")
         for tournament in past.tournaments[:5]:
             print(f"\n  {tournament.tournament_name}")
             print(f"    Date: {tournament.event_date}")
             print(f"    Players: {tournament.player_count}")
-            print(f"    Value: {tournament.value:.2f}")
+            if tournament.value:
+                print(f"    Value: {tournament.value:.2f}")
 
         # Get upcoming tournaments
-        future: DirectorTournamentsResponse = client.director(director_id).tournaments(
-            TimePeriod.FUTURE
-        )
+        future = client.director(director_id).tournaments(TimePeriod.FUTURE)
 
         if future.total_count and future.total_count > 0:
             print(f"\nUpcoming Tournaments ({future.total_count}):")
@@ -307,6 +345,8 @@ def analyze_director(director_id: int) -> None:
                 print(f"\n  {tournament.tournament_name}")
                 print(f"    Start: {tournament.event_date}")
                 print(f"    Location: {tournament.location_name}")
+        else:
+            print(f"\nNo upcoming tournaments scheduled")
 
     except IfpaApiError as e:
         if e.status_code == 404:
@@ -346,11 +386,10 @@ Handle empty search results:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
 
 client = IfpaClient()
 
-results: DirectorSearchResponse = client.director.search(name="XYZ123")
+results = client.director.search(name="XYZ123")
 
 if results.count == 0 or not results.directors:
     print("No directors found")
@@ -366,11 +405,10 @@ Find a specific country's director:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import CountryDirectorsResponse
 
 client = IfpaClient()
 
-country_dirs: CountryDirectorsResponse = client.director.country_directors()
+country_dirs = client.director.country_directors()
 
 # Find director for a specific country
 target_country = "US"
@@ -385,8 +423,26 @@ else:
     print(f"No director found for {target_country}")
 ```
 
+### Working with International Directors
+
+Access directors from any country:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient()
+
+# Get international director - Michael Trepp (1071) from Switzerland
+director = client.director(1071).details()
+
+print(f"{director.name}")
+print(f"  Country: {director.country_name} ({director.country_code})")
+print(f"  Tournaments: {director.stats.tournament_count}")
+print(f"  Unique Players: {director.stats.unique_player_count}")
+```
+
 ## Related Resources
 
 - [Tournaments](tournaments.md) - View tournament details and results
-- [Players](players.md) - View player profiles and statistics
+- [Player](player.md) - View player profiles and statistics
 - [Error Handling](error-handling.md) - Handle API errors

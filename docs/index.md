@@ -40,7 +40,7 @@ for entry in rankings.rankings[:5]:
     print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
 
 # Search for tournaments
-tournaments = client.tournaments.search(city="Portland", stateprov="OR")
+tournaments = client.tournament.search(city="Portland", stateprov="OR")
 for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name} ({tournament.event_date})")
 
@@ -74,7 +74,7 @@ The client provides access to 36 of 46 IFPA API endpoints:
 ## Getting Help
 
 - **Documentation**: Browse the [Getting Started](getting-started/installation.md) guide
-- **Examples**: Check the [Usage Guide](usage/directors.md) for code examples
+- **Examples**: Check the [Usage Guide](usage/director.md) for code examples
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/johnsosoka/ifpa-api-python/issues)
 - **API Reference**: See the [IFPA API docs](https://api.ifpapinball.com/docs)
 
@@ -83,7 +83,7 @@ The client provides access to 36 of 46 IFPA API endpoints:
 - [Install the client](getting-started/installation.md)
 - [Quick Start Guide](getting-started/quickstart.md)
 - [Authentication Setup](getting-started/authentication.md)
-- [Usage Examples](usage/directors.md)
+- [Usage Examples](usage/director.md)
 
 ## License
 

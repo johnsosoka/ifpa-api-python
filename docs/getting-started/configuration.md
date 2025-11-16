@@ -337,5 +337,5 @@ except Exception as e:
 ## Next Steps
 
 - [Quick Start Guide](quickstart.md)
-- [Usage Examples](../usage/directors.md)
+- [Usage Examples](../usage/director.md)
 - [Error Handling](../usage/error-handling.md)

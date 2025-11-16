@@ -1,4 +1,4 @@
-"""Tournaments resource client and handle.
+"""Tournament resource client with callable pattern.
 
 Provides access to tournament information, results, formats, and submissions.
 """
@@ -20,11 +20,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class TournamentHandle:
-    """Handle for interacting with a specific tournament.
+class _TournamentContext:
+    """Context for interacting with a specific tournament.
 
-    This class provides methods for accessing information about a specific
-    tournament identified by its tournament ID.
+    This internal class provides resource-specific methods for a tournament
+    identified by its tournament ID. Instances are returned by calling
+    TournamentClient with a tournament ID.
 
     Attributes:
         _http: The HTTP client instance
@@ -35,7 +36,7 @@ class TournamentHandle:
     def __init__(
         self, http: "_HttpClient", tournament_id: int | str, validate_requests: bool
     ) -> None:
-        """Initialize a tournament handle.
+        """Initialize a tournament context.
 
         Args:
             http: The HTTP client instance
@@ -46,7 +47,7 @@ class TournamentHandle:
         self._tournament_id = tournament_id
         self._validate_requests = validate_requests
 
-    def get(self) -> Tournament:
+    def details(self) -> Tournament:
         """Get detailed information about this tournament.
 
         Returns:
@@ -57,7 +58,7 @@ class TournamentHandle:
 
         Example:
             ```python
-            tournament = client.tournament(12345).get()
+            tournament = client.tournament(12345).details()
             print(f"Tournament: {tournament.tournament_name}")
             print(f"Players: {tournament.player_count}")
             print(f"Date: {tournament.event_date}")
@@ -160,7 +161,7 @@ class TournamentHandle:
         Example:
             ```python
             # Get related tournaments
-            tournament = client.tournament(12345).get()
+            tournament = client.tournament(12345).details()
             related = client.tournament(12345).related()
 
             print(f"Found {len(related.tournament)} related tournaments")
@@ -174,19 +175,32 @@ class TournamentHandle:
         return RelatedTournamentsResponse.model_validate(response)
 
 
-class TournamentsClient:
-    """Client for tournaments collection-level operations.
+class TournamentClient:
+    """Callable client for tournament operations.
 
-    This client provides methods for searching tournaments and accessing
-    collection-level tournament information.
+    This client provides both collection-level methods (search, list_formats) and
+    resource-level access via the callable pattern. Call with a tournament ID to get
+    a context for tournament-specific operations.
 
     Attributes:
         _http: The HTTP client instance
         _validate_requests: Whether to validate request parameters
+
+    Example:
+        ```python
+        # Collection-level operations
+        results = client.tournament.search(name="PAPA")
+        formats = client.tournament.list_formats()
+
+        # Resource-level operations
+        tournament = client.tournament(12345).details()
+        results = client.tournament(12345).results()
+        formats = client.tournament(12345).formats()
+        ```
     """
 
     def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
-        """Initialize the tournaments client.
+        """Initialize the tournament client.
 
         Args:
             http: The HTTP client instance
@@ -194,6 +208,25 @@ class TournamentsClient:
         """
         self._http = http
         self._validate_requests = validate_requests
+
+    def __call__(self, tournament_id: int | str) -> _TournamentContext:
+        """Get a context for a specific tournament.
+
+        Args:
+            tournament_id: The tournament's unique identifier
+
+        Returns:
+            _TournamentContext instance for accessing tournament-specific operations
+
+        Example:
+            ```python
+            # Get tournament context and access methods
+            tournament = client.tournament(12345).details()
+            results = client.tournament(12345).results()
+            league = client.tournament(12345).league()
+            ```
+        """
+        return _TournamentContext(self._http, tournament_id, self._validate_requests)
 
     def search(
         self,
@@ -234,10 +267,10 @@ class TournamentsClient:
         Example:
             ```python
             # Search by name
-            results = client.tournaments.search(name="Pinball")
+            results = client.tournament.search(name="Pinball")
 
             # Search by location and date range (must provide BOTH dates)
-            results = client.tournaments.search(
+            results = client.tournament.search(
                 city="Portland",
                 stateprov="OR",
                 start_date="2024-01-01",
@@ -245,7 +278,7 @@ class TournamentsClient:
             )
 
             # Paginated search
-            results = client.tournaments.search(
+            results = client.tournament.search(
                 country="US",
                 start_pos=0,
                 count=50
@@ -299,7 +332,7 @@ class TournamentsClient:
         Example:
             ```python
             # Get all tournament formats
-            formats = client.tournaments.list_formats()
+            formats = client.tournament.list_formats()
 
             print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
             for fmt in formats.qualifying_formats:

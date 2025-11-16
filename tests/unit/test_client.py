@@ -7,7 +7,7 @@ from ifpa_api.resources.director import DirectorClient, _DirectorContext
 from ifpa_api.resources.player import PlayerClient, _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
-from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
+from ifpa_api.resources.tournament import TournamentClient, _TournamentContext
 
 
 class TestIfpaClientInitialization:
@@ -67,11 +67,11 @@ class TestIfpaClientResourceProperties:
         rankings = client.rankings
         assert isinstance(rankings, RankingsClient)
 
-    def test_tournaments_property_returns_tournaments_client(self) -> None:
-        """Test that tournaments property returns TournamentsClient."""
+    def test_tournament_property_returns_tournament_client(self) -> None:
+        """Test that tournament property returns TournamentClient."""
         client = IfpaClient(api_key="test-key")
-        tournaments = client.tournaments
-        assert isinstance(tournaments, TournamentsClient)
+        tournament = client.tournament
+        assert isinstance(tournament, TournamentClient)
 
     def test_series_property_returns_series_client(self) -> None:
         """Test that series property returns SeriesClient."""
@@ -116,18 +116,18 @@ class TestIfpaClientHandleFactory:
         context = client.player(player_id)
         assert context._player_id == player_id
 
-    def test_tournament_method_returns_tournament_handle(self) -> None:
-        """Test that tournament() method returns TournamentHandle."""
+    def test_tournament_callable_returns_tournament_context(self) -> None:
+        """Test that tournament() callable returns _TournamentContext."""
         client = IfpaClient(api_key="test-key")
-        handle = client.tournament(54321)
-        assert isinstance(handle, TournamentHandle)
+        context = client.tournament(54321)
+        assert isinstance(context, _TournamentContext)
 
-    def test_tournament_handle_stores_id(self) -> None:
-        """Test that tournament handle stores the tournament ID."""
+    def test_tournament_context_stores_id(self) -> None:
+        """Test that tournament context stores the tournament ID."""
         client = IfpaClient(api_key="test-key")
         tournament_id = 54321
-        handle = client.tournament(tournament_id)
-        assert handle._tournament_id == tournament_id
+        context = client.tournament(tournament_id)
+        assert context._tournament_id == tournament_id
 
     def test_series_handle_method_returns_series_handle(self) -> None:
         """Test that series_handle() method returns SeriesHandle."""

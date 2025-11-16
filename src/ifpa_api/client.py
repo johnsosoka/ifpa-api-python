@@ -13,7 +13,7 @@ from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
-from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
+from ifpa_api.resources.tournament import TournamentClient
 
 
 class IfpaClient:
@@ -41,7 +41,8 @@ class IfpaClient:
         player = client.player(12345).details()
         rankings = client.rankings.wppr(start_pos=0, count=100)
         director = client.director(1000).details()
-        tournaments = client.director(1000).tournaments(TimePeriod.PAST)
+        director_tourneys = client.director(1000).tournaments(TimePeriod.PAST)
+        tournament = client.tournament(12345).details()
 
         # Close when done (or use context manager)
         client.close()
@@ -99,7 +100,7 @@ class IfpaClient:
         self._player_client: PlayerClient | None = None
         self._rankings_client: RankingsClient | None = None
         self._reference_client: ReferenceClient | None = None
-        self._tournaments_client: TournamentsClient | None = None
+        self._tournament_client: TournamentClient | None = None
         self._series_client: SeriesClient | None = None
 
     @property
@@ -197,25 +198,34 @@ class IfpaClient:
         return self._reference_client
 
     @property
-    def tournaments(self) -> TournamentsClient:
-        """Access the tournaments resource client.
+    def tournament(self) -> TournamentClient:
+        """Access the tournament resource client.
 
         Returns:
-            TournamentsClient instance for searching tournaments
+            TournamentClient instance for tournament operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for tournaments
-            results = client.tournaments.search(
+            # Collection-level: Search for tournaments
+            results = client.tournament.search(
                 name="Pinball",
                 city="Portland",
                 stateprov="OR"
             )
+
+            # Collection-level: List tournament formats
+            formats = client.tournament.list_formats()
+
+            # Resource-level: Get tournament details
+            tournament = client.tournament(12345).details()
+
+            # Resource-level: Get tournament results
+            results = client.tournament(12345).results()
             ```
         """
-        if self._tournaments_client is None:
-            self._tournaments_client = TournamentsClient(self._http, self._config.validate_requests)
-        return self._tournaments_client
+        if self._tournament_client is None:
+            self._tournament_client = TournamentClient(self._http, self._config.validate_requests)
+        return self._tournament_client
 
     @property
     def series(self) -> SeriesClient:
@@ -236,32 +246,6 @@ class IfpaClient:
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
-
-    def tournament(self, tournament_id: int | str) -> TournamentHandle:
-        """Get a handle for a specific tournament.
-
-        Args:
-            tournament_id: The tournament's unique identifier
-
-        Returns:
-            TournamentHandle instance for accessing tournament-specific operations
-
-        Example:
-            ```python
-            # Get tournament details
-            tournament = client.tournament(12345).get()
-
-            # Get tournament results
-            results = client.tournament(12345).results()
-
-            # Get tournament formats
-            formats = client.tournament(12345).formats()
-
-            # Get league information
-            league = client.tournament(12345).league()
-            ```
-        """
-        return TournamentHandle(self._http, tournament_id, self._config.validate_requests)
 
     def series_handle(self, series_code: str) -> SeriesHandle:
         """Get a handle for a specific tournament series.

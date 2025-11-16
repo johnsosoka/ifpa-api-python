@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - TBD
+
+### Changed
+
+**Tournament Resource Refactoring (BREAKING CHANGES)**
+
+The Tournament resource has been refactored to match the callable pattern established by Player and Director resources, providing a unified interface for collection and resource-level operations.
+
+**Breaking Changes:**
+
+1. **Property renamed**: `client.tournaments` → `client.tournament` (singular)
+   ```python
+   # Before (v0.2.x)
+   results = client.tournaments.search(name="PAPA")
+
+   # After (v0.3.0)
+   results = client.tournament.search(name="PAPA")
+   ```
+
+2. **Method renamed**: `.get()` → `.details()` (consistent with Player and Director)
+   ```python
+   # Before (v0.2.x)
+   tournament = client.tournament(12345).get()
+
+   # After (v0.3.0)
+   tournament = client.tournament(12345).details()
+   ```
+
+3. **Class renamed**: `TournamentsClient` → `TournamentClient` (singular)
+   ```python
+   # Before (v0.2.x)
+   from ifpa_api.resources.tournaments import TournamentsClient
+
+   # After (v0.3.0)
+   from ifpa_api.resources.tournament import TournamentClient
+   ```
+
+4. **Class removed**: `TournamentHandle` is now private (`_TournamentContext`)
+   - This internal class should not be directly imported by users
+   - Access tournament operations via the callable pattern: `client.tournament(id).details()`
+
+**Unified Pattern:**
+
+The tournament resource now follows the same callable pattern as player and director:
+```python
+# Collection-level operations
+tournaments = client.tournament.search(name="PAPA")
+formats = client.tournament.list_formats()
+
+# Resource-level operations via callable pattern
+tournament = client.tournament(12345).details()
+results = client.tournament(12345).results()
+league = client.tournament(12345).league()
+```
+
+### Fixed
+
+- Consolidated integration tests from 3 files into 1 organized file (`test_tournament_integration.py`)
+- Updated all documentation to reflect new callable pattern
+- Fixed helper function `get_test_tournament_id()` to use correct callable pattern
+
 ## [0.2.1] - TBD
 
 ### Added

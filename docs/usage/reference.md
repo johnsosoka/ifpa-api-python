@@ -313,6 +313,6 @@ The Reference client uses these IFPA API endpoints:
 ## Related Resources
 
 - [Rankings](rankings.md) - Use country filters with rankings
-- [Players](players.md) - Search players by location
+- [Player](player.md) - Search players by location
 - [Tournaments](tournaments.md) - Search tournaments by location
 - [API Reference: Models](../api-reference/models.md) - Complete model definitions

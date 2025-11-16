@@ -112,12 +112,12 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
         client = IfpaClient()
         tournament_id = get_test_tournament_id(client)
         if tournament_id:
-            tournament = client.tournament(tournament_id).get()
+            tournament = client.tournament(tournament_id).details()
         ```
     """
     try:
         # Search for tournaments, get first result
-        results = client.tournaments.search(count=1)
+        results = client.tournament.search(count=1)
         if results.tournaments and len(results.tournaments) > 0:
             return results.tournaments[0].tournament_id
     except Exception:

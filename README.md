@@ -56,7 +56,7 @@ for entry in rankings.rankings[:5]:
     print(f"{entry.rank}. {entry.player_name}: {entry.rating} WPPR")
 
 # Search for tournaments
-tournaments = client.tournaments.search(city="Portland", stateprov="OR")
+tournaments = client.tournament.search(city="Portland", stateprov="OR")
 for tournament in tournaments.tournaments[:3]:
     print(f"{tournament.tournament_name} ({tournament.event_date})")
 
