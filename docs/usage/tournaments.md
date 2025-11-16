@@ -1,6 +1,24 @@
-# Tournaments
+# Tournament
 
 Search for tournaments and access detailed tournament information, results, formats, and submission history.
+
+## Callable Pattern
+
+The Tournament resource uses a callable pattern for accessing both collection-level and resource-level operations:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient()
+
+# Collection operations on client.tournament
+search_results = client.tournament.search(name="PAPA")
+formats = client.tournament.list_formats()
+
+# Individual tournament operations via callable pattern
+tournament = client.tournament(7070).details()
+results = client.tournament(7070).results()
+```
 
 ## Search for Tournaments
 
@@ -18,17 +36,28 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client = IfpaClient()
 
-# Simple name search
-tournaments: TournamentSearchResponse = client.tournaments.search(name="Pinball")
-for tournament in tournaments.tournaments:
-    print(f"{tournament.tournament_name} ({tournament.event_date})")
-    print(f"  Location: {tournament.city}, {tournament.stateprov}")
-    print(f"  Players: {tournament.player_count}")
+tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA")
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client = IfpaClient()
+
+# Search for PAPA tournaments
+tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA", count=10)
+
+print(f"Found {len(tournaments.tournaments)} PAPA tournaments")
+for t in tournaments.tournaments:
+    print(f"{t.tournament_name} - {t.event_date}")
+    print(f"  Location: {t.city}, {t.stateprov}")
+    print(f"  Players: {t.player_count}, Rating: {t.rating_value}")
 ```
 
 ### Search with Filters
-
-Narrow down results with location, date range, and tournament type filters:
 
 ```python
 from ifpa_api import IfpaClient
@@ -37,25 +66,46 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client = IfpaClient()
 
 # Search by location and date range (BOTH dates required)
-results: TournamentSearchResponse = client.tournaments.search(
+results: TournamentSearchResponse = client.tournament.search(
     city="Portland",
     stateprov="OR",
     start_date="2024-01-01",
     end_date="2024-12-31"
 )
+```
 
-# Search women's tournaments only
-women_tournaments: TournamentSearchResponse = client.tournaments.search(
-    tournament_type="women",
-    country="US"
-)
+**Complete Example:**
 
-# Paginated search
-results: TournamentSearchResponse = client.tournaments.search(
-    name="Championship",
-    start_pos=0,
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client = IfpaClient()
+
+# Search by location and date range (BOTH dates required)
+results: TournamentSearchResponse = client.tournament.search(
+    city="Portland",
+    stateprov="OR",
+    start_date="2024-01-01",
+    end_date="2024-12-31",
     count=50
 )
+
+print(f"Found {len(results.tournaments)} tournaments in Portland, OR")
+for t in results.tournaments:
+    print(f"\n{t.tournament_name}")
+    print(f"  Date: {t.event_date}")
+    print(f"  Players: {t.player_count}")
+    print(f"  Rating: {t.rating_value}")
+
+# Search women's tournaments only
+women_tournaments: TournamentSearchResponse = client.tournament.search(
+    tournament_type="women",
+    country="US",
+    count=25
+)
+
+print(f"\n\nFound {len(women_tournaments.tournaments)} women's tournaments")
 ```
 
 ### Search Parameters
@@ -84,8 +134,19 @@ from ifpa_api.models.tournaments import Tournament
 
 client = IfpaClient()
 
-# Get tournament by ID
-tournament: Tournament = client.tournament(12345).get()
+tournament: Tournament = client.tournament(7070).details()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import Tournament
+
+client = IfpaClient()
+
+# Get PAPA 17 tournament details
+tournament: Tournament = client.tournament(7070).details()
 
 print(f"Name: {tournament.tournament_name}")
 print(f"Event: {tournament.event_name}")
@@ -121,17 +182,32 @@ from ifpa_api.models.tournaments import TournamentResultsResponse
 
 client = IfpaClient()
 
-# Get results
-results: TournamentResultsResponse = client.tournament(12345).results()
+results: TournamentResultsResponse = client.tournament(7070).results()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentResultsResponse
+
+client = IfpaClient()
+
+# Get PAPA 17 results
+results: TournamentResultsResponse = client.tournament(7070).results()
 
 print(f"Tournament: {results.tournament_name}")
 print(f"Date: {results.event_date}")
 print(f"Players: {results.player_count}")
-print("\nFinal Standings:")
+print("\nTop 10 Finishers:")
 
-for result in results.results[:10]:  # Top 10
+for result in results.results[:10]:
     print(f"{result.position}. {result.player_name} ({result.city}, {result.stateprov})")
-    print(f"   WPPR: {result.wppr_points:.2f} | Rating: {result.rating_points:.2f}")
+    if result.wppr_points:
+        print(f"   WPPR: {result.wppr_points:.2f}", end="")
+    if result.rating_points:
+        print(f" | Rating: {result.rating_points:.2f}", end="")
+    print()
 ```
 
 ### Result Details
@@ -153,8 +229,19 @@ from ifpa_api.models.tournaments import TournamentFormatsResponse
 
 client = IfpaClient()
 
-# Get tournament format information
-formats: TournamentFormatsResponse = client.tournament(12345).formats()
+formats: TournamentFormatsResponse = client.tournament(7070).formats()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentFormatsResponse
+
+client = IfpaClient()
+
+# Get PAPA 17 format information
+formats: TournamentFormatsResponse = client.tournament(7070).formats()
 
 print(f"Tournament ID: {formats.tournament_id}")
 print(f"Formats used: {len(formats.formats)}")
@@ -190,23 +277,39 @@ from ifpa_api.models.tournaments import TournamentFormatsListResponse
 
 client = IfpaClient()
 
+formats: TournamentFormatsListResponse = client.tournament.list_formats()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentFormatsListResponse
+
+client = IfpaClient()
+
 # Get all tournament formats
-formats: TournamentFormatsListResponse = client.tournaments.list_formats()
+formats: TournamentFormatsListResponse = client.tournament.list_formats()
 
 print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
 for fmt in formats.qualifying_formats:
     print(f"  {fmt.format_id}: {fmt.name}")
+    if fmt.description:
+        print(f"    {fmt.description}")
 
 print(f"\nFinals formats ({len(formats.finals_formats)}):")
 for fmt in formats.finals_formats:
     print(f"  {fmt.format_id}: {fmt.name}")
+    if fmt.description:
+        print(f"    {fmt.description}")
 
 # Find a specific format
 swiss = next(
-    f for f in formats.qualifying_formats
-    if "swiss" in f.name.lower()
+    (f for f in formats.qualifying_formats if "swiss" in f.name.lower()),
+    None
 )
-print(f"\nSwiss format ID: {swiss.format_id}")
+if swiss:
+    print(f"\nSwiss format ID: {swiss.format_id}")
 ```
 
 ## Get Related Tournaments
@@ -219,19 +322,43 @@ from ifpa_api.models.tournaments import RelatedTournamentsResponse
 
 client = IfpaClient()
 
-# Get related tournaments
-related: RelatedTournamentsResponse = client.tournament(12345).related()
+related: RelatedTournamentsResponse = client.tournament(7070).related()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import RelatedTournamentsResponse
+
+client = IfpaClient()
+
+# Get related tournaments for PAPA 17
+related: RelatedTournamentsResponse = client.tournament(7070).related()
 
 print(f"Found {len(related.tournament)} related tournaments")
 for t in related.tournament:
-    print(f"  {t.event_start_date}: {t.tournament_name}")
+    print(f"\n{t.event_start_date}: {t.tournament_name}")
+    print(f"  Type: {t.tournament_type}")
+    print(f"  Event: {t.event_name}")
     if t.winner:
-        print(f"    Winner: {t.winner.name} ({t.winner.country_name})")
+        print(f"  Winner: {t.winner.name} ({t.winner.country_name})")
 ```
 
 ## Get League Information
 
 For tournaments that are part of a league, retrieve league session data:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentLeagueResponse
+
+client = IfpaClient()
+
+league: TournamentLeagueResponse = client.tournament(12345).league()
+```
+
+**Complete Example:**
 
 ```python
 from ifpa_api import IfpaClient
@@ -250,7 +377,8 @@ print("\nSession Details:")
 for session in league.sessions:
     print(f"\n{session.session_date}")
     print(f"  Players: {session.player_count}")
-    print(f"  WPPR Value: {session.session_value}")
+    if session.session_value:
+        print(f"  WPPR Value: {session.session_value}")
 ```
 
 ### League Session Data
@@ -272,17 +400,31 @@ from ifpa_api.models.tournaments import TournamentSubmissionsResponse
 
 client = IfpaClient()
 
+submissions: TournamentSubmissionsResponse = client.tournament(7070).submissions()
+```
+
+**Complete Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSubmissionsResponse
+
+client = IfpaClient()
+
 # Get submission information
-submissions: TournamentSubmissionsResponse = client.tournament(12345).submissions()
+submissions: TournamentSubmissionsResponse = client.tournament(7070).submissions()
 
 print(f"Tournament ID: {submissions.tournament_id}")
 print(f"Total Submissions: {len(submissions.submissions)}")
 
 for submission in submissions.submissions:
     print(f"\nSubmission ID: {submission.submission_id}")
-    print(f"  Date: {submission.submission_date}")
-    print(f"  Submitter: {submission.submitter_name}")
-    print(f"  Status: {submission.status}")
+    if submission.submission_date:
+        print(f"  Date: {submission.submission_date}")
+    if submission.submitter_name:
+        print(f"  Submitter: {submission.submitter_name}")
+    if submission.status:
+        print(f"  Status: {submission.status}")
     if submission.details:
         print(f"  Details: {submission.details}")
 ```
@@ -312,55 +454,58 @@ from ifpa_api.models.tournaments import (
 
 def analyze_tournament(tournament_id: int) -> None:
     """Comprehensive tournament analysis."""
-    with IfpaClient() as client:
-        try:
-            # Get tournament details
-            tournament: Tournament = client.tournament(tournament_id).get()
+    client = IfpaClient()
 
-            print("=" * 60)
-            print(f"{tournament.tournament_name}")
-            print("=" * 60)
+    try:
+        # Get tournament details
+        tournament: Tournament = client.tournament(tournament_id).details()
 
-            # Basic info
-            print(f"\nEvent: {tournament.event_name}")
-            print(f"Location: {tournament.location_name}")
-            print(f"  {tournament.city}, {tournament.stateprov}, {tournament.country_name}")
-            print(f"Date: {tournament.event_date}")
+        print("=" * 60)
+        print(f"{tournament.tournament_name}")
+        print("=" * 60)
 
-            # Tournament details
-            print(f"\nTournament Details:")
-            print(f"  Type: {tournament.tournament_type}")
-            print(f"  Players: {tournament.player_count}")
-            print(f"  Machines: {tournament.machine_count}")
-            print(f"  Director: {tournament.director_name}")
-            print(f"  WPPR Value: {tournament.wppr_value}")
-            print(f"  Rating Value: {tournament.rating_value}")
+        # Basic info
+        print(f"\nEvent: {tournament.event_name}")
+        print(f"Location: {tournament.location_name}")
+        print(f"  {tournament.city}, {tournament.stateprov}, {tournament.country_name}")
+        print(f"Date: {tournament.event_date}")
 
-            # Get formats
-            formats: TournamentFormatsResponse = client.tournament(tournament_id).formats()
-            print(f"\nFormats Used:")
-            for fmt in formats.formats:
-                print(f"  - {fmt.format_name}: {fmt.rounds} rounds, {fmt.games_per_round} games/round")
+        # Tournament details
+        print(f"\nTournament Details:")
+        print(f"  Type: {tournament.tournament_type}")
+        print(f"  Players: {tournament.player_count}")
+        print(f"  Machines: {tournament.machine_count}")
+        print(f"  Director: {tournament.director_name}")
+        print(f"  WPPR Value: {tournament.wppr_value}")
+        print(f"  Rating Value: {tournament.rating_value}")
 
-            # Get results
-            results: TournamentResultsResponse = client.tournament(tournament_id).results()
-            print(f"\nTop 5 Finishers:")
-            for result in results.results[:5]:
-                print(f"  {result.position}. {result.player_name} - {result.wppr_points:.2f} WPPR")
+        # Get formats
+        formats: TournamentFormatsResponse = client.tournament(tournament_id).formats()
+        print(f"\nFormats Used:")
+        for fmt in formats.formats:
+            print(f"  - {fmt.format_name}: {fmt.rounds} rounds, {fmt.games_per_round} games/round")
 
-            # Calculate statistics
-            if results.results:
-                avg_wppr = sum(r.wppr_points or 0 for r in results.results) / len(results.results)
-                print(f"\nStatistics:")
-                print(f"  Average WPPR: {avg_wppr:.2f}")
-                print(f"  Total Finishers: {len(results.results)}")
+        # Get results
+        results: TournamentResultsResponse = client.tournament(tournament_id).results()
+        print(f"\nTop 5 Finishers:")
+        for result in results.results[:5]:
+            wppr = result.wppr_points if result.wppr_points else 0
+            print(f"  {result.position}. {result.player_name} - {wppr:.2f} WPPR")
 
-        except IfpaApiError as e:
-            print(f"Error: {e}")
+        # Calculate statistics
+        if results.results:
+            avg_wppr = sum(r.wppr_points or 0 for r in results.results) / len(results.results)
+            print(f"\nStatistics:")
+            print(f"  Average WPPR: {avg_wppr:.2f}")
+            print(f"  Total Finishers: {len(results.results)}")
+
+    except IfpaApiError as e:
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
-    analyze_tournament(12345)
+    # Analyze PAPA 17 (tournament ID 7070)
+    analyze_tournament(7070)
 ```
 
 ## Best Practices
@@ -376,7 +521,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client = IfpaClient()
 
 # CORRECT: Both dates provided
-results: TournamentSearchResponse = client.tournaments.search(
+results: TournamentSearchResponse = client.tournament.search(
     start_date="2024-01-01",
     end_date="2024-12-31",
     country="US"
@@ -384,7 +529,7 @@ results: TournamentSearchResponse = client.tournaments.search(
 
 # INCORRECT: Only one date - raises ValueError
 try:
-    results = client.tournaments.search(start_date="2024-01-01")
+    results = client.tournament.search(start_date="2024-01-01")
 except ValueError as e:
     print(f"Error: {e}")
 
@@ -394,7 +539,7 @@ from datetime import datetime, timedelta
 today = datetime.now()
 next_month = today + timedelta(days=30)
 
-upcoming: TournamentSearchResponse = client.tournaments.search(
+upcoming: TournamentSearchResponse = client.tournament.search(
     start_date=today.strftime("%Y-%m-%d"),
     end_date=next_month.strftime("%Y-%m-%d")
 )
@@ -411,7 +556,8 @@ from ifpa_api.models.tournaments import Tournament
 client = IfpaClient()
 
 try:
-    tournament: Tournament = client.tournament(999999).get()
+    tournament: Tournament = client.tournament(999999).details()
+    print(f"Found: {tournament.tournament_name}")
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Tournament not found")
@@ -436,7 +582,7 @@ def get_all_tournaments(name: str, page_size: int = 100):
     start_pos = 0
 
     while True:
-        results: TournamentSearchResponse = client.tournaments.search(
+        results: TournamentSearchResponse = client.tournament.search(
             name=name,
             start_pos=start_pos,
             count=page_size
@@ -462,7 +608,7 @@ print(f"Found {len(championships)} championship tournaments")
 
 ## Related Resources
 
-- [Directors](directors.md) - View tournament directors
-- [Players](players.md) - View player profiles and results
+- [Director](director.md) - View tournament directors
+- [Player](player.md) - View player profiles and results
 - [Series](series.md) - Tournament series information
 - [Error Handling](error-handling.md) - Handle API errors

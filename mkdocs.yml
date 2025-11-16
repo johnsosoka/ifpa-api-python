@@ -47,10 +47,10 @@ nav:
       - Authentication: getting-started/authentication.md
       - Configuration: getting-started/configuration.md
   - Usage Guide:
-      - Directors: usage/directors.md
-      - Players: usage/players.md
+      - Director: usage/director.md
+      - Player: usage/player.md
       - Rankings: usage/rankings.md
-      - Tournaments: usage/tournaments.md
+      - Tournament: usage/tournaments.md
       - Series: usage/series.md
       - Reference: usage/reference.md
       - Error Handling: usage/error-handling.md
