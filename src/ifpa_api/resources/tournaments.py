@@ -6,7 +6,9 @@ Provides access to tournament information, results, formats, and submissions.
 from typing import TYPE_CHECKING, Any
 
 from ifpa_api.models.tournaments import (
+    RelatedTournamentsResponse,
     Tournament,
+    TournamentFormatsListResponse,
     TournamentFormatsResponse,
     TournamentLeagueResponse,
     TournamentResultsResponse,
@@ -142,6 +144,35 @@ class TournamentHandle:
         response = self._http._request("GET", f"/tournament/{self._tournament_id}/submissions")
         return TournamentSubmissionsResponse.model_validate(response)
 
+    def related(self) -> RelatedTournamentsResponse:
+        """Get tournaments related to this tournament.
+
+        Returns tournaments that are part of the same tournament series or held at
+        the same venue. This is useful for finding recurring events and historical
+        data for tournament series.
+
+        Returns:
+            RelatedTournamentsResponse with list of related tournaments.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get related tournaments
+            tournament = client.tournament(12345).get()
+            related = client.tournament(12345).related()
+
+            print(f"Found {len(related.tournament)} related tournaments")
+            for t in related.tournament:
+                print(f"  {t.event_start_date}: {t.tournament_name}")
+                if t.winner:
+                    print(f"    Winner: {t.winner.name}")
+            ```
+        """
+        response = self._http._request("GET", f"/tournament/{self._tournament_id}/related")
+        return RelatedTournamentsResponse.model_validate(response)
+
 
 class TournamentsClient:
     """Client for tournaments collection-level operations.
@@ -183,8 +214,8 @@ class TournamentsClient:
             city: Filter by city
             stateprov: Filter by state/province
             country: Filter by country code
-            start_date: Filter by start date (YYYY-MM-DD)
-            end_date: Filter by end date (YYYY-MM-DD)
+            start_date: Filter by start date (YYYY-MM-DD). Must be provided with end_date.
+            end_date: Filter by end date (YYYY-MM-DD). Must be provided with start_date.
             tournament_type: Filter by tournament type (open, women, etc.)
             start_pos: Starting position for pagination
             count: Number of results to return
@@ -193,14 +224,19 @@ class TournamentsClient:
             List of matching tournaments
 
         Raises:
+            ValueError: If only one of start_date or end_date is provided
             IfpaApiError: If the API request fails
+
+        Note:
+            The API requires start_date and end_date to be provided together.
+            Providing only one will result in a ValueError.
 
         Example:
             ```python
             # Search by name
             results = client.tournaments.search(name="Pinball")
 
-            # Search by location and date range
+            # Search by location and date range (must provide BOTH dates)
             results = client.tournaments.search(
                 city="Portland",
                 stateprov="OR",
@@ -216,6 +252,14 @@ class TournamentsClient:
             )
             ```
         """
+        # Validate that start_date and end_date are provided together
+        if (start_date is not None) != (end_date is not None):
+            raise ValueError(
+                "start_date and end_date must be provided together. "
+                "The IFPA API requires both dates or neither. "
+                f"Received start_date={start_date}, end_date={end_date}"
+            )
+
         params: dict[str, Any] = {}
         if name is not None:
             params["name"] = name
@@ -238,3 +282,40 @@ class TournamentsClient:
 
         response = self._http._request("GET", "/tournament/search", params=params)
         return TournamentSearchResponse.model_validate(response)
+
+    def list_formats(self) -> TournamentFormatsListResponse:
+        """Get list of all available tournament format types.
+
+        Returns a comprehensive list of format types used for tournament qualifying
+        and finals rounds. This reference data is useful for understanding format
+        options when creating or searching for tournaments.
+
+        Returns:
+            TournamentFormatsListResponse with qualifying and finals format lists.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get all tournament formats
+            formats = client.tournaments.list_formats()
+
+            print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
+            for fmt in formats.qualifying_formats:
+                print(f"  {fmt.format_id}: {fmt.name}")
+
+            print(f"\\nFinals formats ({len(formats.finals_formats)}):")
+            for fmt in formats.finals_formats:
+                print(f"  {fmt.format_id}: {fmt.name}")
+
+            # Find a specific format
+            swiss = next(
+                f for f in formats.qualifying_formats
+                if "swiss" in f.name.lower()
+            )
+            print(f"\\nSwiss format ID: {swiss.format_id}")
+            ```
+        """
+        response = self._http._request("GET", "/tournament/formats")
+        return TournamentFormatsListResponse.model_validate(response)

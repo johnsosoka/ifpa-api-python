@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ifpa-api"
-version = "0.2.0"
+version = "0.2.1"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
@@ -66,6 +66,10 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disable_error_code = ["misc"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

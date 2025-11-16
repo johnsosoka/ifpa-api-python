@@ -5,7 +5,7 @@ Models for players, their rankings, tournament results, and head-to-head compari
 
 from typing import Any
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from ifpa_api.models.common import IfpaBaseModel
 
@@ -113,7 +113,7 @@ class PlayerSearchResult(IfpaBaseModel):
     first_name: str
     last_name: str
     city: str | None = None
-    state: str | None = None
+    state: str | None = Field(None, validation_alias="stateprov")
     country_code: str | None = None
     country_name: str | None = None
     wppr_rank: str | None = None
@@ -128,7 +128,8 @@ class PlayerSearchResponse(IfpaBaseModel):
     """
 
     query: str | None = None
-    search: list[PlayerSearchResult] = Field(default_factory=list)
+    search: list[PlayerSearchResult] = Field(default_factory=list, validation_alias="results")
+    total_results: str | None = None
 
 
 class MultiPlayerResponse(IfpaBaseModel):
@@ -271,14 +272,61 @@ class PvpAllCompetitors(IfpaBaseModel):
     title: str
 
 
+class PvpPlayer(IfpaBaseModel):
+    """Player information in a PVP comparison.
+
+    Attributes:
+        player_id: Player's unique identifier
+        first_name: Player's first name
+        last_name: Player's last name
+        city: City location
+        stateprov: State or province
+        country_name: Full country name
+        country_code: ISO country code
+        profile_photo: URL to profile photo
+    """
+
+    player_id: int
+    first_name: str
+    last_name: str
+    city: str | None = None
+    stateprov: str | None = None
+    country_name: str | None = None
+    country_code: str | None = None
+    profile_photo: str | None = None
+
+
+class PvpTournament(IfpaBaseModel):
+    """Tournament details in a PVP comparison.
+
+    Attributes:
+        tournament_id: Tournament identifier
+        tournament_name: Tournament name
+        event_date: Date of the tournament
+        player_1_position: First player's finishing position
+        player_2_position: Second player's finishing position
+        winner_player_id: ID of the player who finished higher
+    """
+
+    tournament_id: int
+    tournament_name: str
+    event_date: str | None = None
+    player_1_position: int | None = None
+    player_2_position: int | None = None
+    winner_player_id: int | None = None
+
+
 class PvpComparison(IfpaBaseModel):
     """Head-to-head comparison between two players.
 
+    The API returns nested player_1 and player_2 objects, but this model
+    flattens them for easier access while maintaining backwards compatibility.
+
     Attributes:
         player1_id: First player's ID
-        player1_name: First player's name
+        player1_name: First player's name (first_name + last_name)
         player2_id: Second player's ID
-        player2_name: Second player's name
+        player2_name: Second player's name (first_name + last_name)
         player1_wins: Number of times player 1 finished ahead
         player2_wins: Number of times player 2 finished ahead
         ties: Number of ties
@@ -294,7 +342,66 @@ class PvpComparison(IfpaBaseModel):
     player2_wins: int | None = None
     ties: int | None = None
     total_meetings: int | None = None
-    tournaments: list[dict[str, Any]] = Field(default_factory=list)
+    tournaments: list[PvpTournament] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def flatten_nested_players(cls, data: Any) -> dict[str, Any]:
+        """Flatten nested player_1 and player_2 objects from API response.
+
+        The IFPA API returns:
+        {
+            "player_1": {"player_id": 123, "first_name": "John", "last_name": "Doe", ...},
+            "player_2": {"player_id": 456, "first_name": "Jane", "last_name": "Smith", ...},
+            "pvp": [...]
+        }
+
+        This validator flattens it to the expected structure with player1_id,
+        player1_name, etc.
+
+        Args:
+            data: Raw data from API or pre-flattened data
+
+        Returns:
+            Flattened dictionary with player1_* and player2_* fields
+        """
+        if not isinstance(data, dict):
+            # If not a dict, it must already be a dict (this should not happen)
+            # but we satisfy mypy by returning an empty dict
+            return {}
+
+        # If already flattened (has player1_id), return as-is
+        if "player1_id" in data:
+            return data
+
+        # Extract nested player objects
+        player_1 = data.get("player_1", {})
+        player_2 = data.get("player_2", {})
+
+        # Build flattened structure
+        player1_first = player_1.get("first_name", "")
+        player1_last = player_1.get("last_name", "")
+        player2_first = player_2.get("first_name", "")
+        player2_last = player_2.get("last_name", "")
+
+        flattened = {
+            "player1_id": player_1.get("player_id"),
+            "player1_name": f"{player1_first} {player1_last}".strip(),
+            "player2_id": player_2.get("player_id"),
+            "player2_name": f"{player2_first} {player2_last}".strip(),
+        }
+
+        # Copy over PVP statistics from root level
+        # API may have these at root or nested - check both
+        for key in ["player1_wins", "player2_wins", "ties", "total_meetings"]:
+            if key in data:
+                flattened[key] = data[key]
+
+        # Handle tournaments list - could be under "pvp" or "tournaments"
+        tournaments = data.get("pvp", data.get("tournaments", []))
+        flattened["tournaments"] = tournaments
+
+        return flattened
 
 
 class PlayerCard(IfpaBaseModel):

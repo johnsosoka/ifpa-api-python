@@ -216,7 +216,7 @@ for entry in pro.rankings:
 
 ## Country Rankings
 
-Compare countries by total players, tournaments, and aggregate statistics:
+Get player rankings filtered by a specific country:
 
 ```python
 from ifpa_api import IfpaClient
@@ -224,27 +224,27 @@ from ifpa_api.models.rankings import CountryRankingsResponse
 
 client = IfpaClient()
 
-# Get all country rankings
-countries: CountryRankingsResponse = client.rankings.by_country(
-    country="",
+# Get US player rankings
+us_rankings: CountryRankingsResponse = client.rankings.by_country(
+    country="US",
     start_pos=0,
     count=25
 )
 
-print(f"Total countries ranked: {countries.total_countries}")
+print(f"Country: {us_rankings.rank_country_name}")
+print(f"Total players: {us_rankings.total_count}")
+print(f"Showing: {us_rankings.return_count} results starting at position {us_rankings.start_position}")
 
-for entry in countries.country_rankings:
-    print(f"{entry.rank}. {entry.country_name} ({entry.country_code})")
-    print(f"  Total Players: {entry.total_players}")
-    print(f"  Active Players: {entry.total_active_players}")
-    print(f"  Total Tournaments: {entry.total_tournaments}")
-    print(f"  Average WPPR: {entry.average_wppr}")
-    print(f"  Top Player: {entry.top_player_name} ({entry.top_player_wppr})")
+for entry in us_rankings.rankings:
+    print(f"{entry.rank}. {entry.player_name}")
+    print(f"  Rating: {entry.rating}")
+    print(f"  Location: {entry.city}, {entry.stateprov}")
+    print(f"  Active Events: {entry.active_events}")
 ```
 
-### Filter by Specific Country
+### Filter by Country Code or Name
 
-Search for a specific country by code or name:
+You can use either the country code or full country name:
 
 ```python
 from ifpa_api import IfpaClient
@@ -253,33 +253,91 @@ from ifpa_api.models.rankings import CountryRankingsResponse
 client = IfpaClient()
 
 # Using country code
-us_info: CountryRankingsResponse = client.rankings.by_country(
+us_rankings: CountryRankingsResponse = client.rankings.by_country(
     country="US",
-    count=10
+    count=50
 )
 
 # Using country name
-canada_info: CountryRankingsResponse = client.rankings.by_country(
+canada_rankings: CountryRankingsResponse = client.rankings.by_country(
     country="Canada",
-    count=10
+    count=50
 )
 
-for entry in us_info.country_rankings:
-    print(f"Rank: {entry.rank}")
-    print(f"Total Players: {entry.total_players}")
+print(f"Top US player: {us_rankings.rankings[0].player_name} (Rating: {us_rankings.rankings[0].rating})")
+print(f"Top Canadian player: {canada_rankings.rankings[0].player_name} (Rating: {canada_rankings.rankings[0].rating})")
 ```
 
 ### Country Rankings Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `country` | `str` | Country code (e.g., "US") or country name (e.g., "United States"). Use empty string for all countries |
+| `country` | `str` | Country code (e.g., "US") or country name (e.g., "United States") - **required** |
 | `start_pos` | `int` | Starting position for pagination |
 | `count` | `int` | Number of results to return |
 
+## List All Countries
+
+Get a list of all countries with ranked players:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import RankingsCountryListResponse
+
+client = IfpaClient()
+
+# Get all countries with player counts
+countries: RankingsCountryListResponse = client.rankings.country_list()
+
+print(f"Total countries: {countries.count}")
+
+# Display top 10 countries by player count
+top_countries = sorted(
+    countries.country,
+    key=lambda c: c.player_count,
+    reverse=True
+)[:10]
+
+for country in top_countries:
+    print(f"{country.country_name} ({country.country_code}): {country.player_count} players")
+
+# Find a specific country
+us = next((c for c in countries.country if c.country_code == "US"), None)
+if us:
+    print(f"\nUS has {us.player_count} ranked players")
+```
+
+This endpoint is useful for discovering valid country codes before calling `by_country()`
+
 ## Custom Rankings
 
-Access custom ranking systems created for specific purposes or regions:
+Access custom ranking systems created for specific purposes or regions.
+
+### List Available Custom Rankings
+
+First, discover available custom ranking systems:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import CustomRankingListResponse
+
+client = IfpaClient()
+
+# Get all custom ranking systems
+custom_list: CustomRankingListResponse = client.rankings.custom_list()
+
+print(f"Total custom rankings: {custom_list.total_count}")
+
+for ranking_info in custom_list.custom_view:
+    print(f"\nID: {ranking_info.view_id}")
+    print(f"Title: {ranking_info.title}")
+    if ranking_info.description:
+        print(f"Description: {ranking_info.description}")
+```
+
+### Get Custom Ranking Results
+
+Once you have a ranking ID, retrieve its rankings:
 
 ```python
 from ifpa_api import IfpaClient
@@ -289,7 +347,7 @@ client = IfpaClient()
 
 # Get custom ranking by ID
 custom: CustomRankingsResponse = client.rankings.custom(
-    ranking_id="regional-2024",
+    ranking_id=123,
     start_pos=0,
     count=50
 )
@@ -302,6 +360,33 @@ for entry in custom.rankings:
     print(f"  Value: {entry.value}")
     if entry.details:
         print(f"  Details: {entry.details}")
+```
+
+### Find and Query a Specific Custom Ranking
+
+Combine both methods to find and query a specific ranking:
+
+```python
+from ifpa_api import IfpaClient
+
+client = IfpaClient()
+
+# Find a specific ranking by title keyword
+custom_list = client.rankings.custom_list()
+retro_ranking = next(
+    (r for r in custom_list.custom_view if "retro" in r.title.lower()),
+    None
+)
+
+if retro_ranking:
+    print(f"Found: {retro_ranking.title} (ID: {retro_ranking.view_id})")
+
+    # Get rankings for that system
+    rankings = client.rankings.custom(retro_ranking.view_id, count=25)
+
+    print(f"\nTop 25 in {rankings.ranking_name}:")
+    for entry in rankings.rankings:
+        print(f"{entry.rank}. {entry.player_name}: {entry.value}")
 ```
 
 ### Custom Rankings Parameters
@@ -423,22 +508,21 @@ except IfpaApiError as e:
         print(f"API error: {e}")
 ```
 
-### Country Code Reference
+### Finding Country Codes
 
-Common country codes for filtering:
+Use the `country_list()` method to discover valid country codes and player counts:
 
-- `US` - United States
-- `CA` - Canada
-- `GB` - United Kingdom
-- `DE` - Germany
-- `SE` - Sweden
-- `AU` - Australia
-- `JP` - Japan
-- `FR` - France
-- `IT` - Italy
-- `ES` - Spain
+```python
+client = IfpaClient()
 
-For a complete list of country codes, use the reference endpoint (see [API Reference](../api-reference/overview.md)).
+# Get all countries
+countries = client.rankings.country_list()
+
+# Find countries with most players
+top_countries = sorted(countries.country, key=lambda c: c.player_count, reverse=True)[:10]
+for country in top_countries:
+    print(f"{country.country_code}: {country.country_name} ({country.player_count} players)")
+```
 
 ## Related Resources
 

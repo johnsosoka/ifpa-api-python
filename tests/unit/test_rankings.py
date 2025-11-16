@@ -10,7 +10,9 @@ from ifpa_api.client import IfpaClient
 from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
+    CustomRankingListResponse,
     CustomRankingsResponse,
+    RankingsCountryListResponse,
     RankingsResponse,
 )
 
@@ -70,6 +72,7 @@ class TestRankingsClientWPPR:
         rankings = client.rankings.wppr(start_pos=0, count=100)
 
         assert len(rankings.rankings) == 100
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=100" in query
@@ -95,6 +98,7 @@ class TestRankingsClientWPPR:
         rankings = client.rankings.wppr(country="US")
 
         assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
         assert "country=us" in mock_requests.last_request.query
 
     def test_wppr_with_region_filter(self, mock_requests: requests_mock.Mocker) -> None:
@@ -117,6 +121,7 @@ class TestRankingsClientWPPR:
         rankings = client.rankings.wppr(region="northwest")
 
         assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
         assert "region=northwest" in mock_requests.last_request.query
 
 
@@ -148,6 +153,7 @@ class TestRankingsClientSpecialSystems:
         assert isinstance(rankings, RankingsResponse)
         assert len(rankings.rankings) == 1
         assert rankings.ranking_system == "Women"
+        assert mock_requests.last_request is not None
         assert "women/open" in mock_requests.last_request.path
 
     def test_women_rankings_with_filters(self, mock_requests: requests_mock.Mocker) -> None:
@@ -166,7 +172,9 @@ class TestRankingsClientSpecialSystems:
         )
 
         assert len(rankings.rankings) == 25
+        assert mock_requests.last_request is not None
         assert "women/women" in mock_requests.last_request.path
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=25" in query
@@ -240,7 +248,9 @@ class TestRankingsClientSpecialSystems:
         rankings = client.rankings.pro(start_pos=0, count=50)
 
         assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
         assert "pro/open" in mock_requests.last_request.path
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=50" in query
@@ -267,6 +277,7 @@ class TestRankingsClientSpecialSystems:
         rankings = client.rankings.pro(ranking_system="WOMEN")
 
         assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
         assert "pro/women" in mock_requests.last_request.path
 
 
@@ -280,26 +291,23 @@ class TestRankingsClientCountryAndCustom:
             json={
                 "rankings": [
                     {
-                        "rank": 1,
+                        "current_rank": 1,
+                        "player_id": 1,
+                        "name": "Top US Player",
                         "country_code": "US",
                         "country_name": "United States",
-                        "total_players": 10000,
-                        "total_active_players": 5000,
-                        "average_wppr": 250.5,
-                        "top_player_id": 1,
-                        "top_player_name": "Top US Player",
-                        "top_player_wppr": 1000.0,
+                        "rating_value": 1000.0,
                     },
                     {
-                        "rank": 2,
-                        "country_code": "CA",
-                        "country_name": "Canada",
-                        "total_players": 5000,
-                        "total_active_players": 2500,
-                        "average_wppr": 220.0,
+                        "current_rank": 2,
+                        "player_id": 2,
+                        "name": "Second US Player",
+                        "country_code": "US",
+                        "country_name": "United States",
+                        "rating_value": 950.0,
                     },
                 ],
-                "total_countries": 100,
+                "total_count": 10000,
             },
         )
 
@@ -307,12 +315,13 @@ class TestRankingsClientCountryAndCustom:
         rankings = client.rankings.by_country(country="US")
 
         assert isinstance(rankings, CountryRankingsResponse)
-        assert len(rankings.country_rankings) == 2
-        assert rankings.country_rankings[0].rank == 1
-        assert rankings.country_rankings[0].country_code == "US"
-        assert rankings.country_rankings[0].total_players == 10000
-        assert rankings.total_countries == 100
+        assert len(rankings.rankings) == 2
+        assert rankings.rankings[0].rank == 1
+        assert rankings.rankings[0].player_name == "Top US Player"
+        assert rankings.rankings[0].country_code == "US"
+        assert rankings.total_count == 10000
         # Verify country parameter was passed
+        assert mock_requests.last_request is not None
         assert "country=" in mock_requests.last_request.query
 
     def test_by_country_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
@@ -322,20 +331,24 @@ class TestRankingsClientCountryAndCustom:
             json={
                 "rankings": [
                     {
-                        "rank": i,
-                        "country_code": f"C{i}",
-                        "country_name": f"Country {i}",
+                        "current_rank": i,
+                        "player_id": i,
+                        "name": f"Player {i}",
+                        "country_code": "US",
+                        "country_name": "United States",
+                        "rating_value": 1000.0 - i,
                     }
                     for i in range(1, 26)
                 ],
-                "total_countries": 100,
+                "total_count": 10000,
             },
         )
 
         client = IfpaClient(api_key="test-key")
         rankings = client.rankings.by_country(country="US", start_pos=0, count=25)
 
-        assert len(rankings.country_rankings) == 25
+        assert len(rankings.rankings) == 25
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "country=" in query
         assert "start_pos=0" in query
@@ -383,6 +396,7 @@ class TestRankingsClientCountryAndCustom:
         rankings = client.rankings.custom(123)
 
         assert isinstance(rankings, CustomRankingsResponse)
+        assert mock_requests.last_request is not None
         assert "custom/123" in mock_requests.last_request.path
 
 
@@ -456,9 +470,12 @@ class TestRankingsClientFieldMappings:
             json={
                 "rankings": [  # API returns 'rankings'
                     {
-                        "rank": 1,
+                        "current_rank": 1,
+                        "player_id": 1,
+                        "name": "Top US Player",
                         "country_code": "US",
                         "country_name": "United States",
+                        "rating_value": 1000.0,
                     }
                 ]
             },
@@ -467,6 +484,78 @@ class TestRankingsClientFieldMappings:
         client = IfpaClient(api_key="test-key")
         rankings = client.rankings.by_country(country="US")
 
-        # Should be accessible via 'country_rankings'
-        assert len(rankings.country_rankings) == 1
-        assert rankings.country_rankings[0].country_code == "US"
+        # Should be accessible via 'rankings'
+        assert len(rankings.rankings) == 1
+        assert rankings.rankings[0].country_code == "US"
+
+
+class TestRankingsClientDiscoveryMethods:
+    """Test cases for discovery methods (country_list, custom_list)."""
+
+    def test_country_list(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test country_list() method returns list of countries."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/country_list",
+            json={
+                "count": 3,
+                "country": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": 5000,
+                    },
+                    {
+                        "country_name": "Canada",
+                        "country_code": "CA",
+                        "player_count": 800,
+                    },
+                    {
+                        "country_name": "United Kingdom",
+                        "country_code": "GB",
+                        "player_count": 600,
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.rankings.country_list()
+
+        assert isinstance(result, RankingsCountryListResponse)
+        assert result.count == 3
+        assert len(result.country) == 3
+        assert result.country[0].country_name == "United States"
+        assert result.country[0].country_code == "US"
+        assert result.country[0].player_count == 5000
+
+    def test_custom_list(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test custom_list() method returns list of custom rankings."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/custom/list",
+            json={
+                "total_count": 2,
+                "custom_view": [
+                    {
+                        "view_id": 100,
+                        "title": "Retro Rankings",
+                        "description": "Rankings for retro tournaments",
+                    },
+                    {
+                        "view_id": 101,
+                        "title": "Regional Circuit",
+                        "description": None,
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.rankings.custom_list()
+
+        assert isinstance(result, CustomRankingListResponse)
+        assert result.total_count == 2
+        assert len(result.custom_view) == 2
+        assert result.custom_view[0].view_id == 100
+        assert result.custom_view[0].title == "Retro Rankings"
+        assert result.custom_view[0].description == "Rankings for retro tournaments"
+        assert result.custom_view[1].description is None

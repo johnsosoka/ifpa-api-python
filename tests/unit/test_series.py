@@ -11,11 +11,8 @@ from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
-    SeriesOverview,
     SeriesPlayerCard,
     SeriesRegionsResponse,
-    SeriesRules,
-    SeriesScheduleResponse,
     SeriesStandingsResponse,
     SeriesStats,
 )
@@ -77,6 +74,7 @@ class TestSeriesClient:
         result = client.series.list(active_only=True)
 
         assert len(result.series) == 1
+        assert mock_requests.last_request is not None
         assert "active_only=true" in mock_requests.last_request.query
 
 
@@ -84,31 +82,39 @@ class TestSeriesHandle:
     """Test cases for SeriesHandle resource-specific operations."""
 
     def test_standings_basic(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting series standings."""
+        """Test getting series overall standings."""
         mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/standings",
+            "https://api.ifpapinball.com/series/PAPA/overall_standings",
             json={
                 "series_code": "PAPA",
-                "series_name": "PAPA Circuit",
-                "standings": [
+                "year": 2024,
+                "championship_prize_fund": 10000.0,
+                "overall_results": [
                     {
-                        "position": 1,
-                        "player_id": 5001,
-                        "player_name": "Top Player",
-                        "points": 500.0,
-                        "events_played": 5,
-                        "best_finish": 1,
+                        "region_code": "OH",
+                        "region_name": "Ohio",
+                        "player_count": "150",
+                        "unique_player_count": "120",
+                        "tournament_count": "10",
+                        "current_leader": {
+                            "player_id": "5001",
+                            "player_name": "Top Player",
+                        },
+                        "prize_fund": 2000.0,
                     },
                     {
-                        "position": 2,
-                        "player_id": 5002,
-                        "player_name": "Second Player",
-                        "points": 450.0,
-                        "events_played": 4,
-                        "best_finish": 2,
+                        "region_code": "IL",
+                        "region_name": "Illinois",
+                        "player_count": "100",
+                        "unique_player_count": "80",
+                        "tournament_count": "8",
+                        "current_leader": {
+                            "player_id": "5002",
+                            "player_name": "Second Player",
+                        },
+                        "prize_fund": 1500.0,
                     },
                 ],
-                "total_players": 100,
             },
         )
 
@@ -117,28 +123,39 @@ class TestSeriesHandle:
 
         assert isinstance(standings, SeriesStandingsResponse)
         assert standings.series_code == "PAPA"
-        assert len(standings.standings) == 2
-        assert standings.standings[0].position == 1
-        assert standings.standings[0].points == 500.0
-        assert standings.total_players == 100
+        assert len(standings.overall_results) == 2
+        assert standings.overall_results[0].region_code == "OH"
+        assert standings.overall_results[0].region_name == "Ohio"
 
     def test_standings_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting paginated series standings."""
+        """Test getting paginated series overall standings."""
         mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/standings",
+            "https://api.ifpapinball.com/series/PAPA/overall_standings",
             json={
                 "series_code": "PAPA",
-                "standings": [
-                    {"position": i, "player_id": i, "points": 500 - i} for i in range(1, 51)
+                "year": 2024,
+                "championship_prize_fund": 50000.0,
+                "overall_results": [
+                    {
+                        "region_code": f"R{i}",
+                        "region_name": f"Region {i}",
+                        "player_count": "100",
+                        "current_leader": {
+                            "player_id": str(i),
+                            "player_name": f"Player {i}",
+                        },
+                        "prize_fund": 1000.0,
+                    }
+                    for i in range(1, 51)
                 ],
-                "total_players": 200,
             },
         )
 
         client = IfpaClient(api_key="test-key")
         standings = client.series_handle("PAPA").standings(start_pos=0, count=50)
 
-        assert len(standings.standings) == 50
+        assert len(standings.overall_results) == 50
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=0" in query
         assert "count=50" in query
@@ -188,6 +205,7 @@ class TestSeriesHandle:
         assert card.player_card[0].region_event_rank == 3
 
         # Verify query parameters
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "region_code=oh" in query
 
@@ -234,35 +252,10 @@ class TestSeriesHandle:
         card = client.series_handle("PAPA").player_card(12345, "OH", year=2023)
 
         assert card.year == 2023
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "region_code=oh" in query
         assert "year=2023" in query
-
-    def test_overview(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting series overview."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/overview",
-            json={
-                "series_code": "PAPA",
-                "series_name": "PAPA Circuit",
-                "description": "Professional pinball circuit",
-                "total_events": 12,
-                "total_players": 500,
-                "start_date": "2024-01-01",
-                "end_date": "2024-12-31",
-                "rules_summary": "Best 5 events count",
-                "current_leader": {"player_id": 5001, "player_name": "Top Player"},
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        overview = client.series_handle("PAPA").overview()
-
-        assert isinstance(overview, SeriesOverview)
-        assert overview.series_code == "PAPA"
-        assert overview.series_name == "PAPA Circuit"
-        assert overview.total_events == 12
-        assert overview.total_players == 500
 
     def test_regions(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting series regions."""
@@ -270,7 +263,8 @@ class TestSeriesHandle:
             "https://api.ifpapinball.com/series/PAPA/regions",
             json={
                 "series_code": "PAPA",
-                "regions": [
+                "year": 2024,
+                "active_regions": [
                     {
                         "region_code": "NW",
                         "region_name": "Northwest",
@@ -288,36 +282,13 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        regions = client.series_handle("PAPA").regions()
+        regions = client.series_handle("PAPA").regions(region_code="NW", year=2024)
 
         assert isinstance(regions, SeriesRegionsResponse)
         assert regions.series_code == "PAPA"
-        assert len(regions.regions) == 2
-        assert regions.regions[0].region_name == "Northwest"
-        assert regions.regions[0].player_count == 100
-
-    def test_rules(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting series rules."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/rules",
-            json={
-                "series_code": "PAPA",
-                "series_name": "PAPA Circuit",
-                "rules_text": "Complete series rules...",
-                "scoring_system": "Points based on finish position",
-                "events_counted": 5,
-                "eligibility": "Open to all IFPA members",
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        rules = client.series_handle("PAPA").rules()
-
-        assert isinstance(rules, SeriesRules)
-        assert rules.series_code == "PAPA"
-        assert rules.series_name == "PAPA Circuit"
-        assert rules.events_counted == 5
-        assert rules.eligibility == "Open to all IFPA members"
+        assert len(regions.active_regions) == 2
+        assert regions.active_regions[0].region_name == "Northwest"
+        assert regions.active_regions[0].player_count == 100
 
     def test_stats(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting series statistics."""
@@ -337,48 +308,13 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        stats = client.series_handle("PAPA").stats()
+        stats = client.series_handle("PAPA").stats(region_code="OH")
 
         assert isinstance(stats, SeriesStats)
         assert stats.series_code == "PAPA"
         assert stats.total_events == 12
         assert stats.total_players == 500
         assert stats.average_event_size == 125.0
-
-    def test_schedule(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting series schedule."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/schedule",
-            json={
-                "series_code": "PAPA",
-                "events": [
-                    {
-                        "tournament_id": 20001,
-                        "event_name": "PAPA Event 3",
-                        "event_date": "2025-03-15",
-                        "location": "Pinball Paradise",
-                        "city": "Portland",
-                        "stateprov": "OR",
-                        "status": "scheduled",
-                    },
-                    {
-                        "event_name": "PAPA Event 4",
-                        "event_date": "2025-04-20",
-                        "city": "Seattle",
-                        "status": "scheduled",
-                    },
-                ],
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        schedule = client.series_handle("PAPA").schedule()
-
-        assert isinstance(schedule, SeriesScheduleResponse)
-        assert schedule.series_code == "PAPA"
-        assert len(schedule.events) == 2
-        assert schedule.events[0].event_name == "PAPA Event 3"
-        assert schedule.events[0].status == "scheduled"
 
     def test_region_reps(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting series region representatives."""
@@ -437,7 +373,7 @@ class TestSeriesErrors:
     def test_standings_handles_404(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that standings handles not found series."""
         mock_requests.get(
-            "https://api.ifpapinball.com/series/NONEXISTENT/standings",
+            "https://api.ifpapinball.com/series/NONEXISTENT/overall_standings",
             status_code=404,
             json={"error": "Series not found"},
         )
@@ -469,19 +405,25 @@ class TestSeriesIntegration:
             },
         )
 
-        # Mock standings
+        # Mock overall standings
         mock_requests.get(
-            "https://api.ifpapinball.com/series/PAPA/standings",
+            "https://api.ifpapinball.com/series/PAPA/overall_standings",
             json={
                 "series_code": "PAPA",
-                "standings": [
+                "year": 2024,
+                "championship_prize_fund": 10000.0,
+                "overall_results": [
                     {
-                        "position": 1,
-                        "player_id": 5001,
-                        "points": 500.0,
+                        "region_code": "OH",
+                        "region_name": "Ohio",
+                        "player_count": "100",
+                        "current_leader": {
+                            "player_id": "5001",
+                            "player_name": "Top Player",
+                        },
+                        "prize_fund": 2000.0,
                     }
                 ],
-                "total_players": 100,
             },
         )
 
@@ -496,5 +438,4 @@ class TestSeriesIntegration:
         standings = client.series_handle(series_code).standings()
 
         assert standings.series_code == "PAPA"
-        assert len(standings.standings) == 1
-        assert standings.total_players == 100
+        assert len(standings.overall_results) == 1

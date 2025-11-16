@@ -189,11 +189,12 @@ class DirectorSearchResponse(IfpaBaseModel):
     directors: list[DirectorSearchResult] = Field(default_factory=list)
 
 
-class CountryDirector(IfpaBaseModel):
-    """Country director information.
+class PlayerProfile(IfpaBaseModel):
+    """Player profile nested in country director response.
 
-    Note: The API spec shows a nested player_profile structure, but the actual API
-    returns a flat structure with the 'directors' key instead of 'country_directors'.
+    This structure is returned by the /director/country endpoint
+    where each country director has their player information nested
+    inside a player_profile object.
 
     Attributes:
         player_id: The player ID of the country director
@@ -210,15 +211,28 @@ class CountryDirector(IfpaBaseModel):
     profile_photo: str | None = None
 
 
+class CountryDirector(IfpaBaseModel):
+    """Country director information with nested player profile.
+
+    The API returns country directors with a nested player_profile structure
+    containing the actual director information.
+
+    Attributes:
+        player_profile: Nested player profile with director details
+    """
+
+    player_profile: PlayerProfile
+
+
 class CountryDirectorsResponse(IfpaBaseModel):
     """Response for country directors list.
 
-    Note: The API returns 'directors' instead of 'country_directors' as shown in spec.
+    The API returns 'country_directors' key with nested player_profile objects.
 
     Attributes:
         count: Total number of country directors
-        country_directors: List of country directors (API returns as 'directors')
+        country_directors: List of country directors with nested player profiles
     """
 
     count: int | None = None
-    country_directors: list[CountryDirector] = Field(default_factory=list, alias="directors")
+    country_directors: list[CountryDirector] = Field(default_factory=list)

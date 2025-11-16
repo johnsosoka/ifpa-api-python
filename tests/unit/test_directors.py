@@ -50,6 +50,7 @@ class TestDirectorsClient:
         assert result.count == 1
 
         # Verify request was made correctly
+        assert mock_requests.last_request is not None
         assert mock_requests.last_request.query == "name=josh"
 
     def test_search_with_location_filters(self, mock_requests: requests_mock.Mocker) -> None:
@@ -78,6 +79,7 @@ class TestDirectorsClient:
         assert result.directors[0].city == "Chicago"
 
         # Verify all query params were sent
+        assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "city=chicago" in query
         assert "stateprov=il" in query
@@ -95,6 +97,7 @@ class TestDirectorsClient:
 
         assert isinstance(result, DirectorSearchResponse)
         assert len(result.directors) == 0
+        assert mock_requests.last_request is not None
         assert mock_requests.last_request.query == ""
 
     def test_search_handles_api_error(self, mock_requests: requests_mock.Mocker) -> None:
@@ -149,18 +152,24 @@ class TestDirectorsClient:
         mock_requests.get(
             "https://api.ifpapinball.com/director/country",
             json={
-                "directors": [
+                "country_directors": [
                     {
-                        "player_id": 5000,
-                        "name": "Country Director 1",
-                        "country_code": "US",
-                        "country_name": "United States",
+                        "player_profile": {
+                            "player_id": 5000,
+                            "name": "Country Director 1",
+                            "country_code": "US",
+                            "country_name": "United States",
+                            "profile_photo": "",
+                        }
                     },
                     {
-                        "player_id": 5001,
-                        "name": "Country Director 2",
-                        "country_code": "CA",
-                        "country_name": "Canada",
+                        "player_profile": {
+                            "player_id": 5001,
+                            "name": "Country Director 2",
+                            "country_code": "CA",
+                            "country_name": "Canada",
+                            "profile_photo": "",
+                        }
                     },
                 ]
             },
@@ -171,9 +180,9 @@ class TestDirectorsClient:
 
         assert isinstance(result, CountryDirectorsResponse)
         assert len(result.country_directors) == 2
-        assert result.country_directors[0].player_id == 5000
-        assert result.country_directors[0].country_code == "US"
-        assert result.country_directors[1].country_name == "Canada"
+        assert result.country_directors[0].player_profile.player_id == 5000
+        assert result.country_directors[0].player_profile.country_code == "US"
+        assert result.country_directors[1].player_profile.country_name == "Canada"
 
     def test_country_directors_with_spec_fields(self, mock_requests: requests_mock.Mocker) -> None:
         """Test country directors with API spec format (count and profile_photo)."""
@@ -181,20 +190,24 @@ class TestDirectorsClient:
             "https://api.ifpapinball.com/director/country",
             json={
                 "count": 2,
-                "directors": [
+                "country_directors": [
                     {
-                        "player_id": 5000,
-                        "name": "Josh Sharpe",
-                        "country_code": "US",
-                        "country_name": "United States",
-                        "profile_photo": "https://example.com/photo.jpg",
+                        "player_profile": {
+                            "player_id": 5000,
+                            "name": "Josh Sharpe",
+                            "country_code": "US",
+                            "country_name": "United States",
+                            "profile_photo": "https://example.com/photo.jpg",
+                        }
                     },
                     {
-                        "player_id": 5001,
-                        "name": "Jane Doe",
-                        "country_code": "CA",
-                        "country_name": "Canada",
-                        "profile_photo": "https://example.com/photo2.jpg",
+                        "player_profile": {
+                            "player_id": 5001,
+                            "name": "Jane Doe",
+                            "country_code": "CA",
+                            "country_name": "Canada",
+                            "profile_photo": "https://example.com/photo2.jpg",
+                        }
                     },
                 ],
             },
@@ -206,8 +219,14 @@ class TestDirectorsClient:
         assert isinstance(result, CountryDirectorsResponse)
         assert result.count == 2
         assert len(result.country_directors) == 2
-        assert result.country_directors[0].profile_photo == "https://example.com/photo.jpg"
-        assert result.country_directors[1].profile_photo == "https://example.com/photo2.jpg"
+        assert (
+            result.country_directors[0].player_profile.profile_photo
+            == "https://example.com/photo.jpg"
+        )
+        assert (
+            result.country_directors[1].player_profile.profile_photo
+            == "https://example.com/photo2.jpg"
+        )
 
 
 class TestDirectorHandle:
@@ -340,8 +359,10 @@ class TestDirectorHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        # Should accept string directly
-        result = client.director(1000).tournaments("past")  # type: ignore
+        # Should accept TimePeriod enum
+        from ifpa_api.models.common import TimePeriod
+
+        result = client.director(1000).tournaments(TimePeriod.PAST)
 
         assert isinstance(result, DirectorTournamentsResponse)
 

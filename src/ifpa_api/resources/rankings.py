@@ -8,7 +8,9 @@ from typing import TYPE_CHECKING
 
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
+    CustomRankingListResponse,
     CustomRankingsResponse,
+    RankingsCountryListResponse,
     RankingsResponse,
 )
 
@@ -307,3 +309,66 @@ class RankingsClient:
 
         response = self._http._request("GET", f"/rankings/custom/{ranking_id}", params=params)
         return CustomRankingsResponse.model_validate(response)
+
+    def country_list(self) -> RankingsCountryListResponse:
+        """Get list of all countries with player counts.
+
+        Returns a list of countries that have players in the IFPA rankings system,
+        including the number of ranked players per country. This is useful for
+        discovering valid country codes before calling by_country().
+
+        Returns:
+            RankingsCountryListResponse with list of countries and their player counts.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get all countries with player counts
+            countries = client.rankings.country_list()
+
+            # Find US player count
+            us = next(c for c in countries.country if c.country_code == "US")
+            print(f"US has {us.player_count} ranked players")
+
+            # Get top 5 countries by player count
+            top5 = sorted(countries.country, key=lambda c: c.player_count, reverse=True)[:5]
+            for country in top5:
+                print(f"{country.country_name}: {country.player_count} players")
+            ```
+        """
+        response = self._http._request("GET", "/rankings/country_list")
+        return RankingsCountryListResponse.model_validate(response)
+
+    def custom_list(self) -> CustomRankingListResponse:
+        """Get list of all custom ranking systems.
+
+        Returns a list of all available custom ranking systems with their IDs, titles,
+        and descriptions. This is useful for discovering valid ranking IDs before
+        calling custom().
+
+        Returns:
+            CustomRankingListResponse with list of custom ranking systems.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get all custom rankings
+            custom_rankings = client.rankings.custom_list()
+
+            # Find a specific ranking by title
+            retro = next(
+                c for c in custom_rankings.custom_view
+                if "retro" in c.title.lower()
+            )
+            print(f"Found: {retro.title} (ID: {retro.view_id})")
+
+            # Get rankings for that system
+            rankings = client.rankings.custom(retro.view_id)
+            ```
+        """
+        response = self._http._request("GET", "/rankings/custom/list")
+        return CustomRankingListResponse.model_validate(response)

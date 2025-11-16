@@ -75,6 +75,15 @@ Returns the series resource client.
 def series(self) -> SeriesClient
 ```
 
+#### `reference`
+
+Returns the reference data client.
+
+```python
+@property
+def reference(self) -> ReferenceClient
+```
+
 ### Methods
 
 #### `director(director_id)`

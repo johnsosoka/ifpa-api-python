@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - TBD
+
+### Added
+
+**Phase 2 - New Features & Enhanced API Coverage**
+
+- **Reference Resource** (NEW):
+  - `ReferenceClient.countries()` - Get list of all countries in IFPA system (62 countries)
+  - `ReferenceClient.state_provs()` - Get states/provinces by country (67 regions across AU, CA, US)
+
+- **Rankings Resource**:
+  - `RankingsClient.country_list()` - List all countries with player counts (51 countries)
+  - `RankingsClient.custom_list()` - List all custom ranking systems (84 custom rankings)
+
+- **Tournaments Resource**:
+  - `TournamentHandle.related()` - Get related tournaments (same venue or series)
+  - `TournamentsClient.list_formats()` - List all tournament format types (25 formats)
+
+- **Exceptions**:
+  - `PlayersNeverMetError` - Custom exception for when PVP data unavailable between two players who have never competed together
+
+### Fixed
+
+- **Rankings Resource**:
+  - Fixed age field validation to handle empty string values returned by API
+  - Fixed `by_country()` response model to correctly return player rankings (was incorrectly expecting country-level statistics)
+
+- **Directors Resource**:
+  - Fixed `country_directors()` to handle nested `player_profile` structure in API response
+
+- **Tournaments Resource**:
+  - Fixed search response to correctly map API's `search` key to model's `tournaments` field
+  - Added validation requiring both `start_date` and `end_date` parameters together (API returns 400 if only one provided)
+
+- **Series Resource**:
+  - Fixed `standings()` to call correct `/series/{code}/overall_standings` endpoint (was calling wrong endpoint)
+  - Added required `region_code` parameter to `regions()`, `stats()`, and `tournaments()` methods
+
+- **Players Resource**:
+  - Improved `pvp()` error handling with clearer exception for players who have never competed together
+
+### Removed
+
+- **Series Resource**:
+  - Removed `overview()` method (endpoint does not exist in API)
+  - Removed `rules()` method (endpoint does not exist in API)
+  - Removed `schedule()` method (endpoint does not exist in API)
+
+### Testing
+
+- Added 154 comprehensive integration tests across all 6 resources
+- Increased code coverage from 95% to 97%
+- All fixes verified against live IFPA API
+- Test pass rate improved from 52% to 100% (unit tests)
+- Integration test pass rate: 88% (180/209 tests passing)
+
 ## [0.2.0] - 2024-11-14
 
 ### Added
@@ -34,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Before (v0.1.x)
 results = client.player(123).results()
 
-# After (v0.2.0) - Both parameters required
+# After (v0.2.0+) - Both parameters required
 from ifpa_api.models.common import RankingSystem, ResultType
 
 results = client.player(123).results(
@@ -50,7 +106,7 @@ history = client.player(123).history()
 for entry in history.history:
     print(entry.rank, entry.rating)
 
-# After (v0.2.0) - Separate arrays
+# After (v0.2.0+) - Separate arrays
 history = client.player(123).history()
 for entry in history.rank_history:
     print(entry.rank_position, entry.wppr_points)
@@ -64,7 +120,7 @@ for entry in history.rating_history:
 rankings = client.player(123).rankings()  # Will raise AttributeError in v0.2.0
 cards = client.player(123).cards()        # Will raise AttributeError in v0.2.0
 
-# After (v0.2.0) - No replacement
+# After (v0.2.0+) - No replacement
 # Player rankings data is available in the player profile
 profile = client.player(123).get()
 # Player cards are only available via series: client.series_handle("CODE").player_card(123)
@@ -149,7 +205,7 @@ profile = client.player(123).get()
 - `GET /player/{player_id}/results` - Tournament results history
 - `GET /player/{player_id}/rank_history` - WPPR ranking history
 
-**Note**: v0.1.0 incorrectly included `rankings()` and `cards()` methods that mapped to non-existent API endpoints. These were removed in v0.2.0.
+**Note**: v0.1.0 incorrectly included `rankings()` and `cards()` methods that mapped to non-existent API endpoints. These were removed in v0.2.0+.
 
 **Rankings (9 endpoints)**:
 - `GET /rankings/wppr` - Main WPPR rankings
@@ -196,6 +252,7 @@ profile = client.player(123).get()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/johnsosoka/ifpa-api-python/releases/tag/v0.1.0

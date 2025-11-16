@@ -33,7 +33,7 @@ Paste error message or stack trace here
 
 ## Environment
 
-- **IFPA API Version**: (e.g., 0.2.0)
+- **IFPA API Version**: (e.g., 0.2.1)
 - **Python Version**: (e.g., 3.11.5)
 - **Operating System**: (e.g., macOS 14.0, Ubuntu 22.04, Windows 11)
 - **Installation Method**: (e.g., pip, poetry)

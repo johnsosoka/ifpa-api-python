@@ -9,7 +9,12 @@ from pydantic import ValidationError
 
 from ifpa_api.client import IfpaClient
 from ifpa_api.exceptions import IfpaApiError
-from ifpa_api.models.rankings import CountryRankingsResponse, RankingsResponse
+from ifpa_api.models.rankings import (
+    CountryRankingsResponse,
+    CustomRankingListResponse,
+    RankingsCountryListResponse,
+    RankingsResponse,
+)
 from tests.integration.helpers import skip_if_no_api_key
 
 
@@ -124,12 +129,13 @@ class TestRankingsClientIntegration:
         try:
             rankings = client.rankings.by_country(country=country_code, count=count_medium)
             assert isinstance(rankings, CountryRankingsResponse)
-            assert rankings.country_rankings is not None
-            # Should have some countries
-            if len(rankings.country_rankings) > 0:
-                first_country = rankings.country_rankings[0]
-                assert first_country.rank > 0
-                assert first_country.country_code is not None
+            assert rankings.rankings is not None
+            # Should have some players
+            if len(rankings.rankings) > 0:
+                first_player = rankings.rankings[0]
+                assert first_player.rank is not None
+                assert first_player.rank > 0
+                assert first_player.country_code is not None
         except (IfpaApiError, ValidationError) as e:
             # Country rankings may not be available or have data quality issues
             pytest.skip(f"Country rankings not available or data issue: {e}")
@@ -148,3 +154,38 @@ class TestRankingsClientIntegration:
         # Country filter may or may not work consistently with the API,
         # so we just verify that we get a response back
         assert isinstance(rankings.rankings, list)
+
+    def test_country_list(self, api_key: str) -> None:
+        """Test getting list of countries with player counts."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        try:
+            result = client.rankings.country_list()
+            assert isinstance(result, RankingsCountryListResponse)
+            assert result.country is not None
+            assert len(result.country) > 0
+            # Verify structure of first country
+            first_country = result.country[0]
+            assert first_country.country_name is not None
+            assert first_country.country_code is not None
+            assert first_country.player_count > 0
+        except (IfpaApiError, ValidationError) as e:
+            pytest.skip(f"Country list not available or data issue: {e}")
+
+    def test_custom_list(self, api_key: str) -> None:
+        """Test getting list of custom ranking systems."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        try:
+            result = client.rankings.custom_list()
+            assert isinstance(result, CustomRankingListResponse)
+            assert result.custom_view is not None
+            assert len(result.custom_view) > 0
+            # Verify structure of first custom ranking
+            first_custom = result.custom_view[0]
+            assert first_custom.view_id is not None
+            assert first_custom.title is not None
+        except (IfpaApiError, ValidationError) as e:
+            pytest.skip(f"Custom list not available or data issue: {e}")

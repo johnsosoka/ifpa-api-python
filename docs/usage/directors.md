@@ -184,18 +184,24 @@ country_dirs: CountryDirectorsResponse = client.directors.country_directors()
 print(f"Total country directors: {country_dirs.count}")
 
 for director in country_dirs.country_directors:
-    print(f"\n{director.country_name} ({director.country_code})")
-    print(f"  Director: {director.name}")
-    print(f"  Player ID: {director.player_id}")
+    profile = director.player_profile
+    print(f"\n{profile.country_name} ({profile.country_code})")
+    print(f"  Director: {profile.name}")
+    print(f"  Player ID: {profile.player_id}")
 ```
 
 ### Country Director Information
 
-Each country director includes:
+Each country director includes a nested `player_profile` with:
 
 - **Identity**: Player ID, name
 - **Country**: Country code, country name
 - **Profile**: Profile photo URL
+
+Note: Access director information through the `player_profile` field:
+```python
+profile = director.player_profile
+print(f"{profile.name} - {profile.country_name}")
 
 ## Complete Example: Director Analysis
 
@@ -338,12 +344,12 @@ country_dirs: CountryDirectorsResponse = client.directors.country_directors()
 # Find director for a specific country
 target_country = "US"
 country_director = next(
-    (d for d in country_dirs.country_directors if d.country_code == target_country),
+    (d for d in country_dirs.country_directors if d.player_profile.country_code == target_country),
     None
 )
 
 if country_director:
-    print(f"Country Director for {target_country}: {country_director.name}")
+    print(f"Country Director for {target_country}: {country_director.player_profile.name}")
 else:
     print(f"No director found for {target_country}")
 ```

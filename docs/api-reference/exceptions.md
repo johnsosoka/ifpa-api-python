@@ -8,6 +8,7 @@ The SDK provides a clear exception hierarchy for different error scenarios.
 IfpaError (base)
 ├── MissingApiKeyError
 ├── IfpaApiError
+├── PlayersNeverMetError
 └── IfpaClientValidationError
 ```
 
@@ -203,5 +204,52 @@ except IfpaApiError as e:
     )
     raise
 ```
+
+## PlayersNeverMetError
+
+Raised when requesting PvP (player vs player) data for two players who have never competed together.
+
+```python
+class PlayersNeverMetError(IfpaError):
+    def __init__(
+        self,
+        player_id: int | str,
+        opponent_id: int | str,
+        message: str | None = None
+    ) -> None
+```
+
+This exception is raised by the SDK when the IFPA API returns a 404 error indicating that two players have never faced each other in any tournament. This provides a more semantic error than a generic 404 response.
+
+**Attributes:**
+
+- `player_id` (int | str): The first player's ID
+- `opponent_id` (int | str): The second player's ID
+- `message` (str): Error message explaining the players have never met
+
+**Example:**
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import PlayersNeverMetError, IfpaApiError
+
+client = IfpaClient()
+
+try:
+    pvp = client.player(12345).pvp(67890)
+    print(f"{pvp.player1_name} vs {pvp.player2_name}")
+    print(f"Wins: {pvp.player1_wins} - {pvp.player2_wins}")
+except PlayersNeverMetError as e:
+    print(f"Players {e.player_id} and {e.opponent_id} have never competed together")
+except IfpaApiError as e:
+    print(f"API error: {e}")
+```
+
+**When This Occurs:**
+
+This exception is raised specifically by the `PlayerHandle.pvp()` method when:
+- The IFPA API returns HTTP 200 with `{"message": "...", "code": "404"}` in the response body
+- The IFPA API returns HTTP 404 status code
+- Both cases indicate the two players have never competed in the same tournament
 
 For usage examples, see the [Error Handling Guide](../usage/error-handling.md).

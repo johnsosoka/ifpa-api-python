@@ -13,15 +13,22 @@ from tests.integration.test_data import (  # noqa: F401
     count_small,
     country_code,
     player_active_id,
+    player_active_id_2,
+    player_highly_active_id,
+    player_ids_active,
     player_ids_multiple,
     player_inactive_id,
+    pvp_pair_never_met,
+    pvp_pair_primary,
+    search_idaho_johns,
+    search_idaho_smiths,
     tournament_id,
     year_end,
     year_start,
 )
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def client(api_key: str) -> Generator[IfpaClient, None, None]:
     """Create a real IfpaClient for integration tests.
 

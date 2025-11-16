@@ -157,4 +157,43 @@ Series information with:
 - `series_name`: str
 - `active`: bool
 
+## Reference Models
+
+### CountryListResponse
+
+Response from countries endpoint with:
+
+- `country`: list[Country]
+
+### Country
+
+Country information with:
+
+- `country_id`: int
+- `country_name`: str
+- `country_code`: str
+- `active_flag`: str
+
+### StateProvListResponse
+
+Response from state/province endpoint with:
+
+- `stateprov`: list[CountryRegions]
+
+### CountryRegions
+
+Country with regions with:
+
+- `country_id`: int
+- `country_name`: str
+- `country_code`: str
+- `regions`: list[Region]
+
+### Region
+
+State or province information with:
+
+- `region_name`: str
+- `region_code`: str
+
 For complete model definitions, see the source code in `src/ifpa_api/models/`.

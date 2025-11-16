@@ -43,7 +43,7 @@ Example:
 
 **Environment**:
 - Python 3.11.5
-- ifpa-api 0.2.0
+- ifpa-api 0.2.1
 - macOS 14.0
 
 **Code**:
