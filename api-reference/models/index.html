@@ -669,6 +669,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../usage/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../usage/error-handling/" class="md-nav__link">
         
   
@@ -1118,6 +1146,78 @@
     <span class="md-ellipsis">
       
         Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reference-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#countrylistresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CountryListResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#country" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Country
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateprovlistresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StateProvListResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#countryregions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CountryRegions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#region" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Region
       
     </span>
   </a>
@@ -1627,6 +1727,78 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#reference-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reference Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reference Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#countrylistresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CountryListResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#country" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Country
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateprovlistresponse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StateProvListResponse
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#countryregions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CountryRegions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#region" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Region
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1771,6 +1943,39 @@
 <li><code>series_code</code>: str</li>
 <li><code>series_name</code>: str</li>
 <li><code>active</code>: bool</li>
+</ul>
+<h2 id="reference-models">Reference Models<a class="headerlink" href="#reference-models" title="Permanent link">&para;</a></h2>
+<h3 id="countrylistresponse">CountryListResponse<a class="headerlink" href="#countrylistresponse" title="Permanent link">&para;</a></h3>
+<p>Response from countries endpoint with:</p>
+<ul>
+<li><code>country</code>: list[Country]</li>
+</ul>
+<h3 id="country">Country<a class="headerlink" href="#country" title="Permanent link">&para;</a></h3>
+<p>Country information with:</p>
+<ul>
+<li><code>country_id</code>: int</li>
+<li><code>country_name</code>: str</li>
+<li><code>country_code</code>: str</li>
+<li><code>active_flag</code>: str</li>
+</ul>
+<h3 id="stateprovlistresponse">StateProvListResponse<a class="headerlink" href="#stateprovlistresponse" title="Permanent link">&para;</a></h3>
+<p>Response from state/province endpoint with:</p>
+<ul>
+<li><code>stateprov</code>: list[CountryRegions]</li>
+</ul>
+<h3 id="countryregions">CountryRegions<a class="headerlink" href="#countryregions" title="Permanent link">&para;</a></h3>
+<p>Country with regions with:</p>
+<ul>
+<li><code>country_id</code>: int</li>
+<li><code>country_name</code>: str</li>
+<li><code>country_code</code>: str</li>
+<li><code>regions</code>: list[Region]</li>
+</ul>
+<h3 id="region">Region<a class="headerlink" href="#region" title="Permanent link">&para;</a></h3>
+<p>State or province information with:</p>
+<ul>
+<li><code>region_name</code>: str</li>
+<li><code>region_code</code>: str</li>
 </ul>
 <p>For complete model definitions, see the source code in <code>src/ifpa_api/models/</code>.</p>
 

@@ -669,6 +669,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../usage/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../usage/error-handling/" class="md-nav__link">
         
   
@@ -1006,6 +1034,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#playersnevermeterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PlayersNeverMetError
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1325,6 +1364,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#playersnevermeterror" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PlayersNeverMetError
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1351,7 +1401,8 @@
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>IfpaError (base)
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── MissingApiKeyError
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── IfpaApiError
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└── IfpaClientValidationError
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── PlayersNeverMetError
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>└── IfpaClientValidationError
 </span></code></pre></div>
 <h2 id="ifpaerror">IfpaError<a class="headerlink" href="#ifpaerror" title="Permanent link">&para;</a></h2>
 <p>Base exception for all IFPA SDK errors.</p>
@@ -1506,6 +1557,43 @@
 </span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>    <span class="p">)</span>
 </span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>    <span class="k">raise</span>
 </span></code></pre></div>
+<h2 id="playersnevermeterror">PlayersNeverMetError<a class="headerlink" href="#playersnevermeterror" title="Permanent link">&para;</a></h2>
+<p>Raised when requesting PvP (player vs player) data for two players who have never competed together.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PlayersNeverMetError</span><span class="p">(</span><span class="n">IfpaError</span><span class="p">):</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        <span class="n">player_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="n">opponent_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>        <span class="n">message</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+<p>This exception is raised by the SDK when the IFPA API returns a 404 error indicating that two players have never faced each other in any tournament. This provides a more semantic error than a generic 404 response.</p>
+<p><strong>Attributes:</strong></p>
+<ul>
+<li><code>player_id</code> (int | str): The first player's ID</li>
+<li><code>opponent_id</code> (int | str): The second player's ID</li>
+<li><code>message</code> (str): Error message explaining the players have never met</li>
+</ul>
+<p><strong>Example:</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PlayersNeverMetError</span><span class="p">,</span> <span class="n">IfpaApiError</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">client</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="n">pvp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span><span class="o">.</span><span class="n">pvp</span><span class="p">(</span><span class="mi">67890</span><span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pvp</span><span class="o">.</span><span class="n">player1_name</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">pvp</span><span class="o">.</span><span class="n">player2_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wins: </span><span class="si">{</span><span class="n">pvp</span><span class="o">.</span><span class="n">player1_wins</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">pvp</span><span class="o">.</span><span class="n">player2_wins</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="k">except</span> <span class="n">PlayersNeverMetError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Players </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">player_id</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">opponent_id</span><span class="si">}</span><span class="s2"> have never competed together&quot;</span><span class="p">)</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="k">except</span> <span class="n">IfpaApiError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;API error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>When This Occurs:</strong></p>
+<p>This exception is raised specifically by the <code>PlayerHandle.pvp()</code> method when:
+- The IFPA API returns HTTP 200 with <code>{"message": "...", "code": "404"}</code> in the response body
+- The IFPA API returns HTTP 404 status code
+- Both cases indicate the two players have never competed in the same tournament</p>
 <p>For usage examples, see the <a href="../../usage/error-handling/">Error Handling Guide</a>.</p>
 
 
