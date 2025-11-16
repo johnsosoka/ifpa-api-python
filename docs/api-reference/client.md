@@ -30,13 +30,25 @@ def __init__(
 
 ### Properties
 
-#### `directors`
+#### `director`
 
-Returns the directors resource client.
+Returns the director resource client. Supports both collection operations and callable pattern for individual director access.
 
 ```python
 @property
-def directors(self) -> DirectorsClient
+def director(self) -> DirectorClient
+```
+
+**Usage:**
+
+```python
+# Collection operations
+results = client.director.search(name="Josh")  # Search directors
+country_dirs = client.director.country_directors()  # Get country directors
+
+# Individual director operations (callable pattern)
+director = client.director(1533).details()  # Get Josh Rainwater's details
+tournaments = client.director(1533).tournaments(TimePeriod.PAST)  # Get tournaments
 ```
 
 #### `player`
@@ -98,21 +110,21 @@ def reference(self) -> ReferenceClient
 
 ### Methods
 
-#### `director(director_id)`
+#### Accessing Individual Directors
 
-Get a handle for a specific tournament director.
+Individual director operations are accessed through the callable pattern on the `director` property:
 
 ```python
-def director(self, director_id: int | str) -> DirectorHandle
+# Access via callable pattern - Example with Josh Rainwater (1533)
+director_handle = client.director(1533)
+
+# Then call methods on the handle
+director = director_handle.details()  # Get director profile
+past = director_handle.tournaments(TimePeriod.PAST)  # Get past tournaments
+future = director_handle.tournaments(TimePeriod.FUTURE)  # Get upcoming tournaments
 ```
 
-**Parameters:**
-
-- `director_id` (int | str): The director's unique identifier
-
-**Returns:**
-
-- `DirectorHandle`: Handle for director-specific operations
+**Note:** The `client.director` property returns a `DirectorClient` which is callable, providing a unified interface for both collection and resource-specific operations.
 
 #### Accessing Individual Players
 

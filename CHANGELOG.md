@@ -144,8 +144,7 @@ profile = client.player(123).details()
   - Calendar models and enums
   - Common models and enums (TimePeriod, RankingSystem, ResultType, TournamentType)
 - Resource clients for all IFPA API resources:
-  - `DirectorsClient` - Search directors, get country directors
-  - `DirectorHandle` - Get director details, past/upcoming tournaments
+  - `DirectorClient` - Search directors, get country directors, director details, tournaments (callable pattern)
   - `PlayersClient` - Search players with multiple filters
   - `PlayerHandle` - Get player profile, rankings, results, PvP, history, cards
   - `RankingsClient` - WPPR, women, youth, virtual, pro, country, age-based, custom, group rankings

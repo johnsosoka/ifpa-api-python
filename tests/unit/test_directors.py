@@ -1,6 +1,6 @@
-"""Unit tests for DirectorsClient and DirectorHandle.
+"""Unit tests for DirectorClient and callable pattern.
 
-Tests the directors resource client and handle using mocked HTTP requests.
+Tests the director resource client and callable pattern using mocked HTTP requests.
 """
 
 import pytest
@@ -17,8 +17,8 @@ from ifpa_api.models.director import (
 )
 
 
-class TestDirectorsClient:
-    """Test cases for DirectorsClient collection-level operations."""
+class TestDirectorClient:
+    """Test cases for DirectorClient collection-level operations."""
 
     def test_search_with_name_filter(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching directors by name."""
@@ -40,7 +40,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.search(name="Josh")
+        result = client.director.search(name="Josh")
 
         assert isinstance(result, DirectorSearchResponse)
         assert len(result.directors) == 1
@@ -73,7 +73,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.search(city="Chicago", stateprov="IL", country="US")
+        result = client.director.search(city="Chicago", stateprov="IL", country="US")
 
         assert len(result.directors) == 1
         assert result.directors[0].city == "Chicago"
@@ -93,7 +93,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.search()
+        result = client.director.search()
 
         assert isinstance(result, DirectorSearchResponse)
         assert len(result.directors) == 0
@@ -110,7 +110,7 @@ class TestDirectorsClient:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.directors.search(name="test")
+            client.director.search(name="test")
 
         assert exc_info.value.status_code == 500
         assert "Internal server error" in str(exc_info.value)
@@ -138,7 +138,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.search(name="sharpe")
+        result = client.director.search(name="sharpe")
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.search_term == "sharpe"
@@ -176,7 +176,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.country_directors()
+        result = client.director.country_directors()
 
         assert isinstance(result, CountryDirectorsResponse)
         assert len(result.country_directors) == 2
@@ -214,7 +214,7 @@ class TestDirectorsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.directors.country_directors()
+        result = client.director.country_directors()
 
         assert isinstance(result, CountryDirectorsResponse)
         assert result.count == 2
@@ -229,8 +229,8 @@ class TestDirectorsClient:
         )
 
 
-class TestDirectorHandle:
-    """Test cases for DirectorHandle resource-specific operations."""
+class TestDirectorContext:
+    """Test cases for DirectorContext resource-specific operations."""
 
     def test_get_director(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting a specific director's details."""
@@ -253,7 +253,7 @@ class TestDirectorHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        director = client.director(1000).get()
+        director = client.director(1000).details()
 
         assert isinstance(director, Director)
         assert director.director_id == 1000
@@ -274,7 +274,7 @@ class TestDirectorHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        director = client.director("1000").get()
+        director = client.director("1000").details()
 
         assert director.director_id == 1000
 
@@ -417,13 +417,13 @@ class TestDirectorHandle:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.director(99999).get()
+            client.director(99999).details()
 
         assert exc_info.value.status_code == 404
 
 
-class TestDirectorsIntegration:
-    """Integration tests ensuring DirectorsClient and DirectorHandle work together."""
+class TestDirectorIntegration:
+    """Integration tests ensuring DirectorClient and callable pattern work together."""
 
     def test_search_then_get_director(self, mock_requests: requests_mock.Mocker) -> None:
         """Test workflow of searching then getting director details."""
@@ -457,12 +457,12 @@ class TestDirectorsIntegration:
         client = IfpaClient(api_key="test-key")
 
         # Search for director
-        search_results = client.directors.search(name="Josh")
+        search_results = client.director.search(name="Josh")
         assert len(search_results.directors) == 1
 
         # Get full details using the ID from search
         director_id = search_results.directors[0].director_id
-        full_director = client.director(director_id).get()
+        full_director = client.director(director_id).details()
 
         assert full_director.director_id == 1000
         assert full_director.stats is not None

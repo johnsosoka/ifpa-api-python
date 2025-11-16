@@ -20,8 +20,8 @@ ifpa_api/
 │   ├── reference.py  # Reference data models
 │   └── calendar.py   # Calendar models
 └── resources/        # Resource clients and handles
-    ├── directors.py  # DirectorsClient, DirectorHandle
-    ├── player.py     # PlayerClient
+    ├── directors.py  # DirectorClient (callable pattern)
+    ├── player.py     # PlayerClient (callable pattern)
     ├── rankings.py   # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle
     ├── series.py     # SeriesClient, SeriesHandle
@@ -70,7 +70,7 @@ from ifpa_api import (
 
 | Client | Description |
 |--------|-------------|
-| `DirectorsClient` | Search directors, get country directors |
+| `DirectorClient` | Search directors, get country directors |
 | `PlayersClient` | Search players |
 | `RankingsClient` | Access ranking systems |
 | `TournamentsClient` | Search tournaments |
@@ -79,10 +79,14 @@ from ifpa_api import (
 
 ## Resource Handles
 
+Director and Player resources use a callable pattern for resource-specific operations:
+- `client.director(id)` returns a context for director operations
+- `client.player(id)` returns a context for player operations
+
+Other resources use traditional handle classes:
+
 | Handle | Description |
 |--------|-------------|
-| `DirectorHandle` | Director-specific operations |
-| `PlayerHandle` | Player-specific operations |
 | `TournamentHandle` | Tournament-specific operations |
 | `SeriesHandle` | Series-specific operations |
 

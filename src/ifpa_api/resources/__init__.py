@@ -4,7 +4,7 @@ This package contains resource-specific clients and handles for interacting
 with different parts of the IFPA API.
 """
 
-from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
+from ifpa_api.resources.directors import DirectorClient
 from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
@@ -12,8 +12,7 @@ from ifpa_api.resources.series import SeriesClient, SeriesHandle
 from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
 
 __all__ = [
-    "DirectorHandle",
-    "DirectorsClient",
+    "DirectorClient",
     "PlayerClient",
     "RankingsClient",
     "ReferenceClient",

@@ -12,14 +12,19 @@ from ifpa_api.models.director import DirectorSearchResponse
 
 client = IfpaClient()
 
-# Simple name search
-results: DirectorSearchResponse = client.directors.search(name="Josh")
+# Simple name search - Find directors named "Josh"
+results: DirectorSearchResponse = client.director.search(name="Josh")
 print(f"Found {results.count} directors")
 
 for director in results.directors:
     print(f"{director.director_id}: {director.name}")
     print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
     print(f"  Tournaments Directed: {director.tournament_count}")
+
+# Output example:
+# 1533: Josh Rainwater
+#   Location: Columbia, SC, United States
+#   Tournaments Directed: 13
 ```
 
 ### Search with Location Filters
@@ -33,19 +38,19 @@ from ifpa_api.models.director import DirectorSearchResponse
 client = IfpaClient()
 
 # Search by name and location
-results: DirectorSearchResponse = client.directors.search(
+results: DirectorSearchResponse = client.director.search(
     name="Josh",
-    city="Portland",
-    stateprov="OR"
+    city="Columbia",
+    stateprov="SC"
 )
 
 # Search by country
-results: DirectorSearchResponse = client.directors.search(
+results: DirectorSearchResponse = client.director.search(
     country="US"
 )
 
 # Combine multiple filters
-results: DirectorSearchResponse = client.directors.search(
+results: DirectorSearchResponse = client.director.search(
     name="Smith",
     city="Chicago",
     stateprov="IL",
@@ -72,8 +77,8 @@ from ifpa_api.models.director import Director
 
 client = IfpaClient()
 
-# Get director by ID
-director: Director = client.director(1000).get()
+# Get director by ID - Josh Rainwater from Columbia, SC
+director: Director = client.director(1533).details()
 
 print(f"Name: {director.name}")
 print(f"Director ID: {director.director_id}")
@@ -89,6 +94,20 @@ if director.stats:
     print(f"  Largest Event: {director.stats.largest_event_count} players")
     print(f"  Average Tournament Value: {director.stats.average_value}")
     print(f"  Highest Tournament Value: {director.stats.highest_value}")
+
+# Output:
+# Name: Josh Rainwater
+# Director ID: 1533
+# Location: Columbia, SC, United States
+#
+# Director Statistics:
+#   Total Tournaments: 13
+#   Unique Venues: 1
+#   Total Players: 347
+#   Unique Players: 120
+#   Largest Event: 41 players
+#   Average Tournament Value: 5.89
+#   Highest Tournament Value: 11.82
 ```
 
 ### Director Profile Information
@@ -115,19 +134,30 @@ from ifpa_api.models.director import DirectorTournamentsResponse
 
 client = IfpaClient()
 
-# Get past tournaments
-past: DirectorTournamentsResponse = client.director(1000).tournaments(TimePeriod.PAST)
+# Get past tournaments for Josh Rainwater
+past: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
 
 print(f"Director: {past.director_name}")
 print(f"Total past tournaments: {past.total_count}")
 
-for tournament in past.tournaments:
+for tournament in past.tournaments[:3]:  # Show first 3
     print(f"\n{tournament.tournament_name}")
     print(f"  Date: {tournament.event_date}")
     print(f"  Location: {tournament.location_name}")
     print(f"  City: {tournament.city}, {tournament.stateprov}")
     print(f"  Players: {tournament.player_count}")
     print(f"  Value: {tournament.value}")
+
+# Output example:
+# Director: Josh Rainwater
+# Total past tournaments: 13
+#
+# South Carolina Pinball Championship
+#   Date: 2024-03-16
+#   Location: Cinnebarre
+#   City: Columbia, SC
+#   Players: 41
+#   Value: 11.82
 ```
 
 ### Get Upcoming Tournaments
@@ -138,8 +168,8 @@ from ifpa_api.models.director import DirectorTournamentsResponse
 
 client = IfpaClient()
 
-# Get future tournaments
-upcoming: DirectorTournamentsResponse = client.director(1000).tournaments(TimePeriod.FUTURE)
+# Get future tournaments for Josh Rainwater
+upcoming: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.FUTURE)
 
 print(f"Upcoming tournaments: {upcoming.total_count}")
 
@@ -179,11 +209,11 @@ from ifpa_api.models.director import CountryDirectorsResponse
 client = IfpaClient()
 
 # Get all country directors
-country_dirs: CountryDirectorsResponse = client.directors.country_directors()
+country_dirs: CountryDirectorsResponse = client.director.country_directors()
 
 print(f"Total country directors: {country_dirs.count}")
 
-for director in country_dirs.country_directors:
+for director in country_dirs.country_directors[:5]:  # Show first 5
     profile = director.player_profile
     print(f"\n{profile.country_name} ({profile.country_code})")
     print(f"  Director: {profile.name}")
@@ -218,7 +248,7 @@ def analyze_director(director_id: int) -> None:
 
     try:
         # Get director profile
-        director: Director = client.director(director_id).get()
+        director: Director = client.director(director_id).details()
 
         print("=" * 60)
         print(f"{director.name}")
@@ -286,7 +316,8 @@ def analyze_director(director_id: int) -> None:
 
 
 if __name__ == "__main__":
-    analyze_director(1000)
+    # Analyze Josh Rainwater (ID: 1533)
+    analyze_director(1533)
 ```
 
 ## Best Practices
@@ -301,7 +332,7 @@ from ifpa_api import IfpaClient, IfpaApiError
 client = IfpaClient()
 
 try:
-    director = client.director(999999).get()
+    director = client.director(999999).details()
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Director not found")
@@ -319,7 +350,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 
 client = IfpaClient()
 
-results: DirectorSearchResponse = client.directors.search(name="XYZ123")
+results: DirectorSearchResponse = client.director.search(name="XYZ123")
 
 if results.count == 0 or not results.directors:
     print("No directors found")
@@ -339,7 +370,7 @@ from ifpa_api.models.director import CountryDirectorsResponse
 
 client = IfpaClient()
 
-country_dirs: CountryDirectorsResponse = client.directors.country_directors()
+country_dirs: CountryDirectorsResponse = client.director.country_directors()
 
 # Find director for a specific country
 target_country = "US"

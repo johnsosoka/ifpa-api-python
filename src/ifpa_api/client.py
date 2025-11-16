@@ -8,7 +8,7 @@ from typing import Any
 
 from ifpa_api.config import Config
 from ifpa_api.http import _HttpClient
-from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
+from ifpa_api.resources.directors import DirectorClient
 from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
@@ -40,6 +40,7 @@ class IfpaClient:
         # Access resources
         player = client.player(12345).details()
         rankings = client.rankings.wppr(start_pos=0, count=100)
+        director = client.director(1000).details()
         tournaments = client.director(1000).tournaments(TimePeriod.PAST)
 
         # Close when done (or use context manager)
@@ -94,7 +95,7 @@ class IfpaClient:
         self._http = _HttpClient(self._config)
 
         # Initialize resource clients (lazy-loaded via properties)
-        self._directors_client: DirectorsClient | None = None
+        self._director_client: DirectorClient | None = None
         self._player_client: PlayerClient | None = None
         self._rankings_client: RankingsClient | None = None
         self._reference_client: ReferenceClient | None = None
@@ -102,24 +103,30 @@ class IfpaClient:
         self._series_client: SeriesClient | None = None
 
     @property
-    def directors(self) -> DirectorsClient:
-        """Access the directors resource client.
+    def director(self) -> DirectorClient:
+        """Access the director resource client.
 
         Returns:
-            DirectorsClient instance for searching and accessing directors
+            DirectorClient instance for director operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for directors
-            results = client.directors.search(name="Josh")
+            # Collection-level: Search for directors
+            results = client.director.search(name="Josh")
 
-            # Get country directors
-            country_dirs = client.directors.country_directors()
+            # Collection-level: Get country directors
+            country_dirs = client.director.country_directors()
+
+            # Resource-level: Get director details
+            director = client.director(1000).details()
+
+            # Resource-level: Get director's tournaments
+            past = client.director(1000).tournaments(TimePeriod.PAST)
             ```
         """
-        if self._directors_client is None:
-            self._directors_client = DirectorsClient(self._http, self._config.validate_requests)
-        return self._directors_client
+        if self._director_client is None:
+            self._director_client = DirectorClient(self._http, self._config.validate_requests)
+        return self._director_client
 
     @property
     def player(self) -> PlayerClient:
@@ -229,27 +236,6 @@ class IfpaClient:
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
-
-    def director(self, director_id: int | str) -> DirectorHandle:
-        """Get a handle for a specific tournament director.
-
-        Args:
-            director_id: The director's unique identifier
-
-        Returns:
-            DirectorHandle instance for accessing director-specific operations
-
-        Example:
-            ```python
-            # Get director details
-            director = client.director(1000).get()
-
-            # Get director's tournaments
-            past = client.director(1000).tournaments(TimePeriod.PAST)
-            future = client.director(1000).tournaments(TimePeriod.FUTURE)
-            ```
-        """
-        return DirectorHandle(self._http, director_id, self._config.validate_requests)
 
     def tournament(self, tournament_id: int | str) -> TournamentHandle:
         """Get a handle for a specific tournament.

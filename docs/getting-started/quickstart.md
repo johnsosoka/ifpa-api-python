@@ -298,9 +298,9 @@ from ifpa_api import (
 
 client = IfpaClient()
 
-# Use enums for type safety
-past_tournaments = client.director(1000).tournaments(TimePeriod.PAST)
-upcoming = client.director(1000).tournaments(TimePeriod.FUTURE)
+# Use enums for type safety - Get Josh Rainwater's tournaments
+past_tournaments = client.director(1533).tournaments(TimePeriod.PAST)
+upcoming = client.director(1533).tournaments(TimePeriod.FUTURE)
 
 # Get active results for main ranking system
 results = client.player(12345).results(

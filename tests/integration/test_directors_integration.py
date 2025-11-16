@@ -22,7 +22,7 @@ class TestDirectorsClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.directors.search()
+        result = client.director.search()
 
         assert isinstance(result, DirectorSearchResponse)
         # API should return some directors
@@ -34,7 +34,7 @@ class TestDirectorsClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search with country filter
-        result = client.directors.search(country=country_code)
+        result = client.director.search(country=country_code)
 
         assert result.directors is not None
         assert isinstance(result.directors, list)
@@ -59,7 +59,7 @@ class TestDirectorHandleIntegration:
         assert director_id is not None, "Could not find test director"
 
         # Get director details
-        director = client.director(director_id).get()
+        director = client.director(director_id).details()
 
         assert isinstance(director, Director)
         assert director.director_id == director_id
@@ -72,7 +72,7 @@ class TestDirectorHandleIntegration:
 
         # Use very high ID that doesn't exist
         with pytest.raises(IfpaApiError) as exc_info:
-            client.director(99999999).get()
+            client.director(99999999).details()
 
         assert exc_info.value.status_code == 400
         assert "not found" in exc_info.value.message.lower()

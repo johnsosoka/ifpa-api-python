@@ -86,6 +86,14 @@ TEST_TOURNAMENT_ID = 7070  # PAPA 17 (2014) - well-known historical tournament
 TEST_YEAR_START = 2020
 TEST_YEAR_END = 2024
 
+# === DIRECTOR DATA ===
+
+# Active tournament director with stable history
+TEST_DIRECTOR_ACTIVE_ID = 1533  # Josh Rainwater - 13 tournaments, 120 unique players, Columbia SC
+
+# Common director search patterns
+TEST_DIRECTOR_SEARCH_JOSH = {"name": "Josh", "count": 30}  # Returns ~26 directors
+
 
 # === FIXTURES ===
 
@@ -411,3 +419,27 @@ def year_start() -> int:
 def year_end() -> int:
     """End year for date range testing (2024)."""
     return TEST_YEAR_END
+
+
+@pytest.fixture
+def director_active_id() -> int:
+    """Active tournament director ID for testing.
+
+    Returns:
+        Director ID 1533 (Josh Rainwater):
+        - Location: Columbia, SC
+        - Tournament count: 13
+        - Unique player count: 120
+        - Has both past and future tournaments
+
+    Use this fixture for tests requiring an active director with tournament history.
+
+    Example:
+        ```python
+        def test_get_director_details(client, director_active_id):
+            director = client.director(director_active_id).details()
+            assert director.director_id == director_active_id
+            assert director.stats.tournament_count > 0
+        ```
+    """
+    return TEST_DIRECTOR_ACTIVE_ID

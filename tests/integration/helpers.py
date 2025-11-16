@@ -54,12 +54,12 @@ def get_test_director_id(client: IfpaClient) -> int | None:
         client = IfpaClient()
         director_id = get_test_director_id(client)
         if director_id:
-            director = client.director(director_id).get()
+            director = client.director(director_id).details()
         ```
     """
     try:
         # Search for directors, get first result
-        results = client.directors.search()
+        results = client.director.search()
         if results.directors and len(results.directors) > 0:
             return results.directors[0].director_id
     except Exception:

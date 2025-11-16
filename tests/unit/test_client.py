@@ -3,7 +3,7 @@
 from typing import Any
 
 from ifpa_api import IfpaClient
-from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
+from ifpa_api.resources.directors import DirectorClient, _DirectorContext
 from ifpa_api.resources.player import PlayerClient, _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.series import SeriesClient, SeriesHandle
@@ -49,11 +49,11 @@ class TestIfpaClientInitialization:
 class TestIfpaClientResourceProperties:
     """Tests for resource client properties."""
 
-    def test_directors_property_returns_directors_client(self) -> None:
-        """Test that directors property returns DirectorsClient."""
+    def test_director_property_returns_director_client(self) -> None:
+        """Test that director property returns DirectorClient."""
         client = IfpaClient(api_key="test-key")
-        directors = client.directors
-        assert isinstance(directors, DirectorsClient)
+        director = client.director
+        assert isinstance(director, DirectorClient)
 
     def test_player_property_returns_player_client(self) -> None:
         """Test that player property returns PlayerClient."""
@@ -82,26 +82,26 @@ class TestIfpaClientResourceProperties:
     def test_resource_properties_are_cached(self) -> None:
         """Test that resource clients are cached after first access."""
         client = IfpaClient(api_key="test-key")
-        directors1 = client.directors
-        directors2 = client.directors
-        assert directors1 is directors2
+        director1 = client.director
+        director2 = client.director
+        assert director1 is director2
 
 
 class TestIfpaClientHandleFactory:
     """Tests for handle factory methods."""
 
-    def test_director_method_returns_director_handle(self) -> None:
-        """Test that director() method returns DirectorHandle."""
+    def test_director_callable_returns_director_context(self) -> None:
+        """Test that director() callable returns _DirectorContext."""
         client = IfpaClient(api_key="test-key")
-        handle = client.director(1000)
-        assert isinstance(handle, DirectorHandle)
+        context = client.director(1000)
+        assert isinstance(context, _DirectorContext)
 
-    def test_director_handle_stores_id(self) -> None:
-        """Test that director handle stores the director ID."""
+    def test_director_context_stores_id(self) -> None:
+        """Test that director context stores the director ID."""
         client = IfpaClient(api_key="test-key")
         director_id = 1000
-        handle = client.director(director_id)
-        assert handle._director_id == director_id
+        context = client.director(director_id)
+        assert context._director_id == director_id
 
     def test_player_callable_returns_player_context(self) -> None:
         """Test that player() callable returns _PlayerContext."""
@@ -145,8 +145,8 @@ class TestIfpaClientHandleFactory:
     def test_handle_accepts_string_ids(self) -> None:
         """Test that handles accept string IDs."""
         client = IfpaClient(api_key="test-key")
-        director_handle = client.director("1000")
-        assert director_handle._director_id == "1000"
+        director_context = client.director("1000")
+        assert director_context._director_id == "1000"
 
     def test_handles_are_independent(self) -> None:
         """Test that each call to handle/callable factory creates a new instance."""
@@ -201,11 +201,11 @@ class TestIfpaClientConfiguration:
     def test_validate_requests_passed_to_resources(self) -> None:
         """Test that validate_requests flag is passed to resource clients."""
         client = IfpaClient(api_key="test-key", validate_requests=False)
-        directors = client.directors
-        assert directors._validate_requests is False
+        director = client.director
+        assert director._validate_requests is False
 
     def test_http_client_passed_to_resources(self) -> None:
         """Test that HTTP client is passed to resource clients."""
         client = IfpaClient(api_key="test-key")
-        directors = client.directors
-        assert directors._http is client._http
+        director = client.director
+        assert director._http is client._http

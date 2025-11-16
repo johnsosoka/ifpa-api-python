@@ -1,4 +1,4 @@
-"""Directors resource client and handle.
+"""Director resource client with callable pattern.
 
 Provides access to tournament director information, their tournament history,
 and search capabilities.
@@ -18,11 +18,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class DirectorHandle:
-    """Handle for interacting with a specific tournament director.
+class _DirectorContext:
+    """Context for interacting with a specific tournament director.
 
-    This class provides methods for accessing information about a specific
-    director identified by their director ID.
+    This internal class provides resource-specific methods for a director
+    identified by their director ID. Instances are returned by calling
+    DirectorClient with a director ID.
 
     Attributes:
         _http: The HTTP client instance
@@ -33,7 +34,7 @@ class DirectorHandle:
     def __init__(
         self, http: "_HttpClient", director_id: int | str, validate_requests: bool
     ) -> None:
-        """Initialize a director handle.
+        """Initialize a director context.
 
         Args:
             http: The HTTP client instance
@@ -44,7 +45,7 @@ class DirectorHandle:
         self._director_id = director_id
         self._validate_requests = validate_requests
 
-    def get(self) -> Director:
+    def details(self) -> Director:
         """Get detailed information about this director.
 
         Returns:
@@ -55,7 +56,7 @@ class DirectorHandle:
 
         Example:
             ```python
-            director = client.director(1000).get()
+            director = client.director(1000).details()
             print(f"Director: {director.name}")
             print(f"Tournaments: {director.stats.tournament_count}")
             ```
@@ -95,19 +96,31 @@ class DirectorHandle:
         return DirectorTournamentsResponse.model_validate(response)
 
 
-class DirectorsClient:
-    """Client for directors collection-level operations.
+class DirectorClient:
+    """Callable client for director operations.
 
-    This client provides methods for searching directors and accessing
-    collection-level director information.
+    This client provides both collection-level methods (search, country_directors) and
+    resource-level access via the callable pattern. Call with a director ID to get
+    a context for director-specific operations.
 
     Attributes:
         _http: The HTTP client instance
         _validate_requests: Whether to validate request parameters
+
+    Example:
+        ```python
+        # Collection-level operations
+        results = client.director.search(name="Josh")
+        country_dirs = client.director.country_directors()
+
+        # Resource-level operations
+        director = client.director(1000).details()
+        past_tournaments = client.director(1000).tournaments(TimePeriod.PAST)
+        ```
     """
 
     def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
-        """Initialize the directors client.
+        """Initialize the director client.
 
         Args:
             http: The HTTP client instance
@@ -115,6 +128,24 @@ class DirectorsClient:
         """
         self._http = http
         self._validate_requests = validate_requests
+
+    def __call__(self, director_id: int | str) -> _DirectorContext:
+        """Get a context for a specific director.
+
+        Args:
+            director_id: The director's unique identifier
+
+        Returns:
+            _DirectorContext instance for accessing director-specific operations
+
+        Example:
+            ```python
+            # Get director context and access methods
+            director = client.director(1000).details()
+            tournaments = client.director(1000).tournaments(TimePeriod.PAST)
+            ```
+        """
+        return _DirectorContext(self._http, director_id, self._validate_requests)
 
     def search(
         self,
@@ -140,10 +171,10 @@ class DirectorsClient:
         Example:
             ```python
             # Search by name
-            results = client.directors.search(name="Josh")
+            results = client.director.search(name="Josh")
 
             # Search by location
-            results = client.directors.search(city="Chicago", stateprov="IL")
+            results = client.director.search(city="Chicago", stateprov="IL")
             ```
         """
         params = {}
@@ -170,7 +201,7 @@ class DirectorsClient:
 
         Example:
             ```python
-            country_dirs = client.directors.country_directors()
+            country_dirs = client.director.country_directors()
             for director in country_dirs.country_directors:
                 print(f"{director.name} - {director.country_name}")
             ```
