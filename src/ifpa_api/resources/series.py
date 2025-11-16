@@ -21,11 +21,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class SeriesHandle:
-    """Handle for interacting with a specific tournament series.
+class _SeriesContext:
+    """Internal context for series-specific operations.
 
     This class provides methods for accessing information about a specific
-    series identified by its series code.
+    series identified by its series code. It is returned by calling
+    SeriesClient with a series code.
 
     Attributes:
         _http: The HTTP client instance
@@ -34,7 +35,7 @@ class SeriesHandle:
     """
 
     def __init__(self, http: "_HttpClient", series_code: str, validate_requests: bool) -> None:
-        """Initialize a series handle.
+        """Initialize a series context.
 
         Args:
             http: The HTTP client instance
@@ -67,7 +68,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            standings = client.series_handle("NACS").standings()
+            standings = client.series("NACS").standings()
             print(f"Series: {standings.series_code} ({standings.year})")
             print(f"Total Prize Fund: ${standings.championship_prize_fund}")
             for region in standings.overall_results:
@@ -110,7 +111,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            standings = client.series_handle("NACS").region_standings("OH")
+            standings = client.series("NACS").region_standings("OH")
             print(f"Region: {standings.region_name}")
             print(f"Prize Fund: ${standings.prize_fund}")
             for player in standings.standings[:10]:
@@ -150,12 +151,12 @@ class SeriesHandle:
         Example:
             ```python
             # Get current year card for player in Ohio region
-            card = client.series_handle("PAPA").player_card(12345, "OH")
+            card = client.series("PAPA").player_card(12345, "OH")
             print(f"Position: {card.current_position}")
             print(f"Points: {card.total_points}")
 
             # Get card for specific year
-            card_2023 = client.series_handle("PAPA").player_card(12345, "OH", year=2023)
+            card_2023 = client.series("PAPA").player_card(12345, "OH", year=2023)
             for event in card_2023.events:
                 print(f"{event.tournament_name}: {event.points_earned} pts")
             ```
@@ -189,7 +190,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            regions = client.series_handle("NACS").regions("OH", 2025)
+            regions = client.series("NACS").regions("OH", 2025)
             for region in regions.active_regions:
                 print(f"{region.region_name} ({region.region_code})")
             ```
@@ -212,7 +213,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            stats = client.series_handle("NACS").stats("OH")
+            stats = client.series("NACS").stats("OH")
             print(f"Total Events: {stats.total_events}")
             print(f"Average Event Size: {stats.average_event_size}")
             ```
@@ -235,7 +236,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            tournaments = client.series_handle("NACS").tournaments("OH")
+            tournaments = client.series("NACS").tournaments("OH")
             for tournament in tournaments.tournaments:
                 print(f"{tournament.tournament_name} on {tournament.event_date}")
             ```
@@ -257,7 +258,7 @@ class SeriesHandle:
 
         Example:
             ```python
-            reps = client.series_handle("PAPA").region_reps()
+            reps = client.series("PAPA").region_reps()
             for rep in reps.representative:
                 print(f"{rep.region_name}: {rep.name} (Player #{rep.player_id})")
             ```
@@ -267,9 +268,13 @@ class SeriesHandle:
 
 
 class SeriesClient:
-    """Client for series collection-level operations.
+    """Callable client for series operations.
 
-    This client provides methods for listing and accessing tournament series.
+    Provides both collection-level operations (listing series) and
+    series-specific operations through the callable pattern.
+
+    Call this client with a series code to get a context for series-specific
+    operations like standings, player cards, and statistics.
 
     Attributes:
         _http: The HTTP client instance
@@ -285,6 +290,29 @@ class SeriesClient:
         """
         self._http = http
         self._validate_requests = validate_requests
+
+    def __call__(self, series_code: str) -> _SeriesContext:
+        """Get a context for a specific series.
+
+        Args:
+            series_code: The series code identifier (e.g., "NACS", "PAPA")
+
+        Returns:
+            _SeriesContext instance for accessing series-specific operations
+
+        Example:
+            ```python
+            # Get series standings
+            standings = client.series("NACS").standings()
+
+            # Get player's series card
+            card = client.series("PAPA").player_card(12345, "OH")
+
+            # Get region standings
+            region = client.series("NACS").region_standings("OH")
+            ```
+        """
+        return _SeriesContext(self._http, series_code, self._validate_requests)
 
     def list(self, active_only: bool | None = None) -> SeriesListResponse:
         """List all available series.

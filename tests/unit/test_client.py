@@ -6,7 +6,7 @@ from ifpa_api import IfpaClient
 from ifpa_api.resources.director import DirectorClient, _DirectorContext
 from ifpa_api.resources.player import PlayerClient, _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
-from ifpa_api.resources.series import SeriesClient, SeriesHandle
+from ifpa_api.resources.series import SeriesClient, _SeriesContext
 from ifpa_api.resources.tournament import TournamentClient, _TournamentContext
 
 
@@ -129,18 +129,18 @@ class TestIfpaClientHandleFactory:
         context = client.tournament(tournament_id)
         assert context._tournament_id == tournament_id
 
-    def test_series_handle_method_returns_series_handle(self) -> None:
-        """Test that series_handle() method returns SeriesHandle."""
+    def test_series_callable_returns_series_context(self) -> None:
+        """Test that series() callable returns _SeriesContext."""
         client = IfpaClient(api_key="test-key")
-        handle = client.series_handle("PAPA")
-        assert isinstance(handle, SeriesHandle)
+        context = client.series("PAPA")
+        assert isinstance(context, _SeriesContext)
 
-    def test_series_handle_stores_code(self) -> None:
-        """Test that series handle stores the series code."""
+    def test_series_context_stores_code(self) -> None:
+        """Test that series context stores the series code."""
         client = IfpaClient(api_key="test-key")
         series_code = "PAPA"
-        handle = client.series_handle(series_code)
-        assert handle._series_code == series_code
+        context = client.series(series_code)
+        assert context._series_code == series_code
 
     def test_handle_accepts_string_ids(self) -> None:
         """Test that handles accept string IDs."""

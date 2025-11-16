@@ -163,7 +163,7 @@ for series_item in all_series.series:
     print(f"{series_item.series_code}: {series_item.series_name}")
 
 # Get series standings
-standings = client.series_handle("PAPA").standings()
+standings = client.series("PAPA").standings()
 for entry in standings.standings:
     print(f"{entry.position}. {entry.player_name}")
 ```

@@ -62,6 +62,49 @@ results = client.tournament(12345).results()
 league = client.tournament(12345).league()
 ```
 
+**Series Resource Refactoring (BREAKING CHANGES)**
+
+The Series resource has been migrated to use the callable pattern, completing the unification effort across all resources.
+
+**Breaking Changes:**
+
+1. **Method removed**: `client.series_handle()` method removed
+   ```python
+   # Before (v0.2.x)
+   standings = client.series_handle("NACS").standings()
+   card = client.series_handle("PAPA").player_card(12345, "OH")
+
+   # After (v0.3.0)
+   standings = client.series("NACS").standings()
+   card = client.series("PAPA").player_card(12345, "OH")
+   ```
+
+2. **Class renamed**: `SeriesHandle` is now private (`_SeriesContext`)
+   - This internal class should not be directly imported by users
+   - Access series operations via the callable pattern: `client.series("CODE").standings()`
+
+**Unified Pattern:**
+
+All resources now follow the same callable pattern:
+```python
+# Player
+client.player(123).details()
+
+# Director
+client.director(456).details()
+
+# Tournament
+client.tournament(789).details()
+
+# Series (NEW)
+client.series("NACS").standings()
+```
+
+**Migration Guide:**
+
+Simple find-replace in your codebase:
+- Replace: `client.series_handle(` → `client.series(`
+
 ### Fixed
 
 - Consolidated integration tests from 3 files into 1 organized file (`test_tournament_integration.py`)

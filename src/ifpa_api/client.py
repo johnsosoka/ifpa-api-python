@@ -12,7 +12,7 @@ from ifpa_api.resources.director import DirectorClient
 from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
-from ifpa_api.resources.series import SeriesClient, SeriesHandle
+from ifpa_api.resources.series import SeriesClient
 from ifpa_api.resources.tournament import TournamentClient
 
 
@@ -232,46 +232,27 @@ class IfpaClient:
         """Access the series resource client.
 
         Returns:
-            SeriesClient instance for accessing tournament series
+            SeriesClient instance for series operations (both collection and resource level)
 
         Example:
             ```python
-            # List all series
+            # Collection-level: List all series
             all_series = client.series.list()
-
-            # Get active series only
             active = client.series.list(active_only=True)
+
+            # Resource-level: Get series standings
+            standings = client.series("NACS").standings()
+
+            # Resource-level: Get player's series card
+            card = client.series("PAPA").player_card(12345, "OH")
+
+            # Resource-level: Get region standings
+            region = client.series("NACS").region_standings("OH")
             ```
         """
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
-
-    def series_handle(self, series_code: str) -> SeriesHandle:
-        """Get a handle for a specific tournament series.
-
-        Args:
-            series_code: The series code identifier
-
-        Returns:
-            SeriesHandle instance for accessing series-specific operations
-
-        Example:
-            ```python
-            # Get series standings
-            standings = client.series_handle("PAPA").standings()
-
-            # Get player's series card
-            card = client.series_handle("PAPA").player_card(12345)
-
-            # Get series overview
-            overview = client.series_handle("PAPA").overview()
-
-            # Get series rules
-            rules = client.series_handle("PAPA").rules()
-            ```
-        """
-        return SeriesHandle(self._http, series_code, self._config.validate_requests)
 
     def close(self) -> None:
         """Close the HTTP client session.

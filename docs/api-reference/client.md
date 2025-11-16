@@ -92,11 +92,24 @@ def tournaments(self) -> TournamentsClient
 
 #### `series`
 
-Returns the series resource client.
+Returns the series resource client. Supports both collection operations and callable pattern for individual series access.
 
 ```python
 @property
 def series(self) -> SeriesClient
+```
+
+**Usage:**
+
+```python
+# Collection operations
+all_series = client.series.list()  # List all series
+active = client.series.list(active_only=True)  # List active series only
+
+# Individual series operations (callable pattern)
+standings = client.series("NACS").standings()  # Get overall standings
+card = client.series("PAPA").player_card(12345, "OH")  # Get player's series card
+region = client.series("NACS").region_standings("OH")  # Get region standings
 ```
 
 #### `reference`
@@ -158,22 +171,6 @@ def tournament(self, tournament_id: int | str) -> TournamentHandle
 **Returns:**
 
 - `TournamentHandle`: Handle for tournament-specific operations
-
-#### `series_handle(series_code)`
-
-Get a handle for a specific tournament series.
-
-```python
-def series_handle(self, series_code: str) -> SeriesHandle
-```
-
-**Parameters:**
-
-- `series_code` (str): The series code identifier
-
-**Returns:**
-
-- `SeriesHandle`: Handle for series-specific operations
 
 #### `close()`
 
