@@ -3,11 +3,15 @@
 from typing import Any
 
 from ifpa_api import IfpaClient
-from ifpa_api.resources.director import DirectorClient, _DirectorContext
-from ifpa_api.resources.player import PlayerClient, _PlayerContext
+from ifpa_api.resources.director import DirectorClient
+from ifpa_api.resources.director.context import _DirectorContext
+from ifpa_api.resources.player import PlayerClient
+from ifpa_api.resources.player.context import _PlayerContext
 from ifpa_api.resources.rankings import RankingsClient
-from ifpa_api.resources.series import SeriesClient, _SeriesContext
-from ifpa_api.resources.tournament import TournamentClient, _TournamentContext
+from ifpa_api.resources.series import SeriesClient
+from ifpa_api.resources.series.context import _SeriesContext
+from ifpa_api.resources.tournament import TournamentClient
+from ifpa_api.resources.tournament.context import _TournamentContext
 
 
 class TestIfpaClientInitialization:
