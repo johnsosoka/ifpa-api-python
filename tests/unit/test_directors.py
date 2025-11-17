@@ -3,6 +3,8 @@
 Tests the director resource client and callable pattern using mocked HTTP requests.
 """
 
+import warnings
+
 import pytest
 import requests_mock
 
@@ -420,6 +422,345 @@ class TestDirectorContext:
             client.director(99999).details()
 
         assert exc_info.value.status_code == 404
+
+
+class TestDirectorQueryBuilder:
+    """Test cases for the new fluent query builder pattern."""
+
+    def test_simple_query(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test simple director name query."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={
+                "directors": [
+                    {
+                        "director_id": 1000,
+                        "name": "Josh Sharpe",
+                        "city": "Chicago",
+                        "country_code": "US",
+                        "tournament_count": 42,
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        results = client.director.query("Josh").get()
+
+        assert isinstance(results, DirectorSearchResponse)
+        assert len(results.directors) == 1
+        assert results.directors[0].name == "Josh Sharpe"
+
+        # Verify query parameter was sent correctly
+        assert mock_requests.last_request is not None
+        assert "name=josh" in mock_requests.last_request.query.lower()
+
+    def test_query_with_country_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with country filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Josh").country("US").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=josh" in query.lower()
+        assert "country=us" in query.lower()
+
+    def test_query_with_state_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with state filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Sharpe").state("IL").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=sharpe" in query.lower()
+        assert "stateprov=il" in query.lower()
+
+    def test_query_with_city_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with city filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Josh").city("Chicago").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=josh" in query.lower()
+        assert "city=chicago" in query.lower()
+
+    def test_query_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with pagination (offset and limit)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Sharpe").offset(25).limit(50).get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "start_pos=25" in query
+        assert "count=50" in query
+
+    def test_query_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test chaining all available filters together."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Josh").country("US").state("IL").city("Chicago").offset(0).limit(
+            25
+        ).get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=josh" in query.lower()
+        assert "country=us" in query.lower()
+        assert "stateprov=il" in query.lower()
+        assert "city=chicago" in query.lower()
+        assert "start_pos=0" in query
+        assert "count=25" in query
+
+    def test_query_immutability(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that query builder is immutable - each method returns new instance."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create base query
+        base_query = client.director.query().country("US")
+
+        # Create two derivative queries
+        il_query = base_query.state("IL")
+        or_query = base_query.state("OR")
+
+        # Execute both queries
+        il_query.get()
+        il_request = mock_requests.last_request
+        assert il_request is not None
+        assert "stateprov=il" in il_request.query.lower()
+        assert "stateprov=or" not in il_request.query.lower()
+
+        or_query.get()
+        or_request = mock_requests.last_request
+        assert or_request is not None
+        assert "stateprov=or" in or_request.query.lower()
+        assert "stateprov=il" not in or_request.query.lower()
+
+        # Verify both queries have country=US
+        assert "country=us" in il_request.query.lower()
+        assert "country=us" in or_request.query.lower()
+
+    def test_query_reuse(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that query can be reused multiple times (immutability)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create a reusable query
+        us_query = client.director.query().country("US")
+
+        # Execute it multiple times with different additional filters
+        us_query.state("IL").city("Chicago").get()
+        us_query.state("OR").city("Portland").get()
+        us_query.state("WA").city("Seattle").get()
+
+        # Base query should still be unchanged
+        us_query.get()
+        final_request = mock_requests.last_request
+        assert final_request is not None
+        assert "country=us" in final_request.query.lower()
+        # Should not have any of the state/city filters from previous calls
+        assert "stateprov" not in final_request.query.lower()
+        assert "city" not in final_request.query.lower()
+
+    def test_empty_query(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with no name (filter-only query)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query().country("US").state("IL").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "country=us" in query.lower()
+        assert "stateprov=il" in query.lower()
+        # Should not have a name parameter
+        assert "name=" not in query.lower()
+
+    def test_query_with_initial_name(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query() method with initial name parameter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Test both ways of setting name
+        client.director.query("Josh").get()
+        assert mock_requests.last_request is not None
+        assert "name=josh" in mock_requests.last_request.query.lower()
+
+        # Also test chaining after initial name
+        client.director.query("Sharpe").country("US").get()
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=sharpe" in query.lower()
+        assert "country=us" in query.lower()
+
+    def test_query_builder_repr(self) -> None:
+        """Test query builder string representation."""
+        client = IfpaClient(api_key="test-key")
+        builder = client.director.query("Josh").country("US")
+
+        # Should show class name and params
+        repr_str = repr(builder)
+        assert "DirectorQueryBuilder" in repr_str
+        assert "params=" in repr_str
+
+    def test_query_method_chaining(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test fluent chaining of query methods."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Test fluent chaining with parentheses
+        results = (
+            client.director.query("Josh").country("US").state("IL").city("Chicago").limit(25).get()
+        )
+
+        assert isinstance(results, DirectorSearchResponse)
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=josh" in query.lower()
+        assert "country=us" in query.lower()
+        assert "stateprov=il" in query.lower()
+        assert "city=chicago" in query.lower()
+        assert "count=25" in query
+
+    def test_query_offset_without_limit(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test using offset without limit."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.director.query("Josh").offset(50).get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "start_pos=50" in query
+        assert "count=" not in query
+
+
+class TestDirectorQueryBuilderIntegration:
+    """Integration tests for query builder with realistic scenarios."""
+
+    def test_search_and_refine_workflow(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test realistic workflow: search broadly, then refine."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={
+                "directors": [
+                    {
+                        "director_id": i,
+                        "name": f"Director{i}",
+                        "city": "Chicago",
+                        "country_code": "US",
+                    }
+                    for i in range(50)
+                ],
+                "total_results": 50,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Start with broad search
+        broad_results = client.director.query("Director").limit(100).get()
+        assert len(broad_results.directors) == 50
+
+        # Refine to specific country
+        client.director.query("Director").country("US").limit(50).get()
+        assert mock_requests.last_request is not None
+        assert "country=us" in mock_requests.last_request.query.lower()
+
+    def test_pagination_workflow(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test paginating through results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create base query
+        base = client.director.query("Sharpe").country("US")
+
+        # Get pages
+        page1 = base.offset(0).limit(25)
+        page2 = base.offset(25).limit(25)
+        page3 = base.offset(50).limit(25)
+
+        # Execute pages
+        page1.get()
+        assert "start_pos=0" in mock_requests.last_request.query
+        page2.get()
+        assert "start_pos=25" in mock_requests.last_request.query
+        page3.get()
+        assert "start_pos=50" in mock_requests.last_request.query
+
+
+class TestDeprecationWarnings:
+    """Test that old methods emit proper deprecation warnings."""
+
+    def test_search_emits_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that search() emits a deprecation warning."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/director/search",
+            json={"directors": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            client.director.search(name="Josh")
+
+            # Verify warning was emitted
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "deprecated" in str(w[0].message).lower()
+            assert "query()" in str(w[0].message)
 
 
 class TestDirectorIntegration:

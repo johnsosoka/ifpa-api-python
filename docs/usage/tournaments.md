@@ -2,127 +2,195 @@
 
 Search for tournaments and access detailed tournament information, results, formats, and submission history.
 
-## Callable Pattern
-
-The Tournament resource uses a callable pattern for accessing both collection-level and resource-level operations:
-
-```python
-from ifpa_api import IfpaClient
-
-client = IfpaClient()
-
-# Collection operations on client.tournament
-search_results = client.tournament.search(name="PAPA")
-formats = client.tournament.list_formats()
-
-# Individual tournament operations via callable pattern
-tournament = client.tournament(7070).details()
-results = client.tournament(7070).results()
-```
-
-## Search for Tournaments
-
-Search for tournaments by name, location, date range, or tournament type.
-
-!!! warning "Date Range Requirement"
-    When using date filters, you **must** provide both `start_date` and `end_date` together.
-    The API requires both dates or neither. Providing only one will result in a `ValueError`.
-
-### Basic Search
+## Quick Example
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA")
+# Fluent query builder - search for PAPA tournaments in Pennsylvania
+results: TournamentSearchResponse = client.tournament.query("PAPA").state("PA").get()
 ```
 
-**Complete Example:**
+## Searching Tournaments (Fluent Query Builder)
+
+The **recommended** way to search for tournaments is using the fluent query builder:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search for PAPA tournaments
-tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA", count=10)
+# Simple name search
+results: TournamentSearchResponse = client.tournament.query("PAPA").get()
 
-print(f"Found {len(tournaments.tournaments)} PAPA tournaments")
-for t in tournaments.tournaments:
-    print(f"{t.tournament_name} - {t.event_date}")
-    print(f"  Location: {t.city}, {t.stateprov}")
-    print(f"  Players: {t.player_count}, Rating: {t.rating_value}")
+print(f"Found {len(results.tournaments)} tournaments")
+for tournament in results.tournaments:
+    print(f"{tournament.tournament_name} - {tournament.event_date}")
+    print(f"  Location: {tournament.city}, {tournament.stateprov}")
+    print(f"  Players: {tournament.player_count}")
 ```
 
-### Search with Filters
+### Chained Filters
+
+The fluent API allows method chaining for complex queries:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search by location and date range (BOTH dates required)
-results: TournamentSearchResponse = client.tournament.search(
-    city="Portland",
-    stateprov="OR",
-    start_date="2024-01-01",
-    end_date="2024-12-31"
-)
+# Chain multiple filters
+results: TournamentSearchResponse = (client.tournament.query("Championship")
+    .country("US")
+    .state("WA")
+    .limit(25)
+    .get())
+
+# Location-only search (no name query)
+results: TournamentSearchResponse = (client.tournament.query()
+    .city("Portland")
+    .state("OR")
+    .get())
+
+# Filter by tournament type
+results: TournamentSearchResponse = (client.tournament.query()
+    .country("US")
+    .tournament_type("women")
+    .limit(25)
+    .get())
 ```
 
-**Complete Example:**
+## Date Range Filtering
+
+Use the `.date_range()` method to filter tournaments by date. **Both dates are required** and must be in `YYYY-MM-DD` format:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search by location and date range (BOTH dates required)
-results: TournamentSearchResponse = client.tournament.search(
-    city="Portland",
-    stateprov="OR",
-    start_date="2024-01-01",
-    end_date="2024-12-31",
-    count=50
-)
+# Search for tournaments in 2024
+results: TournamentSearchResponse = (client.tournament.query()
+    .country("US")
+    .date_range("2024-01-01", "2024-12-31")
+    .get())
 
-print(f"Found {len(results.tournaments)} tournaments in Portland, OR")
-for t in results.tournaments:
-    print(f"\n{t.tournament_name}")
-    print(f"  Date: {t.event_date}")
-    print(f"  Players: {t.player_count}")
-    print(f"  Rating: {t.rating_value}")
+# Find upcoming tournaments
+from datetime import datetime, timedelta
 
-# Search women's tournaments only
-women_tournaments: TournamentSearchResponse = client.tournament.search(
-    tournament_type="women",
-    country="US",
-    count=25
-)
+today = datetime.now()
+next_month = today + timedelta(days=30)
 
-print(f"\n\nFound {len(women_tournaments.tournaments)} women's tournaments")
+upcoming: TournamentSearchResponse = (client.tournament.query()
+    .date_range(
+        today.strftime("%Y-%m-%d"),
+        next_month.strftime("%Y-%m-%d")
+    )
+    .get())
 ```
 
-### Search Parameters
+!!! warning "Date Format Validation"
+    The SDK validates date format strictly. Dates must be in `YYYY-MM-DD` format.
+    Invalid formats raise `IfpaClientValidationError`:
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | `str` | No | Tournament name (partial match) |
-| `city` | `str` | No | Filter by city |
-| `stateprov` | `str` | No | Filter by state/province code |
-| `country` | `str` | No | Filter by country code (e.g., "US") |
-| `start_date` | `str` | No* | Filter by start date (YYYY-MM-DD format) |
-| `end_date` | `str` | No* | Filter by end date (YYYY-MM-DD format) |
-| `tournament_type` | `str` | No | Filter by type ("open", "women", etc.) |
-| `start_pos` | `int` | No | Starting position for pagination |
-| `count` | `int` | No | Number of results to return |
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.exceptions import IfpaClientValidationError
 
-*Must be provided together - both required or both omitted
+    client: IfpaClient = IfpaClient()
+
+    try:
+        # Invalid format - raises error
+        results = client.tournament.query().date_range("01-01-2024", "12-31-2024").get()
+    except IfpaClientValidationError as e:
+        print(f"Invalid date format: {e}")
+    ```
+
+### Query Reuse (Immutable Pattern)
+
+The query builder is immutable - each method returns a new instance, allowing query reuse:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Create a reusable base query for US tournaments
+us_query = client.tournament.query().country("US")
+
+# Derive state-specific queries from the base
+wa_tournaments: TournamentSearchResponse = us_query.state("WA").limit(25).get()
+or_tournaments: TournamentSearchResponse = us_query.state("OR").limit(25).get()
+id_tournaments: TournamentSearchResponse = us_query.state("ID").limit(25).get()
+
+# The base query remains unchanged and can be reused
+ca_tournaments: TournamentSearchResponse = us_query.state("CA").limit(25).get()
+
+# Create a reusable date range query
+year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
+us_2024 = year_2024.country("US").get()
+women_2024 = year_2024.tournament_type("women").get()
+```
+
+## Available Filters
+
+The fluent query builder provides these methods:
+
+| Method | Parameter | Description |
+|--------|-----------|-------------|
+| `.query(name)` | `str` | Tournament name (partial match, case insensitive) |
+| `.city(city)` | `str` | Filter by city name |
+| `.state(stateprov)` | `str` | Filter by state/province code |
+| `.country(country)` | `str` | Filter by country code (e.g., "US", "CA") |
+| `.date_range(start, end)` | `str, str` | Date range filter (both required, YYYY-MM-DD format) |
+| `.tournament_type(type)` | `str` | Tournament type (e.g., "open", "women", "youth") |
+| `.offset(start_position)` | `int` | Pagination offset (0-based) |
+| `.limit(count)` | `int` | Maximum number of results |
+| `.get()` | - | Execute query and return results |
+
+!!! note "Deprecated Methods"
+    The old `client.tournament.search(name="PAPA")` method is deprecated and will be removed in v1.0.0.
+    Use the fluent query builder instead: `client.tournament.query("PAPA").get()`
+
+## Complex Query Examples
+
+Combine multiple filters for precise searches:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Find all women's tournaments in the Pacific Northwest during 2024
+results: TournamentSearchResponse = (client.tournament.query()
+    .country("US")
+    .date_range("2024-01-01", "2024-12-31")
+    .tournament_type("women")
+    .limit(100)
+    .get())
+
+# Search for championship events in a specific city
+results: TournamentSearchResponse = (client.tournament.query("Championship")
+    .city("Portland")
+    .state("OR")
+    .get())
+
+# Find recent tournaments with pagination
+results: TournamentSearchResponse = (client.tournament.query()
+    .date_range("2024-11-01", "2024-11-30")
+    .country("US")
+    .offset(0)
+    .limit(50)
+    .get())
+```
 
 ## Get Tournament Details
 
@@ -132,20 +200,9 @@ Retrieve detailed information about a specific tournament:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import Tournament
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-tournament: Tournament = client.tournament(7070).details()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import Tournament
-
-client = IfpaClient()
-
-# Get PAPA 17 tournament details
+# Get PAPA 17 tournament details (tournament ID 7070)
 tournament: Tournament = client.tournament(7070).details()
 
 print(f"Name: {tournament.tournament_name}")
@@ -180,18 +237,7 @@ Access complete tournament standings and player results:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentResultsResponse
 
-client = IfpaClient()
-
-results: TournamentResultsResponse = client.tournament(7070).results()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentResultsResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get PAPA 17 results
 results: TournamentResultsResponse = client.tournament(7070).results()
@@ -227,18 +273,7 @@ Retrieve format information for a specific tournament:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentFormatsResponse
 
-client = IfpaClient()
-
-formats: TournamentFormatsResponse = client.tournament(7070).formats()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentFormatsResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get PAPA 17 format information
 formats: TournamentFormatsResponse = client.tournament(7070).formats()
@@ -275,18 +310,7 @@ Get a comprehensive list of all available tournament format types:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentFormatsListResponse
 
-client = IfpaClient()
-
-formats: TournamentFormatsListResponse = client.tournament.list_formats()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentFormatsListResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get all tournament formats
 formats: TournamentFormatsListResponse = client.tournament.list_formats()
@@ -302,14 +326,6 @@ for fmt in formats.finals_formats:
     print(f"  {fmt.format_id}: {fmt.name}")
     if fmt.description:
         print(f"    {fmt.description}")
-
-# Find a specific format
-swiss = next(
-    (f for f in formats.qualifying_formats if "swiss" in f.name.lower()),
-    None
-)
-if swiss:
-    print(f"\nSwiss format ID: {swiss.format_id}")
 ```
 
 ## Get Related Tournaments
@@ -320,18 +336,7 @@ Find tournaments related to a specific tournament (same venue or series):
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import RelatedTournamentsResponse
 
-client = IfpaClient()
-
-related: RelatedTournamentsResponse = client.tournament(7070).related()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import RelatedTournamentsResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get related tournaments for PAPA 17
 related: RelatedTournamentsResponse = client.tournament(7070).related()
@@ -353,18 +358,7 @@ For tournaments that are part of a league, retrieve league session data:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentLeagueResponse
 
-client = IfpaClient()
-
-league: TournamentLeagueResponse = client.tournament(12345).league()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentLeagueResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get league data (if tournament is part of a league)
 league: TournamentLeagueResponse = client.tournament(12345).league()
@@ -398,18 +392,7 @@ Access submission history and status for a tournament:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSubmissionsResponse
 
-client = IfpaClient()
-
-submissions: TournamentSubmissionsResponse = client.tournament(7070).submissions()
-```
-
-**Complete Example:**
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSubmissionsResponse
-
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get submission information
 submissions: TournamentSubmissionsResponse = client.tournament(7070).submissions()
@@ -452,9 +435,12 @@ from ifpa_api.models.tournaments import (
 )
 
 
-def analyze_tournament(tournament_id: int) -> None:
-    """Comprehensive tournament analysis."""
-    client = IfpaClient()
+def analyze_tournament(tournament_id: int = 7070) -> None:
+    """Comprehensive tournament analysis.
+
+    Default tournament: PAPA 17 (7070)
+    """
+    client: IfpaClient = IfpaClient()
 
     try:
         # Get tournament details
@@ -510,41 +496,6 @@ if __name__ == "__main__":
 
 ## Best Practices
 
-### Date Range Searches
-
-When searching by date, always provide both dates in ISO format (YYYY-MM-DD):
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
-
-client = IfpaClient()
-
-# CORRECT: Both dates provided
-results: TournamentSearchResponse = client.tournament.search(
-    start_date="2024-01-01",
-    end_date="2024-12-31",
-    country="US"
-)
-
-# INCORRECT: Only one date - raises ValueError
-try:
-    results = client.tournament.search(start_date="2024-01-01")
-except ValueError as e:
-    print(f"Error: {e}")
-
-# Get upcoming tournaments
-from datetime import datetime, timedelta
-
-today = datetime.now()
-next_month = today + timedelta(days=30)
-
-upcoming: TournamentSearchResponse = client.tournament.search(
-    start_date=today.strftime("%Y-%m-%d"),
-    end_date=next_month.strftime("%Y-%m-%d")
-)
-```
-
 ### Error Handling
 
 Always handle potential errors when accessing tournament data:
@@ -553,7 +504,7 @@ Always handle potential errors when accessing tournament data:
 from ifpa_api import IfpaClient, IfpaApiError
 from ifpa_api.models.tournaments import Tournament
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 try:
     tournament: Tournament = client.tournament(999999).details()
@@ -565,6 +516,25 @@ except IfpaApiError as e:
         print(f"API error: {e}")
 ```
 
+### Reusable Queries
+
+Take advantage of the immutable query builder pattern:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Create a base query for 2024 tournaments
+year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
+
+# Derive specific queries
+us_tournaments: TournamentSearchResponse = year_2024.country("US").limit(100).get()
+women_tournaments: TournamentSearchResponse = year_2024.tournament_type("women").get()
+ca_tournaments: TournamentSearchResponse = year_2024.country("CA").limit(100).get()
+```
+
 ### Pagination for Large Result Sets
 
 Use pagination when searching for tournaments:
@@ -573,7 +543,7 @@ Use pagination when searching for tournaments:
 from ifpa_api import IfpaClient
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 
 def get_all_tournaments(name: str, page_size: int = 100):
@@ -582,11 +552,10 @@ def get_all_tournaments(name: str, page_size: int = 100):
     start_pos = 0
 
     while True:
-        results: TournamentSearchResponse = client.tournament.search(
-            name=name,
-            start_pos=start_pos,
-            count=page_size
-        )
+        results: TournamentSearchResponse = (client.tournament.query(name)
+            .offset(start_pos)
+            .limit(page_size)
+            .get())
 
         if not results.tournaments:
             break
@@ -605,6 +574,78 @@ def get_all_tournaments(name: str, page_size: int = 100):
 championships = get_all_tournaments("Championship")
 print(f"Found {len(championships)} championship tournaments")
 ```
+
+## Deprecated Methods
+
+!!! warning "Deprecated in v0.2.0"
+    The following collection-level methods are deprecated and will be removed in v1.0.0:
+
+### Old Search API (Deprecated)
+
+```python
+# DEPRECATED - will be removed in v1.0.0
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Old method signature (deprecated)
+tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA")
+
+# Old method with filters (deprecated)
+results: TournamentSearchResponse = client.tournament.search(
+    city="Portland",
+    stateprov="OR",
+    start_date="2024-01-01",
+    end_date="2024-12-31"
+)
+```
+
+### Migration Guide
+
+Migrate from deprecated `search()` to fluent query builder:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# OLD (deprecated):
+results = client.tournament.search(name="PAPA")
+
+# NEW (recommended):
+results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+
+# OLD (deprecated):
+results = client.tournament.search(
+    name="Championship",
+    city="Portland",
+    stateprov="OR",
+    country="US",
+    start_date="2024-01-01",
+    end_date="2024-12-31",
+    count=50
+)
+
+# NEW (recommended):
+results: TournamentSearchResponse = (client.tournament.query("Championship")
+    .city("Portland")
+    .state("OR")
+    .country("US")
+    .date_range("2024-01-01", "2024-12-31")
+    .limit(50)
+    .get())
+```
+
+!!! tip "Why Migrate?"
+    The fluent query builder provides:
+
+    - **Immutability**: Safe query composition and reuse
+    - **Type Safety**: Better IDE autocomplete and type checking
+    - **Composability**: Build complex queries incrementally
+    - **Clarity**: Method chaining makes intent explicit
+    - **Validation**: Date format validation at query build time
 
 ## Related Resources
 

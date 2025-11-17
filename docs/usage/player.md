@@ -2,19 +2,31 @@
 
 The Player resource provides access to player profiles, rankings, tournament results, and head-to-head comparisons.
 
-## Search for Players
-
-Search for players by name, location, or tournament participation:
+## Quick Example
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse, PlayerSearchResult
+from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Simple name search - Search for players named "Smith" in Idaho
-response: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
-for player in response.search:
+# Fluent query builder - search for players named "Smith" in Idaho
+results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+```
+
+## Search for Players
+
+The **recommended** way to search for players is using the fluent query builder:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.player import PlayerSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Simple name search
+results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
     print(f"  Location: {player.city}, {player.state}")
     print(f"  Current Rank: #{player.wppr_rank}")
@@ -28,9 +40,9 @@ for player in response.search:
 #   Current Rank: #7078
 ```
 
-### Search with Filters
+### Chained Filters
 
-Narrow down results with multiple filters:
+The fluent API allows method chaining for complex queries:
 
 ```python
 from ifpa_api import IfpaClient
@@ -38,46 +50,70 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Search by location - Idaho players
-response: PlayerSearchResponse = client.player.search(
-    stateprov="ID",
-    country="US",
-    count=10
-)
+# Chain multiple filters
+results: PlayerSearchResponse = (client.player.query("John")
+    .country("US")
+    .state("ID")
+    .limit(5)
+    .get())
 
-# Search by tournament participation - PAPA winners
-response: PlayerSearchResponse = client.player.search(
-    tournament="PAPA",
-    tourpos=1,
-    count=10
-)
+# Filter by tournament participation
+results: PlayerSearchResponse = (client.player.query()
+    .tournament("PAPA")
+    .position(1)
+    .limit(10)
+    .get())
 
-# Search with count limit - Limit to 5 players named "John" in Idaho
-response: PlayerSearchResponse = client.player.search(
-    name="John",
-    stateprov="ID",
-    count=5
-)
+# Location-only search (no name query)
+results: PlayerSearchResponse = (client.player.query()
+    .country("US")
+    .state("ID")
+    .limit(25)
+    .get())
 ```
 
-!!! warning "Pagination Limitations"
-    The IFPA API's player search pagination is currently non-functional. Using `start_pos` parameter
-    may cause errors or return 0 results. For best results, use only the `count` parameter to limit
-    results and avoid `start_pos` entirely.
+### Query Reuse (Immutable Pattern)
 
-### Search Parameters
+The query builder is immutable - each method returns a new instance, allowing query reuse:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `name` | `str` | Player name (partial match, case insensitive) |
-| `stateprov` | `str` | State/province code (2-digit) |
-| `country` | `str` | Country name or 2-digit code |
-| `tournament` | `str` | Tournament name (partial strings accepted) |
-| `tourpos` | `int` | Finishing position in tournament |
-| `count` | `int \| str` | Number of results to return (recommended: use without start_pos) |
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.player import PlayerSearchResponse
 
-!!! note "Deprecated Parameter"
-    The `start_pos` parameter is documented but non-functional in the API. Avoid using it.
+client: IfpaClient = IfpaClient()
+
+# Create a reusable base query for US players
+us_query = client.player.query().country("US")
+
+# Derive state-specific queries from the base
+wa_players: PlayerSearchResponse = us_query.state("WA").limit(25).get()
+id_players: PlayerSearchResponse = us_query.state("ID").limit(25).get()
+or_players: PlayerSearchResponse = us_query.state("OR").limit(25).get()
+
+# The base query remains unchanged and can be reused
+ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
+```
+
+### Query Builder Methods
+
+| Method | Parameter | Description |
+|--------|-----------|-------------|
+| `.query(name)` | `str` | Player name (partial match, case insensitive) |
+| `.state(code)` | `str` | State/province code (2-digit, e.g., "ID", "WA") |
+| `.country(code)` | `str` | Country name or 2-digit code (e.g., "US", "CA") |
+| `.tournament(name)` | `str` | Tournament name (partial strings accepted) |
+| `.position(pos)` | `int` | Finishing position in tournament |
+| `.offset(start)` | `int` | Pagination offset (0-based) |
+| `.limit(count)` | `int` | Maximum number of results |
+| `.get()` | - | Execute query and return results |
+
+!!! warning "API Pagination Limitations"
+    The IFPA API's player search pagination is currently non-functional. Using `.offset()` may cause
+    errors or return 0 results. For best results, use only `.limit()` and avoid `.offset()`.
+
+!!! note "Deprecated Methods"
+    The old `client.player.search(name="John")` method is deprecated and will be removed in v1.0.0.
+    Use the fluent query builder instead: `client.player.query("John").get()`
 
 ## Get Player Profile
 
@@ -138,46 +174,6 @@ except IfpaApiError as e:
         print("Player not found")
 ```
 
-## Get Multiple Players
-
-Fetch multiple players in a single request for efficient batch operations:
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import MultiPlayerResponse, Player
-
-client: IfpaClient = IfpaClient()
-
-# Fetch up to 50 players at once - Get 3 Idaho players with mixed activity levels
-response: MultiPlayerResponse = client.player.get_multiple([25584, 50104, 50106])
-
-# Handle single or multiple players
-if isinstance(response.player, list):
-    for player in response.player:
-        print(f"{player.first_name} {player.last_name} - Rank: {player.player_stats.get('current_wppr_rank', 'N/A')}")
-else:
-    player: Player = response.player
-    print(f"{player.first_name} {player.last_name}")
-
-# Output:
-# Dwayne Smith - Rank: 753 (highly active)
-# John Sosoka - Rank: 47572 (low activity)
-# Anna Rigas - Rank: N/A (inactive since 2017)
-```
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `player_ids` | `list[int \| str]` | List of player IDs (maximum 50) |
-
-### Notes
-
-- Maximum 50 player IDs per request
-- Raises `IfpaClientValidationError` if more than 50 IDs provided
-- Response may contain a single `Player` or list of `Player` objects depending on API response
-- Invalid player IDs will cause the entire request to fail with a 404 error
-
 ## Tournament Results
 
 Get a player's tournament history:
@@ -185,7 +181,7 @@ Get a player's tournament history:
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.common import RankingSystem, ResultType
-from ifpa_api.models.player import PlayerResultsResponse, TournamentResult
+from ifpa_api.models.player import PlayerResultsResponse
 
 client: IfpaClient = IfpaClient()
 
@@ -247,16 +243,6 @@ inactive: PlayerResultsResponse = client.player(25584).results(
     While the API accepts `start_pos` and `count` parameters for results, they are currently
     ignored by the API. Requesting a specific page size or offset will not work as expected.
     The API returns all results regardless of these parameters.
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `ranking_system` | `RankingSystem` | Ranking system filter (REQUIRED) |
-| `result_type` | `ResultType` | Result activity type (REQUIRED) |
-
-!!! note "Deprecated Parameters"
-    `start_pos` and `count` parameters are non-functional in the current API.
 
 ### Ranking Systems
 
@@ -330,19 +316,13 @@ try:
     # John Sosoka (50104) vs World #1 player (1) - they've never met
     comparison = client.player(50104).pvp(1)
 except PlayersNeverMetError as e:
-    print(f"Players {e.player1_id} and {e.player2_id} have never met")
+    print(f"Players {e.player_id} and {e.opponent_id} have never met")
 except IfpaApiError as e:
     print(f"API error: {e}")
 
 # Output:
 # Players 50104 and 1 have never met
 ```
-
-### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `opponent_id` | `int \| str` | ID of player to compare against |
 
 ## PvP All Competitors
 
@@ -368,16 +348,6 @@ print(f"Type: {summary.type}")
 # System: MAIN
 # Type: all
 ```
-
-### Response Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `player_id` | `int` | The player's ID |
-| `total_competitors` | `int` | Total number of players competed against |
-| `system` | `str` | Ranking system (e.g., "MAIN") |
-| `type` | `str` | Type of PvP data (e.g., "all") |
-| `title` | `str` | Title or description |
 
 ## Ranking History
 
@@ -416,49 +386,9 @@ for entry in history.rating_history[-5:]:
 # 2024-12-01: Rank #753, WPPR 65.42, Tournaments: 433
 ```
 
-### Response Fields
-
-The history response contains two separate arrays:
-
-- **rank_history**: Historical rank positions with WPPR points and tournament counts
-- **rating_history**: Historical rating values
-
 !!! note "String Values"
     The API returns numeric fields as strings in history data. Convert them using `int()` or
     `float()` when performing calculations.
-
-### Visualize Ranking Trends
-
-```python
-import matplotlib.pyplot as plt
-from datetime import datetime
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import RankingHistory
-
-client: IfpaClient = IfpaClient()
-# Get history for Dwayne Smith - highly active player with long history
-history: RankingHistory = client.player(25584).history()
-
-# Extract dates and rankings (convert string values to numbers)
-rank_dates = [datetime.strptime(e.rank_date, "%Y-%m-%d") for e in history.rank_history]
-ranks = [int(e.rank_position) for e in history.rank_history]
-wppr_points = [float(e.wppr_points) for e in history.rank_history]
-
-# Plot ranking over time
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
-
-ax1.plot(rank_dates, ranks)
-ax1.set_ylabel('World Rank')
-ax1.set_title(f'Dwayne Smith (Player {history.player_id}) - WPPR Ranking History')
-ax1.invert_yaxis()  # Lower rank number is better
-
-ax2.plot(rank_dates, wppr_points)
-ax2.set_ylabel('WPPR Points')
-ax2.set_xlabel('Date')
-
-plt.tight_layout()
-plt.show()
-```
 
 ## Complete Example: Player Analysis
 
@@ -548,7 +478,6 @@ from ifpa_api.models.player import Player
 client: IfpaClient = IfpaClient()
 
 try:
-    # Try to get a player with an invalid ID
     player: Player = client.player(99999999).details()
 except IfpaApiError as e:
     if e.status_code == 404:
@@ -581,46 +510,23 @@ player: Player = get_cached_player(25584)  # Dwayne Smith
 player: Player = get_cached_player(25584)  # Instant - from cache
 ```
 
-### Batch Operations
+### Reusable Queries
 
-When working with multiple players, use the `get_multiple()` method for efficiency:
+Take advantage of the immutable query builder pattern:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.player import MultiPlayerResponse, Player
+from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Efficient batch fetch (up to 50 at once) - Get all active Idaho players
-response: MultiPlayerResponse = client.player.get_multiple([25584, 47585, 52913])
+# Create a base query for tournament winners
+winners_query = client.player.query().position(1)
 
-if isinstance(response.player, list):
-    for player in response.player:
-        print(f"{player.first_name} {player.last_name} - {player.city}, {player.stateprov}")
-```
-
-For larger batches, chunk the requests:
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player
-
-def get_many_players(player_ids: list[int]) -> list[Player]:
-    """Get multiple player profiles with chunking."""
-    client: IfpaClient = IfpaClient()
-    all_players: list[Player] = []
-
-    # Process in chunks of 50
-    for i in range(0, len(player_ids), 50):
-        chunk = player_ids[i:i+50]
-        response = client.player.get_multiple(chunk)
-
-        if isinstance(response.player, list):
-            all_players.extend(response.player)
-        else:
-            all_players.append(response.player)
-
-    return all_players
+# Derive specific tournament queries
+papa_winners: PlayerSearchResponse = winners_query.tournament("PAPA").limit(10).get()
+pinburgh_winners: PlayerSearchResponse = winners_query.tournament("Pinburgh").limit(10).get()
+tilt_winners: PlayerSearchResponse = winners_query.tournament("TILT").limit(10).get()
 ```
 
 ## Known Limitations
@@ -629,15 +535,25 @@ def get_many_players(player_ids: list[int]) -> list[Player]:
 
 The IFPA API has several known pagination issues:
 
-1. **Player Search Pagination**: Using `start_pos` may cause SQL errors or return 0 results
+1. **Player Search Pagination**: Using `.offset()` may cause SQL errors or return 0 results
 2. **Results Pagination**: The `count` and `start_pos` parameters are ignored by the API
 3. **State/Province Filter**: May return players from incorrect states/countries
 
 These are API-level issues, not SDK bugs. For the most reliable experience:
 
-- Avoid using `start_pos` in player searches
+- Avoid using `.offset()` in player searches
 - Don't rely on pagination for player results
 - Be cautious with state/province filters - verify results manually
+
+## Deprecated Methods
+
+!!! warning "Deprecated in v0.2.0"
+    The following methods are deprecated and will be removed in v1.0.0:
+
+    - `client.player.search(name="John")` → Use `client.player.query("John").get()`
+    - `client.player.get_multiple([123, 456])` → Use `client.player(123).details()` for individual players
+
+    Both methods still work but emit deprecation warnings. Migrate to the new fluent API.
 
 ## Related Resources
 

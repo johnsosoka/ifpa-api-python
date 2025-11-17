@@ -2,79 +2,128 @@
 
 The Director resource provides access to tournament director information, their tournament history, and country director assignments.
 
-## Search for Directors
-
-Search for tournament directors by name or location:
+## Quick Example
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Simple name search - Find directors named "Josh"
-results = client.director.search(name="Josh")
-print(f"Found {results.count} directors")
+# Fluent query builder - search for directors named "Josh" in the US
+results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+```
 
+## Searching Directors (Fluent Query Builder)
+
+The **recommended** way to search for directors is using the fluent query builder:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Simple name search
+results: DirectorSearchResponse = client.director.query("Josh").get()
 for director in results.directors:
     print(f"{director.director_id}: {director.name}")
     print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
     print(f"  Tournaments Directed: {director.tournament_count}")
 
-# Output example:
-# Found 26 directors
-# 1533: Josh Rainwater
-#   Location: Columbia, SC, United States
-#   Tournaments Directed: 13
+# Output:
+# 1533: Josh Sharpe
+#   Location: Chicago, IL, United States
+#   Tournaments Directed: 45
 ```
 
-### Search with Location Filters
+### Chained Filters
 
-Narrow down results with multiple filters:
+The fluent API allows method chaining for complex queries:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search by name and location
-results = client.director.search(
-    name="Josh",
-    city="Columbia",
-    stateprov="SC"
-)
+# Chain multiple filters
+results: DirectorSearchResponse = (client.director.query("Sharpe")
+    .country("US")
+    .state("IL")
+    .city("Chicago")
+    .limit(25)
+    .get())
 
-# Search by country
-results = client.director.search(country="US")
+# Location-only search (no name query)
+results: DirectorSearchResponse = (client.director.query()
+    .country("US")
+    .state("IL")
+    .limit(50)
+    .get())
 
-# Combine multiple filters
-results = client.director.search(
-    name="Smith",
-    city="Chicago",
-    stateprov="IL",
-    country="US"
-)
+# Country filter with pagination
+results: DirectorSearchResponse = (client.director.query()
+    .country("US")
+    .offset(0)
+    .limit(100)
+    .get())
 ```
 
-### Search Parameters
+### Query Reuse (Immutable Pattern)
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `name` | `str` | No | Director name (partial match) |
-| `city` | `str` | No | Filter by city |
-| `stateprov` | `str` | No | Filter by state/province code |
-| `country` | `str` | No | Filter by country code (e.g., "US") |
+The query builder is immutable - each method returns a new instance, allowing query reuse:
 
-## Get Director Details
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Create a reusable base query for US directors
+us_query = client.director.query().country("US")
+
+# Derive state-specific queries from the base
+il_directors: DirectorSearchResponse = us_query.state("IL").limit(25).get()
+or_directors: DirectorSearchResponse = us_query.state("OR").limit(25).get()
+wa_directors: DirectorSearchResponse = us_query.state("WA").limit(25).get()
+
+# The base query remains unchanged and can be reused
+ca_directors: DirectorSearchResponse = us_query.state("CA").limit(25).get()
+```
+
+### Available Filters
+
+| Method | Parameter | Description |
+|--------|-----------|-------------|
+| `.query(name)` | `str` | Director name (partial match, case insensitive) |
+| `.city(city)` | `str` | City filter |
+| `.state(stateprov)` | `str` | State/province code (e.g., "IL", "WA") |
+| `.country(code)` | `str` | Country name or code (e.g., "US", "CA") |
+| `.offset(start_position)` | `int` | Pagination offset (0-based) |
+| `.limit(count)` | `int` | Maximum number of results |
+| `.get()` | - | Execute query and return results |
+
+!!! note "Deprecated Methods"
+    The old `client.director.search(name="Josh")` method is deprecated and will be removed in v1.0.0.
+    Use the fluent query builder instead: `client.director.query("Josh").get()`
+
+## Individual Director Operations
+
+Access individual director information using the callable pattern. These methods are **not deprecated**.
+
+### Get Director Details
 
 Retrieve detailed information about a specific tournament director:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import Director
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get director by ID - Josh Rainwater (1533) from Columbia, SC
-director = client.director(1533).details()
+director: Director = client.director(1533).details()
 
 print(f"Name: {director.name}")
 print(f"Director ID: {director.director_id}")
@@ -106,7 +155,7 @@ if director.stats:
 #   Highest Tournament Value: 11.82
 ```
 
-### Director Profile Information
+#### Director Profile Information
 
 Director profiles include:
 
@@ -120,18 +169,36 @@ Director profiles include:
   - Format breakdown (single, multiple, unknown)
   - Tournament values (highest, average)
 
-## Get Director's Tournaments
+#### Invalid Director IDs
+
+When requesting a non-existent director, the SDK raises an error:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+
+client: IfpaClient = IfpaClient()
+
+try:
+    director = client.director(99999999).details()
+except IfpaApiError as e:
+    if e.status_code == 404:
+        print("Director not found")
+```
+
+### Get Director's Tournaments
 
 Access a director's tournament history:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import DirectorTournamentsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get past tournaments for Josh Rainwater (1533)
-past = client.director(1533).tournaments(TimePeriod.PAST)
+past: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
 
 print(f"Director: {past.director_name}")
 print(f"Total past tournaments: {past.total_count}")
@@ -144,7 +211,7 @@ for tournament in past.tournaments[:3]:  # Show first 3
     print(f"  Players: {tournament.player_count}")
     print(f"  Value: {tournament.value}")
 
-# Output example:
+# Output:
 # Director: Josh Rainwater
 # Total past tournaments: 13
 #
@@ -156,16 +223,17 @@ for tournament in past.tournaments[:3]:  # Show first 3
 #   Value: 11.82
 ```
 
-### Get Upcoming Tournaments
+#### Get Upcoming Tournaments
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import DirectorTournamentsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get future tournaments for Josh Rainwater (1533)
-upcoming = client.director(1533).tournaments(TimePeriod.FUTURE)
+upcoming: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.FUTURE)
 
 print(f"Upcoming tournaments: {upcoming.total_count}")
 
@@ -177,19 +245,20 @@ for tournament in upcoming.tournaments:
     print(f"  Ranking System: {tournament.ranking_system}")
 ```
 
-### Working with Highly Active Directors
+#### Working with Highly Active Directors
 
 For directors with extensive history, use the same pattern:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import Director, DirectorTournamentsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get highly active director - Erik Thoren (1151)
 # 545 tournaments, 1,658 unique players, De Pere, WI
-director = client.director(1151).details()
+director: Director = client.director(1151).details()
 
 print(f"{director.name}")
 print(f"  Tournaments: {director.stats.tournament_count}")
@@ -198,22 +267,23 @@ print(f"  Highest Value: {director.stats.highest_value}")
 print(f"  Location: {director.city}, {director.stateprov}")
 
 # Get future events
-future = client.director(1151).tournaments(TimePeriod.FUTURE)
+future: DirectorTournamentsResponse = client.director(1151).tournaments(TimePeriod.FUTURE)
 print(f"  Upcoming Events: {future.total_count}")
 ```
 
-### Handling Empty Results
+#### Handling Empty Results
 
 Some directors may have no future tournaments:
 
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import DirectorTournamentsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Director with zero future tournaments - Cory Casella (1752)
-future = client.director(1752).tournaments(TimePeriod.FUTURE)
+# Check for empty tournament lists
+future: DirectorTournamentsResponse = client.director(1752).tournaments(TimePeriod.FUTURE)
 
 if future.total_count == 0 or not future.tournaments:
     print("No upcoming tournaments")
@@ -221,13 +291,13 @@ else:
     print(f"Found {future.total_count} upcoming tournaments")
 ```
 
-### Tournament Parameters
+#### Tournament Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `time_period` | `TimePeriod` | Yes | `TimePeriod.PAST` or `TimePeriod.FUTURE` |
 
-### Tournament Information
+#### Tournament Information
 
 Each tournament includes:
 
@@ -238,17 +308,18 @@ Each tournament includes:
 - **Details**: Ranking system, player count, tournament value
 - **Special**: Women-only flag
 
-## Get Country Directors
+## Country Directors
 
 Get the list of IFPA country directors:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import CountryDirectorsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get all country directors
-country_dirs = client.director.country_directors()
+country_dirs: CountryDirectorsResponse = client.director.country_directors()
 
 print(f"Total country directors: {country_dirs.count}")
 
@@ -279,17 +350,22 @@ print(f"{profile.name} - {profile.country_name}")
 Here's a complete example that analyzes a director's activity:
 
 ```python
-from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.common import TimePeriod
+from ifpa_api.models.director import Director, DirectorTournamentsResponse
 
 
-def analyze_director(director_id: int) -> None:
-    """Comprehensive director analysis."""
-    client = IfpaClient()
+def analyze_director(director_id: int = 1533) -> None:
+    """Comprehensive director analysis.
+
+    Default director: Josh Rainwater (1533) - active director from Columbia, SC
+    """
+    client: IfpaClient = IfpaClient()
 
     try:
         # Get director profile
-        director = client.director(director_id).details()
+        director: Director = client.director(director_id).details()
 
         print("=" * 60)
         print(f"{director.name}")
@@ -326,7 +402,7 @@ def analyze_director(director_id: int) -> None:
                     print(f"  {fmt.name}: {fmt.count} tournaments")
 
         # Get recent past tournaments
-        past = client.director(director_id).tournaments(TimePeriod.PAST)
+        past: DirectorTournamentsResponse = client.director(director_id).tournaments(TimePeriod.PAST)
 
         print(f"\nRecent Past Tournaments ({past.total_count} total):")
         for tournament in past.tournaments[:5]:
@@ -337,7 +413,7 @@ def analyze_director(director_id: int) -> None:
                 print(f"    Value: {tournament.value:.2f}")
 
         # Get upcoming tournaments
-        future = client.director(director_id).tournaments(TimePeriod.FUTURE)
+        future: DirectorTournamentsResponse = client.director(director_id).tournaments(TimePeriod.FUTURE)
 
         if future.total_count and future.total_count > 0:
             print(f"\nUpcoming Tournaments ({future.total_count}):")
@@ -356,7 +432,7 @@ def analyze_director(director_id: int) -> None:
 
 
 if __name__ == "__main__":
-    # Analyze Josh Rainwater (ID: 1533)
+    # Analyze Josh Rainwater - active director
     analyze_director(1533)
 ```
 
@@ -367,12 +443,14 @@ if __name__ == "__main__":
 Always handle potential errors:
 
 ```python
-from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient
+from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.models.director import Director
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 try:
-    director = client.director(999999).details()
+    director: Director = client.director(999999).details()
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Director not found")
@@ -380,23 +458,23 @@ except IfpaApiError as e:
         print(f"API error: {e}")
 ```
 
-### Search Validation
+### Reusable Queries
 
-Handle empty search results:
+Take advantage of the immutable query builder pattern:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-results = client.director.search(name="XYZ123")
+# Create a base query for US directors
+us_query = client.director.query().country("US")
 
-if results.count == 0 or not results.directors:
-    print("No directors found")
-else:
-    print(f"Found {results.count} directors")
-    for director in results.directors:
-        print(f"  {director.name} - {director.city}, {director.stateprov}")
+# Derive specific state queries
+il_directors: DirectorSearchResponse = us_query.state("IL").limit(50).get()
+wa_directors: DirectorSearchResponse = us_query.state("WA").limit(50).get()
+or_directors: DirectorSearchResponse = us_query.state("OR").limit(50).get()
 ```
 
 ### Working with Country Directors
@@ -405,10 +483,11 @@ Find a specific country's director:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import CountryDirectorsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-country_dirs = client.director.country_directors()
+country_dirs: CountryDirectorsResponse = client.director.country_directors()
 
 # Find director for a specific country
 target_country = "US"
@@ -429,17 +508,85 @@ Access directors from any country:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.director import Director
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get international director - Michael Trepp (1071) from Switzerland
-director = client.director(1071).details()
+director: Director = client.director(1071).details()
 
 print(f"{director.name}")
 print(f"  Country: {director.country_name} ({director.country_code})")
 print(f"  Tournaments: {director.stats.tournament_count}")
 print(f"  Unique Players: {director.stats.unique_player_count}")
 ```
+
+## Deprecated Methods
+
+!!! warning "Deprecated in v0.2.0"
+    The `search()` method is deprecated and will be removed in v1.0.0. Use the fluent query builder instead.
+
+### Old Search Method
+
+The old `search()` method still works but emits deprecation warnings:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# DEPRECATED - Emits DeprecationWarning
+results: DirectorSearchResponse = client.director.search(name="Josh")
+
+# DEPRECATED - Multiple filters
+results: DirectorSearchResponse = client.director.search(
+    name="Josh",
+    city="Chicago",
+    stateprov="IL",
+    country="US"
+)
+```
+
+### Migration Guide
+
+Migrate to the new fluent API:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.director import DirectorSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Old (deprecated):
+results: DirectorSearchResponse = client.director.search(name="Josh", country="US")
+
+# New (recommended):
+results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+
+# Old (deprecated):
+results: DirectorSearchResponse = client.director.search(
+    name="Sharpe",
+    city="Chicago",
+    stateprov="IL",
+    country="US"
+)
+
+# New (recommended):
+results: DirectorSearchResponse = (client.director.query("Sharpe")
+    .city("Chicago")
+    .state("IL")
+    .country("US")
+    .get())
+```
+
+### Benefits of the New API
+
+- **Type-safe**: Better IDE autocomplete and type checking
+- **Composable**: Chain methods in any order
+- **Reusable**: Immutable pattern allows query reuse
+- **Readable**: Fluent interface is more intuitive
+- **Flexible**: Can start with filters only (no name required)
 
 ## Related Resources
 

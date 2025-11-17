@@ -4,7 +4,13 @@ Provides access to player profiles, rankings, tournament results, and
 head-to-head comparisons.
 """
 
+from __future__ import annotations
+
+import warnings
 from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from typing import Self
 
 from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
@@ -17,6 +23,7 @@ from ifpa_api.models.player import (
     PvpComparison,
     RankingHistory,
 )
+from ifpa_api.query_builder import QueryBuilder
 
 if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
@@ -35,7 +42,7 @@ class _PlayerContext:
         _validate_requests: Whether to validate request parameters
     """
 
-    def __init__(self, http: "_HttpClient", player_id: int | str, validate_requests: bool) -> None:
+    def __init__(self, http: _HttpClient, player_id: int | str, validate_requests: bool) -> None:
         """Initialize a player context.
 
         Args:
@@ -220,6 +227,196 @@ class _PlayerContext:
         return RankingHistory.model_validate(response)
 
 
+class PlayerQueryBuilder(QueryBuilder[PlayerSearchResponse]):
+    """Fluent query builder for player search operations.
+
+    This class implements an immutable query builder pattern for searching players.
+    Each method returns a new instance, allowing safe query composition and reuse.
+
+    Attributes:
+        _http: The HTTP client instance
+        _params: Accumulated query parameters
+
+    Example:
+        ```python
+        # Simple query
+        results = client.player.query("John").get()
+
+        # Chained filters with immutability
+        us_query = client.player.query().country("US")
+        wa_players = us_query.state("WA").limit(25).get()
+        or_players = us_query.state("OR").limit(25).get()  # base unchanged!
+
+        # Complex query
+        results = (client.player.query("Smith")
+            .country("CA")
+            .tournament("PAPA")
+            .position(1)
+            .limit(50)
+            .get())
+        ```
+    """
+
+    def __init__(self, http: _HttpClient) -> None:
+        """Initialize the player query builder.
+
+        Args:
+            http: The HTTP client instance
+        """
+        super().__init__()
+        self._http = http
+
+    def query(self, name: str) -> Self:
+        """Set the player name to search for.
+
+        Args:
+            name: Player name to search for (partial match, not case sensitive)
+
+        Returns:
+            New PlayerQueryBuilder instance with the name parameter set
+
+        Example:
+            ```python
+            results = client.player.query("John").get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["name"] = name
+        return clone
+
+    def state(self, state_code: str) -> Self:
+        """Filter by state/province.
+
+        Args:
+            state_code: 2-digit state or province code (e.g., "WA", "BC")
+
+        Returns:
+            New PlayerQueryBuilder instance with the state filter applied
+
+        Example:
+            ```python
+            results = client.player.query("John").state("WA").get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["stateprov"] = state_code
+        return clone
+
+    def country(self, country_code: str) -> Self:
+        """Filter by country.
+
+        Args:
+            country_code: Country name or 2-digit country code (e.g., "US", "CA")
+
+        Returns:
+            New PlayerQueryBuilder instance with the country filter applied
+
+        Example:
+            ```python
+            results = client.player.query().country("US").get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["country"] = country_code
+        return clone
+
+    def tournament(self, tournament_name: str) -> Self:
+        """Filter by tournament participation.
+
+        Args:
+            tournament_name: Tournament name (partial strings accepted)
+
+        Returns:
+            New PlayerQueryBuilder instance with the tournament filter applied
+
+        Example:
+            ```python
+            results = client.player.query().tournament("PAPA").get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["tournament"] = tournament_name
+        return clone
+
+    def position(self, finish_position: int) -> Self:
+        """Filter by finishing position in tournament.
+
+        Must be used with tournament() filter.
+
+        Args:
+            finish_position: Tournament finishing position to filter by
+
+        Returns:
+            New PlayerQueryBuilder instance with the position filter applied
+
+        Example:
+            ```python
+            # Find all players who won PAPA
+            results = client.player.query().tournament("PAPA").position(1).get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["tourpos"] = finish_position
+        return clone
+
+    def offset(self, start_position: int) -> Self:
+        """Set pagination offset.
+
+        Args:
+            start_position: Starting position for pagination (0-based)
+
+        Returns:
+            New PlayerQueryBuilder instance with the offset set
+
+        Example:
+            ```python
+            # Get second page of results
+            results = client.player.query("Smith").offset(25).limit(25).get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["start_pos"] = start_position
+        return clone
+
+    def limit(self, count: int) -> Self:
+        """Set maximum number of results to return.
+
+        Args:
+            count: Maximum number of results
+
+        Returns:
+            New PlayerQueryBuilder instance with the limit set
+
+        Example:
+            ```python
+            results = client.player.query("John").limit(50).get()
+            ```
+        """
+        clone = self._clone()
+        clone._params["count"] = count
+        return clone
+
+    def get(self) -> PlayerSearchResponse:
+        """Execute the query and return results.
+
+        Returns:
+            PlayerSearchResponse containing matching players
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            results = client.player.query("John").country("US").get()
+            print(f"Found {len(results.search)} players")
+            for player in results.search:
+                print(f"{player.first_name} {player.last_name}")
+            ```
+        """
+        response = self._http._request("GET", "/player/search", params=self._params)
+        return PlayerSearchResponse.model_validate(response)
+
+
 class PlayerClient:
     """Callable client for player operations.
 
@@ -244,7 +441,7 @@ class PlayerClient:
         ```
     """
 
-    def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
+    def __init__(self, http: _HttpClient, validate_requests: bool) -> None:
         """Initialize the player client.
 
         Args:
@@ -273,6 +470,48 @@ class PlayerClient:
         """
         return _PlayerContext(self._http, player_id, self._validate_requests)
 
+    def query(self, name: str = "") -> PlayerQueryBuilder:
+        """Create a fluent query builder for searching players.
+
+        This is the recommended way to search for players, providing a type-safe
+        and composable interface. The returned builder can be reused and composed
+        thanks to its immutable pattern.
+
+        Args:
+            name: Optional player name to search for (can also be set via .query() on builder)
+
+        Returns:
+            PlayerQueryBuilder instance for building the search query
+
+        Example:
+            ```python
+            # Simple name search
+            results = client.player.query("John").get()
+
+            # Chained filters
+            results = (client.player.query("Smith")
+                .country("US")
+                .state("WA")
+                .limit(25)
+                .get())
+
+            # Query reuse (immutable pattern)
+            us_base = client.player.query().country("US")
+            wa_players = us_base.state("WA").get()
+            or_players = us_base.state("OR").get()  # base unchanged!
+
+            # Empty query to start with filters
+            results = (client.player.query()
+                .tournament("PAPA")
+                .position(1)
+                .get())
+            ```
+        """
+        builder = PlayerQueryBuilder(self._http)
+        if name:
+            return builder.query(name)
+        return builder
+
     def search(
         self,
         name: str | None = None,
@@ -284,6 +523,15 @@ class PlayerClient:
         count: int | str | None = None,
     ) -> PlayerSearchResponse:
         """Search for players.
+
+        .. deprecated:: 0.2.0
+            Use :meth:`query` instead for a more fluent and type-safe interface.
+            This method will be removed in version 1.0.0.
+
+            Migration example:
+                Old: ``client.player.search(name="John", country="US", count=25)``
+
+                New: ``client.player.query("John").country("US").limit(25).get()``
 
         Args:
             name: Player name to search for (partial match, not case sensitive)
@@ -302,6 +550,7 @@ class PlayerClient:
 
         Example:
             ```python
+            # DEPRECATED - Use query() instead
             # Search by name
             results = client.player.search(name="John")
 
@@ -315,6 +564,13 @@ class PlayerClient:
             results = client.player.search(name="Smith", start_pos=0, count=25)
             ```
         """
+        warnings.warn(
+            "PlayerClient.search() is deprecated and will be removed in version 1.0.0. "
+            "Use PlayerClient.query() for a more fluent and type-safe interface. "
+            "Example: client.player.query('John').country('US').limit(25).get()",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params: dict[str, Any] = {}
         if name is not None:
             params["name"] = name
@@ -337,6 +593,16 @@ class PlayerClient:
     def get_multiple(self, player_ids: list[int | str]) -> MultiPlayerResponse:
         """Fetch multiple players in a single request.
 
+        .. deprecated:: 0.2.0
+            This method will be removed in version 1.0.0. Use the callable pattern
+            with individual player IDs instead.
+
+            Migration example:
+                Old: ``result = client.player.get_multiple([123, 456])``
+
+                New: ``player1 = client.player(123).details()``
+                     ``player2 = client.player(456).details()``
+
         Args:
             player_ids: List of player IDs (max 50)
 
@@ -349,6 +615,7 @@ class PlayerClient:
 
         Example:
             ```python
+            # DEPRECATED - Use callable pattern instead
             # Fetch multiple players efficiently
             result = client.player.get_multiple([123, 456, 789])
             if isinstance(result.player, list):
@@ -356,6 +623,12 @@ class PlayerClient:
                     print(f"{player.first_name} {player.last_name}")
             ```
         """
+        warnings.warn(
+            "PlayerClient.get_multiple() is deprecated and will be removed in version 1.0.0. "
+            "Use the callable pattern instead: client.player(player_id).details()",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         from ifpa_api.exceptions import IfpaClientValidationError
 
         if len(player_ids) > 50:
