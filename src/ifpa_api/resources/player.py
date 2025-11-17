@@ -6,16 +6,20 @@ head-to-head comparisons.
 
 from __future__ import annotations
 
-import warnings
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Self
 
+from ifpa_api.core.base import (
+    BaseResourceClient,
+    BaseResourceContext,
+    LocationFiltersMixin,
+    PaginationMixin,
+)
 from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
-    MultiPlayerResponse,
     Player,
     PlayerResultsResponse,
     PlayerSearchResponse,
@@ -29,7 +33,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class _PlayerContext:
+# ============================================================================
+# Player Context - Individual Player Operations
+# ============================================================================
+
+
+class _PlayerContext(BaseResourceContext[int | str]):
     """Context for interacting with a specific player.
 
     This internal class provides resource-specific methods for a player
@@ -38,21 +47,9 @@ class _PlayerContext:
 
     Attributes:
         _http: The HTTP client instance
-        _player_id: The player's unique identifier
+        _resource_id: The player's unique identifier
         _validate_requests: Whether to validate request parameters
     """
-
-    def __init__(self, http: _HttpClient, player_id: int | str, validate_requests: bool) -> None:
-        """Initialize a player context.
-
-        Args:
-            http: The HTTP client instance
-            player_id: The player's unique identifier
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._player_id = player_id
-        self._validate_requests = validate_requests
 
     def details(self) -> Player:
         """Get detailed information about this player.
@@ -70,7 +67,7 @@ class _PlayerContext:
             print(f"Country: {player.country_name}")
             ```
         """
-        response = self._http._request("GET", f"/player/{self._player_id}")
+        response = self._http._request("GET", f"/player/{self._resource_id}")
         # API returns {"player": [player_object]}
         if isinstance(response, dict) and "player" in response:
             player_data = response["player"]
@@ -93,7 +90,7 @@ class _PlayerContext:
             print(f"Competed against {summary.total_competitors} players")
             ```
         """
-        response = self._http._request("GET", f"/player/{self._player_id}/pvp")
+        response = self._http._request("GET", f"/player/{self._resource_id}/pvp")
         return PvpAllCompetitors.model_validate(response)
 
     def pvp(self, opponent_id: int | str) -> PvpComparison:
@@ -134,17 +131,17 @@ class _PlayerContext:
         """
 
         try:
-            response = self._http._request("GET", f"/player/{self._player_id}/pvp/{opponent_id}")
+            response = self._http._request("GET", f"/player/{self._resource_id}/pvp/{opponent_id}")
 
             # Check for error response (API returns HTTP 200 with error payload)
             if isinstance(response, dict) and response.get("code") == "404":
-                raise PlayersNeverMetError(self._player_id, opponent_id)
+                raise PlayersNeverMetError(self._resource_id, opponent_id)
 
             return PvpComparison.model_validate(response)
         except IfpaApiError as e:
             # Check if this is a 404 indicating players never met
             if e.status_code == 404:
-                raise PlayersNeverMetError(self._player_id, opponent_id) from e
+                raise PlayersNeverMetError(self._resource_id, opponent_id) from e
             # Re-raise for other API errors
             raise
 
@@ -194,7 +191,7 @@ class _PlayerContext:
         )
         type_value = result_type.value if isinstance(result_type, ResultType) else result_type
 
-        path = f"/player/{self._player_id}/results/{system_value}/{type_value}"
+        path = f"/player/{self._resource_id}/results/{system_value}/{type_value}"
 
         params = {}
         if start_pos is not None:
@@ -223,11 +220,20 @@ class _PlayerContext:
                 print(f"{entry.rating_date}: Rating {entry.rating}")
             ```
         """
-        response = self._http._request("GET", f"/player/{self._player_id}/rank_history")
+        response = self._http._request("GET", f"/player/{self._resource_id}/rank_history")
         return RankingHistory.model_validate(response)
 
 
-class PlayerQueryBuilder(QueryBuilder[PlayerSearchResponse]):
+# ============================================================================
+# Player Query Builder - Fluent Search Interface
+# ============================================================================
+
+
+class PlayerQueryBuilder(
+    QueryBuilder[PlayerSearchResponse],
+    LocationFiltersMixin,
+    PaginationMixin,
+):
     """Fluent query builder for player search operations.
 
     This class implements an immutable query builder pattern for searching players.
@@ -284,42 +290,6 @@ class PlayerQueryBuilder(QueryBuilder[PlayerSearchResponse]):
         clone._params["name"] = name
         return clone
 
-    def state(self, state_code: str) -> Self:
-        """Filter by state/province.
-
-        Args:
-            state_code: 2-digit state or province code (e.g., "WA", "BC")
-
-        Returns:
-            New PlayerQueryBuilder instance with the state filter applied
-
-        Example:
-            ```python
-            results = client.player.query("John").state("WA").get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["stateprov"] = state_code
-        return clone
-
-    def country(self, country_code: str) -> Self:
-        """Filter by country.
-
-        Args:
-            country_code: Country name or 2-digit country code (e.g., "US", "CA")
-
-        Returns:
-            New PlayerQueryBuilder instance with the country filter applied
-
-        Example:
-            ```python
-            results = client.player.query().country("US").get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["country"] = country_code
-        return clone
-
     def tournament(self, tournament_name: str) -> Self:
         """Filter by tournament participation.
 
@@ -359,43 +329,6 @@ class PlayerQueryBuilder(QueryBuilder[PlayerSearchResponse]):
         clone._params["tourpos"] = finish_position
         return clone
 
-    def offset(self, start_position: int) -> Self:
-        """Set pagination offset.
-
-        Args:
-            start_position: Starting position for pagination (0-based)
-
-        Returns:
-            New PlayerQueryBuilder instance with the offset set
-
-        Example:
-            ```python
-            # Get second page of results
-            results = client.player.query("Smith").offset(25).limit(25).get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["start_pos"] = start_position
-        return clone
-
-    def limit(self, count: int) -> Self:
-        """Set maximum number of results to return.
-
-        Args:
-            count: Maximum number of results
-
-        Returns:
-            New PlayerQueryBuilder instance with the limit set
-
-        Example:
-            ```python
-            results = client.player.query("John").limit(50).get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["count"] = count
-        return clone
-
     def get(self) -> PlayerSearchResponse:
         """Execute the query and return results.
 
@@ -417,12 +350,17 @@ class PlayerQueryBuilder(QueryBuilder[PlayerSearchResponse]):
         return PlayerSearchResponse.model_validate(response)
 
 
-class PlayerClient:
+# ============================================================================
+# Player Resource Client - Main Entry Point
+# ============================================================================
+
+
+class PlayerClient(BaseResourceClient):
     """Callable client for player operations.
 
-    This client provides both collection-level methods (search, get_multiple) and
-    resource-level access via the callable pattern. Call with a player ID to get
-    a context for player-specific operations.
+    This client provides both collection-level query builder and resource-level
+    access via the callable pattern. Call with a player ID to get a context for
+    player-specific operations.
 
     Attributes:
         _http: The HTTP client instance
@@ -430,9 +368,8 @@ class PlayerClient:
 
     Example:
         ```python
-        # Collection-level operations
-        results = client.player.search(name="John")
-        players = client.player.get_multiple([123, 456])
+        # Query builder pattern (RECOMMENDED)
+        results = client.player.query("John").country("US").get()
 
         # Resource-level operations
         player = client.player(12345).details()
@@ -440,16 +377,6 @@ class PlayerClient:
         results = client.player(12345).results(RankingSystem.MAIN, ResultType.ACTIVE)
         ```
     """
-
-    def __init__(self, http: _HttpClient, validate_requests: bool) -> None:
-        """Initialize the player client.
-
-        Args:
-            http: The HTTP client instance
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._validate_requests = validate_requests
 
     def __call__(self, player_id: int | str) -> _PlayerContext:
         """Get a context for a specific player.
@@ -511,132 +438,3 @@ class PlayerClient:
         if name:
             return builder.query(name)
         return builder
-
-    def search(
-        self,
-        name: str | None = None,
-        stateprov: str | None = None,
-        country: str | None = None,
-        tournament: str | None = None,
-        tourpos: int | None = None,
-        start_pos: int | str | None = None,
-        count: int | str | None = None,
-    ) -> PlayerSearchResponse:
-        """Search for players.
-
-        .. deprecated:: 0.2.0
-            Use :meth:`query` instead for a more fluent and type-safe interface.
-            This method will be removed in version 1.0.0.
-
-            Migration example:
-                Old: ``client.player.search(name="John", country="US", count=25)``
-
-                New: ``client.player.query("John").country("US").limit(25).get()``
-
-        Args:
-            name: Player name to search for (partial match, not case sensitive)
-            stateprov: Filter by state/province (2-digit code)
-            country: Filter by country name or 2-digit code
-            tournament: Filter by tournament name (partial strings accepted)
-            tourpos: Filter by finishing position in tournament
-            start_pos: Starting position for pagination
-            count: Number of results to return
-
-        Returns:
-            List of matching players
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            # DEPRECATED - Use query() instead
-            # Search by name
-            results = client.player.search(name="John")
-
-            # Search by location
-            results = client.player.search(stateprov="WA", country="US")
-
-            # Search by tournament participation
-            results = client.player.search(tournament="PAPA", tourpos=1)
-
-            # Paginated search
-            results = client.player.search(name="Smith", start_pos=0, count=25)
-            ```
-        """
-        warnings.warn(
-            "PlayerClient.search() is deprecated and will be removed in version 1.0.0. "
-            "Use PlayerClient.query() for a more fluent and type-safe interface. "
-            "Example: client.player.query('John').country('US').limit(25).get()",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        params: dict[str, Any] = {}
-        if name is not None:
-            params["name"] = name
-        if stateprov is not None:
-            params["stateprov"] = stateprov
-        if country is not None:
-            params["country"] = country
-        if tournament is not None:
-            params["tournament"] = tournament
-        if tourpos is not None:
-            params["tourpos"] = tourpos
-        if start_pos is not None:
-            params["start_pos"] = start_pos
-        if count is not None:
-            params["count"] = count
-
-        response = self._http._request("GET", "/player/search", params=params)
-        return PlayerSearchResponse.model_validate(response)
-
-    def get_multiple(self, player_ids: list[int | str]) -> MultiPlayerResponse:
-        """Fetch multiple players in a single request.
-
-        .. deprecated:: 0.2.0
-            This method will be removed in version 1.0.0. Use the callable pattern
-            with individual player IDs instead.
-
-            Migration example:
-                Old: ``result = client.player.get_multiple([123, 456])``
-
-                New: ``player1 = client.player(123).details()``
-                     ``player2 = client.player(456).details()``
-
-        Args:
-            player_ids: List of player IDs (max 50)
-
-        Returns:
-            MultiPlayerResponse containing the requested players
-
-        Raises:
-            IfpaClientValidationError: If more than 50 player IDs provided
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            # DEPRECATED - Use callable pattern instead
-            # Fetch multiple players efficiently
-            result = client.player.get_multiple([123, 456, 789])
-            if isinstance(result.player, list):
-                for player in result.player:
-                    print(f"{player.first_name} {player.last_name}")
-            ```
-        """
-        warnings.warn(
-            "PlayerClient.get_multiple() is deprecated and will be removed in version 1.0.0. "
-            "Use the callable pattern instead: client.player(player_id).details()",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        from ifpa_api.exceptions import IfpaClientValidationError
-
-        if len(player_ids) > 50:
-            raise IfpaClientValidationError("Maximum 50 player IDs allowed per request")
-
-        # Join IDs with commas
-        players_param = ",".join(str(pid) for pid in player_ids)
-        params = {"players": players_param}
-
-        response = self._http._request("GET", "/player", params=params)
-        return MultiPlayerResponse.model_validate(response)

@@ -3,8 +3,6 @@
 Tests the tournaments resource client and handle using mocked HTTP requests.
 """
 
-import warnings
-
 import pytest
 import requests_mock
 
@@ -26,7 +24,7 @@ class TestTournamentsClient:
     """Test cases for TournamentClient collection-level operations."""
 
     def test_search_with_name_filter(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments by name."""
+        """Test searching tournaments by name using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -46,7 +44,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.search(name="Pinball")
+        result = client.tournament.query("Pinball").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert len(result.tournaments) == 1
@@ -55,7 +53,7 @@ class TestTournamentsClient:
         assert result.total_results == 1
 
     def test_search_with_location_filters(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments by location."""
+        """Test searching tournaments by location using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -73,7 +71,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.search(city="Portland", stateprov="OR", country="US")
+        result = client.tournament.query().city("Portland").state("OR").country("US").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -83,7 +81,7 @@ class TestTournamentsClient:
         assert "country=us" in query
 
     def test_search_with_date_range(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments with date range."""
+        """Test searching tournaments with date range using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -99,7 +97,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.search(start_date="2024-07-01", end_date="2024-07-31")
+        result = client.tournament.query().date_range("2024-07-01", "2024-07-31").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -108,7 +106,7 @@ class TestTournamentsClient:
         assert "end_date=2024-07-31" in query
 
     def test_search_with_tournament_type(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching with tournament type filter."""
+        """Test searching with tournament type filter using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -124,14 +122,14 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.search(tournament_type="women")
+        result = client.tournament.query().tournament_type("women").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
         assert "tournament_type=women" in mock_requests.last_request.query
 
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments with pagination."""
+        """Test searching tournaments with pagination using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -143,7 +141,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.search(start_pos=0, count=50)
+        result = client.tournament.query().offset(0).limit(50).get()
 
         assert len(result.tournaments) == 50
         assert mock_requests.last_request is not None
@@ -340,7 +338,7 @@ class TestTournamentsIntegration:
     """Integration tests ensuring TournamentClient and TournamentHandle work together."""
 
     def test_search_then_get_tournament(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test workflow of searching then getting tournament details."""
+        """Test workflow of searching then getting tournament details using query builder."""
         # Mock search
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
@@ -369,8 +367,8 @@ class TestTournamentsIntegration:
 
         client = IfpaClient(api_key="test-key")
 
-        # Search for tournament
-        search_results = client.tournament.search(name="Championship")
+        # Search for tournament using query builder
+        search_results = client.tournament.query("Championship").get()
         assert len(search_results.tournaments) == 1
 
         # Get full details using the ID from search
@@ -797,29 +795,6 @@ class TestTournamentQueryBuilderIntegration:
         assert "start_date=2024-01-01" in query
         assert "end_date=2024-12-31" in query
         assert "country=us" in query.lower()
-
-
-class TestDeprecationWarnings:
-    """Test that old methods emit proper deprecation warnings."""
-
-    def test_search_emits_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that search() emits a deprecation warning."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/tournament/search",
-            json={"tournaments": [], "total_results": 0},
-        )
-
-        client = IfpaClient(api_key="test-key")
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            client.tournament.search(name="PAPA")
-
-            # Verify warning was emitted
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-            assert "query()" in str(w[0].message)
 
 
 def test_tournament_related(mock_requests: requests_mock.Mocker) -> None:

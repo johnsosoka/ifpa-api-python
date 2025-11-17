@@ -194,7 +194,7 @@ class IfpaClient:
             ```
         """
         if self._reference_client is None:
-            self._reference_client = ReferenceClient(self._http)
+            self._reference_client = ReferenceClient(self._http, self._config.validate_requests)
         return self._reference_client
 
     @property

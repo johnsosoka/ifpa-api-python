@@ -6,12 +6,17 @@ and search capabilities.
 
 from __future__ import annotations
 
-import warnings
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Self
 
+from ifpa_api.core.base import (
+    BaseResourceClient,
+    BaseResourceContext,
+    LocationFiltersMixin,
+    PaginationMixin,
+)
 from ifpa_api.models.common import TimePeriod
 from ifpa_api.models.director import (
     CountryDirectorsResponse,
@@ -25,7 +30,12 @@ if TYPE_CHECKING:
     from ifpa_api.http import _HttpClient
 
 
-class _DirectorContext:
+# ============================================================================
+# Director Context - Individual Director Operations
+# ============================================================================
+
+
+class _DirectorContext(BaseResourceContext[int | str]):
     """Context for interacting with a specific tournament director.
 
     This internal class provides resource-specific methods for a director
@@ -34,21 +44,9 @@ class _DirectorContext:
 
     Attributes:
         _http: The HTTP client instance
-        _director_id: The director's unique identifier
+        _resource_id: The director's unique identifier
         _validate_requests: Whether to validate request parameters
     """
-
-    def __init__(self, http: _HttpClient, director_id: int | str, validate_requests: bool) -> None:
-        """Initialize a director context.
-
-        Args:
-            http: The HTTP client instance
-            director_id: The director's unique identifier
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._director_id = director_id
-        self._validate_requests = validate_requests
 
     def details(self) -> Director:
         """Get detailed information about this director.
@@ -66,7 +64,7 @@ class _DirectorContext:
             print(f"Tournaments: {director.stats.tournament_count}")
             ```
         """
-        response = self._http._request("GET", f"/director/{self._director_id}")
+        response = self._http._request("GET", f"/director/{self._resource_id}")
         return Director.model_validate(response)
 
     def tournaments(self, time_period: TimePeriod) -> DirectorTournamentsResponse:
@@ -96,16 +94,26 @@ class _DirectorContext:
         period_value = time_period.value if isinstance(time_period, TimePeriod) else time_period
 
         response = self._http._request(
-            "GET", f"/director/{self._director_id}/tournaments/{period_value}"
+            "GET", f"/director/{self._resource_id}/tournaments/{period_value}"
         )
         return DirectorTournamentsResponse.model_validate(response)
 
 
-class DirectorQueryBuilder(QueryBuilder[DirectorSearchResponse]):
+# ============================================================================
+# Director Query Builder - Fluent Search Interface
+# ============================================================================
+
+
+class DirectorQueryBuilder(
+    QueryBuilder[DirectorSearchResponse], LocationFiltersMixin, PaginationMixin
+):
     """Fluent query builder for director search operations.
 
     This class implements an immutable query builder pattern for searching directors.
     Each method returns a new instance, allowing safe query composition and reuse.
+
+    Inherits location filtering (country, state, city) from LocationFiltersMixin
+    and pagination (limit, offset) from PaginationMixin.
 
     Attributes:
         _http: The HTTP client instance
@@ -158,97 +166,6 @@ class DirectorQueryBuilder(QueryBuilder[DirectorSearchResponse]):
         clone._params["name"] = name
         return clone
 
-    def city(self, city: str) -> Self:
-        """Filter by city.
-
-        Args:
-            city: City name to filter by
-
-        Returns:
-            New DirectorQueryBuilder instance with the city filter applied
-
-        Example:
-            ```python
-            results = client.director.query("Josh").city("Chicago").get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["city"] = city
-        return clone
-
-    def state(self, stateprov: str) -> Self:
-        """Filter by state/province.
-
-        Args:
-            stateprov: State or province code to filter by (e.g., "IL", "OR")
-
-        Returns:
-            New DirectorQueryBuilder instance with the state filter applied
-
-        Example:
-            ```python
-            results = client.director.query("Josh").state("IL").get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["stateprov"] = stateprov
-        return clone
-
-    def country(self, country: str) -> Self:
-        """Filter by country.
-
-        Args:
-            country: Country code to filter by (e.g., "US", "CA")
-
-        Returns:
-            New DirectorQueryBuilder instance with the country filter applied
-
-        Example:
-            ```python
-            results = client.director.query().country("US").get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["country"] = country
-        return clone
-
-    def offset(self, start_position: int) -> Self:
-        """Set pagination offset.
-
-        Args:
-            start_position: Starting position for pagination (0-based)
-
-        Returns:
-            New DirectorQueryBuilder instance with the offset set
-
-        Example:
-            ```python
-            # Get second page of results
-            results = client.director.query("Sharpe").offset(25).limit(25).get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["start_pos"] = start_position
-        return clone
-
-    def limit(self, count: int) -> Self:
-        """Set maximum number of results to return.
-
-        Args:
-            count: Maximum number of results
-
-        Returns:
-            New DirectorQueryBuilder instance with the limit set
-
-        Example:
-            ```python
-            results = client.director.query("Josh").limit(50).get()
-            ```
-        """
-        clone = self._clone()
-        clone._params["count"] = count
-        return clone
-
     def get(self) -> DirectorSearchResponse:
         """Execute the query and return results.
 
@@ -270,10 +187,15 @@ class DirectorQueryBuilder(QueryBuilder[DirectorSearchResponse]):
         return DirectorSearchResponse.model_validate(response)
 
 
-class DirectorClient:
+# ============================================================================
+# Director Resource Client - Main Entry Point
+# ============================================================================
+
+
+class DirectorClient(BaseResourceClient):
     """Callable client for director operations.
 
-    This client provides both collection-level methods (search, country_directors) and
+    This client provides both collection-level methods (query, country_directors) and
     resource-level access via the callable pattern. Call with a director ID to get
     a context for director-specific operations.
 
@@ -283,8 +205,8 @@ class DirectorClient:
 
     Example:
         ```python
-        # Collection-level operations
-        results = client.director.search(name="Josh")
+        # Query builder pattern (recommended)
+        results = client.director.query("Josh").get()
         country_dirs = client.director.country_directors()
 
         # Resource-level operations
@@ -292,16 +214,6 @@ class DirectorClient:
         past_tournaments = client.director(1000).tournaments(TimePeriod.PAST)
         ```
     """
-
-    def __init__(self, http: _HttpClient, validate_requests: bool) -> None:
-        """Initialize the director client.
-
-        Args:
-            http: The HTTP client instance
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._validate_requests = validate_requests
 
     def __call__(self, director_id: int | str) -> _DirectorContext:
         """Get a context for a specific director.
@@ -363,69 +275,6 @@ class DirectorClient:
         if name:
             return builder.query(name)
         return builder
-
-    def search(
-        self,
-        name: str | None = None,
-        city: str | None = None,
-        stateprov: str | None = None,
-        country: str | None = None,
-    ) -> DirectorSearchResponse:
-        """Search for tournament directors.
-
-        .. deprecated:: 0.2.0
-            Use :meth:`query` instead for a more fluent and type-safe interface.
-            This method will be removed in version 1.0.0.
-
-            Migration example:
-                Old: ``client.director.search(name="Josh", city="Chicago", stateprov="IL")``
-
-                New: ``client.director.query("Josh").city("Chicago").state("IL").get()``
-
-        Args:
-            name: Director name to search for (partial match)
-            city: Filter by city
-            stateprov: Filter by state/province
-            country: Filter by country code
-
-        Returns:
-            List of matching directors
-
-        Raises:
-            IfpaApiError: If the API request fails
-
-        Example:
-            ```python
-            # DEPRECATED - Use query() instead
-            # Search by name
-            results = client.director.search(name="Josh")
-
-            # Search by location
-            results = client.director.search(city="Chicago", stateprov="IL")
-            ```
-        """
-        warnings.warn(
-            "DirectorClient.search() is deprecated and will be removed in v1.0.0. "
-            "Use DirectorClient.query() instead:\n"
-            "  # Old (deprecated):\n"
-            "  client.director.search(name='Josh', state='WA')\n"
-            "  # New (recommended):\n"
-            "  client.director.query('Josh').state('WA').get()",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        params: dict[str, Any] = {}
-        if name is not None:
-            params["name"] = name
-        if city is not None:
-            params["city"] = city
-        if stateprov is not None:
-            params["stateprov"] = stateprov
-        if country is not None:
-            params["country"] = country
-
-        response = self._http._request("GET", "/director/search", params=params)
-        return DirectorSearchResponse.model_validate(response)
 
     def country_directors(self) -> CountryDirectorsResponse:
         """Get list of IFPA country directors.

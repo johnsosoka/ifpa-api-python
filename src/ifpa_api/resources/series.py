@@ -4,8 +4,7 @@ Provides access to tournament series information, standings, player cards,
 and statistics.
 """
 
-from typing import TYPE_CHECKING
-
+from ifpa_api.core.base import BaseResourceClient, BaseResourceContext
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
@@ -17,11 +16,12 @@ from ifpa_api.models.series import (
     SeriesTournamentsResponse,
 )
 
-if TYPE_CHECKING:
-    from ifpa_api.http import _HttpClient
+# ============================================================================
+# Series Context - Individual Series Operations
+# ============================================================================
 
 
-class _SeriesContext:
+class _SeriesContext(BaseResourceContext[str]):
     """Internal context for series-specific operations.
 
     This class provides methods for accessing information about a specific
@@ -30,21 +30,9 @@ class _SeriesContext:
 
     Attributes:
         _http: The HTTP client instance
-        _series_code: The series code identifier
+        _resource_id: The series code identifier
         _validate_requests: Whether to validate request parameters
     """
-
-    def __init__(self, http: "_HttpClient", series_code: str, validate_requests: bool) -> None:
-        """Initialize a series context.
-
-        Args:
-            http: The HTTP client instance
-            series_code: The series code identifier
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._series_code = series_code
-        self._validate_requests = validate_requests
 
     def standings(
         self,
@@ -83,7 +71,7 @@ class _SeriesContext:
             params["count"] = count
 
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/overall_standings", params=params
+            "GET", f"/series/{self._resource_id}/overall_standings", params=params
         )
         return SeriesStandingsResponse.model_validate(response)
 
@@ -125,7 +113,7 @@ class _SeriesContext:
             params["count"] = count
 
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/standings", params=params
+            "GET", f"/series/{self._resource_id}/standings", params=params
         )
         return SeriesRegionStandingsResponse.model_validate(response)
 
@@ -166,7 +154,7 @@ class _SeriesContext:
             params["year"] = int(year)
 
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/player_card/{player_id}", params=params
+            "GET", f"/series/{self._resource_id}/player_card/{player_id}", params=params
         )
         return SeriesPlayerCard.model_validate(response)
 
@@ -196,7 +184,7 @@ class _SeriesContext:
             ```
         """
         params = {"region_code": region_code, "year": year}
-        response = self._http._request("GET", f"/series/{self._series_code}/regions", params=params)
+        response = self._http._request("GET", f"/series/{self._resource_id}/regions", params=params)
         return SeriesRegionsResponse.model_validate(response)
 
     def stats(self, region_code: str) -> SeriesStats:
@@ -219,7 +207,7 @@ class _SeriesContext:
             ```
         """
         params = {"region_code": region_code}
-        response = self._http._request("GET", f"/series/{self._series_code}/stats", params=params)
+        response = self._http._request("GET", f"/series/{self._resource_id}/stats", params=params)
         return SeriesStats.model_validate(response)
 
     def tournaments(self, region_code: str) -> SeriesTournamentsResponse:
@@ -243,7 +231,7 @@ class _SeriesContext:
         """
         params = {"region_code": region_code}
         response = self._http._request(
-            "GET", f"/series/{self._series_code}/tournaments", params=params
+            "GET", f"/series/{self._resource_id}/tournaments", params=params
         )
         return SeriesTournamentsResponse.model_validate(response)
 
@@ -263,11 +251,16 @@ class _SeriesContext:
                 print(f"{rep.region_name}: {rep.name} (Player #{rep.player_id})")
             ```
         """
-        response = self._http._request("GET", f"/series/{self._series_code}/region_reps")
+        response = self._http._request("GET", f"/series/{self._resource_id}/region_reps")
         return RegionRepsResponse.model_validate(response)
 
 
-class SeriesClient:
+# ============================================================================
+# Series Resource Client - Main Entry Point
+# ============================================================================
+
+
+class SeriesClient(BaseResourceClient):
     """Callable client for series operations.
 
     Provides both collection-level operations (listing series) and
@@ -280,16 +273,6 @@ class SeriesClient:
         _http: The HTTP client instance
         _validate_requests: Whether to validate request parameters
     """
-
-    def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
-        """Initialize the series client.
-
-        Args:
-            http: The HTTP client instance
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._validate_requests = validate_requests
 
     def __call__(self, series_code: str) -> _SeriesContext:
         """Get a context for a specific series.

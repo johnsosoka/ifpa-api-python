@@ -4,8 +4,7 @@ Provides access to various IFPA ranking systems including WPPR, Women's,
 Youth, Pro, and custom rankings.
 """
 
-from typing import TYPE_CHECKING
-
+from ifpa_api.core.base import BaseResourceClient
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
     CustomRankingListResponse,
@@ -14,11 +13,12 @@ from ifpa_api.models.rankings import (
     RankingsResponse,
 )
 
-if TYPE_CHECKING:
-    from ifpa_api.http import _HttpClient
+# ============================================================================
+# Rankings Resource Client - WPPR Rankings Access
+# ============================================================================
 
 
-class RankingsClient:
+class RankingsClient(BaseResourceClient):
     """Client for rankings queries.
 
     This client provides access to various ranking systems maintained by IFPA,
@@ -28,16 +28,6 @@ class RankingsClient:
         _http: The HTTP client instance
         _validate_requests: Whether to validate request parameters
     """
-
-    def __init__(self, http: "_HttpClient", validate_requests: bool) -> None:
-        """Initialize the rankings client.
-
-        Args:
-            http: The HTTP client instance
-            validate_requests: Whether to validate request parameters
-        """
-        self._http = http
-        self._validate_requests = validate_requests
 
     def wppr(
         self,

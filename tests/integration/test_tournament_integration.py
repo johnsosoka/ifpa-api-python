@@ -41,7 +41,7 @@ class TestTournamentSearchIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.tournament.search()
+        result = client.tournament.query().get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -57,7 +57,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search with a common term that should return results
-        results = client.tournament.search(name="Championship", count=count_small)
+        results = client.tournament.query("Championship").limit(count_small).get()
 
         assert isinstance(results, TournamentSearchResponse)
         # Should have at least one result
@@ -76,7 +76,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for common tournament name
-        result = client.tournament.search(name="Pinball")
+        result = client.tournament.query("Pinball").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -92,7 +92,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for tournaments in a major city
-        result = client.tournament.search(city="Portland")
+        result = client.tournament.query().city("Portland").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -107,7 +107,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for tournaments in Oregon
-        result = client.tournament.search(stateprov="OR")
+        result = client.tournament.query().state("OR").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -122,7 +122,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search California tournaments
-        result = client.tournament.search(stateprov="CA", count=count_small)
+        result = client.tournament.query().state("CA").limit(count_small).get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert isinstance(result.tournaments, list)
@@ -132,7 +132,7 @@ class TestTournamentSearchIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.tournament.search(country=country_code, count=5)
+        result = client.tournament.query().country(country_code).limit(5).get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -147,7 +147,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for tournaments by country
-        results = client.tournament.search(country=country_code, count=count_medium)
+        results = client.tournament.query().country(country_code).limit(count_medium).get()
 
         assert isinstance(results, TournamentSearchResponse)
         if results.tournaments:
@@ -167,7 +167,7 @@ class TestTournamentSearchIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.tournament.search(country="US", count=5)
+        result = client.tournament.query().country("US").limit(5).get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -183,8 +183,8 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Should raise ValueError - both dates required together
-        with pytest.raises(ValueError, match="start_date and end_date must be provided together"):
-            client.tournament.search(start_date="2024-01-01", count=10)
+        with pytest.raises(ValueError, match="Both start_date and end_date must be provided"):
+            client.tournament.query().date_range("2024-01-01", None).limit(10).get()
 
         print("✓ search(start_date='2024-01-01') correctly raised ValueError")
 
@@ -194,8 +194,8 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Should raise ValueError - both dates required together
-        with pytest.raises(ValueError, match="start_date and end_date must be provided together"):
-            client.tournament.search(end_date="2024-12-31", count=10)
+        with pytest.raises(ValueError, match="Both start_date and end_date must be provided"):
+            client.tournament.query().date_range(None, "2024-12-31").limit(10).get()
 
         print("✓ search(end_date='2024-12-31') correctly raised ValueError")
 
@@ -205,7 +205,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for tournaments in 2024
-        result = client.tournament.search(start_date="2024-01-01", end_date="2024-12-31", count=20)
+        result = client.tournament.query().date_range("2024-01-01", "2024-12-31").limit(20).get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -220,7 +220,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for women's tournaments
-        result = client.tournament.search(tournament_type="women", count=10)
+        result = client.tournament.query().tournament_type("women").limit(10).get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert result.tournaments is not None
@@ -235,7 +235,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Get first page (API requires start_pos >= 1)
-        page1 = client.tournament.search(start_pos=1, count=count_small)
+        page1 = client.tournament.query().offset(1).limit(count_small).get()
         assert isinstance(page1, TournamentSearchResponse)
         print(
             f"✓ search(start_pos=1, count={count_small}) "
@@ -244,7 +244,7 @@ class TestTournamentSearchIntegration:
 
         # Try to get second page - may timeout on API side
         try:
-            page2 = client.tournament.search(start_pos=count_small + 1, count=count_small)
+            page2 = client.tournament.query().offset(count_small + 1).limit(count_small).get()
             assert isinstance(page2, TournamentSearchResponse)
             print(
                 f"✓ search(start_pos={count_small + 1}, count={count_small}) "
@@ -277,8 +277,12 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Combine country, date range, and pagination
-        result = client.tournament.search(
-            country="US", start_date="2024-01-01", end_date="2024-12-31", count=15
+        result = (
+            client.tournament.query()
+            .country("US")
+            .date_range("2024-01-01", "2024-12-31")
+            .limit(15)
+            .get()
         )
 
         assert isinstance(result, TournamentSearchResponse)
@@ -301,7 +305,7 @@ class TestTournamentSearchIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Get a search result
-        search_results = client.tournament.search(count=1)
+        search_results = client.tournament.query().limit(1).get()
         if not search_results.tournaments:
             pytest.skip("No tournaments found for field consistency test")
 
@@ -624,7 +628,7 @@ class TestTournamentLeagueIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Try to find a league tournament first
-        search_result = client.tournament.search(tournament_type="league", count=5)
+        search_result = client.tournament.query().tournament_type("league").limit(5).get()
 
         if len(search_result.tournaments) > 0:
             league_tournament_id = search_result.tournaments[0].tournament_id
@@ -821,7 +825,7 @@ class TestTournamentRelatedIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Get multiple tournament IDs to test
-        search_result = client.tournament.search(count=10)
+        search_result = client.tournament.query().limit(10).get()
 
         api_key_value = os.getenv("IFPA_API_KEY")
         if not api_key_value:

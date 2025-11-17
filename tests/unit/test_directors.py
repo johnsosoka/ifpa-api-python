@@ -3,8 +3,6 @@
 Tests the director resource client and callable pattern using mocked HTTP requests.
 """
 
-import warnings
-
 import pytest
 import requests_mock
 
@@ -42,7 +40,7 @@ class TestDirectorClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.director.search(name="Josh")
+        result = client.director.query("Josh").get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert len(result.directors) == 1
@@ -75,7 +73,7 @@ class TestDirectorClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.director.search(city="Chicago", stateprov="IL", country="US")
+        result = client.director.query().city("Chicago").state("IL").country("US").get()
 
         assert len(result.directors) == 1
         assert result.directors[0].city == "Chicago"
@@ -95,7 +93,7 @@ class TestDirectorClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.director.search()
+        result = client.director.query().get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert len(result.directors) == 0
@@ -112,7 +110,7 @@ class TestDirectorClient:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.director.search(name="test")
+            client.director.query("test").get()
 
         assert exc_info.value.status_code == 500
         assert "Internal server error" in str(exc_info.value)
@@ -140,7 +138,7 @@ class TestDirectorClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.director.search(name="sharpe")
+        result = client.director.query("sharpe").get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.search_term == "sharpe"
@@ -740,27 +738,7 @@ class TestDirectorQueryBuilderIntegration:
         assert "start_pos=50" in mock_requests.last_request.query
 
 
-class TestDeprecationWarnings:
-    """Test that old methods emit proper deprecation warnings."""
-
-    def test_search_emits_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that search() emits a deprecation warning."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/director/search",
-            json={"directors": [], "total_results": 0},
-        )
-
-        client = IfpaClient(api_key="test-key")
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            client.director.search(name="Josh")
-
-            # Verify warning was emitted
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-            assert "query()" in str(w[0].message)
+# TestDeprecationWarnings class removed - search() method has been removed in favor of query()
 
 
 class TestDirectorIntegration:
@@ -797,8 +775,8 @@ class TestDirectorIntegration:
 
         client = IfpaClient(api_key="test-key")
 
-        # Search for director
-        search_results = client.director.search(name="Josh")
+        # Search for director using query builder
+        search_results = client.director.query("Josh").get()
         assert len(search_results.directors) == 1
 
         # Get full details using the ID from search

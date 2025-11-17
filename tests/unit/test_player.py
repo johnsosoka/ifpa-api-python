@@ -3,8 +3,6 @@
 Tests the players resource client and handle using mocked HTTP requests.
 """
 
-import warnings
-
 import pytest
 import requests_mock
 
@@ -12,7 +10,6 @@ from ifpa_api.client import IfpaClient
 from ifpa_api.exceptions import IfpaApiError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
-    MultiPlayerResponse,
     Player,
     PlayerResultsResponse,
     PlayerSearchResponse,
@@ -20,127 +17,6 @@ from ifpa_api.models.player import (
     PvpComparison,
     RankingHistory,
 )
-
-
-class TestPlayersClient:
-    """Test cases for PlayersClient collection-level operations."""
-
-    def test_search_with_name_filter(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching players by name."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={
-                "query": "John",
-                "search": [
-                    {
-                        "player_id": 12345,
-                        "first_name": "John",
-                        "last_name": "Smith",
-                        "city": "Seattle",
-                        "state": "WA",
-                        "country_code": "US",
-                        "country_name": "United States",
-                        "wppr_rank": "100",
-                    }
-                ],
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        result = client.player.search(name="John")
-
-        assert isinstance(result, PlayerSearchResponse)
-        assert result.query == "John"
-        assert len(result.search) == 1
-        assert result.search[0].player_id == 12345
-        assert result.search[0].first_name == "John"
-        assert result.search[0].last_name == "Smith"
-        assert result.search[0].wppr_rank == "100"
-
-    def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching players with pagination parameters."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={
-                "query": "Test",
-                "search": [
-                    {"player_id": i, "first_name": f"Player{i}", "last_name": "Test"}
-                    for i in range(25)
-                ],
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        result = client.player.search(name="Test", start_pos=0, count=25)
-
-        assert len(result.search) == 25
-
-        assert mock_requests.last_request is not None
-        query = mock_requests.last_request.query
-        assert "start_pos=0" in query
-        assert "count=25" in query
-
-    def test_get_multiple(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test fetching multiple players at once."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player",
-            json={
-                "player": [
-                    {"player_id": 123, "first_name": "John", "last_name": "Smith"},
-                    {"player_id": 456, "first_name": "Jane", "last_name": "Doe"},
-                ]
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-        result = client.player.get_multiple([123, 456])
-
-        assert isinstance(result, MultiPlayerResponse)
-        assert result.player is not None
-        assert mock_requests.last_request is not None
-        query = mock_requests.last_request.query
-        assert "players=123%2c456" in query.lower()
-
-    def test_get_multiple_max_validation(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that get_multiple raises error for more than 50 players."""
-        from ifpa_api.exceptions import IfpaClientValidationError
-
-        client = IfpaClient(api_key="test-key")
-
-        with pytest.raises(IfpaClientValidationError) as exc_info:
-            client.player.get_multiple(list(range(1, 52)))
-
-        assert "50 player ids" in str(exc_info.value).lower()
-
-    def test_search_parameter_mapping(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that name parameter maps to 'name' query param, not 'q'."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={"search": []},
-        )
-
-        client = IfpaClient(api_key="test-key")
-        client.player.search(name="John")
-
-        assert mock_requests.last_request is not None
-        query = mock_requests.last_request.query
-        assert "name=john" in query.lower()
-        assert "q=" not in query
-
-    def test_search_with_tournament_filters(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test search with new tournament and tourpos parameters."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={"search": []},
-        )
-
-        client = IfpaClient(api_key="test-key")
-        client.player.search(tournament="PAPA", tourpos=1)
-
-        assert mock_requests.last_request is not None
-        query = mock_requests.last_request.query
-        assert "tournament=papa" in query.lower()
-        assert "tourpos=1" in query
 
 
 class TestPlayerHandle:
@@ -552,54 +428,6 @@ class TestPlayerHandle:
 class TestPlayersIntegration:
     """Integration tests ensuring PlayersClient and PlayerHandle work together."""
 
-    def test_search_then_get_player(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test workflow of searching then getting player details."""
-        # Mock search
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={
-                "query": "John",
-                "search": [
-                    {
-                        "player_id": 12345,
-                        "first_name": "John",
-                        "last_name": "Smith",
-                        "wppr_rank": "100",
-                    }
-                ],
-            },
-        )
-
-        # Mock get player
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/12345",
-            json={
-                "player": [
-                    {
-                        "player_id": 12345,
-                        "first_name": "John",
-                        "last_name": "Smith",
-                        "city": "Seattle",
-                        "ifpa_registered": True,
-                    }
-                ]
-            },
-        )
-
-        client = IfpaClient(api_key="test-key")
-
-        # Search for player
-        search_results = client.player.search(name="John")
-        assert len(search_results.search) == 1
-
-        # Get full details using the ID from search
-        player_id = search_results.search[0].player_id
-        full_player = client.player(player_id).details()
-
-        assert full_player.player_id == 12345
-        assert full_player.city == "Seattle"
-        assert full_player.ifpa_registered is True
-
     def test_player_handles_404(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that getting non-existent player raises error."""
         mock_requests.get(
@@ -884,46 +712,3 @@ class TestPlayerQueryBuilderIntegration:
         assert "start_pos=25" in mock_requests.last_request.query
         page3.get()
         assert "start_pos=50" in mock_requests.last_request.query
-
-
-class TestDeprecationWarnings:
-    """Test that old methods emit proper deprecation warnings."""
-
-    def test_search_emits_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that search() emits a deprecation warning."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player/search",
-            json={"search": []},
-        )
-
-        client = IfpaClient(api_key="test-key")
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            client.player.search(name="John")
-
-            # Verify warning was emitted
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()
-            assert "query()" in str(w[0].message)
-
-    def test_get_multiple_emits_deprecation_warning(
-        self, mock_requests: requests_mock.Mocker
-    ) -> None:
-        """Test that get_multiple() emits a deprecation warning."""
-        mock_requests.get(
-            "https://api.ifpapinball.com/player",
-            json={"player": []},
-        )
-
-        client = IfpaClient(api_key="test-key")
-
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            client.player.get_multiple([123, 456])
-
-            # Verify warning was emitted
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "deprecated" in str(w[0].message).lower()

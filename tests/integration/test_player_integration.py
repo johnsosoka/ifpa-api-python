@@ -15,16 +15,13 @@ These tests make real API calls and require a valid API key.
 Run with: pytest -m integration
 """
 
-from typing import cast
-
 import pytest
 from pydantic import ValidationError
 
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError, IfpaClientValidationError, PlayersNeverMetError
+from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
-    MultiPlayerResponse,
     Player,
     PlayerResultsResponse,
     PlayerSearchResponse,
@@ -49,7 +46,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # API requires at least one search parameter
-        result = client.player.search(country=country_code, count=count_medium)
+        result = client.player.query().country(country_code).limit(count_medium).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -61,7 +58,7 @@ class TestPlayerClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.search(country=country_code, count=count_small)
+        result = client.player.query().country(country_code).limit(count_small).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -79,7 +76,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Test country + count combination
-        result = client.player.search(country=country_code, count=count_small)
+        result = client.player.query().country(country_code).limit(count_small).get()
         assert isinstance(result.search, list)
         # Note: API may not always respect count parameter for broad searches like country-only
         # Just verify we got results
@@ -94,7 +91,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for players with top finishes in PAPA tournaments
-        result = client.player.search(tournament="PAPA", tourpos=1, count=count_small)
+        result = client.player.query().tournament("PAPA").position(1).limit(count_small).get()
         assert isinstance(result.search, list)
 
     def test_search_with_tournament_integration(self, api_key: str, count_small: int) -> None:
@@ -103,7 +100,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for players in PAPA tournaments
-        result = client.player.search(tournament="PAPA", count=count_small)
+        result = client.player.query().tournament("PAPA").limit(count_small).get()
         assert isinstance(result.search, list)
 
     def test_search_idaho_smiths_predictable(
@@ -113,7 +110,8 @@ class TestPlayerClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.search(**search_idaho_smiths)  # type: ignore[arg-type]
+        # Extract values from fixture and use query builder
+        result = client.player.query("smith").state("ID").get()
 
         # Predictable count (at least 2, currently 3 including Aviana Smith)
         assert len(result.search) >= 2, "Should return at least 2 Smiths from Idaho"
@@ -135,7 +133,8 @@ class TestPlayerClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.search(**search_idaho_johns)  # type: ignore[arg-type]
+        # Use query builder instead of fixture
+        result = client.player.query("john").state("ID").get()
 
         # Known to return exactly 5 Johns
         assert len(result.search) == 5, "Should return exactly 5 Johns from Idaho"
@@ -149,33 +148,7 @@ class TestPlayerClientIntegration:
         player_ids = {p.player_id for p in result.search}
         assert 50104 in player_ids, "Should include John Sosoka"
 
-    def test_get_multiple_integration(self, api_key: str, player_ids_multiple: list[int]) -> None:
-        """Test get_multiple with real API."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Test with multiple test players (25584 highly active, 50104 low activity, 50106 inactive)
-        result = client.player.get_multiple(cast(list[int | str], player_ids_multiple))
-        assert result.player is not None
-        # Verify we got a list of players
-        if isinstance(result.player, list):
-            assert len(result.player) == len(player_ids_multiple)
-            assert all(p.player_id in player_ids_multiple for p in result.player)
-
-            # Validate mixed activity levels
-            players_by_id = {p.player_id: p for p in result.player}
-            # Dwayne (25584) - highly active, should be top 1000
-            if 25584 in players_by_id:
-                dwayne = players_by_id[25584]
-                assert dwayne.player_stats is not None
-                dwayne_rank = int(dwayne.player_stats["system"]["open"]["current_rank"])
-                assert dwayne_rank < 1000, "Highly active player should be ranked in top 1000"
-            # Anna (50106) - inactive, should not be ranked
-            if 50106 in players_by_id:
-                anna = players_by_id[50106]
-                assert anna.player_stats is not None
-                anna_rank = anna.player_stats["system"]["open"]["current_rank"]
-                assert anna_rank == "0", "Inactive player should not be ranked"
+    # Removed test_get_multiple_integration - get_multiple() method has been removed
 
 
 # =============================================================================
@@ -193,7 +166,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for Dwayne Smith - known Idaho player
-        result = client.player.search(name="Dwayne Smith", count=10)
+        result = client.player.query("Dwayne Smith").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -219,7 +192,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players in California (stable, large dataset)
-        result = client.player.search(stateprov="CA", count=10)
+        result = client.player.query().state("CA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -233,7 +206,7 @@ class TestPlayerSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.search(country=country_code, count=10)
+        result = client.player.query().country(country_code).limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -248,7 +221,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players who participated in PAPA tournaments
-        result = client.player.search(tournament="PAPA", count=10)
+        result = client.player.query().tournament("PAPA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -260,7 +233,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players who finished 1st in PAPA tournaments
-        result = client.player.search(tournament="PAPA", tourpos=1, count=5)
+        result = client.player.query().tournament("PAPA").position(1).limit(5).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -281,9 +254,9 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Get first page
-        page1 = client.player.search(country=country_code, start_pos=0, count=5)
+        page1 = client.player.query().country(country_code).offset(0).limit(5).get()
         # Get second page
-        page2 = client.player.search(country=country_code, start_pos=5, count=5)
+        page2 = client.player.query().country(country_code).offset(5).limit(5).get()
 
         assert isinstance(page1, PlayerSearchResponse)
         assert isinstance(page2, PlayerSearchResponse)
@@ -308,7 +281,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         for count in [5, 10, 25]:
-            result = client.player.search(country=country_code, count=count)
+            result = client.player.query().country(country_code).limit(count).get()
             assert len(result.search) <= count
 
     def test_search_combined_filters(self, api_key: str) -> None:
@@ -317,7 +290,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Combine country and state filters
-        result = client.player.search(country="US", stateprov="CA", count=10)
+        result = client.player.query().country("US").state("CA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         # Verify combined filters work
@@ -332,7 +305,7 @@ class TestPlayerSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.search(country=country_code, count=5)
+        result = client.player.query().country(country_code).limit(5).get()
 
         # Verify response structure
         assert isinstance(result, PlayerSearchResponse)
@@ -353,141 +326,10 @@ class TestPlayerSearchAudit:
 
 
 # =============================================================================
-# GET MULTIPLE AUDIT TESTS
+# GET MULTIPLE AUDIT TESTS - REMOVED
 # =============================================================================
-
-
-@pytest.mark.integration
-class TestPlayerGetMultipleAudit:
-    """Comprehensive audit tests for PlayersClient.get_multiple() method."""
-
-    def test_get_multiple_single_player(self, api_key: str, player_active_id: int) -> None:
-        """Test get_multiple with single player ID (Debbie Smith)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        result = client.player.get_multiple([player_active_id])
-
-        assert isinstance(result, MultiPlayerResponse)
-        assert result.player is not None
-        # Result may be single Player or list with one Player
-        if isinstance(result.player, list):
-            assert len(result.player) == 1
-            player = result.player[0]
-            assert player.player_id == player_active_id
-            # Validate identity
-            assert player.first_name == "Debbie"
-            assert player.last_name == "Smith"
-            assert player.city == "Boise"
-        else:
-            assert result.player.player_id == player_active_id
-            assert result.player.first_name == "Debbie"
-            assert result.player.last_name == "Smith"
-
-    def test_get_multiple_several_players(
-        self, api_key: str, player_ids_multiple: list[int]
-    ) -> None:
-        """Test get_multiple with multiple player IDs (mixed activity levels)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Type cast to satisfy mypy - list[int] is compatible with list[int | str]
-        result = client.player.get_multiple(cast(list[int | str], player_ids_multiple))
-
-        assert isinstance(result, MultiPlayerResponse)
-        assert result.player is not None
-        # Should return list of players
-        if isinstance(result.player, list):
-            assert len(result.player) == len(player_ids_multiple)
-            returned_ids = {p.player_id for p in result.player}
-            for pid in player_ids_multiple:
-                assert pid in returned_ids
-
-            # Map players by ID for validation
-            players_by_id = {p.player_id: p for p in result.player}
-
-            # Validate Dwayne (highly active)
-            dwayne = players_by_id[25584]
-            assert dwayne.first_name == "Dwayne"
-            assert dwayne.last_name == "Smith"
-            assert dwayne.player_stats is not None
-            assert int(dwayne.player_stats["system"]["open"]["current_rank"]) < 1000
-
-            # Validate John (low activity)
-            john = players_by_id[50104]
-            assert john.first_name == "John"
-            assert john.last_name == "Sosoka"
-            assert john.player_stats is not None
-            assert int(john.player_stats["system"]["open"]["current_rank"]) > 10000
-
-            # Validate Anna (inactive)
-            anna = players_by_id[50106]
-            assert anna.first_name == "Anna"
-            assert anna.last_name == "Rigas"
-            assert anna.player_stats is not None
-            assert anna.player_stats["system"]["open"]["current_rank"] == "0"
-
-    def test_get_multiple_max_50_limit(self, api_key: str) -> None:
-        """Test get_multiple enforces 50 player limit."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Try to request 51 players (should raise validation error)
-        with pytest.raises(IfpaClientValidationError) as exc_info:
-            client.player.get_multiple(list(range(1, 52)))
-
-        assert "Maximum 50 player IDs" in str(exc_info.value)
-
-    def test_get_multiple_invalid_player_id(self, api_key: str) -> None:
-        """Test get_multiple with invalid player ID.
-
-        Note: API returns HTTP 200 with JSON null for invalid player IDs.
-        SDK detects null response and raises IfpaApiError with 404 status.
-        """
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Very high ID that doesn't exist - SDK raises exception
-        with pytest.raises(IfpaApiError) as exc_info:
-            client.player.get_multiple([99999999])
-
-        # SDK converts null response to 404 error
-        assert exc_info.value.status_code == 404
-        assert (
-            "null response" in str(exc_info.value).lower()
-            or "not found" in str(exc_info.value).lower()
-        )
-
-    def test_get_multiple_mixed_valid_invalid(self, api_key: str, player_active_id: int) -> None:
-        """Test get_multiple with mix of valid and invalid IDs."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Mix valid and invalid IDs
-        result = client.player.get_multiple([player_active_id, 99999999])
-
-        assert isinstance(result, MultiPlayerResponse)
-        # Should return at least the valid player
-        if isinstance(result.player, list):
-            assert len(result.player) >= 1
-            assert player_active_id in {p.player_id for p in result.player}
-
-    def test_get_multiple_response_structure(self, api_key: str, player_active_id: int) -> None:
-        """Test get_multiple response structure matches model."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        result = client.player.get_multiple([player_active_id])
-
-        # Verify response structure
-        assert isinstance(result, MultiPlayerResponse)
-        assert hasattr(result, "player")
-        # Player should be Player or list[Player]
-        if isinstance(result.player, list):
-            for player in result.player:
-                assert isinstance(player, Player)
-        else:
-            assert isinstance(result.player, Player)
+# The get_multiple() method has been removed from the SDK in favor of the
+# query builder pattern. Tests have been deleted.
 
 
 # =============================================================================
@@ -1234,22 +1076,4 @@ class TestPlayerCrossMethodValidation:
         assert player.last_name == "Smith"
         assert player.city == "Boise"
 
-    def test_get_multiple_matches_individual_get(self, api_key: str, player_active_id: int) -> None:
-        """Test that get_multiple returns same data as individual get."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        # Get player individually
-        individual = client.player(player_active_id).details()
-
-        # Get player via get_multiple
-        multiple_result = client.player.get_multiple([player_active_id])
-        if isinstance(multiple_result.player, list):
-            multiple = multiple_result.player[0]
-        else:
-            multiple = multiple_result.player
-
-        # Verify core fields match
-        assert individual.player_id == multiple.player_id
-        assert individual.first_name == multiple.first_name
-        assert individual.last_name == multiple.last_name
+    # Removed test_get_multiple_matches_individual_get - get_multiple() method has been removed

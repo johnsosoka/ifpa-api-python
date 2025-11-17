@@ -59,7 +59,7 @@ def get_test_director_id(client: IfpaClient) -> int | None:
     """
     try:
         # Search for directors, get first result
-        results = client.director.search()
+        results = client.director.query().get()
         if results.directors and len(results.directors) > 0:
             return results.directors[0].director_id
     except Exception:
@@ -117,7 +117,7 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
     """
     try:
         # Search for tournaments, get first result
-        results = client.tournament.search(count=1)
+        results = client.tournament.query().limit(1).get()
         if results.tournaments and len(results.tournaments) > 0:
             return results.tournaments[0].tournament_id
     except Exception:

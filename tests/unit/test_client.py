@@ -101,7 +101,7 @@ class TestIfpaClientHandleFactory:
         client = IfpaClient(api_key="test-key")
         director_id = 1000
         context = client.director(director_id)
-        assert context._director_id == director_id
+        assert context._resource_id == director_id
 
     def test_player_callable_returns_player_context(self) -> None:
         """Test that player() callable returns _PlayerContext."""
@@ -114,7 +114,7 @@ class TestIfpaClientHandleFactory:
         client = IfpaClient(api_key="test-key")
         player_id = 12345
         context = client.player(player_id)
-        assert context._player_id == player_id
+        assert context._resource_id == player_id
 
     def test_tournament_callable_returns_tournament_context(self) -> None:
         """Test that tournament() callable returns _TournamentContext."""
@@ -127,7 +127,7 @@ class TestIfpaClientHandleFactory:
         client = IfpaClient(api_key="test-key")
         tournament_id = 54321
         context = client.tournament(tournament_id)
-        assert context._tournament_id == tournament_id
+        assert context._resource_id == tournament_id
 
     def test_series_callable_returns_series_context(self) -> None:
         """Test that series() callable returns _SeriesContext."""
@@ -140,13 +140,13 @@ class TestIfpaClientHandleFactory:
         client = IfpaClient(api_key="test-key")
         series_code = "PAPA"
         context = client.series(series_code)
-        assert context._series_code == series_code
+        assert context._resource_id == series_code
 
     def test_handle_accepts_string_ids(self) -> None:
         """Test that handles accept string IDs."""
         client = IfpaClient(api_key="test-key")
         director_context = client.director("1000")
-        assert director_context._director_id == "1000"
+        assert director_context._resource_id == "1000"
 
     def test_handles_are_independent(self) -> None:
         """Test that each call to handle/callable factory creates a new instance."""

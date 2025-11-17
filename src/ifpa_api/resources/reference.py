@@ -1,10 +1,14 @@
 """Reference data resource client."""
 
-from ifpa_api.http import _HttpClient
+from ifpa_api.core.base import BaseResourceClient
 from ifpa_api.models.reference import CountryListResponse, StateProvListResponse
 
+# ============================================================================
+# Reference Resource Client - Reference Data Access
+# ============================================================================
 
-class ReferenceClient:
+
+class ReferenceClient(BaseResourceClient):
     """Client for IFPA reference/lookup data endpoints.
 
     Provides access to reference data such as countries and states/provinces
@@ -29,14 +33,6 @@ class ReferenceClient:
                 print(f"  - {region.region_name} ({region.region_code})")
         ```
     """
-
-    def __init__(self, http: _HttpClient) -> None:
-        """Initialize the reference client.
-
-        Args:
-            http: The HTTP client for making requests.
-        """
-        self._http = http
 
     def countries(self) -> CountryListResponse:
         """Get list of all countries in the IFPA system.
