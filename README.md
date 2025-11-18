@@ -17,7 +17,7 @@ Complete documentation is available at: **https://johnsosoka.github.io/ifpa-api-
 
 A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, and statistics through a clean, modern Python interface with full type safety and Pydantic validation.
 
-> **Alpha Release**: This library is under active development.
+> **Alpha Release**: This library is under active development, with significant and breaking changes being released as we work towards v1.0.0, which will be considered our **stable** release.
 
 ## Features
 
@@ -102,6 +102,13 @@ Visit the full documentation: **https://johnsosoka.github.io/ifpa-api-python/**
 
 ## Contributing
 
+You can contribute by:
+* Reporting bugs
+* Feature Requests
+* General Feedback (usability, docs, etc.)
+
+### Contributing Code
+
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
 
 - Setting up your development environment
@@ -117,4 +124,4 @@ See the [LICENSE](LICENSE) file for details.
 
 ---
 
-Built by [John Sosoka](https://johnsosoka.com) for the pinball community.
+Built by [John Sosoka](https://johnsosoka.com) for the worldwide pinball community.

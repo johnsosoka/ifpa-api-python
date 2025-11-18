@@ -9,6 +9,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - TBD
 
+### Added
+
+**Query Builder Pattern (NEW)**
+
+All resources with search/query capabilities now support a fluent Query Builder pattern for composable, type-safe filtering:
+
+```python
+# Player queries
+results = client.player.query("John").country("US").state("WA").limit(25).get()
+
+# Director queries
+results = client.director.query("Josh").city("Seattle").state("WA").get()
+
+# Tournament queries
+results = client.tournament.query("PAPA").country("US").date_range("2024-01-01", "2024-12-31").get()
+
+# Query reuse (immutable pattern)
+us_query = client.player.query().country("US")
+wa_players = us_query.state("WA").get()
+or_players = us_query.state("OR").get()  # base query unchanged!
+```
+
+**Base Classes & Infrastructure**
+
+- `BaseResourceContext[T]` - Generic base class for resource contexts
+- `BaseResourceClient` - Base class for all resource client classes
+- `LocationFiltersMixin` - Adds `.country()`, `.state()`, `.city()` filtering
+- `PaginationMixin` - Adds `.limit()` and `.offset()` pagination
+- Eliminated ~550 lines of duplicated code through DRY principles
+
+**Package Restructuring**
+
+Resources now organized into focused packages:
+- `player/` - `client.py`, `context.py`, `query_builder.py`
+- `director/` - `client.py`, `context.py`, `query_builder.py`
+- `tournament/` - `client.py`, `context.py`, `query_builder.py`
+- `series/` - `client.py`, `context.py`
+
+**Reference Resource** (from 0.2.1):
+- `ReferenceClient.countries()` - Get list of all countries in IFPA system (62 countries)
+- `ReferenceClient.state_provs()` - Get states/provinces by country (67 regions across AU, CA, US)
+
+**Rankings Resource Additions** (from 0.2.1):
+- `RankingsClient.country_list()` - List all countries with player counts (51 countries)
+- `RankingsClient.custom_list()` - List all custom ranking systems (84 custom rankings)
+
+**Tournaments Resource Additions** (from 0.2.1):
+- `TournamentClient.list_formats()` - List all tournament format types (25 formats)
+
+**Exceptions** (from 0.2.1):
+- `PlayersNeverMetError` - Custom exception for when PVP data unavailable between two players who have never competed together
+
 ### Changed
 
 **Tournament Resource Refactoring (BREAKING CHANGES)**
@@ -23,7 +75,7 @@ The Tournament resource has been refactored to match the callable pattern establ
    results = client.tournaments.search(name="PAPA")
 
    # After (v0.3.0)
-   results = client.tournament.search(name="PAPA")
+   results = client.tournament.query("PAPA").get()
    ```
 
 2. **Method renamed**: `.get()` → `.details()` (consistent with Player and Director)
@@ -48,20 +100,6 @@ The Tournament resource has been refactored to match the callable pattern establ
    - This internal class should not be directly imported by users
    - Access tournament operations via the callable pattern: `client.tournament(id).details()`
 
-**Unified Pattern:**
-
-The tournament resource now follows the same callable pattern as player and director:
-```python
-# Collection-level operations
-tournaments = client.tournament.search(name="PAPA")
-formats = client.tournament.list_formats()
-
-# Resource-level operations via callable pattern
-tournament = client.tournament(12345).details()
-results = client.tournament(12345).results()
-league = client.tournament(12345).league()
-```
-
 **Series Resource Refactoring (BREAKING CHANGES)**
 
 The Series resource has been migrated to use the callable pattern, completing the unification effort across all resources.
@@ -83,35 +121,120 @@ The Series resource has been migrated to use the callable pattern, completing th
    - This internal class should not be directly imported by users
    - Access series operations via the callable pattern: `client.series("CODE").standings()`
 
-**Unified Pattern:**
+**Unified Pattern Across All Resources:**
 
 All resources now follow the same callable pattern:
 ```python
 # Player
 client.player(123).details()
+client.player.query("John").country("US").get()
 
 # Director
 client.director(456).details()
+client.director.query("Josh").city("Seattle").get()
 
 # Tournament
 client.tournament(789).details()
+client.tournament.query("PAPA").country("US").get()
 
-# Series (NEW)
+# Series
 client.series("NACS").standings()
 ```
 
-**Migration Guide:**
+### Fixed
 
-Simple find-replace in your codebase:
-- Replace: `client.series_handle(` → `client.series(`
+**From 0.3.0 Development:**
+- Consolidated integration tests from 3 files into 1 organized file (`test_tournament_integration.py`)
+- Updated all documentation to reflect new callable pattern and query builder
+- Fixed helper function `get_test_tournament_id()` to use correct callable pattern
+
+**From 0.2.2:**
+- **Players Resource**:
+  - Fixed `wppr_points` field in player results/history always returning None due to incorrect API field mapping (API uses `current_points`, not `wppr_points`)
+  - Added missing optional fields to player tournament results: `all_time_points`, `active_points`, `inactive_points`
+
+- **Tournaments Resource**:
+  - Fixed `wppr_points` field mapping in tournament results (API uses `points`, not `wppr_points`)
+  - Fixed `rating_points` field mapping in tournament results (API uses `ratings_value`, not `rating_points`)
+  - Fixed `total_events` field mapping in tournament results (API uses `player_tournament_count`, not `total_events`)
+  - Added missing `wppr_rank` field to tournament results
+
+**From 0.2.1:**
+- **Rankings Resource**:
+  - Fixed age field validation to handle empty string values returned by API
+  - Fixed `by_country()` response model to correctly return player rankings (was incorrectly expecting country-level statistics)
+
+- **Directors Resource**:
+  - Fixed `country_directors()` to handle nested `player_profile` structure in API response
+
+- **Tournaments Resource**:
+  - Fixed search response to correctly map API's `search` key to model's `tournaments` field
+  - Added validation requiring both `start_date` and `end_date` parameters together (API returns 400 if only one provided)
+
+- **Series Resource**:
+  - Fixed `standings()` to call correct `/series/{code}/overall_standings` endpoint (was calling wrong endpoint)
+  - Added required `region_code` parameter to `regions()`, `stats()`, and `tournaments()` methods
+
+- **Players Resource**:
+  - Improved `pvp()` error handling with clearer exception for players who have never competed together
+
+### Removed
+
+**From 0.2.1:**
+- **Series Resource**:
+  - Removed `overview()` method (endpoint does not exist in API)
+  - Removed `rules()` method (endpoint does not exist in API)
+  - Removed `schedule()` method (endpoint does not exist in API)
+
+### Testing
+
+- 473 comprehensive tests across unit and integration suites
+- Enhanced integration tests to validate actual field values instead of just field existence
+- Updated unit test mocks to reflect actual API response structure
+- All tests passing with 2 skipped due to known API issues
+- Maintained 99% code coverage
+
+### Migration Guide
+
+**Simple find-replace for your codebase:**
+- `client.tournaments` → `client.tournament`
+- `client.series_handle(` → `client.series(`
+- `.search(` → `.query().get()` (or use fluent filters)
+
+**Query Builder Migration:**
+```python
+# Before (v0.2.x) - positional search
+results = client.player.search(name="John")
+
+# After (v0.3.0) - fluent query builder
+results = client.player.query("John").get()
+
+# With additional filters
+results = client.player.query("John").country("US").state("WA").limit(25).get()
+```
+
+## [0.2.2] - 2024-11-18
 
 ### Fixed
 
-- Consolidated integration tests from 3 files into 1 organized file (`test_tournament_integration.py`)
-- Updated all documentation to reflect new callable pattern
-- Fixed helper function `get_test_tournament_id()` to use correct callable pattern
+- **Players Resource**:
+  - Fixed `wppr_points` field in player results/history always returning None due to incorrect API field mapping (API uses `current_points`, not `wppr_points`)
+  - Added missing optional fields to player tournament results: `all_time_points`, `active_points`, `inactive_points`
 
-## [0.2.1] - TBD
+- **Tournaments Resource**:
+  - Fixed `wppr_points` field mapping in tournament results (API uses `points`, not `wppr_points`)
+  - Fixed `rating_points` field mapping in tournament results (API uses `ratings_value`, not `rating_points`)
+  - Fixed `total_events` field mapping in tournament results (API uses `player_tournament_count`, not `total_events`)
+  - Added missing `wppr_rank` field to tournament results
+
+### Testing
+
+- Enhanced integration tests to validate actual field values instead of just field existence
+- Updated unit test mocks to reflect actual API response structure
+- Skipped unreliable `stateprov` filter tests for both Player and Director search (API returns incorrect states)
+- All 212 integration tests passing (with 2 skipped due to known API issues)
+
+## [0.2.1] - 2024-11-16
 
 ### Added
 
@@ -355,7 +478,8 @@ profile = client.player(123).details()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/johnsosoka/ifpa-api-python/releases/tag/v0.1.0

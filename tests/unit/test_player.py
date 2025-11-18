@@ -236,7 +236,7 @@ class TestPlayerHandle:
         assert len(results.results) == 1
         assert results.results[0].tournament_id == 10001
         assert results.results[0].position == 3
-        assert results.results[0].current_points == 25.5
+        assert results.results[0].wppr_points == 25.5
         assert results.results[0].all_time_points == 30.0
         assert results.results[0].active_points == 25.5
 

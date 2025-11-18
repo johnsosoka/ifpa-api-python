@@ -708,12 +708,12 @@ class TestPlayerHandleResultsAudit:
         assert first_result.position is not None
 
         # CRITICAL: Validate point fields have actual values (not None)
-        # This catches field mapping bugs like current_points always being None
+        # This catches field mapping bugs like wppr_points always being None
         assert (
-            first_result.current_points is not None
-        ), "current_points should not be None for active results"
-        assert isinstance(first_result.current_points, float), "current_points should be a float"
-        assert first_result.current_points >= 0, "current_points should be non-negative"
+            first_result.wppr_points is not None
+        ), "wppr_points should not be None for active results"
+        assert isinstance(first_result.wppr_points, float), "wppr_points should be a float"
+        assert first_result.wppr_points >= 0, "wppr_points should be non-negative"
 
         # Also validate the newly added point fields
         if first_result.all_time_points is not None:
@@ -826,15 +826,15 @@ class TestPlayerHandleResultsAudit:
             assert hasattr(result, "tournament_name")
             assert hasattr(result, "event_date")
             assert hasattr(result, "position")
-            assert hasattr(result, "current_points")
+            assert hasattr(result, "wppr_points")
             assert hasattr(result, "all_time_points")
             assert hasattr(result, "active_points")
 
-            # Validate that current_points has actual data from API
+            # Validate that wppr_points has actual data from API
             assert (
-                result.current_points is not None
-            ), "current_points must have a value for active results"
-            assert isinstance(result.current_points, float), "current_points should be float type"
+                result.wppr_points is not None
+            ), "wppr_points must have a value for active results"
+            assert isinstance(result.wppr_points, float), "wppr_points should be float type"
 
     def test_results_arvid_flygare_real_data(self, api_key: str) -> None:
         """Test results with real player data - Arvid Flygare (ID: 49549).
@@ -854,17 +854,17 @@ class TestPlayerHandleResultsAudit:
         assert results.player_id == 49549
         assert len(results.results) > 0, "Arvid should have active tournament results"
 
-        # Validate the fix: current_points should be populated
+        # Validate the fix: wppr_points should be populated
         first_result = results.results[0]
         assert (
-            first_result.current_points is not None
-        ), "Bug fix validation: current_points must be populated"
-        assert isinstance(first_result.current_points, float)
-        assert first_result.current_points >= 0
+            first_result.wppr_points is not None
+        ), "Bug fix validation: wppr_points must be populated"
+        assert isinstance(first_result.wppr_points, float)
+        assert first_result.wppr_points >= 0
 
         print("✓ Validated Arvid Flygare's results")
         print(f"  First tournament: {first_result.tournament_name}")
-        print(f"  Current points: {first_result.current_points}")
+        print(f"  Current points: {first_result.wppr_points}")
 
 
 # =============================================================================
