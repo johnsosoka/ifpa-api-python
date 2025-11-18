@@ -216,7 +216,9 @@ class TestPlayerHandle:
                         "city": "Seattle",
                         "country_code": "US",
                         "position": 3,
-                        "wppr_points": 25.5,
+                        "current_points": 25.5,
+                        "all_time_points": 30.0,
+                        "active_points": 25.5,
                         "player_count": 48,
                     }
                 ],
@@ -234,7 +236,9 @@ class TestPlayerHandle:
         assert len(results.results) == 1
         assert results.results[0].tournament_id == 10001
         assert results.results[0].position == 3
-        assert results.results[0].wppr_points == 25.5
+        assert results.results[0].current_points == 25.5
+        assert results.results[0].all_time_points == 30.0
+        assert results.results[0].active_points == 25.5
 
     def test_results_with_ranking_system(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting player results filtered by ranking system."""

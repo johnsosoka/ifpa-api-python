@@ -23,30 +23,50 @@ The IFPA API client enables Python developers to access pinball rankings, tourna
 
 ## Quick Example
 
+This example demonstrates the fluent, chainable query builder pattern and type-safe resource access:
+
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.player import PlayerSearchResponse, Player
 
 # Initialize client with API key
-client = IfpaClient(api_key='your-api-key-here')
+client: IfpaClient = IfpaClient(api_key="your-api-key-here")
 
-# Get player information
-player = client.player(2643).details()
-print(f"Name: {player.first_name} {player.last_name}")
-print(f"Country: {player.country_name}")
+# Build a base query for US players - demonstrates immutable query builder
+us_query = client.player.query().country("US")
+
+# Reuse the base query for different states (immutable pattern!)
+idaho_players: PlayerSearchResponse = us_query.state("ID").limit(10).get()
+washington_players: PlayerSearchResponse = us_query.state("WA").limit(10).get()
+
+print(f"Found {len(idaho_players.search)} players in Idaho")
+print(f"Top Idaho player: {idaho_players.search[0].first_name} {idaho_players.search[0].last_name}")
+
+# Extract player ID from search results and get detailed info (chained lookup!)
+top_player_id: int = idaho_players.search[0].player_id
+player: Player = client.player(top_player_id).details()
+
+print(f"\nDetailed info for {player.first_name} {player.last_name}:")
+print(f"Current WPPR Rank: {player.player_stats['system']['open']['current_rank']}")
+print(f"Total Events: {player.player_stats['player_events']['total_events']}")
 
 # Get top WPPR rankings
-rankings = client.rankings.wppr(count=100)
+rankings = client.rankings.wppr(count=10)
 for entry in rankings.rankings[:5]:
     print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
-
-# Search for tournaments
-tournaments = client.tournament.search(city="Portland", stateprov="OR")
-for tournament in tournaments.tournaments:
-    print(f"{tournament.tournament_name} ({tournament.event_date})")
 
 # Close the client when done
 client.close()
 ```
+
+**Key Patterns Demonstrated:**
+
+- **Immutable Query Builder**: Base queries can be safely reused without side effects
+- **Fluent Chaining**: Methods like `.country()`, `.state()`, `.limit()` chain naturally
+- **Chained Lookups**: Extract data from search results and use it in follow-up API calls
+- **Callable Pattern**: Direct resource access via `client.player(id).details()`
+- **Type Safety**: Full type hints enable IDE autocompletion and type checking
+- **Pydantic Models**: Response models provide validated, typed data access
 
 ## Installation
 

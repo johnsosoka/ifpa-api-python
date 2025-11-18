@@ -701,11 +701,27 @@ class TestPlayerHandleResultsAudit:
         # total_results may be None or a string
         if results.total_results is not None:
             assert int(results.total_results) > 200
-        # Validate result structure
+        # Validate result structure and field values
         first_result = results.results[0]
         assert first_result.tournament_id is not None
         assert first_result.tournament_name is not None
         assert first_result.position is not None
+
+        # CRITICAL: Validate point fields have actual values (not None)
+        # This catches field mapping bugs like current_points always being None
+        assert (
+            first_result.current_points is not None
+        ), "current_points should not be None for active results"
+        assert isinstance(first_result.current_points, float), "current_points should be a float"
+        assert first_result.current_points >= 0, "current_points should be non-negative"
+
+        # Also validate the newly added point fields
+        if first_result.all_time_points is not None:
+            assert isinstance(first_result.all_time_points, float)
+            assert first_result.all_time_points >= 0
+        if first_result.active_points is not None:
+            assert isinstance(first_result.active_points, float)
+            assert first_result.active_points >= 0
 
     def test_results_main_nonactive(self, api_key: str, player_active_id: int) -> None:
         """Test results() with Main ranking system and Nonactive results."""
@@ -803,14 +819,52 @@ class TestPlayerHandleResultsAudit:
         assert hasattr(results, "results")
         assert hasattr(results, "total_results")
 
-        # Verify TournamentResult structure
+        # Verify TournamentResult structure and validate field values
         if len(results.results) > 0:
             result = results.results[0]
             assert hasattr(result, "tournament_id")
             assert hasattr(result, "tournament_name")
             assert hasattr(result, "event_date")
             assert hasattr(result, "position")
-            assert hasattr(result, "wppr_points")
+            assert hasattr(result, "current_points")
+            assert hasattr(result, "all_time_points")
+            assert hasattr(result, "active_points")
+
+            # Validate that current_points has actual data from API
+            assert (
+                result.current_points is not None
+            ), "current_points must have a value for active results"
+            assert isinstance(result.current_points, float), "current_points should be float type"
+
+    def test_results_arvid_flygare_real_data(self, api_key: str) -> None:
+        """Test results with real player data - Arvid Flygare (ID: 49549).
+
+        This test uses the exact player from the bug report to validate the fix works
+        with real-world data. Arvid Flygare is a Swedish player with active tournament results.
+        """
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        # Arvid Flygare - ID from bug report screenshot
+        results = client.player(49549).results(
+            ranking_system=RankingSystem.MAIN, result_type=ResultType.ACTIVE, count=10
+        )
+
+        assert isinstance(results, PlayerResultsResponse)
+        assert results.player_id == 49549
+        assert len(results.results) > 0, "Arvid should have active tournament results"
+
+        # Validate the fix: current_points should be populated
+        first_result = results.results[0]
+        assert (
+            first_result.current_points is not None
+        ), "Bug fix validation: current_points must be populated"
+        assert isinstance(first_result.current_points, float)
+        assert first_result.current_points >= 0
+
+        print("✓ Validated Arvid Flygare's results")
+        print(f"  First tournament: {first_result.tournament_name}")
+        print(f"  Current points: {first_result.current_points}")
 
 
 # =============================================================================
