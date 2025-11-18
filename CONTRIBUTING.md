@@ -35,7 +35,7 @@ Example:
 
 **Steps to Reproduce**:
 1. Initialize client with valid API key
-2. Call `client.player.search(name="José")`
+2. Call `client.player.query("José").get()`
 3. Observe error
 
 **Expected**: Returns players matching "José"
@@ -50,7 +50,7 @@ Example:
 ```python
 from ifpa_api import IfpaClient
 client = IfpaClient()
-players = client.player.search(name="José")  # Fails
+players = client.player.query("José").get()  # Fails
 ```
 ```
 
@@ -244,19 +244,19 @@ from ifpa_api import IfpaClient
 
 
 def test_search_players():
-    """Test searching for players."""
+    """Test querying for players."""
     with requests_mock.Mocker() as m:
         # Mock the API response
         m.get(
             "https://api.ifpapinball.com/player/search",
-            json={"players": [{"player_id": 12345, "first_name": "John"}]}
+            json={"search": [{"player_id": 12345, "first_name": "John"}]}
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.player.search(name="John")
+        result = client.player.query("John").get()
 
-        assert len(result.players) == 1
-        assert result.players[0].player_id == 12345
+        assert len(result.search) == 1
+        assert result.search[0].player_id == 12345
 ```
 
 #### Integration Tests
@@ -271,10 +271,10 @@ from ifpa_api import IfpaClient
 
 @pytest.mark.integration
 def test_search_players_integration(client: IfpaClient):
-    """Test searching for real players."""
-    result = client.player.search(name="Josh")
-    assert len(result.players) > 0
-    assert all(hasattr(p, "player_id") for p in result.players)
+    """Test querying for real players."""
+    result = client.player.query("Josh").get()
+    assert len(result.search) > 0
+    assert all(hasattr(p, "player_id") for p in result.search)
 ```
 
 Integration tests use a fixture that provides a configured client (see `tests/integration/conftest.py`).

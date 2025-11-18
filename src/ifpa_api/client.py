@@ -112,8 +112,11 @@ class IfpaClient:
 
         Example:
             ```python
-            # Collection-level: Search for directors
-            results = client.director.search(name="Josh")
+            # Collection-level: Query for directors
+            results = client.director.query("Josh").get()
+
+            # Collection-level: Query with filters
+            results = client.director.query("Josh").country("US").state("IL").get()
 
             # Collection-level: Get country directors
             country_dirs = client.director.country_directors()
@@ -138,8 +141,11 @@ class IfpaClient:
 
         Example:
             ```python
-            # Collection-level: Search for players
-            results = client.player.search(name="John", stateprov="WA")
+            # Collection-level: Query for players
+            results = client.player.query("John").get()
+
+            # Collection-level: Query with filters
+            results = client.player.query("John").state("WA").country("US").get()
 
             # Resource-level: Get player details
             player = client.player(12345).details()
@@ -206,12 +212,11 @@ class IfpaClient:
 
         Example:
             ```python
-            # Collection-level: Search for tournaments
-            results = client.tournament.search(
-                name="Pinball",
-                city="Portland",
-                stateprov="OR"
-            )
+            # Collection-level: Query for tournaments
+            results = client.tournament.query("Pinball").get()
+
+            # Collection-level: Query with filters
+            results = client.tournament.query("Pinball").city("Portland").state("OR").get()
 
             # Collection-level: List tournament formats
             formats = client.tournament.list_formats()

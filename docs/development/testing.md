@@ -106,7 +106,7 @@ def test_search_players():
         m.get(
             "https://api.ifpapinball.com/player/search",
             json={
-                "players": [
+                "search": [
                     {
                         "player_id": 12345,
                         "first_name": "John",
@@ -118,11 +118,11 @@ def test_search_players():
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.player.search(name="John")
+        result = client.player.query("John").get()
 
-        assert len(result.players) == 1
-        assert result.players[0].player_id == 12345
-        assert result.players[0].first_name == "John"
+        assert len(result.search) == 1
+        assert result.search[0].player_id == 12345
+        assert result.search[0].first_name == "John"
 ```
 
 ### Integration Test Example
@@ -134,12 +134,12 @@ from ifpa_api import IfpaClient
 
 @pytest.mark.integration
 def test_search_players_integration(client: IfpaClient):
-    """Test searching for real players."""
-    result = client.player.search(name="Josh")
+    """Test querying for real players."""
+    result = client.player.query("Josh").get()
 
-    assert len(result.players) > 0
-    assert all(hasattr(p, "player_id") for p in result.players)
-    assert all(hasattr(p, "first_name") for p in result.players)
+    assert len(result.search) > 0
+    assert all(hasattr(p, "player_id") for p in result.search)
+    assert all(hasattr(p, "first_name") for p in result.search)
 ```
 
 ## Test Markers

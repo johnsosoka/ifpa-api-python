@@ -46,8 +46,8 @@ from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
-# Search by name - Find players named "Smith" in Idaho
-results = client.player.search(name="Smith", stateprov="ID")
+# Query by name - Find players named "Smith" in Idaho
+results = client.player.query("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
@@ -55,13 +55,8 @@ for player in results.search:
 # 25584: Dwayne Smith
 # 47585: Debbie Smith
 
-# Search with filters - Find players named "John" in Idaho
-results = client.player.search(
-    name="John",
-    stateprov="ID",
-    country="US",
-    count=5
-)
+# Query with filters - Find players named "John" in Idaho
+results = client.player.query("John").state("ID").country("US").limit(5).get()
 ```
 
 ### Get Rankings
@@ -90,13 +85,10 @@ from ifpa_api import IfpaClient
 
 client = IfpaClient()
 
-# Search for tournaments
-tournaments = client.tournament.search(
-    name="Pinball",
-    stateprov="WA"
-)
+# Query for tournaments with filters
+tournaments = client.tournament.query("Pinball").state("WA").get()
 
-for tournament in tournaments.tournament:
+for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name}")
     print(f"  Date: {tournament.event_date}")
     print(f"  Location: {tournament.city}, {tournament.stateprov}")

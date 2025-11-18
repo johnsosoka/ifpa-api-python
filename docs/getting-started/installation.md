@@ -24,7 +24,7 @@ After installation, verify that the package is installed correctly:
 ```python
 import ifpa_api
 
-print(ifpa_api.__version__)  # Should print: 0.2.1
+print(ifpa_api.__version__)  # Should print: 0.3.0
 ```
 
 You can also check the installed version using pip:

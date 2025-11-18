@@ -26,7 +26,7 @@ Example:
     )
 
     # Search for directors
-    directors = client.director.search(name="Josh")
+    directors = client.director.query("Josh").get()
 
     # Get director's tournaments
     tournaments = client.director(1000).tournaments(TimePeriod.PAST)
@@ -43,7 +43,7 @@ from ifpa_api.exceptions import (
 )
 from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 __all__ = [
     # Main client
