@@ -1119,15 +1119,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#021-tbd" class="md-nav__link">
+  <a href="#022-2024-11-18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.2.1 - TBD
+        0.2.2 - 2024-11-18
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.2.1 - TBD">
+    <nav class="md-nav" aria-label="0.2.2 - 2024-11-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1142,7 +1181,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1164,7 +1203,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
+  <a href="#testing_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Testing
@@ -1336,15 +1375,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#021-tbd" class="md-nav__link">
+  <a href="#022-2024-11-18" class="md-nav__link">
     <span class="md-ellipsis">
       
-        0.2.1 - TBD
+        0.2.2 - 2024-11-18
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="0.2.1 - TBD">
+    <nav class="md-nav" aria-label="0.2.2 - 2024-11-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.2.1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1359,7 +1437,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixed" class="md-nav__link">
+  <a href="#fixed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Fixed
@@ -1381,7 +1459,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
+  <a href="#testing_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Testing
@@ -1531,8 +1609,31 @@
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>,
 and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
-<h2 id="unreleased"><a href="https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...HEAD">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
-<h2 id="021-tbd"><a href="https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1">0.2.1</a> - TBD<a class="headerlink" href="#021-tbd" title="Permanent link">&para;</a></h2>
+<h2 id="unreleased"><a href="https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...HEAD">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h2 id="022-2024-11-18"><a href="https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2">0.2.2</a> - 2024-11-18<a class="headerlink" href="#022-2024-11-18" title="Permanent link">&para;</a></h2>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Players Resource</strong>:</li>
+<li>Fixed <code>wppr_points</code> field in player results/history always returning None due to incorrect API field mapping (API uses <code>current_points</code>, not <code>wppr_points</code>)</li>
+<li>
+<p>Added missing optional fields to player tournament results: <code>all_time_points</code>, <code>active_points</code>, <code>inactive_points</code></p>
+</li>
+<li>
+<p><strong>Tournaments Resource</strong>:</p>
+</li>
+<li>Fixed <code>wppr_points</code> field mapping in tournament results (API uses <code>points</code>, not <code>wppr_points</code>)</li>
+<li>Fixed <code>rating_points</code> field mapping in tournament results (API uses <code>ratings_value</code>, not <code>rating_points</code>)</li>
+<li>Fixed <code>total_events</code> field mapping in tournament results (API uses <code>player_tournament_count</code>, not <code>total_events</code>)</li>
+<li>Added missing <code>wppr_rank</code> field to tournament results</li>
+</ul>
+<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Enhanced integration tests to validate actual field values instead of just field existence</li>
+<li>Updated unit test mocks to reflect actual API response structure</li>
+<li>Skipped unreliable <code>stateprov</code> filter tests for both Player and Director search (API returns incorrect states)</li>
+<li>All 212 integration tests passing (with 2 skipped due to known API issues)</li>
+</ul>
+<h2 id="021"><a href="https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1">0.2.1</a><a class="headerlink" href="#021" title="Permanent link">&para;</a></h2>
 <h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
 <p><strong>Phase 2 - New Features &amp; Enhanced API Coverage</strong></p>
 <ul>
@@ -1560,7 +1661,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 </li>
 <li><code>PlayersNeverMetError</code> - Custom exception for when PVP data unavailable between two players who have never competed together</li>
 </ul>
-<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<h3 id="fixed_1">Fixed<a class="headerlink" href="#fixed_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Rankings Resource</strong>:</li>
 <li>Fixed age field validation to handle empty string values returned by API</li>
@@ -1599,7 +1700,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semant
 <li>Removed <code>rules()</code> method (endpoint does not exist in API)</li>
 <li>Removed <code>schedule()</code> method (endpoint does not exist in API)</li>
 </ul>
-<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
+<h3 id="testing_1">Testing<a class="headerlink" href="#testing_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Added 154 comprehensive integration tests across all 6 resources</li>
 <li>Increased code coverage from 95% to 97%</li>
