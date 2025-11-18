@@ -61,7 +61,8 @@ def get_test_director_id(client: IfpaClient) -> int | None:
         # Search for directors, get first result
         results = client.directors.search()
         if results.directors and len(results.directors) > 0:
-            return results.directors[0].director_id
+            director_id: int = results.directors[0].director_id
+            return director_id
     except Exception:
         pass
     return None
@@ -90,7 +91,8 @@ def get_test_player_id(client: IfpaClient) -> int | None:
         # Get top WPPR rankings, use first player
         rankings = client.rankings.wppr(start_pos=0, count=1)
         if rankings.rankings and len(rankings.rankings) > 0:
-            return rankings.rankings[0].player_id
+            player_id: int = rankings.rankings[0].player_id
+            return player_id
     except Exception:
         pass
     return None
@@ -119,7 +121,8 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
         # Search for tournaments, get first result
         results = client.tournaments.search(count=1)
         if results.tournaments and len(results.tournaments) > 0:
-            return results.tournaments[0].tournament_id
+            tournament_id: int = results.tournaments[0].tournament_id
+            return tournament_id
     except Exception:
         pass
     return None
@@ -148,7 +151,8 @@ def get_test_series_code(client: IfpaClient) -> str | None:
         # List series, prefer active ones
         series_list = client.series.list(active_only=True)
         if series_list.series and len(series_list.series) > 0:
-            return series_list.series[0].series_code
+            series_code: str = series_list.series[0].series_code
+            return series_code
     except Exception:
         pass
     return None

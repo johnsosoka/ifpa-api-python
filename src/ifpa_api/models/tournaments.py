@@ -89,11 +89,12 @@ class TournamentResult(IfpaBaseModel):
         stateprov: Player's state/province
         country_code: ISO country code
         country_name: Full country name
-        wppr_points: WPPR points earned
-        rating_points: Rating points earned
+        wppr_points: WPPR points earned (mapped from 'points' in API)
+        wppr_rank: Player's current WPPR rank
+        rating_points: Rating points earned (mapped from 'ratings_value' in API)
         percentile: Player's percentile in tournament
         best_game_finish: Best individual game finish
-        total_events: Total events played
+        total_events: Total events played (mapped from 'player_tournament_count' in API)
     """
 
     position: int
@@ -105,11 +106,12 @@ class TournamentResult(IfpaBaseModel):
     stateprov: str | None = None
     country_code: str | None = None
     country_name: str | None = None
-    wppr_points: float | None = None
-    rating_points: float | None = None
+    wppr_points: float | None = Field(None, validation_alias="points")
+    wppr_rank: int | None = None
+    rating_points: float | None = Field(None, validation_alias="ratings_value")
     percentile: float | None = None
     best_game_finish: int | None = None
-    total_events: int | None = None
+    total_events: int | None = Field(None, validation_alias="player_tournament_count")
 
 
 class TournamentResultsResponse(IfpaBaseModel):

@@ -16,6 +16,11 @@ from ifpa_api.models.tournaments import (
     TournamentSearchResponse,
     TournamentSubmissionsResponse,
 )
+from tests.integration.conftest import (
+    assert_collection_not_empty,
+    assert_field_present,
+    assert_numeric_field_valid,
+)
 
 
 @pytest.mark.integration
@@ -32,10 +37,12 @@ class TestTournamentsIntegration:
         assert isinstance(results, TournamentSearchResponse)
         # Should have at least one result
         if results.tournaments:
+            assert_collection_not_empty(results.tournaments)
             first_result = results.tournaments[0]
-            assert first_result.tournament_id is not None
-            assert first_result.tournament_name is not None
-            # Verify critical fields are populated
+            # Verify critical fields are present and valid
+            assert_field_present(first_result, "tournament_id", int)
+            assert_field_present(first_result, "tournament_name", str)
+            # Display for debugging
             tournament_name = first_result.tournament_name
             tournament_id = first_result.tournament_id
             print(f"Found tournament: {tournament_name} (ID: {tournament_id})")
@@ -81,7 +88,10 @@ class TestTournamentsIntegration:
 
         assert isinstance(tournament, Tournament)
         assert tournament.tournament_id == tournament_id
-        assert tournament.tournament_name is not None
+        # Verify critical fields are present
+        assert_field_present(tournament, "tournament_name", str)
+        # player_count is numeric if present
+        assert_numeric_field_valid(tournament.player_count, min_threshold=0)
         print("\nTournament Details:")
         print(f"  Name: {tournament.tournament_name}")
         print(f"  Location: {tournament.city}, {tournament.stateprov}")
@@ -97,12 +107,25 @@ class TestTournamentsIntegration:
 
             assert isinstance(results, TournamentResultsResponse)
             if results.results:
+                # Verify we have at least one result
+                assert_collection_not_empty(results.results)
+
                 print("\nTournament Results (showing first 3):")
                 for result in results.results[:3]:
                     print(f"  {result.position}. {result.player_name}: {result.wppr_points} WPPR")
-                    # Verify field names are correct
-                    assert result.position is not None
-                    assert result.player_id is not None
+
+                    # Required fields must be present
+                    assert_field_present(result, "position", int)
+                    assert_field_present(result, "player_id", int)
+
+                    # Position must be at least 1
+                    assert (
+                        result.position >= 1
+                    ), f"Position must be at least 1, got {result.position}"
+
+                    # Optional numeric fields - validate if present
+                    assert_numeric_field_valid(result.wppr_points, min_threshold=0.0)
+                    assert_numeric_field_valid(result.rating_points, min_threshold=0.0)
         except IfpaApiError as e:
             # Some tournaments may not have results data
             if e.status_code in [404, 400]:

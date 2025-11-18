@@ -338,7 +338,7 @@ class TestPlayerHandle:
                         "city": "Seattle",
                         "country_code": "US",
                         "position": 3,
-                        "wppr_points": 25.5,
+                        "current_points": 25.5,
                         "player_count": 48,
                     }
                 ],

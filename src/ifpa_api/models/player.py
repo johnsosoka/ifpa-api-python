@@ -162,7 +162,10 @@ class TournamentResult(IfpaBaseModel):
         position: Player's finishing position
         position_points: Points earned for position
         count_flag: Whether result counts toward rankings
-        wppr_points: WPPR points earned
+        wppr_points: Current WPPR points earned (mapped from 'current_points' in API)
+        all_time_points: All-time WPPR points for this tournament
+        active_points: Active WPPR points for this tournament
+        inactive_points: Inactive WPPR points for this tournament
         rating_value: Tournament rating value
         percentile_value: Player's percentile in tournament
         best_game_finish: Best individual game finish
@@ -180,7 +183,10 @@ class TournamentResult(IfpaBaseModel):
     position: int | None = None
     position_points: float | None = None
     count_flag: bool | None = None
-    wppr_points: float | None = None
+    wppr_points: float | None = Field(None, validation_alias="current_points")
+    all_time_points: float | None = None
+    active_points: float | None = None
+    inactive_points: float | None = None
     rating_value: float | None = None
     percentile_value: float | None = None
     best_game_finish: int | None = None

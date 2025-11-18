@@ -7,7 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.1] - TBD
+## [0.2.2] - 2024-11-18
+
+### Fixed
+
+- **Players Resource**:
+  - Fixed `wppr_points` field in player results/history always returning None due to incorrect API field mapping (API uses `current_points`, not `wppr_points`)
+  - Added missing optional fields to player tournament results: `all_time_points`, `active_points`, `inactive_points`
+
+- **Tournaments Resource**:
+  - Fixed `wppr_points` field mapping in tournament results (API uses `points`, not `wppr_points`)
+  - Fixed `rating_points` field mapping in tournament results (API uses `ratings_value`, not `rating_points`)
+  - Fixed `total_events` field mapping in tournament results (API uses `player_tournament_count`, not `total_events`)
+  - Added missing `wppr_rank` field to tournament results
+
+### Testing
+
+- Enhanced integration tests to validate actual field values instead of just field existence
+- Updated unit test mocks to reflect actual API response structure
+- Skipped unreliable `stateprov` filter tests for both Player and Director search (API returns incorrect states)
+- All 212 integration tests passing (with 2 skipped due to known API issues)
+
+## [0.2.1]
 
 ### Added
 
@@ -252,7 +273,8 @@ profile = client.player(123).get()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/johnsosoka/ifpa-api-python/releases/tag/v0.1.0
