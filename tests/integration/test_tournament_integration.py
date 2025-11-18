@@ -14,7 +14,7 @@ import pytest
 import requests
 
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -294,6 +294,29 @@ class TestTournamentSearchIntegration:
                 f"  Sample: {tournament.tournament_name} - "
                 f"{tournament.country_code}, {tournament.event_date}"
             )
+
+    def test_search_returns_zero_results(self, api_key: str) -> None:
+        """Test that zero-result tournament searches are handled correctly.
+
+        Uses unlikely search criteria to ensure empty results. The SDK should
+        return an empty list rather than raising an error.
+        """
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        # Search for something unlikely to exist with restrictive filters
+        result = (
+            client.tournament.query("ZzZzUnlikelyName999XxX")
+            .country("XX")  # Invalid country code
+            .date_range("1900-01-01", "1900-01-02")  # Date range with no tournaments
+            .get()
+        )
+
+        # Should return empty list, not error
+        assert result.tournaments is not None
+        assert isinstance(result.tournaments, list)
+        assert len(result.tournaments) == 0
+        print("✓ search() with no matches returns empty list")
 
     def test_field_names_consistency(self, api_key: str) -> None:
         """Test that field names match between search and details endpoints.

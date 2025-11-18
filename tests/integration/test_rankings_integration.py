@@ -23,7 +23,7 @@ import pytest
 from pydantic import ValidationError
 
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
     CustomRankingListResponse,
@@ -169,6 +169,38 @@ class TestWpprRankings:
 
         assert isinstance(result, RankingsResponse)
         # May return empty if no rankings at that position
+
+    def test_wppr_offset_beyond_results(self, api_key: str) -> None:
+        """Test that requesting offset beyond valid range returns proper error."""
+        skip_if_no_api_key()
+        client: IfpaClient = IfpaClient(api_key=api_key)
+
+        # Request rankings starting way beyond reasonable data
+        # API properly validates and rejects invalid offsets
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.rankings.wppr(start_pos=999999, count=10)
+
+        # Should be a 400 Bad Request error
+        assert exc_info.value.status_code == 400
+        assert "Start Position is invalid" in str(exc_info.value)
+
+    def test_wppr_large_page_size_request(self, api_key: str) -> None:
+        """Test requesting large but valid page size."""
+        skip_if_no_api_key()
+        client: IfpaClient = IfpaClient(api_key=api_key)
+
+        # Request a large but valid page size (API max is around 250)
+        # Note: start_pos must be >= 1 (0 causes SQL error)
+        result: RankingsResponse = client.rankings.wppr(start_pos=1, count=100)
+
+        # Should return up to requested count
+        assert result.rankings is not None
+        assert len(result.rankings) > 0
+        assert len(result.rankings) <= 100
+
+        # Verify we got meaningful data
+        assert result.rankings[0].player_id > 0
+        assert result.rankings[0].rank > 0
 
 
 # =============================================================================

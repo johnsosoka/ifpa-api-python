@@ -5,6 +5,10 @@ from collections.abc import Generator
 import pytest
 
 from ifpa_api import IfpaClient
+from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.director import Director
+from ifpa_api.models.player import Player
+from ifpa_api.models.tournaments import Tournament
 
 # Import test data fixtures to make them available to all integration tests
 from tests.integration.test_data import (  # noqa: F401
@@ -109,3 +113,114 @@ def assert_collection_not_empty(collection: object) -> None:
     """
     assert collection is not None, "Collection is None"
     assert len(collection) > 0, "Collection is empty"  # type: ignore[arg-type]
+
+
+def validate_test_player(client: IfpaClient, player_id: int) -> Player:
+    """Validate that a test player exists in the API.
+
+    This helper function checks if a player ID is still valid in the IFPA database.
+    If the player doesn't exist (404 error), the test will be skipped with a helpful
+    message rather than failing unexpectedly.
+
+    Args:
+        client: IFPA API client
+        player_id: Player ID to validate
+
+    Returns:
+        Player object if player exists
+
+    Raises:
+        pytest.skip: If player doesn't exist or is inaccessible (404 error)
+
+    Example:
+        ```python
+        def test_player_feature(client):
+            player = validate_test_player(client, 25584)
+            # Continue with test knowing player exists
+            assert player.player_id == 25584
+        ```
+    """
+    try:
+        return client.player(player_id).details()
+    except IfpaApiError as e:
+        if e.status_code == 404:
+            pytest.skip(
+                f"Test player {player_id} not found in IFPA database. "
+                "This test requires a valid player ID to run."
+            )
+        # Re-raise unexpected errors
+        raise
+
+
+def validate_test_director(client: IfpaClient, director_id: int) -> Director:
+    """Validate that a test director exists in the API.
+
+    This helper function checks if a director ID is still valid in the IFPA database.
+    If the director doesn't exist (404 error), the test will be skipped with a helpful
+    message rather than failing unexpectedly.
+
+    Args:
+        client: IFPA API client
+        director_id: Director ID to validate
+
+    Returns:
+        Director object if director exists
+
+    Raises:
+        pytest.skip: If director doesn't exist or is inaccessible (404 error)
+
+    Example:
+        ```python
+        def test_director_feature(client):
+            director = validate_test_director(client, 1533)
+            # Continue with test knowing director exists
+            assert director.director_id == 1533
+        ```
+    """
+    try:
+        return client.director(director_id).details()
+    except IfpaApiError as e:
+        if e.status_code == 404:
+            pytest.skip(
+                f"Test director {director_id} not found in IFPA database. "
+                "This test requires a valid director ID to run."
+            )
+        # Re-raise unexpected errors
+        raise
+
+
+def validate_test_tournament(client: IfpaClient, tournament_id_param: int) -> Tournament:
+    """Validate that a test tournament exists in the API.
+
+    This helper function checks if a tournament ID is still valid in the IFPA database.
+    If the tournament doesn't exist (404 error), the test will be skipped with a helpful
+    message rather than failing unexpectedly.
+
+    Args:
+        client: IFPA API client
+        tournament_id_param: Tournament ID to validate
+
+    Returns:
+        Tournament object if tournament exists
+
+    Raises:
+        pytest.skip: If tournament doesn't exist or is inaccessible (404 error)
+
+    Example:
+        ```python
+        def test_tournament_feature(client):
+            tournament = validate_test_tournament(client, 12345)
+            # Continue with test knowing tournament exists
+            assert tournament.tournament_id == 12345
+        ```
+    """
+    try:
+        return client.tournament(tournament_id_param).details()
+    except IfpaApiError as e:
+        if e.status_code == 404:
+            pytest.skip(
+                f"Test tournament {tournament_id_param} not found in IFPA database. "
+                "This test requires a valid tournament ID to run."
+            )
+        # Re-raise unexpected errors
+        raise
