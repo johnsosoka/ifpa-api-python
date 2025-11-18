@@ -7,7 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2025-11-18
+## [0.3.0] - Unreleased
+
+### Breaking Changes - Field Name Alignment
+
+**SDK Field Names Now Match Exact API Field Names**
+
+To improve transparency and reduce confusion when comparing SDK responses with API documentation, all response model field names now exactly match the IFPA API field names. This is a breaking change that affects how you access certain fields in player and tournament results.
+
+**Player Model Changes (`TournamentResult` in player results/history):**
+
+| Old Field Name (v0.2.x) | New Field Name (v0.3.0) | Description |
+|-------------------------|-------------------------|-------------|
+| `wppr_points` | `current_points` | WPPR points from tournament result |
+
+```python
+# Before (v0.2.x)
+results = client.player(12345).results(RankingSystem.MAIN, ResultType.ACTIVE)
+for result in results.results:
+    print(f"WPPR: {result.wppr_points}")
+
+# After (v0.3.0)
+results = client.player(12345).results(RankingSystem.MAIN, ResultType.ACTIVE)
+for result in results.results:
+    print(f"WPPR: {result.current_points}")
+```
+
+**Tournament Model Changes (`TournamentResult` in tournament results):**
+
+| Old Field Name (v0.2.x) | New Field Name (v0.3.0) | Description |
+|-------------------------|-------------------------|-------------|
+| `wppr_points` | `points` | WPPR points earned in tournament |
+| `rating_points` | `ratings_value` | Rating value earned in tournament |
+| `total_events` | `player_tournament_count` | Total tournaments player has participated in |
+
+```python
+# Before (v0.2.x)
+results = client.tournament(12345).results()
+for result in results.results:
+    print(f"Position: {result.position}")
+    print(f"WPPR: {result.wppr_points}")
+    print(f"Rating: {result.rating_points}")
+    print(f"Total Events: {result.total_events}")
+
+# After (v0.3.0)
+results = client.tournament(12345).results()
+for result in results.results:
+    print(f"Position: {result.position}")
+    print(f"WPPR: {result.points}")
+    print(f"Rating: {result.ratings_value}")
+    print(f"Total Events: {result.player_tournament_count}")
+```
+
+**Why This Change?**
+
+- **Transparency**: Field names now exactly match what the API returns
+- **Debugging**: Easier to compare SDK responses with API documentation
+- **Consistency**: Aligns with the API specification
+- **Clarity**: No more confusion about SDK field name mappings
+
+**Migration Checklist:**
+
+1. Search your codebase for `result.wppr_points` in player results → Replace with `result.current_points`
+2. Search your codebase for `result.wppr_points` in tournament results → Replace with `result.points`
+3. Search your codebase for `result.rating_points` in tournament results → Replace with `result.ratings_value`
+4. Search your codebase for `result.total_events` in tournament results → Replace with `result.player_tournament_count`
+5. Run your tests to identify any remaining references
+6. Update any documentation or comments referencing the old field names
 
 ### Added
 

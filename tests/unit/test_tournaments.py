@@ -236,7 +236,7 @@ class TestTournamentHandle:
         assert len(results.results) == 2
         assert results.results[0].position == 1
         assert results.results[0].player_name == "John Smith"
-        assert results.results[0].wppr_points == 50.0
+        assert results.results[0].points == 50.0
         assert results.player_count == 64
 
     def test_formats(self, mock_requests: requests_mock.Mocker) -> None:

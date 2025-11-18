@@ -249,10 +249,10 @@ print("\nTop 10 Finishers:")
 
 for result in results.results[:10]:
     print(f"{result.position}. {result.player_name} ({result.city}, {result.stateprov})")
-    if result.wppr_points:
-        print(f"   WPPR: {result.wppr_points:.2f}", end="")
-    if result.rating_points:
-        print(f" | Rating: {result.rating_points:.2f}", end="")
+    if result.points:
+        print(f"   WPPR: {result.points:.2f}", end="")
+    if result.ratings_value:
+        print(f" | Rating: {result.ratings_value:.2f}", end="")
     print()
 ```
 
@@ -262,8 +262,8 @@ Each result includes:
 
 - **Placement**: Position, percentile
 - **Player Info**: Player ID, name, location
-- **Points**: WPPR points earned, rating points earned
-- **Performance**: Best game finish, total events
+- **Points**: WPPR points earned, rating value earned
+- **Performance**: Best game finish, total player tournaments
 
 ## Get Tournament Formats
 
@@ -475,12 +475,12 @@ def analyze_tournament(tournament_id: int = 7070) -> None:
         results: TournamentResultsResponse = client.tournament(tournament_id).results()
         print(f"\nTop 5 Finishers:")
         for result in results.results[:5]:
-            wppr = result.wppr_points if result.wppr_points else 0
+            wppr = result.points if result.points else 0
             print(f"  {result.position}. {result.player_name} - {wppr:.2f} WPPR")
 
         # Calculate statistics
         if results.results:
-            avg_wppr = sum(r.wppr_points or 0 for r in results.results) / len(results.results)
+            avg_wppr = sum(r.points or 0 for r in results.results) / len(results.results)
             print(f"\nStatistics:")
             print(f"  Average WPPR: {avg_wppr:.2f}")
             print(f"  Total Finishers: {len(results.results)}")

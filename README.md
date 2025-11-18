@@ -108,7 +108,7 @@ print(f"Players: {tournament.tournament_stats.total_players}")
 
 results = client.tournament(67890).results()
 for result in results.results[:5]:
-    print(f"{result.position}. {result.player_name}: {result.wppr_points} pts")
+    print(f"{result.position}. {result.player_name}: {result.points} pts")
 
 # Close client when done
 client.close()

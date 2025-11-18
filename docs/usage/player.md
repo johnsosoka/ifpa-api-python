@@ -196,7 +196,7 @@ for result in results.results[:3]:  # Show first 3 results
     print(f"\n{result.tournament_name}")
     print(f"  Date: {result.event_date}")
     print(f"  Position: {result.position} of {result.player_count}")
-    print(f"  WPPR Points: {result.wppr_points}")
+    print(f"  WPPR Points: {result.current_points}")
     print(f"  Rating: {result.rating_value}")
 
 # Output:
@@ -438,7 +438,7 @@ def analyze_player(player_id: int = 25584) -> None:
 
         for result in results.results[:5]:
             finish = f"{result.position}/{result.player_count}" if result.player_count else str(result.position)
-            points = f"{result.wppr_points:.2f}" if result.wppr_points else "N/A"
+            points = f"{result.current_points:.2f}" if result.current_points else "N/A"
             print(f"  {result.tournament_name}: {finish} ({points} pts)")
 
         # Ranking trend

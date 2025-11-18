@@ -453,7 +453,7 @@ class TestTournamentResultsIntegration:
             if results.results:
                 print("\nTournament Results (showing first 3):")
                 for result in results.results[:3]:
-                    print(f"  {result.position}. {result.player_name}: {result.wppr_points} WPPR")
+                    print(f"  {result.position}. {result.player_name}: {result.points} WPPR")
                     # Verify field names are correct
                     assert result.position is not None
                     assert result.player_id is not None
@@ -496,7 +496,7 @@ class TestTournamentResultsIntegration:
             assert result.position is not None
             assert result.player_id is not None
             print(f"  Winner: {result.player_name} (ID: {result.player_id})")
-            print(f"  WPPR Points: {result.wppr_points}")
+            print(f"  WPPR Points: {result.points}")
 
     def test_results_player_rankings_structure(self, api_key: str, tournament_id: int) -> None:
         """Test results() player rankings structure validation."""
@@ -513,9 +513,9 @@ class TestTournamentResultsIntegration:
             for _i, result in enumerate(results.results[:3]):  # Check first 3
                 assert isinstance(result.position, int)
                 assert isinstance(result.player_id, int)
-                if result.wppr_points is not None:
-                    assert isinstance(result.wppr_points, int | float)
-                print(f"  Pos {result.position}: {result.player_name} - {result.wppr_points} WPPR")
+                if result.points is not None:
+                    assert isinstance(result.points, int | float)
+                print(f"  Pos {result.position}: {result.player_name} - {result.points} WPPR")
 
         print("✓ results() player rankings structure validated")
 
