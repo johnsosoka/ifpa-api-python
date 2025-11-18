@@ -71,6 +71,11 @@ print(f"Active countries: {len(active)}")
 
 The `state_provs()` method returns regional subdivisions for countries that have them. The IFPA system tracks regions for three countries: Australia, Canada, and the United States (67 total regions):
 
+!!! warning "Reference Data Incompleteness"
+    The `/stateprovs` endpoint only returns official codes for US, Canada, and Australia. However, the IFPA database contains many additional undocumented state/province codes from other countries (e.g., "CAB" for Buenos Aires, "Can" for Canterbury NZ, "PAC" for Provence-Alpes-Côte d'Azur).
+
+    **Impact**: You cannot use this endpoint to validate all possible state codes that appear in player, director, or tournament records.
+
 ```python
 state_provs = client.reference.state_provs()
 

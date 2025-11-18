@@ -200,7 +200,7 @@ class TestWpprRankings:
 
         # Verify we got meaningful data
         assert result.rankings[0].player_id > 0
-        assert result.rankings[0].rank > 0
+        assert result.rankings[0].rank is not None and result.rankings[0].rank > 0
 
 
 # =============================================================================
@@ -237,11 +237,16 @@ class TestWomenRankings:
     def test_women_women_only_tournaments(self, api_key: str) -> None:
         """Test women() with WOMEN tournament type.
 
-        Note: The API endpoint /rankings/women/women returns 404.
-        The women() method only supports "OPEN" tournament type.
-        Skipping this test as the endpoint doesn't exist.
+        The API endpoint /rankings/women/women now works correctly and returns
+        women's rankings based only on women-only tournaments.
         """
-        pytest.skip("API endpoint /rankings/women/women does not exist (404)")
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+        result = client.rankings.women(tournament_type="WOMEN", count=25)
+
+        assert isinstance(result, RankingsResponse)
+        assert len(result.rankings) > 0
+        assert result.rankings[0].player_id is not None
 
     def test_women_pagination(self, api_key: str) -> None:
         """Test women() with pagination parameters."""

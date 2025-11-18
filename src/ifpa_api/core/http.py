@@ -9,8 +9,8 @@ from typing import Any
 
 import requests
 
-from ifpa_api.config import Config
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.config import Config
+from ifpa_api.core.exceptions import IfpaApiError
 
 
 class _HttpClient:

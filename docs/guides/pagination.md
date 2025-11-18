@@ -170,14 +170,7 @@ page1: PlayerSearchResponse = (client.player.query("Smith")
     .offset(0)
     .limit(25)
     .get())
-
-# Note: offset() is currently broken in the API for player searches
-# See "Known Limitations" section below
 ```
-
-!!! warning "Player Search Offset Broken"
-    The IFPA API's player search pagination is currently non-functional. Using `.offset()` may cause
-    SQL errors or return 0 results. **Use only `.limit()` without `.offset()` for player searches.**
 
 ### Director Query Pagination
 
@@ -389,37 +382,6 @@ print(f"US: {len(top_200_us)} players")
 ```
 
 ## Known Limitations
-
-### Player Search Pagination (Broken)
-
-!!! danger "Critical Limitation"
-    The IFPA API's player search pagination is **completely non-functional**. Using `.offset()` will:
-
-    - Cause SQL errors from the API
-    - Return 0 results
-    - Return incorrect results
-
-    **Workaround**: Use only `.limit()` without `.offset()` for player searches. Request all results you need in a single query with a reasonable limit.
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
-
-client: IfpaClient = IfpaClient()
-
-# BAD - Will fail or return incorrect results
-try:
-    page1: PlayerSearchResponse = client.player.query("Smith").offset(0).limit(25).get()
-    page2: PlayerSearchResponse = client.player.query("Smith").offset(25).limit(25).get()
-except Exception as e:
-    print(f"Player search pagination broken: {e}")
-
-# GOOD - Single query with reasonable limit
-all_smiths: PlayerSearchResponse = (client.player.query("Smith")
-    .country("US")
-    .limit(100)  # Get first 100 results only
-    .get())
-```
 
 ### Player Results Pagination (Ignored)
 
@@ -714,7 +676,7 @@ rankings: list[RankingEntry] = fetch_rankings_with_progress(max_results=500)
 | **Rankings (WPPR, Women, Youth, etc.)** | ✅ Full support | `start_pos` and `count` work correctly |
 | **Director Search (Query Builder)** | ✅ Full support | `.offset()` and `.limit()` work correctly |
 | **Tournament Search (Query Builder)** | ✅ Full support | `.offset()` and `.limit()` work correctly |
-| **Player Search (Query Builder)** | ❌ **Broken** | `.offset()` causes errors - use `.limit()` only |
+| **Player Search (Query Builder)** | ✅ Full support | `.offset()` and `.limit()` work correctly |
 | **Player Results** | ❌ **Ignored** | API ignores pagination params - returns all results |
 | **Series Standings** | ❌ **Ignored** | API ignores pagination params - returns all results |
 | **Series Region Standings** | ✅ Partial support | `start_pos` and `count` accepted but may not be reliable |

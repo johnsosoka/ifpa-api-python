@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ifpa_api.core.base import BaseResourceContext
-from ifpa_api.exceptions import IfpaApiError, PlayersNeverMetError
+from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
     Player,

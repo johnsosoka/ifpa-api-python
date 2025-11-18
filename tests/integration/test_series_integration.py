@@ -17,7 +17,7 @@ import pytest
 import requests
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,

@@ -158,6 +158,11 @@ The fluent query builder provides these methods:
     The old `client.tournament.search(name="PAPA")` method is deprecated and will be removed in v1.0.0.
     Use the fluent query builder instead: `client.tournament.query("PAPA").get()`
 
+!!! success "State Filter Works Correctly"
+    Tournament search uses **exact matching** for state/province filtering, unlike player and director search which have a substring matching bug. You can reliably filter tournaments by state code without false positives.
+
+    See [Known Limitations](../guides/known-limitations.md#stateprovince-filter-broken) for details on the player/director state filter bug.
+
 ## Complex Query Examples
 
 Combine multiple filters for precise searches:

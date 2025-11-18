@@ -6,9 +6,9 @@ import pytest
 import requests
 import requests_mock
 
-from ifpa_api.config import Config
-from ifpa_api.exceptions import IfpaApiError
-from ifpa_api.http import _HttpClient
+from ifpa_api.core.config import Config
+from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.core.http import _HttpClient
 
 
 class TestHttpClientInitialization:

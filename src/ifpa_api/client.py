@@ -6,8 +6,8 @@ through a clean, typed interface.
 
 from typing import Any
 
-from ifpa_api.config import Config
-from ifpa_api.http import _HttpClient
+from ifpa_api.core.config import Config
+from ifpa_api.core.http import _HttpClient
 from ifpa_api.resources.director import DirectorClient
 from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient

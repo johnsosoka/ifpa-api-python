@@ -34,7 +34,7 @@ Example:
 """
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import (
+from ifpa_api.core.exceptions import (
     IfpaApiError,
     IfpaClientValidationError,
     IfpaError,

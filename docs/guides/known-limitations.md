@@ -9,7 +9,21 @@ This guide documents known bugs and limitations in the IFPA API that affect the 
 
 ### State/Province Filter (Broken)
 
-The `stateprov` filter in both player and director search endpoints returns incorrect results.
+The `stateprov` filter in both player and director search endpoints returns incorrect results due to case-insensitive substring matching instead of exact matching.
+
+!!! warning "Tournament Search Works Correctly"
+    The state/province filter works correctly in tournament search (`.tournament.query().state()`), which uses exact matching. This bug only affects player and director search.
+
+#### Root Cause
+
+The IFPA API performs **case-insensitive substring matching** on state/province codes instead of exact matching. This causes queries to match unintended state codes:
+
+- `"CA"` (California, US) matches `"CAB"` (Buenos Aires, Argentina) and `"Can"` (Canterbury, New Zealand)
+- `"AB"` (Alberta, Canada) matches `"CAB"` (Buenos Aires, Argentina)
+- `"OR"` (Oregon, US) matches `"Nor"` (Norwegian regions)
+- `"IN"` (Indiana, US) matches `"Inn"` (Innlandet, Norway)
+
+**Technical Pattern**: The API likely uses `WHERE LOWER(stateprov) LIKE LOWER('{filter}%')` instead of exact equality.
 
 #### Player Search
 
@@ -26,10 +40,10 @@ ca_players: PlayerSearchResponse = (client.player.query()
     .state("CA")
     .get())
 
-# BUG: Results may include players from:
+# BUG: Results include false positives:
+# - Buenos Aires, Argentina (state="CAB")
 # - Canterbury, New Zealand (state="Can")
-# - Other provinces/states that contain "CA" anywhere in the name
-# - Players from completely unrelated locations
+# - Any other state code starting with "CA" (case-insensitive)
 ```
 
 **Impact**: Cannot reliably filter players by state/province.
@@ -51,7 +65,7 @@ ca_players = [p for p in results.search if p.state == "CA" and p.country_code ==
 
 #### Director Search
 
-**Symptom**: Filtering by state/province returns directors from incorrect states.
+**Symptom**: Filtering by state/province returns directors from incorrect states using the same substring matching pattern.
 
 ```python
 from ifpa_api import IfpaClient
@@ -64,7 +78,7 @@ wa_directors: DirectorSearchResponse = (client.director.query()
     .state("WA")
     .get())
 
-# BUG: Results include directors from other states
+# BUG: Results include directors with state codes starting with "WA"
 # Filter is unreliable and returns incorrect data
 ```
 
@@ -87,29 +101,19 @@ results: DirectorSearchResponse = (client.director.query("Josh")
 wa_directors = [d for d in results.directors if d.stateprov == "WA"]
 ```
 
-### Player Search Pagination (Broken)
+### Search Endpoints Fixed Page Size
 
-The `.offset()` method in player search queries is completely non-functional.
+Player, director, and tournament search endpoints return a **fixed 50 results per page** by API design. The `count` parameter is accepted but ignored.
 
-**Symptom**: Using `.offset()` causes SQL errors or returns zero results.
+!!! note "Rankings Work Differently"
+    Rankings endpoints DO honor the `count` parameter and support variable page sizes. This limitation only affects search endpoints.
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+**Affected Endpoints**:
+- `client.player.query()` - Fixed 50 results
+- `client.director.query()` - Fixed 50 results
+- `client.tournament.query()` - Fixed 50 results
 
-client: IfpaClient = IfpaClient()
-
-# BAD - Will fail
-try:
-    page1: PlayerSearchResponse = client.player.query("Smith").offset(0).limit(25).get()
-    page2: PlayerSearchResponse = client.player.query("Smith").offset(25).limit(25).get()  # FAILS
-except Exception as e:
-    print(f"Pagination broken: {e}")
-```
-
-**Impact**: Cannot paginate through player search results.
-
-**Workaround**: Use `.limit()` only and request all needed results in a single query:
+**Symptom**: Using `.limit(n)` where n < 50 still returns 50 results.
 
 ```python
 from ifpa_api import IfpaClient
@@ -117,14 +121,38 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# GOOD - Single query with reasonable limit
-all_smiths: PlayerSearchResponse = (client.player.query("Smith")
-    .country("US")
-    .limit(100)  # Get first 100 results only
-    .get())
+# Request 10 results, but get 50
+result: PlayerSearchResponse = client.player.query("Smith").limit(10).get()
+print(len(result.search))  # 50, not 10
 ```
 
-**See Also**: [Pagination Guide - Known Limitations](pagination.md#known-limitations) for detailed examples and workarounds.
+**Impact**: Cannot request smaller page sizes for search endpoints. Always receive 50 results per page.
+
+**Workaround**: Use `offset()` to navigate through 50-result pages:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.player import PlayerSearchResponse
+
+client: IfpaClient = IfpaClient()
+
+# Get first page (results 1-50)
+page1: PlayerSearchResponse = client.player.query("Smith").offset(0).get()
+
+# Get second page (results 51-100)
+page2: PlayerSearchResponse = client.player.query("Smith").offset(50).get()
+
+# Get third page (results 101-150)
+page3: PlayerSearchResponse = client.player.query("Smith").offset(100).get()
+```
+
+If you need fewer results, slice client-side:
+
+```python
+# Get only first 10 results
+result: PlayerSearchResponse = client.player.query("Smith").limit(10).get()
+first_10 = result.search[:10]
+```
 
 ### Player Results Pagination (Ignored)
 

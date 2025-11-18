@@ -11,11 +11,11 @@ if TYPE_CHECKING:
     from typing import Self
 
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
+from ifpa_api.core.query_builder import QueryBuilder
 from ifpa_api.models.director import DirectorSearchResponse
-from ifpa_api.query_builder import QueryBuilder
 
 if TYPE_CHECKING:
-    from ifpa_api.http import _HttpClient
+    from ifpa_api.core.http import _HttpClient
 
 
 class DirectorQueryBuilder(

@@ -9,7 +9,7 @@ from ifpa_api.core.base import (
     LocationFiltersMixin,
     PaginationMixin,
 )
-from ifpa_api.query_builder import QueryBuilder
+from ifpa_api.core.query_builder import QueryBuilder
 
 
 class TestBaseResourceContext:
@@ -162,7 +162,7 @@ class TestPaginationMixin:
 
         result = builder.offset(25)
 
-        assert result._params["start_pos"] == 25
+        assert result._params["start_pos"] == 26
         assert result is not builder
 
     def test_pagination_chaining(self) -> None:
@@ -172,7 +172,7 @@ class TestPaginationMixin:
 
         result = builder.offset(25).limit(50)
 
-        assert result._params["start_pos"] == 25
+        assert result._params["start_pos"] == 26
         assert result._params["count"] == 50
 
     def test_immutability(self) -> None:
@@ -185,9 +185,9 @@ class TestPaginationMixin:
 
         assert base._params == {}
         assert page1._params["count"] == 25
-        assert page1._params["start_pos"] == 0
+        assert page1._params["start_pos"] == 1
         assert page2._params["count"] == 25
-        assert page2._params["start_pos"] == 25
+        assert page2._params["start_pos"] == 26
 
 
 class TestMixinCombination:
@@ -214,7 +214,7 @@ class TestMixinCombination:
         assert result._params["country"] == "US"
         assert result._params["stateprov"] == "WA"
         assert result._params["count"] == 50
-        assert result._params["start_pos"] == 25
+        assert result._params["start_pos"] == 26
 
     def test_query_reuse_with_both_mixins(self) -> None:
         """Test query reuse pattern with both mixins."""
@@ -237,17 +237,17 @@ class TestMixinCombination:
             "country": "US",
             "stateprov": "WA",
             "count": 25,
-            "start_pos": 0,
+            "start_pos": 1,
         }
         assert wa_page2._params == {
             "country": "US",
             "stateprov": "WA",
             "count": 25,
-            "start_pos": 25,
+            "start_pos": 26,
         }
         assert or_page1._params == {
             "country": "US",
             "stateprov": "OR",
             "count": 25,
-            "start_pos": 0,
+            "start_pos": 1,
         }

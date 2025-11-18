@@ -7,7 +7,7 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import IfpaApiError, IfpaClientValidationError
+from ifpa_api.core.exceptions import IfpaApiError, IfpaClientValidationError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -146,7 +146,7 @@ class TestTournamentsClient:
         assert len(result.tournaments) == 50
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
-        assert "start_pos=0" in query
+        assert "start_pos=1" in query
         assert "count=50" in query
 
 
@@ -508,7 +508,7 @@ class TestTournamentQueryBuilder:
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
-        assert "start_pos=25" in query
+        assert "start_pos=26" in query
         assert "count=50" in query
 
     def test_query_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
@@ -540,7 +540,7 @@ class TestTournamentQueryBuilder:
         assert "start_date=2024-01-01" in query
         assert "end_date=2024-12-31" in query
         assert "tournament_type=open" in query
-        assert "start_pos=0" in query
+        assert "start_pos=1" in query
         assert "count=25" in query
 
     def test_query_immutability(self, mock_requests: requests_mock.Mocker) -> None:
@@ -772,11 +772,11 @@ class TestTournamentQueryBuilderIntegration:
 
         # Execute pages
         page1.get()
-        assert "start_pos=0" in mock_requests.last_request.query
+        assert "start_pos=1" in mock_requests.last_request.query
         page2.get()
-        assert "start_pos=25" in mock_requests.last_request.query
+        assert "start_pos=26" in mock_requests.last_request.query
         page3.get()
-        assert "start_pos=50" in mock_requests.last_request.query
+        assert "start_pos=51" in mock_requests.last_request.query
 
     def test_date_range_search_workflow(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching tournaments within a date range."""

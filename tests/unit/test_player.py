@@ -7,7 +7,7 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
     Player,
@@ -389,7 +389,7 @@ class TestPlayerHandle:
         self, mock_requests: requests_mock.Mocker
     ) -> None:
         """Test pvp() raises PlayersNeverMetError when players never met."""
-        from ifpa_api.exceptions import PlayersNeverMetError
+        from ifpa_api.core.exceptions import PlayersNeverMetError
 
         mock_requests.get(
             "https://api.ifpapinball.com/player/12345/pvp/67890",
@@ -409,7 +409,7 @@ class TestPlayerHandle:
 
     def test_pvp_other_404_raises_api_error(self, mock_requests: requests_mock.Mocker) -> None:
         """Test pvp() still raises PlayersNeverMetError for any 404."""
-        from ifpa_api.exceptions import PlayersNeverMetError
+        from ifpa_api.core.exceptions import PlayersNeverMetError
 
         # Mock a 404 with different message (e.g., player doesn't exist)
         mock_requests.get(
@@ -535,7 +535,7 @@ class TestPlayerQueryBuilder:
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
-        assert "start_pos=25" in query
+        assert "start_pos=26" in query
         assert "count=50" in query
 
     def test_query_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
@@ -557,7 +557,7 @@ class TestPlayerQueryBuilder:
         assert "stateprov=wa" in query.lower()
         assert "tournament=papa" in query.lower()
         assert "tourpos=1" in query
-        assert "start_pos=0" in query
+        assert "start_pos=1" in query
         assert "count=25" in query
 
     def test_query_immutability(self, mock_requests: requests_mock.Mocker) -> None:
@@ -711,8 +711,8 @@ class TestPlayerQueryBuilderIntegration:
 
         # Execute pages
         page1.get()
-        assert "start_pos=0" in mock_requests.last_request.query
+        assert "start_pos=1" in mock_requests.last_request.query
         page2.get()
-        assert "start_pos=25" in mock_requests.last_request.query
+        assert "start_pos=26" in mock_requests.last_request.query
         page3.get()
-        assert "start_pos=50" in mock_requests.last_request.query
+        assert "start_pos=51" in mock_requests.last_request.query

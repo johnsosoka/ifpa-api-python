@@ -179,13 +179,9 @@ tilt_champs: PlayerSearchResponse = champions_query.tournament("TILT").limit(10)
 | `.city(name)` | `str` | City name |
 | `.tournament(name)` | `str` | Tournament name (partial strings accepted) |
 | `.position(pos)` | `int` | Finishing position in tournament |
-| `.offset(start)` | `int` | Pagination offset (0-based) - **currently broken in API** |
+| `.offset(start)` | `int` | Pagination offset (0-based) |
 | `.limit(count)` | `int` | Maximum number of results |
 | `.get()` | - | Execute query and return results |
-
-!!! warning "API Limitation: Player Search Offset"
-    The IFPA API's player search pagination is currently non-functional. Using `.offset()` may cause
-    SQL errors or return 0 results. For best results, use only `.limit()` without `.offset()`.
 
 ## Director Search
 
@@ -701,16 +697,6 @@ results: PlayerSearchResponse = (client.player.query("Smith")
 ```
 
 ## Known Limitations
-
-### Player Search Pagination
-
-!!! warning "Broken Offset Parameter"
-    The IFPA API's player search pagination is currently non-functional. Using `.offset()` may:
-    - Cause SQL errors from the API
-    - Return 0 results
-    - Return duplicate or incorrect results
-
-    **Workaround**: Use only `.limit()` without `.offset()` for player searches.
 
 ### State/Province Filters
 

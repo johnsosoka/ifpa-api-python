@@ -12,12 +12,12 @@ if TYPE_CHECKING:
     from typing import Self
 
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
-from ifpa_api.exceptions import IfpaClientValidationError
+from ifpa_api.core.exceptions import IfpaClientValidationError
+from ifpa_api.core.query_builder import QueryBuilder
 from ifpa_api.models.tournaments import TournamentSearchResponse
-from ifpa_api.query_builder import QueryBuilder
 
 if TYPE_CHECKING:
-    from ifpa_api.http import _HttpClient
+    from ifpa_api.core.http import _HttpClient
 
 
 # ============================================================================

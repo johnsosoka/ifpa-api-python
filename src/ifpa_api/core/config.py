@@ -66,7 +66,7 @@ class Config:
             MissingApiKeyError: If no API key can be resolved
         """
         # Import here to avoid circular dependency
-        from ifpa_api.exceptions import MissingApiKeyError
+        from ifpa_api.core.exceptions import MissingApiKeyError
 
         if api_key is not None:
             return api_key

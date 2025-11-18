@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any, Generic, TypeVar
 if TYPE_CHECKING:
     from typing import Self
 
-    from ifpa_api.http import _HttpClient
+    from ifpa_api.core.http import _HttpClient
 
 # Type variable for BaseResourceContext resource_id type
 T = TypeVar("T")
@@ -241,6 +241,11 @@ class PaginationMixin:
 
         This method maps to the IFPA API's "count" parameter.
 
+        Important: API behavior varies by endpoint type:
+        - **Search endpoints** (player, director, tournament): Return fixed 50-result
+          pages. The count parameter is ignored. Use offset() to navigate pages.
+        - **Rankings endpoints**: Count parameter is honored, variable result sizes supported.
+
         Args:
             count: Maximum number of results to return (must be positive)
 
@@ -249,15 +254,15 @@ class PaginationMixin:
 
         Example:
             ```python
-            # Get first 50 results
-            results = client.player.query("Smith").limit(50).get()
+            # Rankings - count is honored
+            rankings = client.rankings.wppr(count=10)  # Returns 10 results
 
-            # Combine with other filters
-            results = (client.player.query()
-                .country("US")
-                .state("WA")
-                .limit(100)
-                .get())
+            # Player search - count is ignored, returns 50
+            players = client.player.query("Smith").limit(10).get()  # Returns 50 results
+
+            # Use offset() for pagination on search endpoints
+            page1 = client.player.query("Smith").offset(0).get()   # First 50
+            page2 = client.player.query("Smith").offset(50).get()  # Next 50
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
@@ -267,7 +272,9 @@ class PaginationMixin:
     def offset(self, start_position: int) -> Self:
         """Set pagination offset (starting position).
 
-        This method maps to the IFPA API's "start_pos" parameter.
+        This method maps to the IFPA API's "start_pos" parameter. The SDK uses
+        0-based indexing for consistency with Python conventions, but internally
+        converts to the API's 1-based indexing.
 
         Args:
             start_position: Starting position for pagination (0-based index)
@@ -285,5 +292,5 @@ class PaginationMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
-        clone._params["start_pos"] = start_position
+        clone._params["start_pos"] = start_position + 1
         return clone  # type: ignore[no-any-return]

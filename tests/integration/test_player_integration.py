@@ -274,22 +274,11 @@ class TestPlayerSearchAudit:
         assert result.search is not None
         assert isinstance(result.search, list)
 
-    @pytest.mark.skip(
-        reason="API Bug: Pagination is completely non-functional. "
-        "start_pos=0 causes SQL errors, start_pos>0 returns empty results. "
-        "This is a known IFPA API limitation - pagination cannot be used."
-    )
     def test_search_pagination_start_pos(self, api_key: str, country_code: str) -> None:
         """Test search pagination with start_pos parameter.
 
-        Note: This test is permanently skipped due to a known IFPA API bug where
-        pagination is completely non-functional. The start_pos parameter causes:
-        - start_pos=0: SQL syntax error (tries to use -1 in LIMIT clause)
-        - start_pos>0: Returns 0 results
-        This is an API limitation and cannot be fixed in the SDK.
-
-        When the API is fixed, this test should validate that pagination correctly
-        returns different sets of results for different start positions.
+        Tests that pagination correctly returns different sets of results for
+        different start positions using the offset() method.
         """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
@@ -312,26 +301,23 @@ class TestPlayerSearchAudit:
             assert page1_ids != page2_ids
 
     @pytest.mark.skip(
-        reason="API Bug: Pagination is completely non-functional. "
-        "The count parameter is ignored and pagination does not work. "
-        "This is a known IFPA API limitation - pagination cannot be used."
+        reason="API Design: Search endpoints use fixed 50-result pages and ignore the count "
+        "parameter. Only offset (start_pos) pagination is supported. This is by design, "
+        "not a bug. Rankings endpoints DO honor count, but search endpoints don't."
     )
     def test_search_pagination_count_limit(self, api_key: str, country_code: str) -> None:
         """Test search with count parameter limits results.
 
-        Note: This test is permanently skipped due to a known IFPA API bug where
-        the count parameter is ignored and pagination does not work. The API returns
-        inconsistent results that don't respect the requested limit. This is an API
-        limitation and cannot be fixed in the SDK.
-
-        When the API is fixed, this test should validate that the count parameter
-        properly limits the number of results returned.
+        Note: This test is skipped because player/director/tournament search endpoints
+        return a FIXED 50 results per page by API design. The count parameter is ignored.
+        Use offset() to navigate through 50-result pages. Rankings endpoints are different
+        and DO honor the count parameter.
         """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
         for count in [5, 10, 25]:
-            result = client.player.query().country(country_code).limit(count).get()
+            result = client.player.query("Smith").country(country_code).limit(count).get()
             assert len(result.search) <= count
 
     def test_search_combined_filters(self, api_key: str) -> None:
