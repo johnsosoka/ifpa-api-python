@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ifpa-api"
-version = "0.2.1"
+version = "0.2.2"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
@@ -18,6 +18,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [{include = "ifpa_api", from = "src"}]
+include = ["src/ifpa_api/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.11"

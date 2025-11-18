@@ -54,3 +54,53 @@ def client(api_key: str) -> Generator[IfpaClient, None, None]:
         yield client_instance
     finally:
         client_instance.close()
+
+
+def assert_field_present(obj: object, field_name: str, expected_type: type) -> None:
+    """Assert that a field exists, is not None, and has the expected type.
+
+    This helper is used for resilient integration testing where we validate
+    field presence and type rather than exact values that may change.
+
+    Args:
+        obj: Object to check
+        field_name: Name of the field to validate
+        expected_type: Expected Python type
+
+    Raises:
+        AssertionError: If field is missing, None, or wrong type
+    """
+    assert hasattr(obj, field_name), f"Object missing field: {field_name}"
+    value = getattr(obj, field_name)
+    assert value is not None, f"Field {field_name} is None"
+    assert isinstance(
+        value, expected_type
+    ), f"Field {field_name} has wrong type. Expected {expected_type}, got {type(value)}"
+
+
+def assert_numeric_field_valid(value: float | int | None, min_threshold: float = 0.0) -> None:
+    """Assert that a numeric field has a reasonable value if present.
+
+    Args:
+        value: Numeric value to check (can be None for optional fields)
+        min_threshold: Minimum acceptable value (default 0.0)
+
+    Raises:
+        AssertionError: If value is present but invalid
+    """
+    if value is not None:
+        assert isinstance(value, float | int), f"Expected numeric type, got {type(value)}"
+        assert value >= min_threshold, f"Value {value} below threshold {min_threshold}"
+
+
+def assert_collection_not_empty(collection: object) -> None:
+    """Assert that a collection has at least one item.
+
+    Args:
+        collection: List, tuple, or other collection
+
+    Raises:
+        AssertionError: If collection is None or empty
+    """
+    assert collection is not None, "Collection is None"
+    assert len(collection) > 0, "Collection is empty"  # type: ignore[arg-type]

@@ -43,7 +43,7 @@ from ifpa_api.exceptions import (
 )
 from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 __all__ = [
     # Main client
