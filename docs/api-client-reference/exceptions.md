@@ -231,7 +231,7 @@ This exception is raised by the SDK when the IFPA API returns a 404 error indica
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import PlayersNeverMetError, IfpaApiError
+from ifpa_api.core.exceptions import PlayersNeverMetError, IfpaApiError
 
 client = IfpaClient()
 
@@ -252,4 +252,4 @@ This exception is raised specifically by the `PlayerHandle.pvp()` method when:
 - The IFPA API returns HTTP 404 status code
 - Both cases indicate the two players have never competed in the same tournament
 
-For usage examples, see the [Error Handling Guide](../usage/error-handling.md).
+For usage examples, see the [Error Handling Guide](../guides/error-handling.md).

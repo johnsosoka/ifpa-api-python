@@ -295,5 +295,5 @@ client = IfpaClient(api_key=config.ifpa_api_key)
 Now that you have authentication configured:
 
 1. [Follow the quick start guide](quickstart.md)
-2. [Explore usage examples](../usage/director.md)
+2. [Explore usage examples](../resources/directors.md)
 3. [Learn about configuration options](configuration.md)

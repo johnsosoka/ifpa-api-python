@@ -299,7 +299,7 @@ except IfpaApiError as e:
     print(f"API error: {e.status_code} - {e.response_body}")
 ```
 
-For more details on error handling, see the [Error Handling guide](error-handling.md).
+For more details on error handling, see the [Error Handling guide](../guides/error-handling.md).
 
 ## API Endpoints
 
@@ -313,6 +313,6 @@ The Reference client uses these IFPA API endpoints:
 ## Related Resources
 
 - [Rankings](rankings.md) - Use country filters with rankings
-- [Player](player.md) - Search players by location
+- [Player](players.md) - Search players by location
 - [Tournaments](tournaments.md) - Search tournaments by location
-- [API Reference: Models](../api-reference/models.md) - Complete model definitions
+- [API Reference: Models](../api-client-reference/models.md) - Complete model definitions

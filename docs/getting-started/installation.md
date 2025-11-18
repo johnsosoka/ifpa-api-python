@@ -207,4 +207,4 @@ Now that you have the package installed:
 
 1. [Set up authentication](authentication.md)
 2. [Follow the quick start guide](quickstart.md)
-3. [Explore usage examples](../usage/director.md)
+3. [Explore usage examples](../resources/directors.md)

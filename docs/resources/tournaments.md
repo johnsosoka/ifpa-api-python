@@ -100,8 +100,7 @@ upcoming: TournamentSearchResponse = (client.tournament.query()
     Invalid formats raise `IfpaClientValidationError`:
 
     ```python
-    from ifpa_api import IfpaClient
-    from ifpa_api.exceptions import IfpaClientValidationError
+    from ifpa_api import IfpaClient, IfpaClientValidationError
 
     client: IfpaClient = IfpaClient()
 
@@ -649,7 +648,7 @@ results: TournamentSearchResponse = (client.tournament.query("Championship")
 
 ## Related Resources
 
-- [Director](director.md) - View tournament directors
-- [Player](player.md) - View player profiles and results
+- [Director](directors.md) - View tournament directors
+- [Player](players.md) - View player profiles and results
 - [Series](series.md) - Tournament series information
-- [Error Handling](error-handling.md) - Handle API errors
+- [Error Handling](../guides/error-handling.md) - Handle API errors

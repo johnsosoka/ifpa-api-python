@@ -397,6 +397,6 @@ All examples can be copied and run directly with a valid IFPA API key.
 
 ## Related Resources
 
-- [Player](player.md) - View player profiles and results
+- [Player](players.md) - View player profiles and results
 - [Tournaments](tournaments.md) - Search and view tournament details
 - [Rankings](rankings.md) - View player rankings

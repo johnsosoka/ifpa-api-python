@@ -163,7 +163,7 @@ When requesting a non-existent player, the SDK raises an error:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 
 client: IfpaClient = IfpaClient()
 
@@ -264,7 +264,7 @@ Compare two players' tournament history:
 ```python
 from ifpa_api import IfpaClient
 from ifpa_api.models.player import PvpComparison
-from ifpa_api.exceptions import PlayersNeverMetError
+from ifpa_api.core.exceptions import PlayersNeverMetError
 
 client: IfpaClient = IfpaClient()
 
@@ -308,7 +308,7 @@ The `pvp()` method raises `PlayersNeverMetError` when two players have never com
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import PlayersNeverMetError, IfpaApiError
+from ifpa_api.core.exceptions import PlayersNeverMetError, IfpaApiError
 
 client: IfpaClient = IfpaClient()
 
@@ -396,7 +396,7 @@ Here's a complete example that analyzes a player's profile:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import Player, PlayerResultsResponse, RankingHistory
 
@@ -472,7 +472,7 @@ Always handle potential errors:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
@@ -559,5 +559,5 @@ These are API-level issues, not SDK bugs. For the most reliable experience:
 
 - [Rankings](rankings.md) - View rankings across all players
 - [Tournaments](tournaments.md) - View tournament results
-- [Error Handling](error-handling.md) - Handle API errors
-- [Exceptions Reference](../api-reference/exceptions.md) - Exception types
+- [Error Handling](../guides/error-handling.md) - Handle API errors
+- [Exceptions Reference](../api-client-reference/exceptions.md) - Exception types

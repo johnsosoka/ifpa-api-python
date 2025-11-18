@@ -343,7 +343,21 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- Explore [resource-specific examples](../usage/director.md)
-- Learn about [error handling](../usage/error-handling.md)
-- Check the [API reference](../api-reference/overview.md)
-- Review [configuration options](configuration.md)
+### Learn Key Patterns
+- [Callable Pattern](../guides/callable-pattern.md) - Understand `client.player(id).details()` pattern
+- [Searching](../guides/searching.md) - Master the Query Builder for powerful searches
+- [Pagination](../guides/pagination.md) - Handle large result sets effectively
+- [Error Handling](../guides/error-handling.md) - Robust error handling strategies
+
+### Explore API Resources
+- [Players](../resources/players.md) - Player profiles, results, and comparisons
+- [Directors](../resources/directors.md) - Tournament directors and their events
+- [Tournaments](../resources/tournaments.md) - Tournament details, results, and formats
+- [Rankings](../resources/rankings.md) - WPPR rankings across all systems
+- [Series](../resources/series.md) - Series standings and player cards
+- [Reference](../resources/reference.md) - Countries and state/province data
+
+### API Client Reference
+- [Client](../api-client-reference/client.md) - Complete IfpaClient documentation
+- [Models](../api-client-reference/models.md) - Pydantic models reference
+- [Exceptions](../api-client-reference/exceptions.md) - Exception handling reference

@@ -175,7 +175,7 @@ When requesting a non-existent director, the SDK raises an error:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 
 client: IfpaClient = IfpaClient()
 
@@ -351,7 +351,7 @@ Here's a complete example that analyzes a director's activity:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.common import TimePeriod
 from ifpa_api.models.director import Director, DirectorTournamentsResponse
 
@@ -444,7 +444,7 @@ Always handle potential errors:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.director import Director
 
 client: IfpaClient = IfpaClient()
@@ -591,5 +591,5 @@ results: DirectorSearchResponse = (client.director.query("Sharpe")
 ## Related Resources
 
 - [Tournaments](tournaments.md) - View tournament details and results
-- [Player](player.md) - View player profiles and statistics
-- [Error Handling](error-handling.md) - Handle API errors
+- [Player](players.md) - View player profiles and statistics
+- [Error Handling](../guides/error-handling.md) - Handle API errors

@@ -94,16 +94,28 @@ The client provides access to 36 of 46 IFPA API endpoints:
 ## Getting Help
 
 - **Documentation**: Browse the [Getting Started](getting-started/installation.md) guide
-- **Examples**: Check the [Usage Guide](usage/director.md) for code examples
+- **Guides**: Learn [key patterns](guides/callable-pattern.md) and [search techniques](guides/searching.md)
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/johnsosoka/ifpa-api-python/issues)
 - **API Reference**: See the [IFPA API docs](https://api.ifpapinball.com/docs)
 
 ## Next Steps
 
+### Get Started
 - [Install the client](getting-started/installation.md)
 - [Quick Start Guide](getting-started/quickstart.md)
 - [Authentication Setup](getting-started/authentication.md)
-- [Usage Examples](usage/director.md)
+
+### Learn Key Patterns
+- [Callable Pattern](guides/callable-pattern.md) - Resource-specific operations
+- [Searching](guides/searching.md) - Query Builder pattern
+- [Pagination](guides/pagination.md) - Handle large result sets
+
+### Explore Resources
+- [Players](resources/players.md) - Player profiles and results
+- [Directors](resources/directors.md) - Tournament directors
+- [Tournaments](resources/tournaments.md) - Tournament data
+- [Rankings](resources/rankings.md) - WPPR rankings
+- [Series](resources/series.md) - Series standings
 
 ## License
 

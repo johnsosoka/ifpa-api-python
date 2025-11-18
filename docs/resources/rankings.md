@@ -526,6 +526,6 @@ for country in top_countries:
 
 ## Related Resources
 
-- [Player](player.md) - View individual player profiles and rankings
+- [Player](players.md) - View individual player profiles and rankings
 - [Tournaments](tournaments.md) - View tournament results
-- [Error Handling](error-handling.md) - Handle API errors
+- [Error Handling](../guides/error-handling.md) - Handle API errors
