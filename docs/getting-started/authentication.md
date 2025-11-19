@@ -4,11 +4,13 @@ The IFPA API package requires an API key to authenticate with the IFPA API. This
 
 ## Obtaining an API Key
 
-To use the IFPA API, you need to obtain an API key from IFPA:
+To use the IFPA API, you need to create an IFPA account and generate an API key:
 
-1. Visit the [IFPA API Documentation](https://api.ifpapinball.com/docs)
-2. Follow the instructions to request an API key
-3. IFPA will provide you with an API key string
+1. **Create an IFPA Account**: Visit [IFPA Registration](https://www.ifpapinball.com/register/) to create your free account
+2. **Log In**: Sign in to your account at [IFPA Login](https://www.ifpapinball.com/login/)
+3. **Generate API Key**: Navigate to [IFPA API](https://www.ifpapinball.com/api/) to generate your API key
+
+Once generated, save your API key securely - you'll need it to authenticate all API requests.
 
 !!! note
     API keys are free and required for all API requests. Keep your API key secure and never commit it to version control.
@@ -295,5 +297,5 @@ client = IfpaClient(api_key=config.ifpa_api_key)
 Now that you have authentication configured:
 
 1. [Follow the quick start guide](quickstart.md)
-2. [Explore usage examples](../usage/directors.md)
+2. [Explore usage examples](../resources/directors.md)
 3. [Learn about configuration options](configuration.md)

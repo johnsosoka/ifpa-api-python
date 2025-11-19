@@ -35,7 +35,7 @@ Example:
 
 **Steps to Reproduce**:
 1. Initialize client with valid API key
-2. Call `client.players.search(name="José")`
+2. Call `client.player.query("José").get()`
 3. Observe error
 
 **Expected**: Returns players matching "José"
@@ -50,7 +50,7 @@ Example:
 ```python
 from ifpa_api import IfpaClient
 client = IfpaClient()
-players = client.players.search(name="José")  # Fails
+players = client.player.query("José").get()  # Fails
 ```
 ```
 
@@ -209,7 +209,7 @@ def get_player(player_id: int | str) -> Player:
 
     Example:
         ```python
-        player = client.player(12345).get()
+        player = client.player(12345).details()
         print(f"{player.first_name} {player.last_name}")
         ```
     """
@@ -238,25 +238,25 @@ All new features must include tests. The project maintains 98% code coverage.
 Unit tests use `requests-mock` to mock API responses:
 
 ```python
-# tests/unit/test_players.py
+# tests/unit/test_player.py
 import requests_mock
 from ifpa_api import IfpaClient
 
 
 def test_search_players():
-    """Test searching for players."""
+    """Test querying for players."""
     with requests_mock.Mocker() as m:
         # Mock the API response
         m.get(
             "https://api.ifpapinball.com/player/search",
-            json={"players": [{"player_id": 12345, "first_name": "John"}]}
+            json={"search": [{"player_id": 12345, "first_name": "John"}]}
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.players.search(name="John")
+        result = client.player.query("John").get()
 
-        assert len(result.players) == 1
-        assert result.players[0].player_id == 12345
+        assert len(result.search) == 1
+        assert result.search[0].player_id == 12345
 ```
 
 #### Integration Tests
@@ -264,17 +264,17 @@ def test_search_players():
 Integration tests make real API calls and are marked with `@pytest.mark.integration`:
 
 ```python
-# tests/integration/test_players_integration.py
+# tests/integration/test_player_integration.py
 import pytest
 from ifpa_api import IfpaClient
 
 
 @pytest.mark.integration
 def test_search_players_integration(client: IfpaClient):
-    """Test searching for real players."""
-    result = client.players.search(name="Josh")
-    assert len(result.players) > 0
-    assert all(hasattr(p, "player_id") for p in result.players)
+    """Test querying for real players."""
+    result = client.player.query("Josh").get()
+    assert len(result.search) > 0
+    assert all(hasattr(p, "player_id") for p in result.search)
 ```
 
 Integration tests use a fixture that provides a configured client (see `tests/integration/conftest.py`).
@@ -295,10 +295,10 @@ poetry run pytest tests/integration/
 poetry run pytest -m "not integration"
 
 # Run a specific test file
-poetry run pytest tests/unit/test_players.py
+poetry run pytest tests/unit/test_player.py
 
 # Run a specific test function
-poetry run pytest tests/unit/test_players.py::test_search_players
+poetry run pytest tests/unit/test_player.py::test_search_players
 
 # Run tests with verbose output
 poetry run pytest -v
@@ -464,7 +464,7 @@ class NewFeatureResponse(BaseModel):
 Add the method to the appropriate resource client in `src/ifpa_api/resources/`:
 
 ```python
-# src/ifpa_api/resources/players.py
+# src/ifpa_api/resources/player.py
 def new_feature(self, player_id: int) -> NewFeatureResponse:
     """Get new feature data for a player.
 
@@ -492,12 +492,12 @@ def new_feature(self, player_id: int) -> NewFeatureResponse:
 Add unit and integration tests:
 
 ```python
-# tests/unit/test_players.py
+# tests/unit/test_player.py
 def test_new_feature(mock_http_client):
     """Test new feature endpoint."""
     # Test implementation
 
-# tests/integration/test_players_integration.py
+# tests/integration/test_player_integration.py
 @pytest.mark.integration
 def test_new_feature_integration(client):
     """Test new feature with real API."""

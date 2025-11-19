@@ -54,12 +54,12 @@ def get_test_director_id(client: IfpaClient) -> int | None:
         client = IfpaClient()
         director_id = get_test_director_id(client)
         if director_id:
-            director = client.director(director_id).get()
+            director = client.director(director_id).details()
         ```
     """
     try:
         # Search for directors, get first result
-        results = client.directors.search()
+        results = client.director.query().get()
         if results.directors and len(results.directors) > 0:
             director_id: int = results.directors[0].director_id
             return director_id
@@ -84,7 +84,7 @@ def get_test_player_id(client: IfpaClient) -> int | None:
         client = IfpaClient()
         player_id = get_test_player_id(client)
         if player_id:
-            player = client.player(player_id).get()
+            player = client.player(player_id).details()
         ```
     """
     try:
@@ -107,23 +107,30 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
         client: Initialized IfpaClient instance
 
     Returns:
-        Tournament ID if found, None otherwise
+        Tournament ID if found, None otherwise (e.g., due to timeout or API error)
 
     Example:
         ```python
         client = IfpaClient()
         tournament_id = get_test_tournament_id(client)
         if tournament_id:
-            tournament = client.tournament(tournament_id).get()
+            tournament = client.tournament(tournament_id).details()
         ```
+
+    Note:
+        This helper is resilient to API timeouts and other errors, returning None
+        rather than raising exceptions. Callers should handle None by skipping tests.
     """
     try:
         # Search for tournaments, get first result
-        results = client.tournaments.search(count=1)
+        # Note: Timeouts may occur in CI environments with rate-limited or slow APIs
+        results = client.tournament.query().limit(1).get()
         if results.tournaments and len(results.tournaments) > 0:
             tournament_id: int = results.tournaments[0].tournament_id
             return tournament_id
     except Exception:
+        # Silently handle errors (timeout, API errors, etc.) and return None
+        # Tests using this helper should skip when None is returned
         pass
     return None
 
@@ -144,7 +151,7 @@ def get_test_series_code(client: IfpaClient) -> str | None:
         client = IfpaClient()
         series_code = get_test_series_code(client)
         if series_code:
-            standings = client.series_handle(series_code).standings()
+            standings = client.series(series_code).standings()
         ```
     """
     try:

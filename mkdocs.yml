@@ -45,25 +45,27 @@ nav:
       - Installation: getting-started/installation.md
       - Quick Start: getting-started/quickstart.md
       - Authentication: getting-started/authentication.md
-      - Configuration: getting-started/configuration.md
-  - Usage Guide:
-      - Directors: usage/directors.md
-      - Players: usage/players.md
-      - Rankings: usage/rankings.md
-      - Tournaments: usage/tournaments.md
-      - Series: usage/series.md
-      - Reference: usage/reference.md
-      - Error Handling: usage/error-handling.md
-  - API Reference:
-      - Overview: api-reference/overview.md
-      - Client: api-reference/client.md
-      - Models: api-reference/models.md
-      - Exceptions: api-reference/exceptions.md
+  - Guides:
+      - Callable Pattern: guides/callable-pattern.md
+      - Searching: guides/searching.md
+      - Pagination: guides/pagination.md
+      - Error Handling: guides/error-handling.md
+  - IFPA API Resources:
+      - Directors: resources/directors.md
+      - Players: resources/players.md
+      - Rankings: resources/rankings.md
+      - Tournaments: resources/tournaments.md
+      - Series: resources/series.md
+      - Reference: resources/reference.md
+  - API Client Reference:
+      - Client: api-client-reference/client.md
+      - Models: api-client-reference/models.md
+      - Exceptions: api-client-reference/exceptions.md
+      - Changelog: api-client-reference/changelog.md
   - Development:
       - Contributing: contributing.md
       - Testing: development/testing.md
       - Code Style: development/code-style.md
-  - Changelog: changelog.md
 
 markdown_extensions:
   - admonition

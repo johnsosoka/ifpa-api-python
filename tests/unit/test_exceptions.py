@@ -2,7 +2,7 @@
 
 import pytest
 
-from ifpa_api.exceptions import (
+from ifpa_api.core.exceptions import (
     IfpaApiError,
     IfpaClientValidationError,
     IfpaError,

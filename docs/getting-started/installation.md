@@ -24,7 +24,7 @@ After installation, verify that the package is installed correctly:
 ```python
 import ifpa_api
 
-print(ifpa_api.__version__)  # Should print: 0.2.1
+print(ifpa_api.__version__)  # Should print: 0.3.0
 ```
 
 You can also check the installed version using pip:
@@ -207,4 +207,4 @@ Now that you have the package installed:
 
 1. [Set up authentication](authentication.md)
 2. [Follow the quick start guide](quickstart.md)
-3. [Explore usage examples](../usage/directors.md)
+3. [Explore usage examples](../resources/directors.md)

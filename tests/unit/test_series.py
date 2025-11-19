@@ -7,7 +7,7 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError, SeriesPlayerNotFoundError
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
@@ -119,7 +119,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        standings = client.series_handle("PAPA").standings()
+        standings = client.series("PAPA").standings()
 
         assert isinstance(standings, SeriesStandingsResponse)
         assert standings.series_code == "PAPA"
@@ -152,7 +152,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        standings = client.series_handle("PAPA").standings(start_pos=0, count=50)
+        standings = client.series("PAPA").standings(start_pos=0, count=50)
 
         assert len(standings.overall_results) == 50
         assert mock_requests.last_request is not None
@@ -192,7 +192,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        card = client.series_handle("PAPA").player_card(12345, "OH")
+        card = client.series("PAPA").player_card(12345, "OH")
 
         assert isinstance(card, SeriesPlayerCard)
         assert card.series_code == "PAPA"
@@ -223,7 +223,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        card = client.series_handle("PAPA").player_card("12345", "IL")
+        card = client.series("PAPA").player_card("12345", "IL")
 
         assert card.player_id == 12345
 
@@ -249,7 +249,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        card = client.series_handle("PAPA").player_card(12345, "OH", year=2023)
+        card = client.series("PAPA").player_card(12345, "OH", year=2023)
 
         assert card.year == 2023
         assert mock_requests.last_request is not None
@@ -282,7 +282,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        regions = client.series_handle("PAPA").regions(region_code="NW", year=2024)
+        regions = client.series("PAPA").regions(region_code="NW", year=2024)
 
         assert isinstance(regions, SeriesRegionsResponse)
         assert regions.series_code == "PAPA"
@@ -308,7 +308,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        stats = client.series_handle("PAPA").stats(region_code="OH")
+        stats = client.series("PAPA").stats(region_code="OH")
 
         assert isinstance(stats, SeriesStats)
         assert stats.series_code == "PAPA"
@@ -342,7 +342,7 @@ class TestSeriesHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        reps = client.series_handle("PAPA").region_reps()
+        reps = client.series("PAPA").region_reps()
 
         assert isinstance(reps, RegionRepsResponse)
         assert reps.series_code == "PAPA"
@@ -380,9 +380,35 @@ class TestSeriesErrors:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.series_handle("NONEXISTENT").standings()
+            client.series("NONEXISTENT").standings()
 
         assert exc_info.value.status_code == 404
+
+    def test_player_card_raises_semantic_exception_on_404(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that 404 for player card raises SeriesPlayerNotFoundError."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/series/PAPA/player_card/99999",
+            status_code=404,
+            json={"error": "Player not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(SeriesPlayerNotFoundError) as exc_info:
+            client.series("PAPA").player_card(99999, "OH")
+
+        error = exc_info.value
+        assert error.series_code == "PAPA"
+        assert error.player_id == 99999
+        assert error.region_code == "OH"
+        assert "PAPA" in str(error)
+        assert "99999" in str(error)
+
+        # Verify exception chaining
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, IfpaApiError)
 
 
 class TestSeriesIntegration:
@@ -435,7 +461,7 @@ class TestSeriesIntegration:
 
         # Get standings for first series
         series_code = series_list.series[0].series_code
-        standings = client.series_handle(series_code).standings()
+        standings = client.series(series_code).standings()
 
         assert standings.series_code == "PAPA"
         assert len(standings.overall_results) == 1

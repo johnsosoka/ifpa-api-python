@@ -1,4 +1,4 @@
-name: CI
+name: Lint, Type Check & Tests
 
 on:
   push:
@@ -94,6 +94,7 @@ jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -133,10 +134,15 @@ jobs:
         run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=xml --cov-report=term-missing
 
       - name: Run integration tests (if API key available)
-        if: ${{ env.IFPA_API_KEY != '' }}
         env:
           IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
-        run: poetry run pytest -v -m "integration" --cov=ifpa_api --cov-append --cov-report=xml --cov-report=term-missing
+        run: |
+          if [ -n "$IFPA_API_KEY" ]; then
+            echo "Running integration tests with API key..."
+            poetry run pytest -v -m "integration" --cov=ifpa_api --cov-append --cov-report=xml --cov-report=term-missing
+          else
+            echo "Skipping integration tests (no API key available)"
+          fi
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'

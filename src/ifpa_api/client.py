@@ -6,14 +6,14 @@ through a clean, typed interface.
 
 from typing import Any
 
-from ifpa_api.config import Config
-from ifpa_api.http import _HttpClient
-from ifpa_api.resources.directors import DirectorHandle, DirectorsClient
-from ifpa_api.resources.players import PlayerHandle, PlayersClient
+from ifpa_api.core.config import Config
+from ifpa_api.core.http import _HttpClient
+from ifpa_api.resources.director import DirectorClient
+from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
-from ifpa_api.resources.series import SeriesClient, SeriesHandle
-from ifpa_api.resources.tournaments import TournamentHandle, TournamentsClient
+from ifpa_api.resources.series import SeriesClient
+from ifpa_api.resources.tournament import TournamentClient
 
 
 class IfpaClient:
@@ -38,9 +38,11 @@ class IfpaClient:
         client = IfpaClient(api_key="your-api-key")
 
         # Access resources
-        player = client.player(12345).get()
+        player = client.player(12345).details()
         rankings = client.rankings.wppr(start_pos=0, count=100)
-        tournaments = client.director(1000).tournaments(TimePeriod.PAST)
+        director = client.director(1000).details()
+        director_tourneys = client.director(1000).tournaments(TimePeriod.PAST)
+        tournament = client.tournament(12345).details()
 
         # Close when done (or use context manager)
         client.close()
@@ -94,49 +96,67 @@ class IfpaClient:
         self._http = _HttpClient(self._config)
 
         # Initialize resource clients (lazy-loaded via properties)
-        self._directors_client: DirectorsClient | None = None
-        self._players_client: PlayersClient | None = None
+        self._director_client: DirectorClient | None = None
+        self._player_client: PlayerClient | None = None
         self._rankings_client: RankingsClient | None = None
         self._reference_client: ReferenceClient | None = None
-        self._tournaments_client: TournamentsClient | None = None
+        self._tournament_client: TournamentClient | None = None
         self._series_client: SeriesClient | None = None
 
     @property
-    def directors(self) -> DirectorsClient:
-        """Access the directors resource client.
+    def director(self) -> DirectorClient:
+        """Access the director resource client.
 
         Returns:
-            DirectorsClient instance for searching and accessing directors
+            DirectorClient instance for director operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for directors
-            results = client.directors.search(name="Josh")
+            # Collection-level: Query for directors
+            results = client.director.query("Josh").get()
 
-            # Get country directors
-            country_dirs = client.directors.country_directors()
+            # Collection-level: Query with filters
+            results = client.director.query("Josh").country("US").state("IL").get()
+
+            # Collection-level: Get country directors
+            country_dirs = client.director.country_directors()
+
+            # Resource-level: Get director details
+            director = client.director(1000).details()
+
+            # Resource-level: Get director's tournaments
+            past = client.director(1000).tournaments(TimePeriod.PAST)
             ```
         """
-        if self._directors_client is None:
-            self._directors_client = DirectorsClient(self._http, self._config.validate_requests)
-        return self._directors_client
+        if self._director_client is None:
+            self._director_client = DirectorClient(self._http, self._config.validate_requests)
+        return self._director_client
 
     @property
-    def players(self) -> PlayersClient:
-        """Access the players resource client.
+    def player(self) -> PlayerClient:
+        """Access the player resource client.
 
         Returns:
-            PlayersClient instance for searching and accessing players
+            PlayerClient instance for player operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for players
-            results = client.players.search(name="John", city="Seattle")
+            # Collection-level: Query for players
+            results = client.player.query("John").get()
+
+            # Collection-level: Query with filters
+            results = client.player.query("John").state("WA").country("US").get()
+
+            # Resource-level: Get player details
+            player = client.player(12345).details()
+
+            # Resource-level: Get PVP comparison
+            pvp = client.player(12345).pvp(67890)
             ```
         """
-        if self._players_client is None:
-            self._players_client = PlayersClient(self._http, self._config.validate_requests)
-        return self._players_client
+        if self._player_client is None:
+            self._player_client = PlayerClient(self._http, self._config.validate_requests)
+        return self._player_client
 
     @property
     def rankings(self) -> RankingsClient:
@@ -180,151 +200,64 @@ class IfpaClient:
             ```
         """
         if self._reference_client is None:
-            self._reference_client = ReferenceClient(self._http)
+            self._reference_client = ReferenceClient(self._http, self._config.validate_requests)
         return self._reference_client
 
     @property
-    def tournaments(self) -> TournamentsClient:
-        """Access the tournaments resource client.
+    def tournament(self) -> TournamentClient:
+        """Access the tournament resource client.
 
         Returns:
-            TournamentsClient instance for searching tournaments
+            TournamentClient instance for tournament operations (both collection and resource level)
 
         Example:
             ```python
-            # Search for tournaments
-            results = client.tournaments.search(
-                name="Pinball",
-                city="Portland",
-                stateprov="OR"
-            )
+            # Collection-level: Query for tournaments
+            results = client.tournament.query("Pinball").get()
+
+            # Collection-level: Query with filters
+            results = client.tournament.query("Pinball").city("Portland").state("OR").get()
+
+            # Collection-level: List tournament formats
+            formats = client.tournament.list_formats()
+
+            # Resource-level: Get tournament details
+            tournament = client.tournament(12345).details()
+
+            # Resource-level: Get tournament results
+            results = client.tournament(12345).results()
             ```
         """
-        if self._tournaments_client is None:
-            self._tournaments_client = TournamentsClient(self._http, self._config.validate_requests)
-        return self._tournaments_client
+        if self._tournament_client is None:
+            self._tournament_client = TournamentClient(self._http, self._config.validate_requests)
+        return self._tournament_client
 
     @property
     def series(self) -> SeriesClient:
         """Access the series resource client.
 
         Returns:
-            SeriesClient instance for accessing tournament series
+            SeriesClient instance for series operations (both collection and resource level)
 
         Example:
             ```python
-            # List all series
+            # Collection-level: List all series
             all_series = client.series.list()
-
-            # Get active series only
             active = client.series.list(active_only=True)
+
+            # Resource-level: Get series standings
+            standings = client.series("NACS").standings()
+
+            # Resource-level: Get player's series card
+            card = client.series("PAPA").player_card(12345, "OH")
+
+            # Resource-level: Get region standings
+            region = client.series("NACS").region_standings("OH")
             ```
         """
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
-
-    def director(self, director_id: int | str) -> DirectorHandle:
-        """Get a handle for a specific tournament director.
-
-        Args:
-            director_id: The director's unique identifier
-
-        Returns:
-            DirectorHandle instance for accessing director-specific operations
-
-        Example:
-            ```python
-            # Get director details
-            director = client.director(1000).get()
-
-            # Get director's tournaments
-            past = client.director(1000).tournaments(TimePeriod.PAST)
-            future = client.director(1000).tournaments(TimePeriod.FUTURE)
-            ```
-        """
-        return DirectorHandle(self._http, director_id, self._config.validate_requests)
-
-    def player(self, player_id: int | str) -> PlayerHandle:
-        """Get a handle for a specific player.
-
-        Args:
-            player_id: The player's unique identifier
-
-        Returns:
-            PlayerHandle instance for accessing player-specific operations
-
-        Example:
-            ```python
-            # Get player details
-            player = client.player(12345).get()
-
-            # Get player rankings
-            rankings = client.player(12345).rankings()
-
-            # Get tournament results
-            results = client.player(12345).results()
-
-            # Compare with another player
-            pvp = client.player(12345).pvp(67890)
-
-            # Get ranking history
-            history = client.player(12345).history()
-            ```
-        """
-        return PlayerHandle(self._http, player_id, self._config.validate_requests)
-
-    def tournament(self, tournament_id: int | str) -> TournamentHandle:
-        """Get a handle for a specific tournament.
-
-        Args:
-            tournament_id: The tournament's unique identifier
-
-        Returns:
-            TournamentHandle instance for accessing tournament-specific operations
-
-        Example:
-            ```python
-            # Get tournament details
-            tournament = client.tournament(12345).get()
-
-            # Get tournament results
-            results = client.tournament(12345).results()
-
-            # Get tournament formats
-            formats = client.tournament(12345).formats()
-
-            # Get league information
-            league = client.tournament(12345).league()
-            ```
-        """
-        return TournamentHandle(self._http, tournament_id, self._config.validate_requests)
-
-    def series_handle(self, series_code: str) -> SeriesHandle:
-        """Get a handle for a specific tournament series.
-
-        Args:
-            series_code: The series code identifier
-
-        Returns:
-            SeriesHandle instance for accessing series-specific operations
-
-        Example:
-            ```python
-            # Get series standings
-            standings = client.series_handle("PAPA").standings()
-
-            # Get player's series card
-            card = client.series_handle("PAPA").player_card(12345)
-
-            # Get series overview
-            overview = client.series_handle("PAPA").overview()
-
-            # Get series rules
-            rules = client.series_handle("PAPA").rules()
-            ```
-        """
-        return SeriesHandle(self._http, series_code, self._config.validate_requests)
 
     def close(self) -> None:
         """Close the HTTP client session.
@@ -337,7 +270,7 @@ class IfpaClient:
             client = IfpaClient()
             try:
                 # Use client
-                player = client.player(12345).get()
+                player = client.player(12345).details()
             finally:
                 client.close()
             ```
@@ -350,7 +283,7 @@ class IfpaClient:
         Example:
             ```python
             with IfpaClient() as client:
-                player = client.player(12345).get()
+                player = client.player(12345).details()
                 rankings = client.rankings.wppr(count=100)
             # Automatically closed
             ```

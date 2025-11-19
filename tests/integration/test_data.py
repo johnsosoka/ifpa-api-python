@@ -86,6 +86,26 @@ TEST_TOURNAMENT_ID = 7070  # PAPA 17 (2014) - well-known historical tournament
 TEST_YEAR_START = 2020
 TEST_YEAR_END = 2024
 
+# === DIRECTOR DATA ===
+
+# Active tournament director with stable history (moderate activity)
+TEST_DIRECTOR_ACTIVE_ID = 1533  # Josh Rainwater - 13 tournaments, 120 unique players, Columbia SC
+
+# Highly active director (545 tournaments, 1658 unique players, 88 future events)
+TEST_DIRECTOR_HIGHLY_ACTIVE_ID = 1151  # Erik Thoren - De Pere, WI, USA
+
+# International director (225 tournaments, 1033 unique players, Switzerland)
+TEST_DIRECTOR_INTERNATIONAL_ID = 1071  # Michael Trepp - Switzerland
+
+# Director with zero future tournaments (for testing empty result sets)
+TEST_DIRECTOR_ZERO_FUTURE_ID = 1752  # Cory Casella - 34 tournaments, 271 players, Los Angeles CA
+
+# Low activity director (3 tournaments, 55 unique players)
+TEST_DIRECTOR_LOW_ACTIVITY_ID = 3657  # Matt Darst - Willard, MO, USA
+
+# Common director search patterns
+TEST_DIRECTOR_SEARCH_JOSH = {"name": "Josh", "count": 30}  # Returns ~26 directors
+
 
 # === FIXTURES ===
 
@@ -108,7 +128,7 @@ def player_highly_active_id() -> int:
     Example:
         ```python
         def test_highly_active_player(client, player_highly_active_id):
-            player = client.player(player_highly_active_id).get()
+            player = client.player(player_highly_active_id).details()
             assert int(player.player_stats["system"]["open"]["current_rank"]) < 1000
         ```
     """
@@ -133,7 +153,7 @@ def player_active_id() -> int:
     Example:
         ```python
         def test_get_active_player(client, player_active_id):
-            player = client.player(player_active_id).get()
+            player = client.player(player_active_id).details()
             assert player.player_id == player_active_id
         ```
     """
@@ -158,8 +178,8 @@ def player_active_id_2() -> int:
     Example:
         ```python
         def test_compare_active_players(client, player_active_id, player_active_id_2):
-            player1 = client.player(player_active_id).get()
-            player2 = client.player(player_active_id_2).get()
+            player1 = client.player(player_active_id).details()
+            player2 = client.player(player_active_id_2).details()
             assert player1.player_id != player2.player_id
         ```
     """
@@ -184,7 +204,7 @@ def player_inactive_id() -> int:
     Example:
         ```python
         def test_handle_inactive_player(client, player_inactive_id):
-            player = client.player(player_inactive_id).get()
+            player = client.player(player_inactive_id).details()
             stats = player.player_stats["system"]["open"]
             assert stats["current_rank"] == "0"
             assert float(stats["active_points"]) == 0.0
@@ -261,7 +281,7 @@ def player_ids_multiple() -> list[int]:
     Example:
         ```python
         def test_get_multiple_mixed(client, player_ids_multiple):
-            result = client.players.get_multiple(player_ids_multiple)
+            result = client.player.get_multiple(player_ids_multiple)
             assert len(result.player) == len(player_ids_multiple)
         ```
     """
@@ -281,7 +301,7 @@ def player_ids_active() -> list[int]:
     Example:
         ```python
         def test_get_multiple_active(client, player_ids_active):
-            result = client.players.get_multiple(player_ids_active)
+            result = client.player.get_multiple(player_ids_active)
             for player in result.player:
                 assert int(player.player_stats["system"]["open"]["current_rank"]) > 0
         ```
@@ -305,7 +325,7 @@ def search_idaho_smiths() -> dict[str, str | int]:
     Example:
         ```python
         def test_search_smiths(client, search_idaho_smiths):
-            result = client.players.search(**search_idaho_smiths)
+            result = client.player.search(**search_idaho_smiths)
             assert len(result.search) == 2
             player_ids = {p.player_id for p in result.search}
             assert 25584 in player_ids
@@ -330,7 +350,7 @@ def search_idaho_johns() -> dict[str, str | int]:
     Example:
         ```python
         def test_search_johns_count(client, search_idaho_johns):
-            result = client.players.search(**search_idaho_johns)
+            result = client.player.search(**search_idaho_johns)
             assert len(result.search) == 5
             player_ids = {p.player_id for p in result.search}
             assert 50104 in player_ids  # John Sosoka
@@ -367,7 +387,7 @@ def country_code() -> str:
     Example:
         ```python
         def test_search_us_players(client, country_code):
-            result = client.players.search(country=country_code, count=5)
+            result = client.player.search(country=country_code, count=5)
             assert result.search is not None
         ```
     """
@@ -411,3 +431,129 @@ def year_start() -> int:
 def year_end() -> int:
     """End year for date range testing (2024)."""
     return TEST_YEAR_END
+
+
+@pytest.fixture
+def director_active_id() -> int:
+    """Active tournament director ID for testing (moderate activity).
+
+    Returns:
+        Director ID 1533 (Josh Rainwater):
+        - Location: Columbia, SC
+        - Tournament count: 13
+        - Unique player count: 120
+        - Has both past and future tournaments
+
+    Use this fixture for tests requiring an active director with tournament history.
+
+    Example:
+        ```python
+        def test_get_director_details(client, director_active_id):
+            director = client.director(director_active_id).details()
+            assert director.director_id == director_active_id
+            assert director.stats.tournament_count > 0
+        ```
+    """
+    return TEST_DIRECTOR_ACTIVE_ID
+
+
+@pytest.fixture
+def director_highly_active_id() -> int:
+    """Highly active tournament director ID for testing.
+
+    Returns:
+        Director ID 1151 (Erik Thoren):
+        - Location: De Pere, WI, USA
+        - Tournament count: 545
+        - Unique player count: 1,658
+        - Total player entries: 31,752
+        - Future events: 88
+        - Highest value tournament: 257.03
+
+    Use this fixture for tests requiring a director with extensive tournament
+    history, high volume data, and complex nested structures.
+
+    Example:
+        ```python
+        def test_highly_active_director(client, director_highly_active_id):
+            director = client.director(director_highly_active_id).details()
+            assert director.stats.tournament_count > 500
+            assert director.stats.unique_player_count > 1000
+        ```
+    """
+    return TEST_DIRECTOR_HIGHLY_ACTIVE_ID
+
+
+@pytest.fixture
+def director_international_id() -> int:
+    """International tournament director ID for testing.
+
+    Returns:
+        Director ID 1071 (Michael Trepp):
+        - Location: Switzerland
+        - Tournament count: 225
+        - Unique player count: 1,033
+        - Future events: 8
+        - Highest value tournament: 178.06
+
+    Use this fixture for tests requiring a non-US director to test
+    international data handling and country filtering.
+
+    Example:
+        ```python
+        def test_international_director(client, director_international_id):
+            director = client.director(director_international_id).details()
+            assert director.country_code != "US"
+            assert director.country_name == "Switzerland"
+        ```
+    """
+    return TEST_DIRECTOR_INTERNATIONAL_ID
+
+
+@pytest.fixture
+def director_zero_future_id() -> int:
+    """Director with zero future tournaments for testing empty result sets.
+
+    Returns:
+        Director ID 1752 (Cory Casella):
+        - Location: Los Angeles, CA, USA
+        - Tournament count: 34
+        - Unique player count: 271
+        - Future events: 0 (perfect for testing empty result sets)
+        - Women tournaments: 12
+        - Leagues: 14
+
+    Use this fixture for tests requiring empty future tournament results.
+
+    Example:
+        ```python
+        def test_director_zero_future(client, director_zero_future_id):
+            result = client.director(director_zero_future_id).tournaments(TimePeriod.FUTURE)
+            assert len(result.tournaments) == 0
+        ```
+    """
+    return TEST_DIRECTOR_ZERO_FUTURE_ID
+
+
+@pytest.fixture
+def director_low_activity_id() -> int:
+    """Low activity tournament director ID for testing minimal data.
+
+    Returns:
+        Director ID 3657 (Matt Darst):
+        - Location: Willard, MO, USA
+        - Tournament count: 3
+        - Unique player count: 55
+        - Future events: 2
+
+    Use this fixture for tests requiring minimal data scenarios and
+    edge case handling.
+
+    Example:
+        ```python
+        def test_low_activity_director(client, director_low_activity_id):
+            director = client.director(director_low_activity_id).details()
+            assert director.stats.tournament_count < 10
+        ```
+    """
+    return TEST_DIRECTOR_LOW_ACTIVITY_ID

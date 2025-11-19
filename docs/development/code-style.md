@@ -95,7 +95,7 @@ def search_players(name: str, count: int | None = None) -> PlayerSearchResponse:
 
     Example:
         ```python
-        results = client.players.search(name="John", count=25)
+        results = client.player.query("John").limit(25).get()
         ```
     """
 ```
@@ -129,8 +129,8 @@ import requests
 from pydantic import BaseModel
 
 # Local
-from ifpa_api.config import Config
-from ifpa_api.exceptions import IfpaError
+from ifpa_api.core.config import Config
+from ifpa_api.core.exceptions import IfpaError
 ```
 
 ## Editor Configuration

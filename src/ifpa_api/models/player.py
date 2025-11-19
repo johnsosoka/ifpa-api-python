@@ -162,7 +162,7 @@ class TournamentResult(IfpaBaseModel):
         position: Player's finishing position
         position_points: Points earned for position
         count_flag: Whether result counts toward rankings
-        wppr_points: Current WPPR points earned (mapped from 'current_points' in API)
+        current_points: Current WPPR points earned
         all_time_points: All-time WPPR points for this tournament
         active_points: Active WPPR points for this tournament
         inactive_points: Inactive WPPR points for this tournament
@@ -183,7 +183,7 @@ class TournamentResult(IfpaBaseModel):
     position: int | None = None
     position_points: float | None = None
     count_flag: bool | None = None
-    wppr_points: float | None = Field(None, validation_alias="current_points")
+    current_points: float | None = None
     all_time_points: float | None = None
     active_points: float | None = None
     inactive_points: float | None = None

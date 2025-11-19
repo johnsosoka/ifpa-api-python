@@ -5,7 +5,7 @@ Models for tournament information, results, formats, and league data.
 
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from ifpa_api.models.common import IfpaBaseModel
 
@@ -89,12 +89,12 @@ class TournamentResult(IfpaBaseModel):
         stateprov: Player's state/province
         country_code: ISO country code
         country_name: Full country name
-        wppr_points: WPPR points earned (mapped from 'points' in API)
+        points: WPPR points earned
         wppr_rank: Player's current WPPR rank
-        rating_points: Rating points earned (mapped from 'ratings_value' in API)
+        ratings_value: Rating points earned
         percentile: Player's percentile in tournament
         best_game_finish: Best individual game finish
-        total_events: Total events played (mapped from 'player_tournament_count' in API)
+        player_tournament_count: Total events played
     """
 
     position: int
@@ -106,12 +106,34 @@ class TournamentResult(IfpaBaseModel):
     stateprov: str | None = None
     country_code: str | None = None
     country_name: str | None = None
-    wppr_points: float | None = Field(None, validation_alias="points")
+    points: float | None = None
     wppr_rank: int | None = None
-    rating_points: float | None = Field(None, validation_alias="ratings_value")
+    ratings_value: float | None = None
     percentile: float | None = None
     best_game_finish: int | None = None
-    total_events: int | None = Field(None, validation_alias="player_tournament_count")
+    player_tournament_count: int | None = None
+
+    @field_validator("ratings_value", "points", "percentile", mode="before")
+    @classmethod
+    def handle_not_rated(cls, v: Any) -> float | None:
+        """Convert "Not Rated" string to None for float fields.
+
+        The IFPA API returns "Not Rated" as a string for unrated players,
+        but the schema expects float values. This validator handles that
+        conversion.
+
+        Args:
+            v: The value from the API (may be float, int, str, or None)
+
+        Returns:
+            The value as float, or None if "Not Rated" or empty
+        """
+        if v == "Not Rated" or v == "" or v is None:
+            return None
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return None
 
 
 class TournamentResultsResponse(IfpaBaseModel):

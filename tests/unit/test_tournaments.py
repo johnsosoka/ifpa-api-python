@@ -1,4 +1,4 @@
-"""Unit tests for TournamentsClient and TournamentHandle.
+"""Unit tests for TournamentClient.
 
 Tests the tournaments resource client and handle using mocked HTTP requests.
 """
@@ -7,7 +7,11 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import (
+    IfpaApiError,
+    IfpaClientValidationError,
+    TournamentNotLeagueError,
+)
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -21,10 +25,10 @@ from ifpa_api.models.tournaments import (
 
 
 class TestTournamentsClient:
-    """Test cases for TournamentsClient collection-level operations."""
+    """Test cases for TournamentClient collection-level operations."""
 
     def test_search_with_name_filter(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments by name."""
+        """Test searching tournaments by name using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -44,7 +48,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(name="Pinball")
+        result = client.tournament.query("Pinball").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert len(result.tournaments) == 1
@@ -53,7 +57,7 @@ class TestTournamentsClient:
         assert result.total_results == 1
 
     def test_search_with_location_filters(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments by location."""
+        """Test searching tournaments by location using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -71,7 +75,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(city="Portland", stateprov="OR", country="US")
+        result = client.tournament.query().city("Portland").state("OR").country("US").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -81,7 +85,7 @@ class TestTournamentsClient:
         assert "country=us" in query
 
     def test_search_with_date_range(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments with date range."""
+        """Test searching tournaments with date range using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -97,7 +101,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(start_date="2024-07-01", end_date="2024-07-31")
+        result = client.tournament.query().date_range("2024-07-01", "2024-07-31").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -106,7 +110,7 @@ class TestTournamentsClient:
         assert "end_date=2024-07-31" in query
 
     def test_search_with_tournament_type(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching with tournament type filter."""
+        """Test searching with tournament type filter using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -122,14 +126,14 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(tournament_type="women")
+        result = client.tournament.query().tournament_type("women").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
         assert "tournament_type=women" in mock_requests.last_request.query
 
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test searching tournaments with pagination."""
+        """Test searching tournaments with pagination using query builder."""
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
             json={
@@ -141,12 +145,12 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournaments.search(start_pos=0, count=50)
+        result = client.tournament.query().offset(0).limit(50).get()
 
         assert len(result.tournaments) == 50
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
-        assert "start_pos=0" in query
+        assert "start_pos=1" in query
         assert "count=50" in query
 
 
@@ -176,7 +180,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament(12345).get()
+        tournament = client.tournament(12345).details()
 
         assert isinstance(tournament, Tournament)
         assert tournament.tournament_id == 12345
@@ -196,7 +200,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament("12345").get()
+        tournament = client.tournament("12345").details()
 
         assert tournament.tournament_id == 12345
 
@@ -236,7 +240,7 @@ class TestTournamentHandle:
         assert len(results.results) == 2
         assert results.results[0].position == 1
         assert results.results[0].player_name == "John Smith"
-        assert results.results[0].wppr_points == 50.0
+        assert results.results[0].points == 50.0
         assert results.player_count == 64
 
     def test_formats(self, mock_requests: requests_mock.Mocker) -> None:
@@ -335,10 +339,10 @@ class TestTournamentHandle:
 
 
 class TestTournamentsIntegration:
-    """Integration tests ensuring TournamentsClient and TournamentHandle work together."""
+    """Integration tests ensuring TournamentClient and TournamentHandle work together."""
 
     def test_search_then_get_tournament(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test workflow of searching then getting tournament details."""
+        """Test workflow of searching then getting tournament details using query builder."""
         # Mock search
         mock_requests.get(
             "https://api.ifpapinball.com/tournament/search",
@@ -367,13 +371,13 @@ class TestTournamentsIntegration:
 
         client = IfpaClient(api_key="test-key")
 
-        # Search for tournament
-        search_results = client.tournaments.search(name="Championship")
+        # Search for tournament using query builder
+        search_results = client.tournament.query("Championship").get()
         assert len(search_results.tournaments) == 1
 
         # Get full details using the ID from search
         tournament_id = search_results.tournaments[0].tournament_id
-        full_tournament = client.tournament(tournament_id).get()
+        full_tournament = client.tournament(tournament_id).details()
 
         assert full_tournament.tournament_id == 12345
         assert full_tournament.location_name == "Pinball Paradise"
@@ -389,9 +393,439 @@ class TestTournamentsIntegration:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.tournament(99999).get()
+            client.tournament(99999).details()
 
         assert exc_info.value.status_code == 404
+
+    def test_league_raises_semantic_exception_on_404(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that 404 for non-league tournament raises TournamentNotLeagueError."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345/league",
+            status_code=404,
+            json={"error": "Not a league"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(TournamentNotLeagueError) as exc_info:
+            client.tournament(12345).league()
+
+        error = exc_info.value
+        assert error.tournament_id == 12345
+        assert "12345" in str(error)
+        assert "league" in str(error).lower()
+
+        # Verify exception chaining
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, IfpaApiError)
+
+
+class TestTournamentQueryBuilder:
+    """Test cases for the new fluent query builder pattern."""
+
+    def test_simple_query(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test simple tournament name query."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 12345,
+                        "tournament_name": "PAPA Championship",
+                        "event_date": "2024-06-15",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        results = client.tournament.query("PAPA").get()
+
+        assert isinstance(results, TournamentSearchResponse)
+        assert len(results.tournaments) == 1
+        assert results.tournaments[0].tournament_name == "PAPA Championship"
+
+        # Verify query parameter was sent correctly
+        assert mock_requests.last_request is not None
+        assert "name=papa" in mock_requests.last_request.query.lower()
+
+    def test_query_with_country_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with country filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query("Championship").country("US").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=championship" in query.lower()
+        assert "country=us" in query.lower()
+
+    def test_query_with_state_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with state filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query().state("OR").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "stateprov=or" in query.lower()
+
+    def test_query_with_city_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with city filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query().city("Portland").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "city=portland" in query.lower()
+
+    def test_query_with_date_range(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with date range filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "start_date=2024-01-01" in query
+        assert "end_date=2024-12-31" in query
+
+    def test_query_with_tournament_type(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with tournament type filter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query().tournament_type("women").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "tournament_type=women" in query
+
+    def test_query_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with pagination (offset and limit)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query("Championship").offset(25).limit(50).get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "start_pos=26" in query
+        assert "count=50" in query
+
+    def test_query_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test chaining all available filters together."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        (
+            client.tournament.query("Championship")
+            .country("US")
+            .state("WA")
+            .city("Seattle")
+            .date_range("2024-01-01", "2024-12-31")
+            .tournament_type("open")
+            .offset(0)
+            .limit(25)
+            .get()
+        )
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=championship" in query.lower()
+        assert "country=us" in query.lower()
+        assert "stateprov=wa" in query.lower()
+        assert "city=seattle" in query.lower()
+        assert "start_date=2024-01-01" in query
+        assert "end_date=2024-12-31" in query
+        assert "tournament_type=open" in query
+        assert "start_pos=1" in query
+        assert "count=25" in query
+
+    def test_query_immutability(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that query builder is immutable - each method returns new instance."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create base query
+        base_query = client.tournament.query().country("US")
+
+        # Create two derivative queries
+        wa_query = base_query.state("WA")
+        or_query = base_query.state("OR")
+
+        # Execute both queries
+        wa_query.get()
+        wa_request = mock_requests.last_request
+        assert wa_request is not None
+        assert "stateprov=wa" in wa_request.query.lower()
+        assert "stateprov=or" not in wa_request.query.lower()
+
+        or_query.get()
+        or_request = mock_requests.last_request
+        assert or_request is not None
+        assert "stateprov=or" in or_request.query.lower()
+        assert "stateprov=wa" not in or_request.query.lower()
+
+        # Verify both queries have country=US
+        assert "country=us" in wa_request.query.lower()
+        assert "country=us" in or_request.query.lower()
+
+    def test_query_reuse(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that query can be reused multiple times (immutability)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create a reusable query
+        us_query = client.tournament.query().country("US")
+
+        # Execute it multiple times with different additional filters
+        us_query.state("WA").limit(10).get()
+        us_query.state("OR").limit(20).get()
+        us_query.state("CA").limit(30).get()
+
+        # Base query should still be unchanged
+        us_query.get()
+        final_request = mock_requests.last_request
+        assert final_request is not None
+        assert "country=us" in final_request.query.lower()
+        # Should not have any of the state filters from previous calls
+        assert "stateprov" not in final_request.query.lower()
+
+    def test_empty_query(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query with no name (filter-only query)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        client.tournament.query().country("US").state("WA").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "country=us" in query.lower()
+        assert "stateprov=wa" in query.lower()
+        # Should not have a name parameter
+        assert "name=" not in query.lower()
+
+    def test_query_with_initial_name(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test query() method with initial name parameter."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Test both ways of setting name
+        client.tournament.query("PAPA").get()
+        assert mock_requests.last_request is not None
+        assert "name=papa" in mock_requests.last_request.query.lower()
+
+        # Also test chaining after initial name
+        client.tournament.query("Championship").country("US").get()
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "name=championship" in query.lower()
+        assert "country=us" in query.lower()
+
+    def test_query_builder_repr(self) -> None:
+        """Test query builder string representation."""
+        client = IfpaClient(api_key="test-key")
+        builder = client.tournament.query("PAPA").country("US")
+
+        # Should show class name and params
+        repr_str = repr(builder)
+        assert "TournamentQueryBuilder" in repr_str
+        assert "params=" in repr_str
+
+    def test_date_range_validation_missing_start(self) -> None:
+        """Test that get() raises error when only end_date is present."""
+        client = IfpaClient(api_key="test-key")
+        builder = client.tournament.query()
+        # Manually add only end_date to params (simulating partial date range)
+        builder._params["end_date"] = "2024-12-31"
+
+        with pytest.raises(IfpaClientValidationError) as exc_info:
+            builder.get()
+
+        assert "start_date and end_date must be provided together" in str(exc_info.value)
+
+    def test_date_range_validation_missing_end(self) -> None:
+        """Test that get() raises error when only start_date is present."""
+        client = IfpaClient(api_key="test-key")
+        builder = client.tournament.query()
+        # Manually add only start_date to params (simulating partial date range)
+        builder._params["start_date"] = "2024-01-01"
+
+        with pytest.raises(IfpaClientValidationError) as exc_info:
+            builder.get()
+
+        assert "start_date and end_date must be provided together" in str(exc_info.value)
+
+    def test_date_range_validation_both_present(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that get() succeeds when both dates are present."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Should not raise an error
+        client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+
+    def test_date_range_validation_both_absent(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that get() succeeds when both dates are absent."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Should not raise an error
+        client.tournament.query("Championship").country("US").get()
+
+    def test_date_range_invalid_start_date_format(self) -> None:
+        """Test that date_range() raises error with invalid start_date format."""
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(IfpaClientValidationError) as exc_info:
+            client.tournament.query().date_range("2024/01/01", "2024-12-31")
+
+        assert "start_date must be in YYYY-MM-DD format" in str(exc_info.value)
+        assert "2024/01/01" in str(exc_info.value)
+
+    def test_date_range_invalid_end_date_format(self) -> None:
+        """Test that date_range() raises error with invalid end_date format."""
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(IfpaClientValidationError) as exc_info:
+            client.tournament.query().date_range("2024-01-01", "12-31-2024")
+
+        assert "end_date must be in YYYY-MM-DD format" in str(exc_info.value)
+        assert "12-31-2024" in str(exc_info.value)
+
+    def test_date_range_valid_format(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that date_range() accepts valid YYYY-MM-DD format."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Should not raise an error
+        result = client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+        assert isinstance(result, TournamentSearchResponse)
+
+
+class TestTournamentQueryBuilderIntegration:
+    """Integration tests for query builder with realistic scenarios."""
+
+    def test_search_and_refine_workflow(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test realistic workflow: search broadly, then refine."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {"tournament_id": i, "tournament_name": f"Tournament {i}"} for i in range(100)
+                ],
+                "total_results": 100,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Start with broad search
+        broad_results = client.tournament.query("Championship").limit(100).get()
+        assert len(broad_results.tournaments) == 100
+
+        # Refine to specific country
+        client.tournament.query("Championship").country("US").limit(50).get()
+        assert mock_requests.last_request is not None
+        assert "country=us" in mock_requests.last_request.query.lower()
+
+    def test_pagination_workflow(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test paginating through results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Create base query
+        base = client.tournament.query("Championship").country("US")
+
+        # Get pages
+        page1 = base.offset(0).limit(25)
+        page2 = base.offset(25).limit(25)
+        page3 = base.offset(50).limit(25)
+
+        # Execute pages
+        page1.get()
+        assert mock_requests.last_request is not None
+        assert "start_pos=1" in mock_requests.last_request.query
+        page2.get()
+        assert mock_requests.last_request is not None
+        assert "start_pos=26" in mock_requests.last_request.query
+        page3.get()
+        assert mock_requests.last_request is not None
+        assert "start_pos=51" in mock_requests.last_request.query
+
+    def test_date_range_search_workflow(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test searching tournaments within a date range."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Search for tournaments in 2024
+        client.tournament.query().country("US").date_range("2024-01-01", "2024-12-31").get()
+
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "start_date=2024-01-01" in query
+        assert "end_date=2024-12-31" in query
+        assert "country=us" in query.lower()
 
 
 def test_tournament_related(mock_requests: requests_mock.Mocker) -> None:
@@ -457,7 +891,7 @@ def test_list_formats(mock_requests: requests_mock.Mocker) -> None:
     )
 
     client = IfpaClient(api_key="test-key")
-    result = client.tournaments.list_formats()
+    result = client.tournament.list_formats()
 
     assert isinstance(result, TournamentFormatsListResponse)
     assert len(result.qualifying_formats) == 2

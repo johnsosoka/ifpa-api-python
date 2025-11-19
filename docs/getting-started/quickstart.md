@@ -15,12 +15,13 @@ Here's a simple example to get you started:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.player import Player
 
 # Initialize the client (uses IFPA_API_KEY environment variable)
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Get information about a player
-player = client.player(12345).get()
+# Get information about a player - Dwayne Smith, highly active player from Boise, ID
+player: Player = client.player(25584).details()
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Country: {player.country_name}")
 
@@ -29,6 +30,12 @@ for ranking in player.rankings:
     if ranking.ranking_system == "Main":
         print(f"Current Rank: {ranking.rank}")
         print(f"WPPR Rating: {ranking.rating}")
+
+# Output:
+# Name: Dwayne Smith
+# Country: United States
+# Current Rank: 753
+# WPPR Rating: 65.42
 ```
 
 ## Common Patterns
@@ -37,55 +44,55 @@ for ranking in player.rankings:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.player import PlayerSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search by name
-results = client.players.search(name="John")
+# Query by name - Find players named "Smith" in Idaho
+results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
-# Search with filters
-results = client.players.search(
-    name="Smith",
-    stateprov="OR",
-    country="US"
-)
+# Output:
+# 25584: Dwayne Smith
+# 47585: Debbie Smith
+
+# Query with filters - Find players named "John" in Idaho
+results: PlayerSearchResponse = client.player.query("John").state("ID").country("US").limit(5).get()
 ```
 
 ### Get Rankings
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get top 100 WPPR rankings
-rankings = client.rankings.wppr(count=100)
+rankings: RankingsResponse = client.rankings.wppr(count=100)
 for entry in rankings.rankings:
     print(f"{entry.rank}. {entry.player_name}: {entry.wppr_points}")
 
 # Get women's rankings
-women = client.rankings.women(count=50)
+women: RankingsResponse = client.rankings.women(count=50)
 
 # Filter by country
-us_rankings = client.rankings.wppr(country="US", count=50)
+us_rankings: RankingsResponse = client.rankings.wppr(country="US", count=50)
 ```
 
 ### Find Tournaments
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import TournamentSearchResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Search for tournaments
-tournaments = client.tournaments.search(
-    name="Pinball",
-    stateprov="WA"
-)
+# Query for tournaments with filters
+tournaments: TournamentSearchResponse = client.tournament.query("Pinball").state("WA").get()
 
-for tournament in tournaments.tournament:
+for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name}")
     print(f"  Date: {tournament.event_date}")
     print(f"  Location: {tournament.city}, {tournament.stateprov}")
@@ -95,15 +102,16 @@ for tournament in tournaments.tournament:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.tournaments import Tournament, TournamentResultsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get tournament details
-tournament = client.tournament(12345).get()
+tournament: Tournament = client.tournament(12345).details()
 print(f"Tournament: {tournament.tournament_name}")
 
 # Get results
-results = client.tournament(12345).results()
+results: TournamentResultsResponse = client.tournament(12345).results()
 for result in results.results:
     print(f"{result.position}. {result.player_name}")
 ```
@@ -111,12 +119,14 @@ for result in results.results:
 ### Player Tournament History
 
 ```python
-from ifpa_api import IfpaClient, RankingSystem, ResultType
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import RankingSystem, ResultType
+from ifpa_api.models.player import PlayerResultsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get active tournament results
-results = client.player(12345).results(
+results: PlayerResultsResponse = client.player(12345).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -129,11 +139,12 @@ for result in results.results:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.player import PvpComparison
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Head-to-head comparison
-pvp = client.player(12345).pvp(67890)
+pvp: PvpComparison = client.player(12345).pvp(67890)
 print(f"Player 1 Wins: {pvp.player1_wins}")
 print(f"Player 2 Wins: {pvp.player2_wins}")
 print(f"Ties: {pvp.ties}")
@@ -143,16 +154,17 @@ print(f"Ties: {pvp.ties}")
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesListResponse, SeriesStandingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # List all series
-all_series = client.series.list()
+all_series: SeriesListResponse = client.series.list()
 for series_item in all_series.series:
     print(f"{series_item.series_code}: {series_item.series_name}")
 
 # Get series standings
-standings = client.series_handle("PAPA").standings()
+standings: SeriesStandingsResponse = client.series("PAPA").standings()
 for entry in standings.standings:
     print(f"{entry.position}. {entry.player_name}")
 ```
@@ -161,16 +173,17 @@ for entry in standings.standings:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.reference import CountryResponse, StateProvResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get all countries
-countries = client.reference.countries()
+countries: CountryResponse = client.reference.countries()
 for country in countries.country[:5]:
     print(f"{country.country_name} ({country.country_code})")
 
 # Get states/provinces for a country
-state_provs = client.reference.state_provs()
+state_provs: StateProvResponse = client.reference.state_provs()
 us_regions = next(c for c in state_provs.stateprov if c.country_code == "US")
 print(f"US has {len(us_regions.regions)} states")
 ```
@@ -181,10 +194,12 @@ The client supports Python's context manager protocol for automatic cleanup:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.player import Player
+from ifpa_api.models.rankings import RankingsResponse
 
 with IfpaClient() as client:
-    player = client.player(12345).get()
-    rankings = client.rankings.wppr(count=100)
+    player: Player = client.player(12345).details()
+    rankings: RankingsResponse = client.rankings.wppr(count=100)
     # Client automatically closed when exiting
 ```
 
@@ -199,11 +214,12 @@ from ifpa_api import (
     MissingApiKeyError,
     IfpaClientValidationError
 )
+from ifpa_api.models.player import Player
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 try:
-    player = client.player(12345).get()
+    player: Player = client.player(12345).details()
     print(f"Found player: {player.first_name} {player.last_name}")
 except MissingApiKeyError:
     print("Error: No API key configured")
@@ -219,30 +235,31 @@ Many endpoints support pagination. Here's how to handle it:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import RankingsResponse, RankingEntry
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get first page
-page_size = 50
-start_pos = 0
+page_size: int = 50
+start_pos: int = 0
 
-rankings = client.rankings.wppr(start_pos=start_pos, count=page_size)
+rankings: RankingsResponse = client.rankings.wppr(start_pos=start_pos, count=page_size)
 print(f"Total rankings: {rankings.total_count}")
 
 # Get next page
 start_pos += page_size
-next_page = client.rankings.wppr(start_pos=start_pos, count=page_size)
+next_page: RankingsResponse = client.rankings.wppr(start_pos=start_pos, count=page_size)
 
 
 # Iterate through all pages
-def get_all_rankings(max_results=1000):
+def get_all_rankings(max_results: int = 1000) -> list[RankingEntry]:
     """Get all rankings up to max_results."""
-    all_rankings = []
-    start_pos = 0
-    page_size = 250  # Maximum per request
+    all_rankings: list[RankingEntry] = []
+    start_pos: int = 0
+    page_size: int = 250  # Maximum per request
 
     while len(all_rankings) < max_results:
-        rankings = client.rankings.wppr(
+        rankings: RankingsResponse = client.rankings.wppr(
             start_pos=start_pos,
             count=min(page_size, max_results - len(all_rankings))
         )
@@ -264,7 +281,7 @@ Customize the client behavior:
 ```python
 from ifpa_api import IfpaClient
 
-client = IfpaClient(
+client: IfpaClient = IfpaClient(
     api_key='your-api-key',  # Explicit API key
     base_url='https://api.ifpapinball.com',  # Custom base URL
     timeout=30.0,  # Request timeout (seconds)
@@ -277,22 +294,24 @@ client = IfpaClient(
 The package provides enums for common parameters:
 
 ```python
-from ifpa_api import (
-    IfpaClient,
+from ifpa_api import IfpaClient
+from ifpa_api.models.common import (
     TimePeriod,  # PAST, FUTURE
     RankingSystem,  # MAIN, WOMEN, YOUTH, VIRTUAL, PRO
     ResultType,  # ACTIVE, NONACTIVE, INACTIVE
     TournamentType  # OPEN, WOMEN, YOUTH, etc.
 )
+from ifpa_api.models.director import DirectorTournamentsResponse
+from ifpa_api.models.player import PlayerResultsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
-# Use enums for type safety
-past_tournaments = client.director(1000).tournaments(TimePeriod.PAST)
-upcoming = client.director(1000).tournaments(TimePeriod.FUTURE)
+# Use enums for type safety - Get Josh Rainwater's tournaments
+past_tournaments: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
+upcoming: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.FUTURE)
 
 # Get active results for main ranking system
-results = client.player(12345).results(
+results: PlayerResultsResponse = client.player(12345).results(
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -303,7 +322,10 @@ results = client.player(12345).results(
 Here's a complete example that demonstrates multiple features:
 
 ```python
-from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api import IfpaClient
+from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.common import RankingSystem, ResultType
+from ifpa_api.models.player import Player, PlayerResultsResponse
 
 
 def analyze_player(player_id: int) -> None:
@@ -311,7 +333,7 @@ def analyze_player(player_id: int) -> None:
     with IfpaClient() as client:
         try:
             # Get player details
-            player = client.player(player_id).get()
+            player: Player = client.player(player_id).details()
             print(f"\n=== {player.first_name} {player.last_name} ===")
             print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
 
@@ -322,8 +344,7 @@ def analyze_player(player_id: int) -> None:
 
             # Get recent tournament results
             print("\n--- Recent Results ---")
-            from ifpa_api.models.common import RankingSystem, ResultType
-            results = client.player(player_id).results(
+            results: PlayerResultsResponse = client.player(player_id).results(
                 ranking_system=RankingSystem.MAIN,
                 result_type=ResultType.ACTIVE
             )
@@ -340,7 +361,21 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- Explore [resource-specific examples](../usage/directors.md)
-- Learn about [error handling](../usage/error-handling.md)
-- Check the [API reference](../api-reference/overview.md)
-- Review [configuration options](configuration.md)
+### Learn Key Patterns
+- [Callable Pattern](../guides/callable-pattern.md) - Understand `client.player(id).details()` pattern
+- [Searching](../guides/searching.md) - Master the Query Builder for powerful searches
+- [Pagination](../guides/pagination.md) - Handle large result sets effectively
+- [Error Handling](../guides/error-handling.md) - Robust error handling strategies
+
+### Explore API Resources
+- [Players](../resources/players.md) - Player profiles, results, and comparisons
+- [Directors](../resources/directors.md) - Tournament directors and their events
+- [Tournaments](../resources/tournaments.md) - Tournament details, results, and formats
+- [Rankings](../resources/rankings.md) - WPPR rankings across all systems
+- [Series](../resources/series.md) - Series standings and player cards
+- [Reference](../resources/reference.md) - Countries and state/province data
+
+### API Client Reference
+- [Client](../api-client-reference/client.md) - Complete IfpaClient documentation
+- [Models](../api-client-reference/models.md) - Pydantic models reference
+- [Exceptions](../api-client-reference/exceptions.md) - Exception handling reference
