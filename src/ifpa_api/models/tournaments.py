@@ -5,7 +5,7 @@ Models for tournament information, results, formats, and league data.
 
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from ifpa_api.models.common import IfpaBaseModel
 
@@ -112,6 +112,28 @@ class TournamentResult(IfpaBaseModel):
     percentile: float | None = None
     best_game_finish: int | None = None
     player_tournament_count: int | None = None
+
+    @field_validator("ratings_value", "points", "percentile", mode="before")
+    @classmethod
+    def handle_not_rated(cls, v: Any) -> float | None:
+        """Convert "Not Rated" string to None for float fields.
+
+        The IFPA API returns "Not Rated" as a string for unrated players,
+        but the schema expects float values. This validator handles that
+        conversion.
+
+        Args:
+            v: The value from the API (may be float, int, str, or None)
+
+        Returns:
+            The value as float, or None if "Not Rated" or empty
+        """
+        if v == "Not Rated" or v == "" or v is None:
+            return None
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return None
 
 
 class TournamentResultsResponse(IfpaBaseModel):
