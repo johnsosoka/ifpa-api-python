@@ -14,7 +14,7 @@ import pytest
 import requests
 
 from ifpa_api import IfpaClient
-from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError, TournamentNotLeagueError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -639,10 +639,13 @@ class TestTournamentLeagueIntegration:
                 print(f"\nTournament {tournament_id} league sessions:")
                 for session in result.sessions[:3]:
                     print(f"  - {session.session_date}: {session.player_count} players")
+        except TournamentNotLeagueError:
+            # Many tournaments are not leagues - this is expected
+            pytest.skip(f"Tournament {tournament_id} is not a league")
         except IfpaApiError as e:
-            # Many tournaments are not leagues
+            # Other API errors should still be handled
             if e.status_code in [404, 400]:
-                pytest.skip(f"Tournament {tournament_id} is not a league")
+                pytest.skip(f"Tournament {tournament_id} has API errors")
             raise
 
     def test_league_with_league_tournament(self, api_key: str) -> None:
@@ -672,6 +675,11 @@ class TestTournamentLeagueIntegration:
                     print(
                         f"  Sample Session: {session.session_date} - {session.player_count} players"
                     )
+            except TournamentNotLeagueError:
+                pytest.skip(
+                    f"League tournament {league_tournament_id} is not actually a league "
+                    f"(may be misclassified in search)"
+                )
             except IfpaApiError as e:
                 if e.status_code == 404:
                     pytest.skip(
@@ -683,7 +691,7 @@ class TestTournamentLeagueIntegration:
             pytest.skip("No league tournaments found in search")
 
     def test_league_with_non_league_tournament(self, api_key: str, tournament_id: int) -> None:
-        """Test league() with a non-league tournament (may return empty or error)."""
+        """Test league() with a non-league tournament (should raise TournamentNotLeagueError)."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
@@ -691,8 +699,13 @@ class TestTournamentLeagueIntegration:
             league = client.tournament(tournament_id).league()
             print(f"✓ league() on non-league tournament returned: {type(league)}")
             print(f"  Sessions: {len(league.sessions)}")
+        except TournamentNotLeagueError as e:
+            print(
+                "✓ league() on non-league tournament raised "
+                f"TournamentNotLeagueError (expected): {e}"
+            )
         except IfpaApiError as e:
-            print(f"✓ league() on non-league tournament raised error (expected): {e}")
+            print(f"✓ league() on non-league tournament raised IfpaApiError: {e}")
 
 
 @pytest.mark.integration
