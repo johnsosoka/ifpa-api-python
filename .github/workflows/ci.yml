@@ -131,7 +131,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run unit tests (always)
-        run: poetry run pytest -v -m "not integration"
+        run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=xml --cov-report=term-missing
 
       - name: Run integration tests (if API key available)
         env:
@@ -139,7 +139,7 @@ jobs:
         run: |
           if [ -n "$IFPA_API_KEY" ]; then
             echo "Running integration tests with API key..."
-            poetry run pytest -v -m "integration"
+            poetry run pytest -v -m "integration" --cov=ifpa_api --cov-append --cov-report=xml --cov-report=term-missing
           else
             echo "Skipping integration tests (no API key available)"
           fi
