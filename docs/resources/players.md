@@ -111,8 +111,8 @@ ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
     The IFPA API's player search pagination is currently non-functional. Using `.offset()` may cause
     errors or return 0 results. For best results, use only `.limit()` and avoid `.offset()`.
 
-!!! note "Deprecated Methods"
-    The old `client.player.search(name="John")` method is deprecated and will be removed in v1.0.0.
+!!! info "Migration from 0.2.x"
+    The `client.player.search(name="John")` method was removed in v0.3.0.
     Use the fluent query builder instead: `client.player.query("John").get()`
 
 ## Get Player Profile
@@ -545,15 +545,20 @@ These are API-level issues, not SDK bugs. For the most reliable experience:
 - Don't rely on pagination for player results
 - Be cautious with state/province filters - verify results manually
 
-## Deprecated Methods
+## Migration from 0.2.x
 
-!!! warning "Deprecated in v0.2.0"
-    The following methods are deprecated and will be removed in v1.0.0:
+!!! info "Migration from 0.2.x"
+    The `search()` method was removed in v0.3.0. Use the fluent query builder instead:
 
-    - `client.player.search(name="John")` → Use `client.player.query("John").get()`
-    - `client.player.get_multiple([123, 456])` → Use `client.player(123).details()` for individual players
+    ```python
+    # Old (0.2.x):
+    results: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
 
-    Both methods still work but emit deprecation warnings. Migrate to the new fluent API.
+    # New (0.3.0+):
+    results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+    ```
+
+    The query builder is immutable and chainable, enabling query reuse and better type safety.
 
 ## Related Resources
 

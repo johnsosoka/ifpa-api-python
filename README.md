@@ -263,8 +263,8 @@ card = client.series("PAPA").player_card(12345, region_code="OH")
 regions = client.series("IFPA").regions(region_code="R1")
 
 # List all series
-all_series = client.series.list_series()
-active_only = client.series.list_series(active=True)
+all_series = client.series.list()
+active_only = client.series.list(active=True)
 ```
 
 ### Reference Data

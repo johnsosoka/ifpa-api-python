@@ -144,7 +144,7 @@ def get_test_series_code(client: IfpaClient) -> str | None:
         client = IfpaClient()
         series_code = get_test_series_code(client)
         if series_code:
-            standings = client.series_handle(series_code).standings()
+            standings = client.series(series_code).standings()
         ```
     """
     try:

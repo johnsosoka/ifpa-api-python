@@ -47,8 +47,10 @@ top_player_id: int = idaho_players.search[0].player_id
 player: Player = client.player(top_player_id).details()
 
 print(f"\nDetailed info for {player.first_name} {player.last_name}:")
-print(f"Current WPPR Rank: {player.player_stats['system']['open']['current_rank']}")
-print(f"Total Events: {player.player_stats['player_events']['total_events']}")
+# Active players always have stats; type-safe access with dict navigation
+if player.player_stats:
+    print(f"Current WPPR Rank: {player.player_stats['system']['open']['current_rank']}")
+    print(f"Total Events: {player.player_stats['player_events']['total_events']}")
 
 # Get top WPPR rankings
 rankings = client.rankings.wppr(count=10)

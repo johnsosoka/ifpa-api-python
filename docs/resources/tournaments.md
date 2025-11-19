@@ -154,8 +154,8 @@ The fluent query builder provides these methods:
 | `.limit(count)` | `int` | Maximum number of results |
 | `.get()` | - | Execute query and return results |
 
-!!! note "Deprecated Methods"
-    The old `client.tournament.search(name="PAPA")` method is deprecated and will be removed in v1.0.0.
+!!! info "Migration from 0.2.x"
+    The `client.tournament.search(name="PAPA")` method was removed in v0.3.0.
     Use the fluent query builder instead: `client.tournament.query("PAPA").get()`
 
 !!! success "State Filter Works Correctly"
@@ -579,77 +579,40 @@ championships = get_all_tournaments("Championship")
 print(f"Found {len(championships)} championship tournaments")
 ```
 
-## Deprecated Methods
+## Migration from 0.2.x
 
-!!! warning "Deprecated in v0.2.0"
-    The following collection-level methods are deprecated and will be removed in v1.0.0:
+!!! info "Migration from 0.2.x"
+    The `search()` method was removed in v0.3.0. Use the fluent query builder instead:
 
-### Old Search API (Deprecated)
+    ```python
+    # Old (0.2.x):
+    results: TournamentSearchResponse = client.tournament.search(name="PAPA")
 
-```python
-# DEPRECATED - will be removed in v1.0.0
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
+    # New (0.3.0+):
+    results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+    ```
 
-client: IfpaClient = IfpaClient()
+    Complex queries with filters:
 
-# Old method signature (deprecated)
-tournaments: TournamentSearchResponse = client.tournament.search(name="PAPA")
+    ```python
+    # Old (0.2.x):
+    results = client.tournament.search(
+        name="Championship",
+        city="Portland",
+        stateprov="OR",
+        start_date="2024-01-01",
+        end_date="2024-12-31"
+    )
 
-# Old method with filters (deprecated)
-results: TournamentSearchResponse = client.tournament.search(
-    city="Portland",
-    stateprov="OR",
-    start_date="2024-01-01",
-    end_date="2024-12-31"
-)
-```
+    # New (0.3.0+):
+    results = client.tournament.query("Championship") \
+        .city("Portland") \
+        .state("OR") \
+        .date_range("2024-01-01", "2024-12-31") \
+        .get()
+    ```
 
-### Migration Guide
-
-Migrate from deprecated `search()` to fluent query builder:
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
-
-client: IfpaClient = IfpaClient()
-
-# OLD (deprecated):
-results = client.tournament.search(name="PAPA")
-
-# NEW (recommended):
-results: TournamentSearchResponse = client.tournament.query("PAPA").get()
-
-# OLD (deprecated):
-results = client.tournament.search(
-    name="Championship",
-    city="Portland",
-    stateprov="OR",
-    country="US",
-    start_date="2024-01-01",
-    end_date="2024-12-31",
-    count=50
-)
-
-# NEW (recommended):
-results: TournamentSearchResponse = (client.tournament.query("Championship")
-    .city("Portland")
-    .state("OR")
-    .country("US")
-    .date_range("2024-01-01", "2024-12-31")
-    .limit(50)
-    .get())
-```
-
-!!! tip "Why Migrate?"
-    The fluent query builder provides:
-
-    - **Immutability**: Safe query composition and reuse
-    - **Type Safety**: Better IDE autocomplete and type checking
-    - **Composability**: Build complex queries incrementally
-    - **Clarity**: Method chaining makes intent explicit
-    - **Validation**: Date format validation at query build time
+    The query builder is immutable and chainable, enabling query reuse and better type safety.
 
 ## Related Resources
 

@@ -7,8 +7,13 @@ Access tournament series information, standings, player cards, and regional data
 List all available tournament series, optionally filtering to active series only.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesListResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example
-series_list = client.series.list(active_only=True)
+series_list: SeriesListResponse = client.series.list(active_only=True)
 ```
 
 **Parameters:**
@@ -23,7 +28,7 @@ series_list = client.series.list(active_only=True)
 from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesListResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # List all series
 all_series: SeriesListResponse = client.series.list()
@@ -42,8 +47,13 @@ print(f"\nFound {len(active_series.series)} active series")
 Get overall standings overview for a series across all regions. This returns a summary of each region with current leader and prize fund information.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesStandingsResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - NACS (North American Championship Series)
-standings = client.series("NACS").standings()
+standings: SeriesStandingsResponse = client.series("NACS").standings()
 ```
 
 **Parameters:**
@@ -56,7 +66,10 @@ standings = client.series("NACS").standings()
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesStandingsResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get overall standings overview for all regions
 standings: SeriesStandingsResponse = client.series("NACS").standings()
@@ -76,8 +89,13 @@ for region in standings.overall_results[:5]:
 Get detailed player standings for a specific region in a series.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesRegionStandingsResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Ohio region in NACS
-standings = client.series("NACS").region_standings("OH")
+standings: SeriesRegionStandingsResponse = client.series("NACS").region_standings("OH")
 ```
 
 **Parameters:**
@@ -91,7 +109,10 @@ standings = client.series("NACS").region_standings("OH")
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesRegionStandingsResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get detailed standings for Ohio region
 standings: SeriesRegionStandingsResponse = client.series("NACS").region_standings("OH")
@@ -118,8 +139,13 @@ standings_page: SeriesRegionStandingsResponse = client.series("NACS").region_sta
 Get a player's performance card for a specific series and region.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesPlayerCard
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Josh Sharpe (Player 14) in Ohio
-card = client.series("NACS").player_card(14, "OH")
+card: SeriesPlayerCard = client.series("NACS").player_card(14, "OH")
 ```
 
 **Parameters:**
@@ -133,7 +159,10 @@ card = client.series("NACS").player_card(14, "OH")
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesPlayerCard
+
+client: IfpaClient = IfpaClient()
 
 # Get current year card for Josh Sharpe in Ohio region
 card: SeriesPlayerCard = client.series("NACS").player_card(
@@ -166,8 +195,13 @@ print(f"\n2023 Card: {len(card_2023.player_card)} events")
 Get list of active regions in a series for a specific year.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesRegionsResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Get 2024 NACS regions
-regions = client.series("NACS").regions("OH", 2024)
+regions: SeriesRegionsResponse = client.series("NACS").regions("OH", 2024)
 ```
 
 !!! note "API Behavior"
@@ -184,7 +218,10 @@ regions = client.series("NACS").regions("OH", 2024)
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesRegionsResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get all active regions for 2024 (region_code is required but not used for filtering)
 regions: SeriesRegionsResponse = client.series("NACS").regions("OH", 2024)
@@ -203,8 +240,13 @@ for region in regions.active_regions:
 Get aggregate statistics for a specific region in a series.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesStats
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Ohio region stats
-stats = client.series("NACS").stats("OH")
+stats: SeriesStats = client.series("NACS").stats("OH")
 ```
 
 **Parameters:**
@@ -216,7 +258,10 @@ stats = client.series("NACS").stats("OH")
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesStats
+
+client: IfpaClient = IfpaClient()
 
 # Get statistics for Ohio region in NACS
 stats: SeriesStats = client.series("NACS").stats("OH")
@@ -233,8 +278,13 @@ print(f"  Average Event Size: {stats.average_event_size:.1f} players")
 Get tournaments for a specific region in a series.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesTournamentsResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Ohio tournaments in NACS
-tournaments = client.series("NACS").tournaments("OH")
+tournaments: SeriesTournamentsResponse = client.series("NACS").tournaments("OH")
 ```
 
 **Parameters:**
@@ -246,7 +296,10 @@ tournaments = client.series("NACS").tournaments("OH")
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import SeriesTournamentsResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get tournaments for Ohio region in NACS
 tournaments: SeriesTournamentsResponse = client.series("NACS").tournaments("OH")
@@ -265,8 +318,13 @@ for tournament in tournaments.tournaments[:10]:  # Show first 10
 Get list of region representatives for a series.
 
 ```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import RegionRepsResponse
+
+client: IfpaClient = IfpaClient()
+
 # Quick example - Get PAPA region reps
-reps = client.series("PAPA").region_reps()
+reps: RegionRepsResponse = client.series("PAPA").region_reps()
 ```
 
 **Parameters:** None
@@ -274,7 +332,10 @@ reps = client.series("PAPA").region_reps()
 **Complete Example:**
 
 ```python
+from ifpa_api import IfpaClient
 from ifpa_api.models.series import RegionRepsResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get region representatives for PAPA series
 reps: RegionRepsResponse = client.series("PAPA").region_reps()
@@ -311,7 +372,8 @@ def analyze_series(series_code: str, region_code: str) -> None:
     Example:
         analyze_series("NACS", "OH")
     """
-    with IfpaClient() as client:
+    client: IfpaClient = IfpaClient()
+    with client:
         try:
             # Get overall standings across all regions
             overall: SeriesStandingsResponse = client.series(series_code).standings()

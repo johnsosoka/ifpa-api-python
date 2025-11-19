@@ -232,12 +232,12 @@ Take advantage of immutable queries for cleaner pagination:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
+from ifpa_api.models.director import DirectorSearchResponse, DirectorQueryBuilder
 
 client: IfpaClient = IfpaClient()
 
 # Create base query
-us_directors_query = client.director.query().country("US").limit(50)
+us_directors_query: DirectorQueryBuilder = client.director.query().country("US").limit(50)
 
 # Fetch multiple pages from same base query
 page1: DirectorSearchResponse = us_directors_query.offset(0).get()
@@ -397,10 +397,9 @@ client: IfpaClient = IfpaClient()
 # These pagination parameters are IGNORED by the API
 results: PlayerResultsResponse = client.player(25584).results(
     ranking_system=RankingSystem.MAIN,
-    result_type=ResultType.ACTIVE,
-    # These do nothing:
-    # start_pos=0,
-    # count=50
+    result_type=ResultType.ACTIVE
+    # Note: API ignores start_pos and count parameters completely
+    # Always returns ALL results regardless of pagination parameters
 )
 
 # API always returns ALL results regardless of pagination parameters

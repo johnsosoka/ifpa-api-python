@@ -10,7 +10,7 @@ Retrieve the main World Pinball Player Rankings:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get top 100 players
 rankings: RankingsResponse = client.rankings.wppr(start_pos=0, count=100)
@@ -31,7 +31,7 @@ Filter rankings by country or region:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get US rankings only
 us_rankings: RankingsResponse = client.rankings.wppr(
@@ -69,7 +69,7 @@ Access women's ranking system with options for open or women-only tournaments:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get women's rankings from all tournaments
 rankings: RankingsResponse = client.rankings.women(
@@ -114,7 +114,7 @@ Access youth player rankings:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get top youth players
 youth: RankingsResponse = client.rankings.youth(
@@ -150,7 +150,7 @@ Access rankings from virtual pinball tournaments:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get virtual tournament rankings
 virtual: RankingsResponse = client.rankings.virtual(
@@ -184,7 +184,7 @@ Access professional circuit rankings for open and women's divisions:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get open division pro rankings
 pro: RankingsResponse = client.rankings.pro(
@@ -222,7 +222,7 @@ Get player rankings filtered by a specific country:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import CountryRankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get US player rankings
 us_rankings: CountryRankingsResponse = client.rankings.by_country(
@@ -250,7 +250,7 @@ You can use either the country code or full country name:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import CountryRankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Using country code
 us_rankings: CountryRankingsResponse = client.rankings.by_country(
@@ -284,7 +284,7 @@ Get a list of all countries with ranked players:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import RankingsCountryListResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get all countries with player counts
 countries: RankingsCountryListResponse = client.rankings.country_list()
@@ -321,7 +321,7 @@ First, discover available custom ranking systems:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import CustomRankingListResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get all custom ranking systems
 custom_list: CustomRankingListResponse = client.rankings.custom_list()
@@ -343,7 +343,7 @@ Once you have a ranking ID, retrieve its rankings:
 from ifpa_api import IfpaClient
 from ifpa_api.models.rankings import CustomRankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Get custom ranking by ID
 custom: CustomRankingsResponse = client.rankings.custom(
@@ -368,11 +368,12 @@ Combine both methods to find and query a specific ranking:
 
 ```python
 from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import CustomRankingListResponse, CustomRankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Find a specific ranking by title keyword
-custom_list = client.rankings.custom_list()
+custom_list: CustomRankingListResponse = client.rankings.custom_list()
 retro_ranking = next(
     (r for r in custom_list.custom_view if "retro" in r.title.lower()),
     None
@@ -382,7 +383,7 @@ if retro_ranking:
     print(f"Found: {retro_ranking.title} (ID: {retro_ranking.view_id})")
 
     # Get rankings for that system
-    rankings = client.rankings.custom(retro_ranking.view_id, count=25)
+    rankings: CustomRankingsResponse = client.rankings.custom(retro_ranking.view_id, count=25)
 
     print(f"\nTop 25 in {rankings.ranking_name}:")
     for entry in rankings.rankings:
@@ -408,7 +409,7 @@ from ifpa_api.models.rankings import RankingsResponse
 
 def compare_rankings() -> None:
     """Compare different ranking systems."""
-    client = IfpaClient()
+    client: IfpaClient = IfpaClient()
 
     try:
         # Get top players from different systems
@@ -462,14 +463,14 @@ When working with large result sets, use pagination:
 
 ```python
 from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import RankingsResponse
+from ifpa_api.models.rankings import RankingsResponse, RankingEntry
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 # Fetch rankings in batches
-all_rankings = []
-batch_size = 250  # Maximum allowed
-start = 0
+all_rankings: list[RankingEntry] = []
+batch_size: int = 250  # Maximum allowed
+start: int = 0
 
 while True:
     batch: RankingsResponse = client.rankings.wppr(
@@ -494,11 +495,12 @@ Handle API errors gracefully:
 
 ```python
 from ifpa_api import IfpaClient, IfpaApiError
+from ifpa_api.models.rankings import RankingsResponse
 
-client = IfpaClient()
+client: IfpaClient = IfpaClient()
 
 try:
-    rankings = client.rankings.wppr(count=100)
+    rankings: RankingsResponse = client.rankings.wppr(count=100)
 except IfpaApiError as e:
     if e.status_code == 429:
         print("Rate limit exceeded. Please wait and retry.")
@@ -513,10 +515,13 @@ except IfpaApiError as e:
 Use the `country_list()` method to discover valid country codes and player counts:
 
 ```python
-client = IfpaClient()
+from ifpa_api import IfpaClient
+from ifpa_api.models.rankings import RankingsCountryListResponse
+
+client: IfpaClient = IfpaClient()
 
 # Get all countries
-countries = client.rankings.country_list()
+countries: RankingsCountryListResponse = client.rankings.country_list()
 
 # Find countries with most players
 top_countries = sorted(countries.country, key=lambda c: c.player_count, reverse=True)[:10]

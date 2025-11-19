@@ -104,8 +104,8 @@ ca_directors: DirectorSearchResponse = us_query.state("CA").limit(25).get()
 | `.limit(count)` | `int` | Maximum number of results |
 | `.get()` | - | Execute query and return results |
 
-!!! note "Deprecated Methods"
-    The old `client.director.search(name="Josh")` method is deprecated and will be removed in v1.0.0.
+!!! info "Migration from 0.2.x"
+    The `client.director.search(name="Josh")` method was removed in v0.3.0.
     Use the fluent query builder instead: `client.director.query("Josh").get()`
 
 ## Individual Director Operations
@@ -521,72 +521,30 @@ print(f"  Tournaments: {director.stats.tournament_count}")
 print(f"  Unique Players: {director.stats.unique_player_count}")
 ```
 
-## Deprecated Methods
+## Migration from 0.2.x
 
-!!! warning "Deprecated in v0.2.0"
-    The `search()` method is deprecated and will be removed in v1.0.0. Use the fluent query builder instead.
+!!! info "Migration from 0.2.x"
+    The `search()` method was removed in v0.3.0. Use the fluent query builder instead:
 
-### Old Search Method
+    ```python
+    # Old (0.2.x):
+    results: DirectorSearchResponse = client.director.search(name="Josh", country="US")
 
-The old `search()` method still works but emits deprecation warnings:
+    # New (0.3.0+):
+    results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+    ```
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
+    Chained filters:
 
-client: IfpaClient = IfpaClient()
+    ```python
+    # Old (0.2.x):
+    results = client.director.search(name="Sharpe", city="Chicago", stateprov="IL")
 
-# DEPRECATED - Emits DeprecationWarning
-results: DirectorSearchResponse = client.director.search(name="Josh")
+    # New (0.3.0+):
+    results = client.director.query("Sharpe").city("Chicago").state("IL").get()
+    ```
 
-# DEPRECATED - Multiple filters
-results: DirectorSearchResponse = client.director.search(
-    name="Josh",
-    city="Chicago",
-    stateprov="IL",
-    country="US"
-)
-```
-
-### Migration Guide
-
-Migrate to the new fluent API:
-
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
-
-client: IfpaClient = IfpaClient()
-
-# Old (deprecated):
-results: DirectorSearchResponse = client.director.search(name="Josh", country="US")
-
-# New (recommended):
-results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
-
-# Old (deprecated):
-results: DirectorSearchResponse = client.director.search(
-    name="Sharpe",
-    city="Chicago",
-    stateprov="IL",
-    country="US"
-)
-
-# New (recommended):
-results: DirectorSearchResponse = (client.director.query("Sharpe")
-    .city("Chicago")
-    .state("IL")
-    .country("US")
-    .get())
-```
-
-### Benefits of the New API
-
-- **Type-safe**: Better IDE autocomplete and type checking
-- **Composable**: Chain methods in any order
-- **Reusable**: Immutable pattern allows query reuse
-- **Readable**: Fluent interface is more intuitive
-- **Flexible**: Can start with filters only (no name required)
+    The query builder is immutable and chainable, enabling query reuse and better type safety.
 
 ## Related Resources
 
