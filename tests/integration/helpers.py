@@ -107,7 +107,7 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
         client: Initialized IfpaClient instance
 
     Returns:
-        Tournament ID if found, None otherwise
+        Tournament ID if found, None otherwise (e.g., due to timeout or API error)
 
     Example:
         ```python
@@ -116,14 +116,21 @@ def get_test_tournament_id(client: IfpaClient) -> int | None:
         if tournament_id:
             tournament = client.tournament(tournament_id).details()
         ```
+
+    Note:
+        This helper is resilient to API timeouts and other errors, returning None
+        rather than raising exceptions. Callers should handle None by skipping tests.
     """
     try:
         # Search for tournaments, get first result
+        # Note: Timeouts may occur in CI environments with rate-limited or slow APIs
         results = client.tournament.query().limit(1).get()
         if results.tournaments and len(results.tournaments) > 0:
             tournament_id: int = results.tournaments[0].tournament_id
             return tournament_id
     except Exception:
+        # Silently handle errors (timeout, API errors, etc.) and return None
+        # Tests using this helper should skip when None is returned
         pass
     return None
 
