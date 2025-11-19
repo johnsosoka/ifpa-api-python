@@ -20,7 +20,7 @@ The IFPA API client enables Python developers to access pinball rankings, tourna
 - **Clear Error Handling**: Exception hierarchy for different failure scenarios
 - **Well Tested**: 99% test coverage with unit and integration tests
 
-> **Alpha Release**: This library is under active development. The API is stable but may evolve based on community feedback. Production use is supported, but you may encounter occasional updates to the interface.
+> Alpha Release: This library is under active development, with significant and breaking changes being released as we work towards v1.0.0, which will be considered our stable release.
 
 ## Quick Example
 
