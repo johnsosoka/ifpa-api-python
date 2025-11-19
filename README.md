@@ -101,7 +101,7 @@ standings = client.series("NACS").standings()
 - **Automatic Pagination**: Memory-efficient iteration with `.iterate()` and `.get_all()`
 - **Enhanced Error Context**: All exceptions include request URLs and parameters for debugging
 - **Semantic Exceptions**: Domain-specific errors (PlayersNeverMetError, SeriesPlayerNotFoundError, etc.)
-- **36 API Endpoints**: Complete coverage of IFPA API v2.1 across 6 resources
+- **46 API Endpoints**: Complete coverage of IFPA API v2.1 across 7 resources
 - **99% Test Coverage**: Comprehensive unit and integration tests
 - **Context Manager Support**: Automatic resource cleanup
 - **Clear Error Handling**: Structured exception hierarchy for different failure modes
@@ -273,6 +273,42 @@ active_only = client.series.list(active=True)
 # Get countries and states
 countries = client.reference.countries()
 states = client.reference.state_provs(country_code="US")
+```
+
+### Stats
+
+```python
+# Get overall IFPA statistics
+stats = client.stats.overall()
+print(f"Active players: {stats.stats.active_player_count:,}")
+print(f"Tournaments this year: {stats.stats.tournament_count_this_year:,}")
+
+# Get top point earners for a time period
+points = client.stats.points_given_period(
+    start_date="2024-01-01",
+    end_date="2024-12-31",
+    limit=25
+)
+for player in points.stats[:10]:
+    print(f"{player.first_name} {player.last_name}: {player.wppr_points} pts")
+
+# Get largest tournaments
+tournaments = client.stats.largest_tournaments(country_code="US")
+for tourney in tournaments.stats[:10]:
+    print(f"{tourney.tournament_name}: {tourney.player_count} players")
+
+# Get player counts by country
+country_stats = client.stats.country_players()
+for country in country_stats.stats[:10]:
+    print(f"{country.country_name}: {country.player_count:,} players")
+
+# Get most active players in a time period
+active_players = client.stats.events_attended_period(
+    start_date="2024-01-01",
+    end_date="2024-12-31",
+    country_code="US",
+    limit=25
+)
 ```
 
 ## Pagination
