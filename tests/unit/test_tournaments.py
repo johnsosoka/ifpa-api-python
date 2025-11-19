@@ -800,10 +800,13 @@ class TestTournamentQueryBuilderIntegration:
 
         # Execute pages
         page1.get()
+        assert mock_requests.last_request is not None
         assert "start_pos=1" in mock_requests.last_request.query
         page2.get()
+        assert mock_requests.last_request is not None
         assert "start_pos=26" in mock_requests.last_request.query
         page3.get()
+        assert mock_requests.last_request is not None
         assert "start_pos=51" in mock_requests.last_request.query
 
     def test_date_range_search_workflow(self, mock_requests: requests_mock.Mocker) -> None:

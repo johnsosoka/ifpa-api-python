@@ -228,11 +228,11 @@ class TestWpprRankings:
         for entry in result.rankings:
             # Validate field quality
             assert entry.player_id > 0, "Player ID must be positive"
-            assert entry.rank > 0, "Rank must be positive"
+            assert entry.rank is not None and entry.rank > 0, "Rank must be positive"
             assert (
                 entry.player_name is not None and len(entry.player_name) > 0
             ), "Player name must not be empty"
-            assert entry.rating > 0, "Rating must be positive"
+            assert entry.rating is not None and entry.rating > 0, "Rating must be positive"
             assert entry.country_code is not None and len(entry.country_code) in [
                 2,
                 3,

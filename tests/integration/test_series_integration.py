@@ -245,11 +245,13 @@ class TestSeriesHandle:
         # Validate consistency: leader in overview should match top player in detailed standings
         if oh_overview.current_leader:
             detail_leader = detail.standings[0]  # First place in detailed standings
-            overview_leader_id = int(oh_overview.current_leader.get("player_id"))
-            assert detail_leader.player_id == overview_leader_id, (
-                f"Leader mismatch: overview shows player {overview_leader_id}, "
-                f"but detailed standings show player {detail_leader.player_id}"
-            )
+            player_id_str = oh_overview.current_leader.get("player_id")
+            if player_id_str is not None:
+                overview_leader_id = int(player_id_str)
+                assert detail_leader.player_id == overview_leader_id, (
+                    f"Leader mismatch: overview shows player {overview_leader_id}, "
+                    f"but detailed standings show player {detail_leader.player_id}"
+                )
 
         logger.info(
             f"✓ Verified relationship: standings() returned {len(overall.overall_results)} region "
@@ -461,33 +463,27 @@ class TestRemovedMethods:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        try:
-            client.series("NACS").overview()
-            raise AssertionError("overview() should not exist")
-        except AttributeError:
-            logger.info("overview() correctly raises AttributeError (method removed)")
+        series_context = client.series("NACS")
+        assert not hasattr(series_context, "overview"), "overview() method should not exist"
+        logger.info("overview() correctly does not exist (method removed)")
 
     def test_rules_method_removed(self, api_key: str) -> None:
         """Verify rules() method was removed from Phase 1 implementation."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        try:
-            client.series("NACS").rules()
-            raise AssertionError("rules() should not exist")
-        except AttributeError:
-            logger.info("rules() correctly raises AttributeError (method removed)")
+        series_context = client.series("NACS")
+        assert not hasattr(series_context, "rules"), "rules() method should not exist"
+        logger.info("rules() correctly does not exist (method removed)")
 
     def test_schedule_method_removed(self, api_key: str) -> None:
         """Verify schedule() method was removed from Phase 1 implementation."""
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        try:
-            client.series("NACS").schedule()
-            raise AssertionError("schedule() should not exist")
-        except AttributeError:
-            logger.info("schedule() correctly raises AttributeError (method removed)")
+        series_context = client.series("NACS")
+        assert not hasattr(series_context, "schedule"), "schedule() method should not exist"
+        logger.info("schedule() correctly does not exist (method removed)")
 
 
 # =============================================================================

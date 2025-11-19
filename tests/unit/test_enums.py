@@ -186,10 +186,10 @@ class TestEnumValueValidation:
     def test_invalid_enum_access_raises_error(self) -> None:
         """Test that accessing invalid enum members raises AttributeError."""
         with pytest.raises(AttributeError):
-            _ = RankingSystem.INVALID_SYSTEM
+            RankingSystem.INVALID_SYSTEM  # noqa: B018
 
         with pytest.raises(AttributeError):
-            _ = ResultType.INVALID_TYPE
+            ResultType.INVALID_TYPE  # noqa: B018
 
         with pytest.raises(AttributeError):
-            _ = TimePeriod.INVALID_PERIOD
+            TimePeriod.INVALID_PERIOD  # noqa: B018
