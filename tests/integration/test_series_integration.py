@@ -203,6 +203,59 @@ class TestSeriesHandle:
             f"returned {len(result.standings)} standings (API may ignore pagination)"
         )
 
+    def test_standings_vs_region_standings_relationship(self, api_key: str) -> None:
+        """Clarify the relationship between standings() and region_standings().
+
+        This test demonstrates that:
+        - standings() returns region OVERVIEWS (summary data per region)
+        - region_standings() returns PLAYER STANDINGS within a specific region
+        - The two methods are complementary, not duplicates
+        - Data should be consistent between the two methods
+        """
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        series_code = "NACS"
+        region_code = "OH"
+
+        # Get overall standings (region overviews)
+        overall = client.series(series_code).standings()
+
+        # Verify we got region overviews, not player data
+        assert isinstance(overall, SeriesStandingsResponse)
+        assert hasattr(overall, "overall_results")
+        assert len(overall.overall_results) > 0
+
+        # Find the Ohio region in overall standings
+        oh_overview = next(
+            (r for r in overall.overall_results if r.region_code == region_code),
+            None,
+        )
+        assert oh_overview is not None, f"Region {region_code} not found in overall standings"
+
+        # Get detailed player standings for Ohio
+        detail = client.series(series_code).region_standings(region_code)
+
+        # Verify we got player standings, not region overviews
+        assert isinstance(detail, SeriesRegionStandingsResponse)
+        assert detail.region_code == region_code
+        assert detail.series_code == series_code
+        assert len(detail.standings) > 0, "Should have player standings"
+
+        # Validate consistency: leader in overview should match top player in detailed standings
+        if oh_overview.current_leader:
+            detail_leader = detail.standings[0]  # First place in detailed standings
+            overview_leader_id = int(oh_overview.current_leader.get("player_id"))
+            assert detail_leader.player_id == overview_leader_id, (
+                f"Leader mismatch: overview shows player {overview_leader_id}, "
+                f"but detailed standings show player {detail_leader.player_id}"
+            )
+
+        logger.info(
+            f"✓ Verified relationship: standings() returned {len(overall.overall_results)} region "
+            f"overviews, region_standings('{region_code}') returned {len(detail.standings)} players"
+        )
+
     # --- Player Card Tests ---
 
     def test_player_card_basic(self, api_key: str, player_active_id: int) -> None:
@@ -409,7 +462,7 @@ class TestRemovedMethods:
         client = IfpaClient(api_key=api_key)
 
         try:
-            client.series("NACS").overview()  # type: ignore[attr-defined]
+            client.series("NACS").overview()
             raise AssertionError("overview() should not exist")
         except AttributeError:
             logger.info("overview() correctly raises AttributeError (method removed)")
@@ -420,7 +473,7 @@ class TestRemovedMethods:
         client = IfpaClient(api_key=api_key)
 
         try:
-            client.series("NACS").rules()  # type: ignore[attr-defined]
+            client.series("NACS").rules()
             raise AssertionError("rules() should not exist")
         except AttributeError:
             logger.info("rules() correctly raises AttributeError (method removed)")
@@ -431,7 +484,7 @@ class TestRemovedMethods:
         client = IfpaClient(api_key=api_key)
 
         try:
-            client.series("NACS").schedule()  # type: ignore[attr-defined]
+            client.series("NACS").schedule()
             raise AssertionError("schedule() should not exist")
         except AttributeError:
             logger.info("schedule() correctly raises AttributeError (method removed)")

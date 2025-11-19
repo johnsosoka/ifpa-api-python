@@ -202,6 +202,51 @@ class TestWpprRankings:
         assert result.rankings[0].player_id > 0
         assert result.rankings[0].rank is not None and result.rankings[0].rank > 0
 
+    def test_wppr_data_quality_validation(self, api_key: str) -> None:
+        """Test wppr() rankings have high-quality, consistent data.
+
+        Validates that rankings data is properly structured with:
+        - Valid player IDs (positive integers)
+        - Valid rank positions (positive integers)
+        - Non-empty player names
+        - Valid country codes (2-3 uppercase characters)
+        - Positive rating values
+        - Rank positions are sequential
+
+        Note: Ratings may not be strictly descending due to API's complex sorting
+        algorithm that considers multiple factors beyond just rating value.
+        """
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        result = client.rankings.wppr(start_pos=1, count=50)
+
+        assert result.rankings is not None
+        assert len(result.rankings) > 0
+
+        expected_rank = 1
+        for entry in result.rankings:
+            # Validate field quality
+            assert entry.player_id > 0, "Player ID must be positive"
+            assert entry.rank > 0, "Rank must be positive"
+            assert (
+                entry.player_name is not None and len(entry.player_name) > 0
+            ), "Player name must not be empty"
+            assert entry.rating > 0, "Rating must be positive"
+            assert entry.country_code is not None and len(entry.country_code) in [
+                2,
+                3,
+            ], f"Country code must be 2-3 chars, got {entry.country_code}"
+            assert (
+                entry.country_code.isupper()
+            ), f"Country code must be uppercase, got {entry.country_code}"
+
+            # Validate rank positions are sequential (1, 2, 3, ...)
+            assert (
+                entry.rank == expected_rank
+            ), f"Rank positions not sequential: expected {expected_rank}, got {entry.rank}"
+            expected_rank += 1
+
 
 # =============================================================================
 # WOMEN'S RANKINGS

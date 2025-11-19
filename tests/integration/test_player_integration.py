@@ -1065,6 +1065,27 @@ class TestPlayerHandlePvpAllAudit:
         assert summary.player_id == player_inactive_id
         assert summary.total_competitors == 0
 
+    def test_pvp_all_mid_range_competitors(self, api_key: str, player_active_id_2: int) -> None:
+        """Test pvp_all() for player with mid-range competitor count (~150 competitors).
+
+        This tests the boundary between low and high competitor counts, ensuring
+        the SDK properly handles players in the 50-200 competitor range.
+        """
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        summary = client.player(player_active_id_2).pvp_all()
+
+        assert isinstance(summary, PvpAllCompetitors)
+        assert summary.player_id == player_active_id_2
+        assert isinstance(summary.total_competitors, int)
+        # Dave Fellows should have mid-range competitor count (100-200)
+        assert 100 <= summary.total_competitors <= 200
+        assert summary.system == "MAIN"
+        assert summary.type == "all"
+        # Validate title is a string (can be empty)
+        assert isinstance(summary.title, str)
+
 
 # =============================================================================
 # HISTORY AUDIT TESTS
