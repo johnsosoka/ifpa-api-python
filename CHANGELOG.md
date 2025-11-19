@@ -77,6 +77,50 @@ for result in results.results:
 
 ### Added
 
+**Quality of Life Improvements**
+
+1. **Enhanced Error Messages** - All API errors now include request context:
+   ```python
+   try:
+       player = client.player(99999).details()
+   except IfpaApiError as e:
+       print(e)  # Now shows: "[404] Resource not found (URL: https://api.ifpapinball.com/player/99999)"
+       print(e.request_url)  # Access URL directly
+       print(e.request_params)  # Access query parameters
+   ```
+
+2. **Pagination Helpers** - Automatic pagination for large result sets:
+   ```python
+   # Memory-efficient iteration over all results
+   for player in client.player.query().country("US").iterate(limit=100):
+       print(f"{player.first_name} {player.last_name}")
+
+   # Collect all results into a list
+   all_players = client.player.query().country("US").state("WA").get_all()
+   ```
+
+3. **Semantic Exceptions** - Clear, specific errors for common scenarios:
+   ```python
+   from ifpa_api.exceptions import SeriesPlayerNotFoundError, TournamentNotLeagueError
+
+   try:
+       card = client.series("PAPA").player_card(12345, "OH")
+   except SeriesPlayerNotFoundError as e:
+       print(f"Player {e.player_id} has no results in {e.series_code}")
+
+   try:
+       league = client.tournament(12345).league()
+   except TournamentNotLeagueError as e:
+       print(f"Tournament {e.tournament_id} is not a league")
+   ```
+
+4. **Better Validation Messages** - Helpful hints for common validation errors:
+   ```python
+   # Before: cryptic Pydantic error
+   # After: "Invalid parameter 'country': Input should be a valid string
+   #        Hint: Country code should be a 2-letter string like 'US' or 'CA'"
+   ```
+
 **Query Builder Pattern (NEW)**
 
 All resources with search/query capabilities now support a fluent Query Builder pattern for composable, type-safe filtering:

@@ -96,18 +96,20 @@ class _HttpClient:
 
             # Check for error indicators in response body
             # Some IFPA API endpoints return HTTP 200 with errors in the body
-            self._check_response_errors(response_data, response.status_code)
+            self._check_response_errors(response_data, response.status_code, url, params)
 
             return response_data
 
         except requests.exceptions.HTTPError as exc:
             # Map HTTP errors to IfpaApiError
-            self._handle_http_error(exc)
+            self._handle_http_error(exc, url, params)
         except requests.exceptions.Timeout as exc:
             raise IfpaApiError(
                 message=f"Request timed out after {self._config.timeout} seconds",
                 status_code=None,
                 response_body=None,
+                request_url=url,
+                request_params=params,
             ) from exc
         except requests.exceptions.RequestException as exc:
             # Network errors, connection errors, etc.
@@ -115,9 +117,17 @@ class _HttpClient:
                 message=f"Request failed: {str(exc)}",
                 status_code=None,
                 response_body=None,
+                request_url=url,
+                request_params=params,
             ) from exc
 
-    def _check_response_errors(self, response_data: Any, status_code: int) -> None:
+    def _check_response_errors(
+        self,
+        response_data: Any,
+        status_code: int,
+        url: str,
+        params: dict[str, Any] | None,
+    ) -> None:
         """Check for error indicators in response body.
 
         The IFPA API sometimes returns HTTP 200 with error details in the
@@ -126,6 +136,8 @@ class _HttpClient:
         Args:
             response_data: Parsed JSON response data
             status_code: HTTP status code from response
+            url: The full URL that was requested
+            params: The query parameters sent with the request
 
         Raises:
             IfpaApiError: If error indicators are found in response body
@@ -136,6 +148,8 @@ class _HttpClient:
                 message="API returned null response (resource not found or invalid ID)",
                 status_code=404,
                 response_body=None,
+                request_url=url,
+                request_params=params,
             )
 
         if not isinstance(response_data, dict):
@@ -148,6 +162,8 @@ class _HttpClient:
                 message=error_message,
                 status_code=status_code,
                 response_body=response_data,
+                request_url=url,
+                request_params=params,
             )
 
         # Check for {"message": "...", "code": "404"} pattern
@@ -161,13 +177,22 @@ class _HttpClient:
                 message=error_message,
                 status_code=status_code,
                 response_body=response_data,
+                request_url=url,
+                request_params=params,
             )
 
-    def _handle_http_error(self, exc: requests.exceptions.HTTPError) -> None:
+    def _handle_http_error(
+        self,
+        exc: requests.exceptions.HTTPError,
+        url: str,
+        params: dict[str, Any] | None,
+    ) -> None:
         """Map requests.HTTPError to IfpaApiError with detailed information.
 
         Args:
             exc: The HTTPError exception from requests
+            url: The full URL that was requested
+            params: The query parameters sent with the request
 
         Raises:
             IfpaApiError: Always raises with appropriate error details
@@ -194,6 +219,8 @@ class _HttpClient:
             message=error_message,
             status_code=status_code,
             response_body=error_body,
+            request_url=url,
+            request_params=params,
         ) from exc
 
     def close(self) -> None:

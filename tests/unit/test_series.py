@@ -7,7 +7,7 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.core.exceptions import IfpaApiError, SeriesPlayerNotFoundError
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesListResponse,
@@ -383,6 +383,32 @@ class TestSeriesErrors:
             client.series("NONEXISTENT").standings()
 
         assert exc_info.value.status_code == 404
+
+    def test_player_card_raises_semantic_exception_on_404(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that 404 for player card raises SeriesPlayerNotFoundError."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/series/PAPA/player_card/99999",
+            status_code=404,
+            json={"error": "Player not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(SeriesPlayerNotFoundError) as exc_info:
+            client.series("PAPA").player_card(99999, "OH")
+
+        error = exc_info.value
+        assert error.series_code == "PAPA"
+        assert error.player_id == 99999
+        assert error.region_code == "OH"
+        assert "PAPA" in str(error)
+        assert "99999" in str(error)
+
+        # Verify exception chaining
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, IfpaApiError)
 
 
 class TestSeriesIntegration:

@@ -7,7 +7,11 @@ import pytest
 import requests_mock
 
 from ifpa_api.client import IfpaClient
-from ifpa_api.core.exceptions import IfpaApiError, IfpaClientValidationError
+from ifpa_api.core.exceptions import (
+    IfpaApiError,
+    IfpaClientValidationError,
+    TournamentNotLeagueError,
+)
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -392,6 +396,30 @@ class TestTournamentsIntegration:
             client.tournament(99999).details()
 
         assert exc_info.value.status_code == 404
+
+    def test_league_raises_semantic_exception_on_404(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that 404 for non-league tournament raises TournamentNotLeagueError."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345/league",
+            status_code=404,
+            json={"error": "Not a league"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        with pytest.raises(TournamentNotLeagueError) as exc_info:
+            client.tournament(12345).league()
+
+        error = exc_info.value
+        assert error.tournament_id == 12345
+        assert "12345" in str(error)
+        assert "league" in str(error).lower()
+
+        # Verify exception chaining
+        assert exc_info.value.__cause__ is not None
+        assert isinstance(exc_info.value.__cause__, IfpaApiError)
 
 
 class TestTournamentQueryBuilder:

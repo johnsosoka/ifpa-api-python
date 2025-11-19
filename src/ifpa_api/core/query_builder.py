@@ -8,8 +8,9 @@ enables query reuse.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from copy import copy
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 if TYPE_CHECKING:
     from typing import Self
@@ -87,6 +88,126 @@ class QueryBuilder(ABC, Generic[T]):
         Raises:
             IfpaApiError: If the API request fails
         """
+
+    def iterate(self, limit: int = 100) -> Iterator[Any]:
+        """Iterate through all results with automatic pagination.
+
+        This method handles pagination automatically, fetching results in batches
+        and yielding individual items. This is memory-efficient for large result sets.
+
+        Args:
+            limit: Number of results to fetch per request (default: 100)
+
+        Yields:
+            Individual items from the search results
+
+        Raises:
+            IfpaApiError: If any API request fails
+
+        Example:
+            ```python
+            # Memory-efficient iteration over all US players
+            for player in client.player.query().country("US").iterate(limit=100):
+                print(f"{player.first_name} {player.last_name}")
+            ```
+
+        Note:
+            This method assumes the response has a 'search' field containing results.
+            Subclasses may need to override _extract_results() if the response
+            structure differs.
+        """
+        offset = 0
+
+        while True:
+            # Clone and add pagination params
+            query = self._clone()
+            if hasattr(query, "limit"):
+                query = query.limit(limit)
+            if hasattr(query, "offset"):
+                query = query.offset(offset)
+
+            # Execute query
+            response = query.get()
+
+            # Extract results - this assumes 'search' field, override if different
+            results = self._extract_results(response)
+
+            if not results:
+                break
+
+            # Yield individual items
+            yield from results
+
+            # Check if we got fewer results than requested (last page)
+            if len(results) < limit:
+                break
+
+            offset += limit
+
+    def _extract_results(self, response: T) -> list[Any]:
+        """Extract results list from response.
+
+        This method should be overridden by subclasses if the response structure
+        doesn't use the standard 'search' field.
+
+        Args:
+            response: The response object from get()
+
+        Returns:
+            List of result items
+        """
+        # Default implementation assumes response has 'search' field
+        if hasattr(response, "search"):
+            return cast(list[Any], response.search)
+        # Fallback for other patterns
+        if hasattr(response, "results"):
+            return cast(list[Any], response.results)
+        # If response is already a list
+        if isinstance(response, list):
+            return response
+        return []
+
+    def get_all(self, max_results: int | None = None) -> list[Any]:
+        """Fetch all results with automatic pagination.
+
+        This is a convenience method that collects all results into a list.
+        For large result sets, consider using iterate() instead for better
+        memory efficiency.
+
+        Args:
+            max_results: Maximum number of results to fetch (optional safety limit)
+
+        Returns:
+            List of all result items
+
+        Raises:
+            IfpaApiError: If any API request fails
+            ValueError: If max_results is exceeded
+
+        Example:
+            ```python
+            # Fetch all players from Washington state
+            all_players = client.player.query().country("US").state("WA").get_all()
+            print(f"Total players: {len(all_players)}")
+            ```
+
+        Warning:
+            Without max_results limit, this could fetch thousands of results
+            and consume significant memory. Use iterate() for large datasets.
+        """
+        results = []
+
+        for item in self.iterate():
+            results.append(item)
+
+            # Check max_results safety limit
+            if max_results is not None and len(results) >= max_results:
+                raise ValueError(
+                    f"Result count exceeded max_results limit of {max_results}. "
+                    f"Consider using iterate() for large datasets or increase the limit."
+                )
+
+        return results
 
     def __repr__(self) -> str:
         """Return a string representation of the query builder.

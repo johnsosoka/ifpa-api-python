@@ -17,6 +17,41 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 
 ## What's New in 0.3.0
 
+**Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
+
+```python
+from ifpa_api import (
+    IfpaClient,
+    IfpaApiError,
+    SeriesPlayerNotFoundError,
+    TournamentNotLeagueError,
+)
+
+# 1. Enhanced Error Messages - Full request context in exceptions
+try:
+    player = client.player(99999).details()
+except IfpaApiError as e:
+    print(e)  # "[404] Resource not found (URL: https://api.ifpapinball.com/player/99999)"
+    print(e.request_url)  # Direct access to URL
+    print(e.request_params)  # Direct access to query parameters
+
+# 2. Pagination Helpers - Automatic pagination for large result sets
+for player in client.player.query().country("US").iterate(limit=100):
+    print(f"{player.first_name} {player.last_name}")
+
+all_players = client.player.query().country("US").state("WA").get_all()
+
+# 3. Semantic Exceptions - Clear, specific errors for common scenarios
+try:
+    card = client.series("PAPA").player_card(12345, "OH")
+except SeriesPlayerNotFoundError as e:
+    print(f"Player {e.player_id} has no results in {e.series_code}")
+
+# 4. Better Validation Messages - Helpful hints for validation errors
+# Input error now shows: "Invalid parameter 'country': Input should be a valid string
+#                        Hint: Country code should be a 2-letter string like 'US' or 'CA'"
+```
+
 **Query Builder Pattern** - Build complex queries with a fluent, type-safe interface:
 
 ```python
@@ -61,10 +96,13 @@ standings = client.series("NACS").standings()
 ## Features
 
 - **Full Type Safety**: Complete type hints for IDE autocompletion and static analysis
-- **Pydantic Validation**: Request and response validation with detailed error messages
+- **Pydantic Validation**: Request and response validation with helpful error hints
 - **Query Builder Pattern**: Composable, immutable queries with method chaining
+- **Automatic Pagination**: Memory-efficient iteration with `.iterate()` and `.get_all()`
+- **Enhanced Error Context**: All exceptions include request URLs and parameters for debugging
+- **Semantic Exceptions**: Domain-specific errors (PlayersNeverMetError, SeriesPlayerNotFoundError, etc.)
 - **36 API Endpoints**: Complete coverage of IFPA API v2.1 across 6 resources
-- **96% Test Coverage**: Comprehensive unit and integration tests
+- **99% Test Coverage**: Comprehensive unit and integration tests
 - **Context Manager Support**: Automatic resource cleanup
 - **Clear Error Handling**: Structured exception hierarchy for different failure modes
 
@@ -109,6 +147,10 @@ print(f"Players: {tournament.tournament_stats.total_players}")
 results = client.tournament(67890).results()
 for result in results.results[:5]:
     print(f"{result.position}. {result.player_name}: {result.points} pts")
+
+# Automatic pagination for large datasets
+for player in client.player.query().country("US").iterate(limit=100):
+    print(f"{player.first_name} {player.last_name}")
 
 # Close client when done
 client.close()
@@ -233,7 +275,52 @@ countries = client.reference.countries()
 states = client.reference.state_provs(country_code="US")
 ```
 
+## Pagination
+
+The SDK provides two methods for handling large result sets with automatic pagination:
+
+### Memory-Efficient Iteration
+
+Use `.iterate()` to process results one at a time without loading everything into memory:
+
+```python
+# Iterate through all US players efficiently
+for player in client.player.query().country("US").iterate(limit=100):
+    print(f"{player.first_name} {player.last_name} - {player.city}")
+    # Process each player individually
+
+# Iterate through tournament results with filters
+for tournament in client.tournament.query("Championship").country("US").iterate():
+    print(f"{tournament.tournament_name} - {tournament.event_date}")
+```
+
+### Collect All Results
+
+Use `.get_all()` when you need all results in a list:
+
+```python
+# Get all players from Washington state
+all_players = client.player.query().country("US").state("WA").get_all()
+print(f"Total players: {len(all_players)}")
+
+# Safety limit to prevent excessive memory usage
+try:
+    results = client.player.query().country("US").get_all(max_results=1000)
+except ValueError as e:
+    print(f"Too many results: {e}")
+```
+
+**Best Practices:**
+- Use `.iterate()` for large datasets or when processing items one at a time
+- Use `.get_all()` for smaller datasets when you need the complete list
+- Always set `max_results` when using `.get_all()` to prevent memory issues
+- Default batch size is 100 items per request; adjust with `limit` parameter if needed
+
 ## Exception Handling
+
+The SDK provides a structured exception hierarchy with enhanced error context for debugging.
+
+### Basic Error Handling
 
 ```python
 from ifpa_api import IfpaClient, IfpaApiError, MissingApiKeyError
@@ -244,16 +331,71 @@ try:
 except MissingApiKeyError:
     print("No API key provided or found in environment")
 except IfpaApiError as e:
-    print(f"API error: {e.status_code} - {e.response_body}")
+    print(f"API error [{e.status_code}]: {e.message}")
+    print(f"Request URL: {e.request_url}")
+    print(f"Request params: {e.request_params}")
 ```
 
-Exception hierarchy:
+### Semantic Exceptions
+
+The SDK raises domain-specific exceptions for common error scenarios:
+
+```python
+from ifpa_api import (
+    IfpaClient,
+    PlayersNeverMetError,
+    SeriesPlayerNotFoundError,
+    TournamentNotLeagueError,
+)
+
+client = IfpaClient(api_key='your-api-key')
+
+# Players who have never competed together
+try:
+    comparison = client.player(12345).pvp(67890)
+except PlayersNeverMetError as e:
+    print(f"Players {e.player_id} and {e.opponent_id} have never met in competition")
+
+# Player not found in series
+try:
+    card = client.series("PAPA").player_card(12345, "OH")
+except SeriesPlayerNotFoundError as e:
+    print(f"Player {e.player_id} has no results in {e.series_code} series")
+    print(f"Region: {e.region_code}")
+
+# Non-league tournament
+try:
+    league = client.tournament(12345).league()
+except TournamentNotLeagueError as e:
+    print(f"Tournament {e.tournament_id} is not a league-format tournament")
+```
+
+### Exception Hierarchy
 
 ```
 IfpaError (base)
 ├── MissingApiKeyError - No API key provided
-├── IfpaApiError - API returned error (has status_code, response_body)
-└── IfpaClientValidationError - Request validation failed
+├── IfpaApiError - API returned error (has status_code, response_body, request_url, request_params)
+│   ├── PlayersNeverMetError - Players have never competed together
+│   ├── SeriesPlayerNotFoundError - Player not found in series/region
+│   └── TournamentNotLeagueError - Tournament is not a league format
+└── IfpaClientValidationError - Request validation failed (includes helpful hints)
+```
+
+### Enhanced Error Context
+
+All API errors (v0.3.0+) include full request context:
+
+```python
+try:
+    results = client.player.query("John").country("INVALID").get()
+except IfpaApiError as e:
+    # Access error details
+    print(f"Status: {e.status_code}")
+    print(f"Message: {e.message}")
+    print(f"URL: {e.request_url}")
+    print(f"Params: {e.request_params}")
+    print(f"Response: {e.response_body}")
 ```
 
 ## Migration from 0.2.x

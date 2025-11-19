@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ifpa_api.core.base import BaseResourceContext
+from ifpa_api.core.exceptions import IfpaApiError, TournamentNotLeagueError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
     Tournament,
@@ -105,18 +106,31 @@ class _TournamentContext(BaseResourceContext[int | str]):
             League session data and format information
 
         Raises:
-            IfpaApiError: If the API request fails
+            TournamentNotLeagueError: If the tournament is not a league-format tournament
+            IfpaApiError: If the API request fails for other reasons
 
         Example:
             ```python
-            league = client.tournament(12345).league()
-            print(f"Total sessions: {league.total_sessions}")
-            for session in league.sessions:
-                print(f"{session.session_date}: {session.player_count} players")
+            from ifpa_api.exceptions import TournamentNotLeagueError
+
+            try:
+                league = client.tournament(12345).league()
+                print(f"Total sessions: {league.total_sessions}")
+                for session in league.sessions:
+                    print(f"{session.session_date}: {session.player_count} players")
+            except TournamentNotLeagueError as e:
+                print(f"Tournament {e.tournament_id} is not a league")
             ```
         """
-        response = self._http._request("GET", f"/tournament/{self._resource_id}/league")
-        return TournamentLeagueResponse.model_validate(response)
+        try:
+            response = self._http._request("GET", f"/tournament/{self._resource_id}/league")
+            return TournamentLeagueResponse.model_validate(response)
+        except IfpaApiError as e:
+            # Convert 404 to semantic exception
+            if e.status_code == 404:
+                raise TournamentNotLeagueError(self._resource_id) from e
+            # Re-raise other API errors
+            raise
 
     def submissions(self) -> TournamentSubmissionsResponse:
         """Get submission information for this tournament.

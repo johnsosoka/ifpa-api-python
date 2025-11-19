@@ -4,6 +4,7 @@ Provides methods for accessing information about a specific tournament series.
 """
 
 from ifpa_api.core.base import BaseResourceContext
+from ifpa_api.core.exceptions import IfpaApiError, SeriesPlayerNotFoundError
 from ifpa_api.models.series import (
     RegionRepsResponse,
     SeriesPlayerCard,
@@ -128,14 +129,20 @@ class _SeriesContext(BaseResourceContext[str]):
             Player's series card with event results and statistics
 
         Raises:
-            IfpaApiError: If the API request fails
+            SeriesPlayerNotFoundError: If the player has no results in the series/region
+            IfpaApiError: If the API request fails for other reasons
 
         Example:
             ```python
+            from ifpa_api.exceptions import SeriesPlayerNotFoundError
+
             # Get current year card for player in Ohio region
-            card = client.series("PAPA").player_card(12345, "OH")
-            print(f"Position: {card.current_position}")
-            print(f"Points: {card.total_points}")
+            try:
+                card = client.series("PAPA").player_card(12345, "OH")
+                print(f"Position: {card.current_position}")
+                print(f"Points: {card.total_points}")
+            except SeriesPlayerNotFoundError as e:
+                print(f"Player {e.player_id} has no results in {e.series_code}")
 
             # Get card for specific year
             card_2023 = client.series("PAPA").player_card(12345, "OH", year=2023)
@@ -147,10 +154,17 @@ class _SeriesContext(BaseResourceContext[str]):
         if year is not None:
             params["year"] = int(year)
 
-        response = self._http._request(
-            "GET", f"/series/{self._resource_id}/player_card/{player_id}", params=params
-        )
-        return SeriesPlayerCard.model_validate(response)
+        try:
+            response = self._http._request(
+                "GET", f"/series/{self._resource_id}/player_card/{player_id}", params=params
+            )
+            return SeriesPlayerCard.model_validate(response)
+        except IfpaApiError as e:
+            # Convert 404 to semantic exception
+            if e.status_code == 404:
+                raise SeriesPlayerNotFoundError(self._resource_id, player_id, region_code) from e
+            # Re-raise other API errors
+            raise
 
     def regions(self, region_code: str, year: int) -> SeriesRegionsResponse:
         """Get active regions in this series for a specific year.
