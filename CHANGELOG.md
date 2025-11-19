@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - Unreleased
+## [0.3.0] - 2025-11-18
 
 ### Breaking Changes - Field Name Alignment
 
@@ -324,7 +324,7 @@ results = client.player.query("John").get()
 results = client.player.query("John").country("US").state("WA").limit(25).get()
 ```
 
-## [0.2.2] - 2024-11-18
+## [0.2.2] - 2025-11-18
 
 ### Fixed
 
@@ -345,7 +345,7 @@ results = client.player.query("John").country("US").state("WA").limit(25).get()
 - Skipped unreliable `stateprov` filter tests for both Player and Director search (API returns incorrect states)
 - All 212 integration tests passing (with 2 skipped due to known API issues)
 
-## [0.2.1] - 2024-11-16
+## [0.2.1] - 2025-11-16
 
 ### Added
 
@@ -401,7 +401,7 @@ results = client.player.query("John").country("US").state("WA").limit(25).get()
 - Test pass rate improved from 52% to 100% (unit tests)
 - Integration test pass rate: 88% (180/209 tests passing)
 
-## [0.2.0] - 2024-11-14
+## [0.2.0] - 2025-11-14
 
 ### Added
 - `PlayersClient.get_multiple()` method to fetch up to 50 players in a single request
@@ -464,7 +464,7 @@ profile = client.player(123).details()
 # Player cards are only available via series: client.series("CODE").player_card(123)
 ```
 
-## [0.1.0] - 2024-11-14
+## [0.1.0] - 2025-11-14
 
 ### Added
 
