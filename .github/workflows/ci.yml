@@ -94,6 +94,7 @@ jobs:
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -133,7 +134,7 @@ jobs:
         run: poetry run pytest -v -m "not integration" --cov=ifpa_api --cov-report=xml --cov-report=term-missing
 
       - name: Run integration tests (if API key available)
-        if: ${{ env.IFPA_API_KEY != '' }}
+        if: ${{ secrets.IFPA_API_KEY != '' }}
         env:
           IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
         run: poetry run pytest -v -m "integration" --cov=ifpa_api --cov-append --cov-report=xml --cov-report=term-missing
