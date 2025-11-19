@@ -254,6 +254,7 @@ client.series("NACS").standings()
 ### Fixed
 
 **From 0.3.0 Development:**
+- Fixed tournament results validation error when API returns "Not Rated" strings for unrated players (now properly converts to None)
 - Consolidated integration tests from 3 files into 1 organized file (`test_tournament_integration.py`)
 - Updated all documentation to reflect new callable pattern and query builder
 - Fixed helper function `get_test_tournament_id()` to use correct callable pattern
