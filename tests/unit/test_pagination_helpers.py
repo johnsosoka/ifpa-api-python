@@ -28,14 +28,14 @@ class TestQueryBuilder(QueryBuilder[PlayerSearchResponse]):
         clone = self._clone()
         clone._params["count"] = count
         clone.mock_responses = self.mock_responses
-        return clone  # type: ignore[no-any-return]
+        return clone
 
     def offset(self, start: int) -> "TestQueryBuilder":
         """Add offset to pagination."""
         clone = self._clone()
         clone._params["start_pos"] = start
         clone.mock_responses = self.mock_responses
-        return clone  # type: ignore[no-any-return]
+        return clone
 
     def get(self) -> PlayerSearchResponse:
         """Execute query and return mocked response.

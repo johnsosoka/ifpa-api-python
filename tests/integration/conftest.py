@@ -112,7 +112,7 @@ def assert_collection_not_empty(collection: object) -> None:
         AssertionError: If collection is None or empty
     """
     assert collection is not None, "Collection is None"
-    assert len(collection) > 0, "Collection is empty"  # type: ignore[arg-type]
+    assert len(collection) > 0, "Collection is empty"
 
 
 def validate_test_player(client: IfpaClient, player_id: int) -> Player:

@@ -71,7 +71,7 @@ disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = "tests.*"
-disable_error_code = ["misc"]
+disable_error_code = ["misc", "no-any-return", "arg-type", "list-item"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

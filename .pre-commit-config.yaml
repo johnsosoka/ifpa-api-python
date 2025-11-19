@@ -27,7 +27,7 @@ repos:
     rev: v1.18.2
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests, pydantic]
+        additional_dependencies: [types-requests, pydantic, pytest]
         args: [--ignore-missing-imports]
 
 # Pre-commit.ci configuration
