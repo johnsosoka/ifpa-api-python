@@ -4,16 +4,14 @@ This test suite performs comprehensive integration testing of all Stats resource
 against the live IFPA API. Tests cover all 10 statistical endpoints with real data validation.
 
 Test Categories:
-1. StatsClient.country_players() - Player counts by country
-2. StatsClient.state_players() - Player counts by state/province (North America)
-3. StatsClient.state_tournaments() - Tournament counts and points by state
-4. StatsClient.events_by_year() - Historical tournament trends by year
-5. StatsClient.players_by_year() - Player retention metrics by year
-6. StatsClient.largest_tournaments() - Top tournaments by player count
-7. StatsClient.lucrative_tournaments() - Top tournaments by WPPR value
-8. StatsClient.points_given_period() - Top point earners in date range
-9. StatsClient.events_attended_period() - Most active players in date range
-10. StatsClient.overall() - Overall IFPA statistics and demographics
+1. TestStatsGeographicData - Geographic statistics (country/state players,
+   state tournaments)
+2. TestStatsHistoricalTrends - Historical trends (events_by_year, players_by_year)
+3. TestStatsTournamentRankings - Tournament rankings (largest, lucrative tournaments)
+4. TestStatsPlayerActivity - Player activity in date ranges (points_given,
+   events_attended)
+5. TestStatsOverall - Overall IFPA statistics
+6. TestStatsDataQualityAndErrors - Data quality validation and error handling
 
 All endpoints were verified operational as of 2025-11-19 via curl testing.
 
@@ -21,7 +19,6 @@ These tests make real API calls and require a valid API key.
 Run with: pytest -m integration tests/integration/test_stats_integration.py
 """
 
-from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
@@ -40,418 +37,389 @@ from ifpa_api.models.stats import (
     StatePlayersResponse,
     StateTournamentsResponse,
 )
-from tests.integration.helpers import skip_if_no_api_key
+from tests.integration.conftest import (
+    assert_numeric_in_range,
+    assert_stats_fields_types,
+    assert_stats_ranking_list,
+)
 
 # =============================================================================
-# COUNTRY PLAYERS STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestCountryPlayers:
-    """Test StatsClient.country_players() method."""
-
-    def test_country_players_default(self, api_key: str) -> None:
-        """Test country_players() with default parameters (OPEN rankings)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.country_players()
-            assert isinstance(result, CountryPlayersResponse)
-            assert result.type == "Players by Country"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
-
-            # Verify first entry structure
-            first_stat = result.stats[0]
-            assert first_stat.country_name is not None
-            assert first_stat.country_code is not None
-            assert first_stat.player_count > 0
-            assert first_stat.stats_rank == 1  # First entry should be rank 1
-        finally:
-            client.close()
-
-    def test_country_players_women(self, api_key: str) -> None:
-        """Test country_players() with WOMEN ranking system."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.country_players(rank_type="WOMEN")
-            assert isinstance(result, CountryPlayersResponse)
-            assert result.type == "Players by Country"
-            assert result.rank_type == "WOMEN"
-            assert len(result.stats) > 0
-
-            # Verify data types after string coercion
-            for stat in result.stats[:5]:  # Check first 5
-                assert isinstance(stat.player_count, int)
-                assert isinstance(stat.stats_rank, int)
-                assert stat.player_count > 0
-        finally:
-            client.close()
-
-
-# =============================================================================
-# STATE PLAYERS STATISTICS
+# GEOGRAPHIC STATISTICS
 # =============================================================================
 
 
 @pytest.mark.integration
-class TestStatePlayers:
-    """Test StatsClient.state_players() method."""
+class TestStatsGeographicData:
+    """Test geographic statistics endpoints (country/state-based data)."""
 
-    def test_state_players_default(self, api_key: str) -> None:
-        """Test state_players() with default parameters."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+    @pytest.mark.parametrize("rank_type", ["OPEN", "WOMEN"])
+    def test_country_players_by_rank_type(self, client: IfpaClient, rank_type: str) -> None:
+        """Test country_players() with different ranking systems.
 
-        try:
-            result = client.stats.state_players()
-            assert isinstance(result, StatePlayersResponse)
-            assert "Players by State" in result.type  # API may add "(North America)"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
+        Args:
+            client: IFPA API client fixture
+            rank_type: Ranking system to test (OPEN or WOMEN)
+        """
+        result = client.stats.country_players(rank_type=rank_type)
 
-            # Verify US states are included
-            state_codes = [stat.stateprov for stat in result.stats]
-            # Common US states should be present
-            common_states = ["CA", "NY", "TX", "WA"]
-            assert any(state in state_codes for state in common_states)
+        # Validate response structure
+        assert isinstance(result, CountryPlayersResponse)
+        assert result.type == "Players by Country"
+        assert result.rank_type == rank_type
+        assert len(result.stats) > 0
 
-            # Verify structure
+        # Validate first entry structure using helper
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "country_name": str,
+                "country_code": str,
+                "player_count": int,
+                "stats_rank": int,
+            },
+        )
+        assert first_stat.player_count > 0
+        assert first_stat.stats_rank == 1  # First entry should be rank 1
+
+    def test_state_players(self, client: IfpaClient) -> None:
+        """Test state_players() returns North American state/province data.
+
+        Args:
+            client: IFPA API client fixture
+        """
+        result = client.stats.state_players()
+
+        # Validate response structure
+        assert isinstance(result, StatePlayersResponse)
+        assert "Players by State" in result.type  # API may add "(North America)"
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Verify US states are included
+        state_codes = [stat.stateprov for stat in result.stats]
+        common_states = ["CA", "NY", "TX", "WA"]
+        assert any(
+            state in state_codes for state in common_states
+        ), "Expected common US states in results"
+
+        # Validate structure using helper
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "stateprov": str,
+                "player_count": int,
+                "stats_rank": int,
+            },
+        )
+        assert first_stat.player_count > 0
+        assert first_stat.stats_rank == 1
+
+    @pytest.mark.parametrize("rank_type", ["OPEN", "WOMEN"])
+    def test_state_tournaments_by_rank_type(self, client: IfpaClient, rank_type: str) -> None:
+        """Test state_tournaments() with different ranking systems.
+
+        Args:
+            client: IFPA API client fixture
+            rank_type: Ranking system to test (OPEN or WOMEN)
+        """
+        result = client.stats.state_tournaments(rank_type=rank_type)
+
+        # Validate response structure
+        assert isinstance(result, StateTournamentsResponse)
+        assert "Tournaments by State" in result.type
+        assert result.rank_type == rank_type
+        assert len(result.stats) > 0
+
+        # Validate detailed tournament statistics
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "stateprov": str,
+                "tournament_count": int,
+                "total_points_all": Decimal,
+                "total_points_tournament_value": Decimal,
+                "stats_rank": int,
+            },
+        )
+        assert first_stat.tournament_count > 0
+        assert first_stat.total_points_all > 0
+        assert first_stat.stats_rank == 1
+
+
+# =============================================================================
+# HISTORICAL TRENDS STATISTICS
+# =============================================================================
+
+
+@pytest.mark.integration
+class TestStatsHistoricalTrends:
+    """Test historical trend statistics endpoints."""
+
+    @pytest.mark.parametrize("country_code", [None, "US"])
+    def test_events_by_year(self, client: IfpaClient, country_code: str | None) -> None:
+        """Test events_by_year() with optional country filter.
+
+        Args:
+            client: IFPA API client fixture
+            country_code: Optional country code filter
+        """
+        result = client.stats.events_by_year(country_code=country_code)
+
+        # Validate response structure
+        assert isinstance(result, EventsByYearResponse)
+        assert "Events" in result.type and "Year" in result.type
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Validate historical data structure
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "year": str,
+                "country_count": int,
+                "tournament_count": int,
+                "player_count": int,
+            },
+        )
+        assert first_stat.country_count > 0
+        assert first_stat.tournament_count > 0
+        assert first_stat.player_count > 0
+
+    def test_players_by_year(self, client: IfpaClient) -> None:
+        """Test players_by_year() returns player retention metrics.
+
+        Args:
+            client: IFPA API client fixture
+        """
+        result = client.stats.players_by_year()
+
+        # Validate response structure
+        assert isinstance(result, PlayersByYearResponse)
+        assert result.type == "Players by Year"
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Validate retention metrics structure
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "year": str,
+                "current_year_count": int,
+                "previous_year_count": int,
+                "previous_2_year_count": int,
+            },
+        )
+        assert first_stat.current_year_count > 0
+        # Retention counts should be less than or equal to current year
+        assert first_stat.previous_year_count <= first_stat.current_year_count
+
+
+# =============================================================================
+# TOURNAMENT RANKINGS STATISTICS
+# =============================================================================
+
+
+@pytest.mark.integration
+class TestStatsTournamentRankings:
+    """Test tournament ranking statistics endpoints."""
+
+    @pytest.mark.parametrize("rank_type", ["OPEN", "WOMEN"])
+    def test_largest_tournaments_by_rank_type(self, client: IfpaClient, rank_type: str) -> None:
+        """Test largest_tournaments() with different ranking systems.
+
+        Args:
+            client: IFPA API client fixture
+            rank_type: Ranking system to test (OPEN or WOMEN)
+        """
+        result = client.stats.largest_tournaments(rank_type=rank_type)
+
+        # Validate response structure
+        assert isinstance(result, LargestTournamentsResponse)
+        assert result.type == "Largest Tournaments"
+        assert result.rank_type == rank_type
+        assert len(result.stats) > 0
+        assert len(result.stats) <= 25  # API returns top 25
+
+        # Validate tournament metadata
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "tournament_id": int,
+                "tournament_name": str,
+                "event_name": str,
+                "country_name": str,
+                "country_code": str,
+                "player_count": int,
+                "tournament_date": str,
+                "stats_rank": int,
+            },
+        )
+        assert first_stat.player_count > 0
+        assert first_stat.stats_rank == 1
+
+    @pytest.mark.parametrize(
+        ("rank_type", "major"),
+        [
+            ("OPEN", "Y"),  # Default: OPEN majors
+            ("OPEN", "N"),  # OPEN non-majors
+            ("WOMEN", "Y"),  # WOMEN majors
+        ],
+    )
+    def test_lucrative_tournaments(self, client: IfpaClient, rank_type: str, major: str) -> None:
+        """Test lucrative_tournaments() with rank types and major filter.
+
+        Args:
+            client: IFPA API client fixture
+            rank_type: Ranking system to test (OPEN or WOMEN)
+            major: Major tournament filter ("Y" or "N")
+        """
+        result = client.stats.lucrative_tournaments(rank_type=rank_type, major=major)
+
+        # Validate response structure
+        assert isinstance(result, LucrativeTournamentsResponse)
+        assert result.type == "Lucrative Tournaments"
+        assert result.rank_type == rank_type
+        assert len(result.stats) > 0
+
+        # Validate tournament value fields
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "tournament_id": int,
+                "tournament_name": str,
+                "tournament_value": float,
+                "stats_rank": int,
+            },
+        )
+        assert first_stat.tournament_value > 0
+        assert first_stat.stats_rank == 1
+
+
+# =============================================================================
+# PLAYER ACTIVITY PERIOD STATISTICS
+# =============================================================================
+
+
+@pytest.mark.integration
+class TestStatsPlayerActivity:
+    """Test player activity statistics over time periods."""
+
+    @pytest.mark.parametrize(
+        "date_fixture_name",
+        ["stats_date_range_90_days", "stats_date_range_180_days"],
+    )
+    def test_points_given_period(
+        self, client: IfpaClient, date_fixture_name: str, request: pytest.FixtureRequest
+    ) -> None:
+        """Test points_given_period() with different date ranges.
+
+        Args:
+            client: IFPA API client fixture
+            date_fixture_name: Name of date fixture to use
+            request: Pytest fixture request object
+        """
+        # Get the date range fixture dynamically
+        start_date, end_date = request.getfixturevalue(date_fixture_name)
+
+        result = client.stats.points_given_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+
+        # Validate response structure
+        assert isinstance(result, PointsGivenPeriodResponse)
+        assert "Points" in result.type
+        assert result.start_date is not None
+        assert result.end_date is not None
+        assert result.return_count >= 0
+        assert result.rank_type == "OPEN"
+
+        # May be empty if no tournaments in date range, but structure should be valid
+        if len(result.stats) > 0:
             first_stat = result.stats[0]
-            assert first_stat.stateprov is not None
-            assert isinstance(first_stat.player_count, int)
-            assert first_stat.player_count > 0
+            assert_stats_fields_types(
+                first_stat,
+                {
+                    "player_id": int,
+                    "first_name": str,
+                    "last_name": str,
+                    "country_name": str,
+                    "wppr_points": Decimal,
+                    "stats_rank": int,
+                },
+            )
+            assert first_stat.wppr_points > 0
             assert first_stat.stats_rank == 1
-        finally:
-            client.close()
 
+    def test_points_given_period_with_country_filter(
+        self, client: IfpaClient, stats_date_range_180_days: tuple[str, str], country_code: str
+    ) -> None:
+        """Test points_given_period() with country filter.
 
-# =============================================================================
-# STATE TOURNAMENTS STATISTICS
-# =============================================================================
+        Args:
+            client: IFPA API client fixture
+            stats_date_range_180_days: 180-day date range fixture
+            country_code: Country code from fixture
+        """
+        start_date, end_date = stats_date_range_180_days
 
+        result = client.stats.points_given_period(
+            start_date=start_date,
+            end_date=end_date,
+            country_code=country_code,
+            limit=10,
+        )
 
-@pytest.mark.integration
-class TestStateTournaments:
-    """Test StatsClient.state_tournaments() method."""
+        # Validate response structure
+        assert isinstance(result, PointsGivenPeriodResponse)
+        # If results exist, verify structure (country filter may not work perfectly in API)
+        if len(result.stats) > 0:
+            assert result.stats[0].country_code is not None
 
-    def test_state_tournaments_default(self, api_key: str) -> None:
-        """Test state_tournaments() with default parameters."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+    def test_events_attended_period(
+        self, client: IfpaClient, stats_date_range_90_days: tuple[str, str]
+    ) -> None:
+        """Test events_attended_period() with 90-day date range.
 
-        try:
-            result = client.stats.state_tournaments()
-            assert isinstance(result, StateTournamentsResponse)
-            assert "Tournaments by State" in result.type  # API may add "(North America)"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
+        Args:
+            client: IFPA API client fixture
+            stats_date_range_90_days: 90-day date range fixture
+        """
+        start_date, end_date = stats_date_range_90_days
 
-            # Verify detailed tournament statistics
+        result = client.stats.events_attended_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+
+        # Validate response structure
+        assert isinstance(result, EventsAttendedPeriodResponse)
+        assert "Events" in result.type or "Tournaments" in result.type
+        assert result.start_date is not None
+        assert result.end_date is not None
+        assert result.return_count >= 0
+
+        # Note: This endpoint doesn't include rank_type field
+        # May be empty if no tournaments in date range
+        if len(result.stats) > 0:
             first_stat = result.stats[0]
-            assert first_stat.stateprov is not None
-            assert isinstance(first_stat.tournament_count, int)
+            assert_stats_fields_types(
+                first_stat,
+                {
+                    "player_id": int,
+                    "first_name": str,
+                    "last_name": str,
+                    "tournament_count": int,
+                    "stats_rank": int,
+                },
+            )
             assert first_stat.tournament_count > 0
-            # Points fields should be Decimal with proper coercion
-            assert isinstance(first_stat.total_points_all, Decimal)
-            assert isinstance(first_stat.total_points_tournament_value, Decimal)
-            assert first_stat.total_points_all > 0
             assert first_stat.stats_rank == 1
-        finally:
-            client.close()
-
-
-# =============================================================================
-# EVENTS BY YEAR STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestEventsByYear:
-    """Test StatsClient.events_by_year() method."""
-
-    def test_events_by_year_default(self, api_key: str) -> None:
-        """Test events_by_year() with default parameters."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.events_by_year()
-            assert isinstance(result, EventsByYearResponse)
-            assert (
-                "Events" in result.type and "Year" in result.type
-            )  # API returns "Events Per Year"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
-
-            # Verify historical data structure
-            first_stat = result.stats[0]
-            assert first_stat.year is not None
-            assert isinstance(first_stat.country_count, int)
-            assert isinstance(first_stat.tournament_count, int)
-            assert isinstance(first_stat.player_count, int)
-            assert first_stat.country_count > 0
-            assert first_stat.tournament_count > 0
-            assert first_stat.player_count > 0
-        finally:
-            client.close()
-
-    def test_events_by_year_with_country_filter(self, api_key: str) -> None:
-        """Test events_by_year() filtered by country."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.events_by_year(country_code="US")
-            assert isinstance(result, EventsByYearResponse)
-            assert len(result.stats) > 0
-
-            # All entries should have tournament activity
-            for stat in result.stats[:5]:
-                assert stat.tournament_count > 0
-        finally:
-            client.close()
-
-
-# =============================================================================
-# PLAYERS BY YEAR STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestPlayersByYear:
-    """Test StatsClient.players_by_year() method."""
-
-    def test_players_by_year_default(self, api_key: str) -> None:
-        """Test players_by_year() with default parameters."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.players_by_year()
-            assert isinstance(result, PlayersByYearResponse)
-            assert result.type == "Players by Year"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
-
-            # Verify retention metrics structure
-            first_stat = result.stats[0]
-            assert first_stat.year is not None
-            assert isinstance(first_stat.current_year_count, int)
-            assert isinstance(first_stat.previous_year_count, int)
-            assert isinstance(first_stat.previous_2_year_count, int)
-            assert first_stat.current_year_count > 0
-            # Retention counts should be less than or equal to current year
-            assert first_stat.previous_year_count <= first_stat.current_year_count
-        finally:
-            client.close()
-
-
-# =============================================================================
-# LARGEST TOURNAMENTS STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestLargestTournaments:
-    """Test StatsClient.largest_tournaments() method."""
-
-    def test_largest_tournaments_default(self, api_key: str) -> None:
-        """Test largest_tournaments() with default parameters."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.largest_tournaments()
-            assert isinstance(result, LargestTournamentsResponse)
-            assert result.type == "Largest Tournaments"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
-            # API returns top 25
-            assert len(result.stats) <= 25
-
-            # Verify tournament metadata
-            first_stat = result.stats[0]
-            assert first_stat.tournament_id > 0
-            assert first_stat.tournament_name is not None
-            assert first_stat.event_name is not None
-            assert first_stat.country_name is not None
-            assert first_stat.country_code is not None
-            assert isinstance(first_stat.player_count, int)
-            assert first_stat.player_count > 0
-            assert first_stat.tournament_date is not None  # YYYY-MM-DD format
-            assert first_stat.stats_rank == 1
-        finally:
-            client.close()
-
-
-# =============================================================================
-# LUCRATIVE TOURNAMENTS STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestLucrativeTournaments:
-    """Test StatsClient.lucrative_tournaments() method."""
-
-    def test_lucrative_tournaments_default_major(self, api_key: str) -> None:
-        """Test lucrative_tournaments() with default parameters (major=Y)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.lucrative_tournaments()
-            assert isinstance(result, LucrativeTournamentsResponse)
-            assert result.type == "Lucrative Tournaments"
-            assert result.rank_type == "OPEN"
-            assert len(result.stats) > 0
-
-            # Verify tournament value is float (not string)
-            first_stat = result.stats[0]
-            assert first_stat.tournament_id > 0
-            assert first_stat.tournament_name is not None
-            assert isinstance(first_stat.tournament_value, float)
-            assert first_stat.tournament_value > 0
-            assert first_stat.stats_rank == 1
-        finally:
-            client.close()
-
-    def test_lucrative_tournaments_non_major(self, api_key: str) -> None:
-        """Test lucrative_tournaments() with major=N filter."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.lucrative_tournaments(major="N")
-            assert isinstance(result, LucrativeTournamentsResponse)
-            assert len(result.stats) > 0
-
-            # Non-major tournaments should have lower values than majors
-            for stat in result.stats[:5]:
-                assert isinstance(stat.tournament_value, float)
-                assert stat.tournament_value > 0
-        finally:
-            client.close()
-
-
-# =============================================================================
-# POINTS GIVEN PERIOD STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestPointsGivenPeriod:
-    """Test StatsClient.points_given_period() method."""
-
-    def test_points_given_period_recent(self, api_key: str) -> None:
-        """Test points_given_period() with recent date range."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            # Use last 3 months to ensure data availability
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=90)
-
-            result = client.stats.points_given_period(
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                limit=10,
-            )
-
-            assert isinstance(result, PointsGivenPeriodResponse)
-            assert "Points" in result.type  # API may vary text
-            assert result.start_date is not None
-            assert result.end_date is not None
-            assert result.return_count >= 0
-            assert result.rank_type == "OPEN"
-
-            # May be empty if no tournaments in date range, but structure should be valid
-            if len(result.stats) > 0:
-                first_stat = result.stats[0]
-                assert first_stat.player_id > 0
-                assert first_stat.first_name is not None
-                assert first_stat.last_name is not None
-                assert first_stat.country_name is not None
-                assert isinstance(first_stat.wppr_points, Decimal)
-                assert first_stat.wppr_points > 0
-                assert first_stat.stats_rank == 1
-        finally:
-            client.close()
-
-    def test_points_given_period_with_country_filter(self, api_key: str) -> None:
-        """Test points_given_period() with country filter."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            # Use last 6 months for more data
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=180)
-
-            result = client.stats.points_given_period(
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                country_code="US",
-                limit=10,
-            )
-
-            assert isinstance(result, PointsGivenPeriodResponse)
-            # If results exist, verify country filter
-            if len(result.stats) > 0:
-                # Country filter may not work perfectly in API, just verify structure
-                assert result.stats[0].country_code is not None
-        finally:
-            client.close()
-
-
-# =============================================================================
-# EVENTS ATTENDED PERIOD STATISTICS
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestEventsAttendedPeriod:
-    """Test StatsClient.events_attended_period() method."""
-
-    def test_events_attended_period_recent(self, api_key: str) -> None:
-        """Test events_attended_period() with recent date range."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            # Use last 3 months
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=90)
-
-            result = client.stats.events_attended_period(
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                limit=10,
-            )
-
-            assert isinstance(result, EventsAttendedPeriodResponse)
-            assert "Events" in result.type or "Tournaments" in result.type  # API may vary text
-            assert result.start_date is not None
-            assert result.end_date is not None
-            assert result.return_count >= 0
-
-            # Note: This endpoint doesn't include rank_type field
-            # May be empty if no tournaments in date range
-            if len(result.stats) > 0:
-                first_stat = result.stats[0]
-                assert first_stat.player_id > 0
-                assert first_stat.first_name is not None
-                assert first_stat.last_name is not None
-                assert isinstance(first_stat.tournament_count, int)
-                assert first_stat.tournament_count > 0
-                assert first_stat.stats_rank == 1
-        finally:
-            client.close()
 
 
 # =============================================================================
@@ -460,202 +428,215 @@ class TestEventsAttendedPeriod:
 
 
 @pytest.mark.integration
-class TestOverallStats:
-    """Test StatsClient.overall() method."""
+class TestStatsOverall:
+    """Test overall IFPA statistics endpoint."""
 
-    def test_overall_default(self, api_key: str) -> None:
-        """Test overall() with default system_code (OPEN)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            result = client.stats.overall()
-            assert isinstance(result, OverallStatsResponse)
-            assert result.type == "Overall Stats"
-            assert result.system_code == "OPEN"
-
-            # Verify nested stats object (not an array)
-            stats = result.stats
-            assert isinstance(stats.overall_player_count, int)
-            assert isinstance(stats.active_player_count, int)
-            assert isinstance(stats.tournament_count, int)
-            assert isinstance(stats.tournament_count_last_month, int)
-            assert isinstance(stats.tournament_count_this_year, int)
-            assert isinstance(stats.tournament_player_count, int)
-            assert isinstance(stats.tournament_player_count_average, float)
-
-            # Verify counts are reasonable
-            assert stats.overall_player_count > 100000  # Should have 100k+ players
-            assert stats.active_player_count > 0
-            assert stats.tournament_count > 0
-            assert stats.tournament_player_count_average > 0
-
-            # Verify age distribution
-            age = stats.age
-            assert isinstance(age.age_under_18, float)
-            assert isinstance(age.age_18_to_29, float)
-            assert isinstance(age.age_30_to_39, float)
-            assert isinstance(age.age_40_to_49, float)
-            assert isinstance(age.age_50_to_99, float)
-
-            # All age percentages should be positive
-            assert age.age_under_18 >= 0
-            assert age.age_18_to_29 >= 0
-            assert age.age_30_to_39 >= 0
-            assert age.age_40_to_49 >= 0
-            assert age.age_50_to_99 >= 0
-        finally:
-            client.close()
-
-    def test_overall_women_system_code(self, api_key: str) -> None:
-        """Test overall() with WOMEN system_code.
+    @pytest.mark.parametrize("system_code", ["OPEN", "WOMEN"])
+    def test_overall_stats(
+        self,
+        client: IfpaClient,
+        system_code: str,
+        stats_thresholds: dict[str, int],
+    ) -> None:
+        """Test overall() with different system codes.
 
         Note: As of 2025-11-19, the API has a bug where system_code=WOMEN
         returns OPEN data. This test documents the current behavior.
+
+        Args:
+            client: IFPA API client fixture
+            system_code: System code to test (OPEN or WOMEN)
+            stats_thresholds: Expected minimum thresholds fixture
         """
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+        result = client.stats.overall(system_code=system_code)
 
-        try:
-            result = client.stats.overall(system_code="WOMEN")
-            assert isinstance(result, OverallStatsResponse)
+        # Validate response structure
+        assert isinstance(result, OverallStatsResponse)
+        assert result.type == "Overall Stats"
 
-            # API bug: Always returns OPEN regardless of system_code
-            # This test documents current API behavior
-            assert result.system_code == "OPEN"  # Known bug
-            assert result.stats.overall_player_count > 0
-        finally:
-            client.close()
+        # API bug: Always returns OPEN regardless of system_code
+        if system_code == "WOMEN":
+            assert result.system_code == "OPEN"  # Known bug - document it
+        else:
+            assert result.system_code == "OPEN"
+
+        # Validate nested stats object (not an array) using helper
+        stats = result.stats
+        assert_stats_fields_types(
+            stats,
+            {
+                "overall_player_count": int,
+                "active_player_count": int,
+                "tournament_count": int,
+                "tournament_count_last_month": int,
+                "tournament_count_this_year": int,
+                "tournament_player_count": int,
+                "tournament_player_count_average": float,
+            },
+        )
+
+        # Verify counts are within reasonable ranges using thresholds
+        assert_numeric_in_range(
+            stats.overall_player_count,
+            stats_thresholds["overall_player_count"],
+            200000,  # Upper bound
+            "overall_player_count",
+        )
+        assert stats.active_player_count > stats_thresholds["active_player_count"]
+        assert stats.tournament_count > stats_thresholds["tournament_count"]
+        assert stats.tournament_count_this_year >= stats_thresholds["tournament_count_this_year"]
+        assert stats.tournament_count_last_month >= stats_thresholds["tournament_count_last_month"]
+        assert stats.tournament_player_count_average > 0
+
+        # Validate age distribution
+        age = stats.age
+        assert_stats_fields_types(
+            age,
+            {
+                "age_under_18": float,
+                "age_18_to_29": float,
+                "age_30_to_39": float,
+                "age_40_to_49": float,
+                "age_50_to_99": float,
+            },
+        )
+
+        # All age percentages should be non-negative
+        assert age.age_under_18 >= 0
+        assert age.age_18_to_29 >= 0
+        assert age.age_30_to_39 >= 0
+        assert age.age_40_to_49 >= 0
+        assert age.age_50_to_99 >= 0
 
 
 # =============================================================================
-# DATA QUALITY VALIDATION
+# DATA QUALITY AND ERROR HANDLING
 # =============================================================================
 
 
 @pytest.mark.integration
-class TestStatsDataQuality:
-    """Test data quality and consistency across stats endpoints."""
+class TestStatsDataQualityAndErrors:
+    """Test data quality validation and error handling for stats endpoints."""
 
-    def test_country_players_sorted_by_count(self, api_key: str) -> None:
-        """Verify country_players results are sorted by player count descending."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+    # === DATA QUALITY TESTS ===
 
-        try:
-            result = client.stats.country_players()
-            assert len(result.stats) > 5  # Need multiple results to check sorting
+    def test_country_players_sorted_and_ranked(self, client: IfpaClient) -> None:
+        """Verify country_players results are sorted correctly with sequential ranks."""
+        result = client.stats.country_players()
+        assert_stats_ranking_list(result.stats, min_count=5)
 
-            # Verify descending order by player count
-            for i in range(len(result.stats) - 1):
-                current_count = result.stats[i].player_count
-                next_count = result.stats[i + 1].player_count
-                assert (
-                    current_count >= next_count
-                ), f"Results not sorted: {current_count} < {next_count} at index {i}"
+        # Verify descending order by player count
+        for i in range(len(result.stats) - 1):
+            current_count = result.stats[i].player_count
+            next_count = result.stats[i + 1].player_count
+            assert (
+                current_count >= next_count
+            ), f"Results not sorted: {current_count} < {next_count} at index {i}"
 
-            # Verify ranks are sequential
-            for i, stat in enumerate(result.stats):
-                assert stat.stats_rank == i + 1
-        finally:
-            client.close()
-
-    def test_string_to_number_coercion(self, api_key: str) -> None:
+    def test_string_to_number_coercion(self, client: IfpaClient) -> None:
         """Verify string count fields are properly coerced to numbers."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+        # Test various endpoints with string coercion
+        country_result = client.stats.country_players()
+        if len(country_result.stats) > 0:
+            assert isinstance(country_result.stats[0].player_count, int)
 
-        try:
-            # Test various endpoints with string coercion
-            country_result = client.stats.country_players()
-            if len(country_result.stats) > 0:
-                assert isinstance(country_result.stats[0].player_count, int)
+        state_result = client.stats.state_tournaments()
+        if len(state_result.stats) > 0:
+            assert isinstance(state_result.stats[0].tournament_count, int)
+            assert isinstance(state_result.stats[0].total_points_all, Decimal)
 
-            state_result = client.stats.state_tournaments()
-            if len(state_result.stats) > 0:
-                assert isinstance(state_result.stats[0].tournament_count, int)
-                assert isinstance(state_result.stats[0].total_points_all, Decimal)
+        largest_result = client.stats.largest_tournaments()
+        if len(largest_result.stats) > 0:
+            assert isinstance(largest_result.stats[0].player_count, int)
 
-            largest_result = client.stats.largest_tournaments()
-            if len(largest_result.stats) > 0:
-                assert isinstance(largest_result.stats[0].player_count, int)
-        finally:
-            client.close()
-
-    def test_overall_stats_numeric_types(self, api_key: str) -> None:
+    def test_overall_stats_numeric_types(self, client: IfpaClient) -> None:
         """Verify overall endpoint returns proper numeric types (not strings)."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+        result = client.stats.overall()
+
+        # Validate all numeric fields using helper
+        assert_stats_fields_types(
+            result.stats,
+            {
+                "overall_player_count": int,
+                "active_player_count": int,
+                "tournament_count": int,
+                "tournament_count_last_month": int,
+                "tournament_count_this_year": int,
+                "tournament_player_count": int,
+                "tournament_player_count_average": float,
+            },
+        )
+
+        # Age percentages should be floats
+        assert_stats_fields_types(
+            result.stats.age,
+            {
+                "age_under_18": float,
+                "age_18_to_29": float,
+            },
+        )
+
+    # === ERROR HANDLING TESTS ===
+
+    def test_invalid_date_range_handling(self, client: IfpaClient) -> None:
+        """Test that invalid/future date ranges are handled gracefully."""
+        from datetime import datetime, timedelta
+
+        # Future dates may return empty results (not an error)
+        future_start = (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d")
+        future_end = (datetime.now() + timedelta(days=730)).strftime("%Y-%m-%d")
 
         try:
-            result = client.stats.overall()
-
-            # All counts should be integers
-            assert isinstance(result.stats.overall_player_count, int)
-            assert isinstance(result.stats.active_player_count, int)
-            assert isinstance(result.stats.tournament_count, int)
-            assert isinstance(result.stats.tournament_count_last_month, int)
-            assert isinstance(result.stats.tournament_count_this_year, int)
-            assert isinstance(result.stats.tournament_player_count, int)
-
-            # Average should be float
-            assert isinstance(result.stats.tournament_player_count_average, float)
-
-            # Age percentages should be floats
-            assert isinstance(result.stats.age.age_under_18, float)
-            assert isinstance(result.stats.age.age_18_to_29, float)
-        finally:
-            client.close()
-
-
-# =============================================================================
-# ERROR HANDLING AND EDGE CASES
-# =============================================================================
-
-
-@pytest.mark.integration
-class TestStatsErrorHandling:
-    """Test error handling for stats endpoints."""
-
-    def test_invalid_date_range(self, api_key: str) -> None:
-        """Test that invalid date ranges are handled gracefully."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
-
-        try:
-            # Future dates may return empty results (not an error)
-            future_start = (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d")
-            future_end = (datetime.now() + timedelta(days=730)).strftime("%Y-%m-%d")
-
             result = client.stats.points_given_period(
                 start_date=future_start, end_date=future_end, limit=10
             )
-
             # Should succeed but may return no results
             assert isinstance(result, PointsGivenPeriodResponse)
             # Empty results are valid for future dates
         except IfpaApiError as e:
             # Some date validation errors may return 400
             assert e.status_code in (400, 404)
-        finally:
-            client.close()
 
-    def test_empty_period_results(self, api_key: str) -> None:
+    def test_empty_period_results_handling(self, client: IfpaClient) -> None:
         """Test handling of period queries that return no results."""
-        skip_if_no_api_key()
-        client = IfpaClient(api_key=api_key)
+        # Use a very narrow date range that may have no tournaments
+        single_day = "2020-01-01"
 
-        try:
-            # Use a very narrow date range that may have no tournaments
-            single_day = "2020-01-01"
+        result = client.stats.events_attended_period(
+            start_date=single_day, end_date=single_day, limit=10
+        )
 
-            result = client.stats.events_attended_period(
-                start_date=single_day, end_date=single_day, limit=10
-            )
+        assert isinstance(result, EventsAttendedPeriodResponse)
+        # Empty stats array is valid
+        assert result.return_count >= 0
+        assert isinstance(result.stats, list)
 
-            assert isinstance(result, EventsAttendedPeriodResponse)
-            # Empty stats array is valid
-            assert result.return_count >= 0
-            assert isinstance(result.stats, list)
-        finally:
-            client.close()
+    # === COMPREHENSIVE ERROR TESTS FOR ALL ENDPOINTS ===
+
+    def test_country_players_invalid_rank_type(self, client: IfpaClient) -> None:
+        """Test country_players() with invalid rank_type."""
+        with pytest.raises((IfpaApiError, ValueError)):
+            client.stats.country_players(rank_type="INVALID")
+
+    def test_events_by_year_invalid_country(self, client: IfpaClient) -> None:
+        """Test events_by_year() with invalid country code."""
+        # API may accept invalid country codes and return empty results
+        result = client.stats.events_by_year(country_code="INVALID")
+        # Should not raise error, but may return empty or all results
+        assert isinstance(result, EventsByYearResponse)
+
+    def test_largest_tournaments_invalid_rank_type(self, client: IfpaClient) -> None:
+        """Test largest_tournaments() with invalid rank_type."""
+        with pytest.raises((IfpaApiError, ValueError)):
+            client.stats.largest_tournaments(rank_type="INVALID")
+
+    def test_overall_invalid_system_code(self, client: IfpaClient) -> None:
+        """Test overall() with invalid system_code.
+
+        Note: The API doesn't validate system_code and returns OPEN data
+        for any invalid value. This test documents that behavior.
+        """
+        # API accepts any system_code but returns OPEN data
+        result = client.stats.overall(system_code="INVALID")
+        assert isinstance(result, OverallStatsResponse)
+        assert result.system_code == "OPEN"  # API returns OPEN for invalid codes
