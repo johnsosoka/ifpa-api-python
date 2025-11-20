@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from ifpa_api.core.base import BaseResourceClient
+from ifpa_api.core.deprecation import issue_deprecation_warning
+from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.player import Player
 
 from .context import _PlayerContext
 from .query_builder import PlayerQueryBuilder
@@ -50,40 +53,116 @@ class PlayerClient(BaseResourceClient):
         """
         return _PlayerContext(self._http, player_id, self._validate_requests)
 
-    def query(self, name: str = "") -> PlayerQueryBuilder:
-        """Create a fluent query builder for searching players.
+    def get(self, player_id: int | str) -> Player:
+        """Get player by ID directly.
 
-        This is the recommended way to search for players, providing a type-safe
-        and composable interface. The returned builder can be reused and composed
-        thanks to its immutable pattern.
+        This is a convenience method equivalent to calling player(id).details().
 
         Args:
-            name: Optional player name to search for (can also be set via .query() on builder)
+            player_id: The player's unique identifier
 
         Returns:
-            PlayerQueryBuilder instance for building the search query
+            The player details
+
+        Raises:
+            IfpaApiError: If the API request fails
 
         Example:
             ```python
-            # Simple name search
-            results = client.player.query("John").get()
+            # New preferred way
+            player = client.player.get(12345)
+
+            # Old way (still works but deprecated)
+            player = client.player(12345).details()
+            ```
+        """
+        return self(player_id).details()
+
+    def get_or_none(self, player_id: int | str) -> Player | None:
+        """Get player by ID, returning None if not found.
+
+        This convenience method wraps get() and returns None instead of raising
+        an exception when the player is not found (404 status code).
+
+        Args:
+            player_id: The player's unique identifier
+
+        Returns:
+            The player details, or None if not found
+
+        Raises:
+            IfpaApiError: If the API request fails with a non-404 error
+
+        Example:
+            ```python
+            player = client.player.get_or_none(12345)
+            if player:
+                print(f"Found: {player.first_name} {player.last_name}")
+            else:
+                print("Player not found")
+            ```
+        """
+        try:
+            return self.get(player_id)
+        except IfpaApiError as e:
+            if e.status_code == 404:
+                return None
+            raise
+
+    def exists(self, player_id: int | str) -> bool:
+        """Check if a player exists by ID.
+
+        This convenience method returns True if the player exists, False otherwise.
+        It's more readable than checking if get_or_none() returns None when you
+        only need to verify existence.
+
+        Args:
+            player_id: The player's unique identifier
+
+        Returns:
+            True if the player exists, False if not found
+
+        Raises:
+            IfpaApiError: If the API request fails with a non-404 error
+
+        Example:
+            ```python
+            if client.player.exists(12345):
+                print("Player exists!")
+            else:
+                print("Player not found")
+            ```
+        """
+        return self.get_or_none(player_id) is not None
+
+    def search(self, name: str = "") -> PlayerQueryBuilder:
+        """Search for players by name (preferred method).
+
+        This method returns a query builder that allows you to compose search
+        filters in a fluent, chainable way. This is the preferred method over
+        the deprecated query() method.
+
+        Args:
+            name: Optional name query string to search for
+
+        Returns:
+            A query builder for composing search filters
+
+        Example:
+            ```python
+            # Simple search
+            results = client.player.search("John").get()
 
             # Chained filters
-            results = (client.player.query("Smith")
+            results = (client.player.search("Smith")
                 .country("US")
                 .state("WA")
                 .limit(25)
                 .get())
 
-            # Query reuse (immutable pattern)
-            us_base = client.player.query().country("US")
-            wa_players = us_base.state("WA").get()
-            or_players = us_base.state("OR").get()  # base unchanged!
-
-            # Empty query to start with filters
-            results = (client.player.query()
-                .tournament("PAPA")
-                .position(1)
+            # Filter-only search (no name query)
+            results = (client.player.search()
+                .country("CA")
                 .get())
             ```
         """
@@ -91,3 +170,23 @@ class PlayerClient(BaseResourceClient):
         if name:
             return builder.query(name)
         return builder
+
+    def query(self, name: str = "") -> PlayerQueryBuilder:
+        """Create a fluent query builder for searching players (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`search` instead. This method will be removed in version 1.0.0.
+
+        Args:
+            name: Optional player name to search for (can also be set via .query() on builder)
+
+        Returns:
+            PlayerQueryBuilder instance for building the search query
+        """
+        issue_deprecation_warning(
+            old_name="query()",
+            new_name="search()",
+            version="1.0.0",
+            additional_info="The search() method provides the same functionality.",
+        )
+        return self.search(name)

@@ -10,10 +10,13 @@ from ifpa_api.core.base import (
     LocationFiltersMixin,
     PaginationMixin,
 )
+from ifpa_api.core.deprecation import deprecated, issue_deprecation_warning
 
 __all__ = [
     "BaseResourceClient",
     "BaseResourceContext",
     "LocationFiltersMixin",
     "PaginationMixin",
+    "deprecated",
+    "issue_deprecation_warning",
 ]

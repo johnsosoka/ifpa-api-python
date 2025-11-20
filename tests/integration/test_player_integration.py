@@ -53,7 +53,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # API requires at least one search parameter
-        result = client.player.query().country(country_code).limit(count_medium).get()
+        result = client.player.search().country(country_code).limit(count_medium).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -65,7 +65,7 @@ class TestPlayerClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.query().country(country_code).limit(count_small).get()
+        result = client.player.search().country(country_code).limit(count_small).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -83,7 +83,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Test country + count combination
-        result = client.player.query().country(country_code).limit(count_small).get()
+        result = client.player.search().country(country_code).limit(count_small).get()
         assert isinstance(result.search, list)
         # Note: API may not always respect count parameter for broad searches like country-only
         # Just verify we got results
@@ -98,7 +98,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for players with top finishes in PAPA tournaments
-        result = client.player.query().tournament("PAPA").position(1).limit(count_small).get()
+        result = client.player.search().tournament("PAPA").position(1).limit(count_small).get()
         assert isinstance(result.search, list)
 
     def test_search_with_tournament_integration(self, api_key: str, count_small: int) -> None:
@@ -107,7 +107,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search for players in PAPA tournaments
-        result = client.player.query().tournament("PAPA").limit(count_small).get()
+        result = client.player.search().tournament("PAPA").limit(count_small).get()
         assert isinstance(result.search, list)
 
     def test_search_idaho_smiths_predictable(
@@ -118,7 +118,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Extract values from fixture and use query builder
-        result = client.player.query("smith").state("ID").get()
+        result = client.player.search("smith").state("ID").get()
 
         # Predictable count (at least 2, currently 3 including Aviana Smith)
         assert len(result.search) >= 2, "Should return at least 2 Smiths from Idaho"
@@ -141,7 +141,7 @@ class TestPlayerClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Use query builder instead of fixture
-        result = client.player.query("john").state("ID").get()
+        result = client.player.search("john").state("ID").get()
 
         # Known to return multiple Johns
         assert len(result.search) >= 4, "Should return multiple Johns from Idaho"
@@ -168,7 +168,7 @@ class TestPlayerClientIntegration:
 
         # Search for something unlikely to exist
         result = (
-            client.player.query("ZzZzUnlikelyName999XxX")
+            client.player.search("ZzZzUnlikelyName999XxX")
             .country("XX")  # Invalid country code
             .get()
         )
@@ -195,7 +195,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for Dwayne Smith - known Idaho player
-        result = client.player.query("Dwayne Smith").limit(10).get()
+        result = client.player.search("Dwayne Smith").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -227,7 +227,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players in California (stable, large dataset)
-        result = client.player.query().state("CA").limit(10).get()
+        result = client.player.search().state("CA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -241,7 +241,7 @@ class TestPlayerSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.query().country(country_code).limit(10).get()
+        result = client.player.search().country(country_code).limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -256,7 +256,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players who participated in PAPA tournaments
-        result = client.player.query().tournament("PAPA").limit(10).get()
+        result = client.player.search().tournament("PAPA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -268,7 +268,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for players who finished 1st in PAPA tournaments
-        result = client.player.query().tournament("PAPA").position(1).limit(5).get()
+        result = client.player.search().tournament("PAPA").position(1).limit(5).get()
 
         assert isinstance(result, PlayerSearchResponse)
         assert result.search is not None
@@ -284,9 +284,9 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Get first page
-        page1 = client.player.query().country(country_code).offset(0).limit(5).get()
+        page1 = client.player.search().country(country_code).offset(0).limit(5).get()
         # Get second page
-        page2 = client.player.query().country(country_code).offset(5).limit(5).get()
+        page2 = client.player.search().country(country_code).offset(5).limit(5).get()
 
         assert isinstance(page1, PlayerSearchResponse)
         assert isinstance(page2, PlayerSearchResponse)
@@ -317,7 +317,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         for count in [5, 10, 25]:
-            result = client.player.query("Smith").country(country_code).limit(count).get()
+            result = client.player.search("Smith").country(country_code).limit(count).get()
             assert len(result.search) <= count
 
     def test_search_combined_filters(self, api_key: str) -> None:
@@ -326,7 +326,7 @@ class TestPlayerSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Combine country and state filters
-        result = client.player.query().country("US").state("CA").limit(10).get()
+        result = client.player.search().country("US").state("CA").limit(10).get()
 
         assert isinstance(result, PlayerSearchResponse)
         # Verify combined filters work
@@ -341,7 +341,7 @@ class TestPlayerSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.player.query().country(country_code).limit(5).get()
+        result = client.player.search().country(country_code).limit(5).get()
 
         # Verify response structure
         assert isinstance(result, PlayerSearchResponse)
@@ -383,7 +383,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Use known test player fixture (Debbie Smith - 47585)
-        player = client.player(player_active_id).details()
+        player = client.player.get(player_active_id)
 
         assert isinstance(player, Player)
         assert player.player_id == player_active_id
@@ -463,7 +463,7 @@ class TestPlayerHandleIntegration:
 
         # Use very high ID that doesn't exist - API returns None which triggers 404 error
         with pytest.raises(IfpaApiError) as exc_info:
-            client.player(99999999).details()
+            client.player.get(99999999)
 
         # Verify it's a 404 error
         assert exc_info.value.status_code == 404
@@ -474,7 +474,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Get inactive player (Anna Rigas - 50106, last played 2017)
-        player = client.player(player_inactive_id).details()
+        player = client.player.get(player_inactive_id)
 
         assert player.player_id == player_inactive_id
         assert player is not None
@@ -528,7 +528,7 @@ class TestPlayerHandleIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Dwayne Smith - rank #753, 433 events
-        player = client.player(player_highly_active_id).details()
+        player = client.player.get(player_highly_active_id)
 
         # Validate identity
         assert player.player_id == player_highly_active_id
@@ -592,7 +592,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_active_id).details()
+        player = client.player.get(player_active_id)
 
         assert isinstance(player, Player)
         assert player.player_id == player_active_id
@@ -618,7 +618,7 @@ class TestPlayerHandleDetailsAudit:
 
         # Very high ID that doesn't exist - SDK raises IfpaApiError
         with pytest.raises(IfpaApiError) as exc_info:
-            client.player(99999999).details()
+            client.player.get(99999999)
 
         assert exc_info.value.status_code == 404
 
@@ -627,7 +627,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_inactive_id).details()
+        player = client.player.get(player_inactive_id)
 
         assert isinstance(player, Player)
         assert player.player_id == player_inactive_id
@@ -646,7 +646,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_active_id).details()
+        player = client.player.get(player_active_id)
 
         # Verify player_stats structure exists
         assert hasattr(player, "player_stats")
@@ -660,7 +660,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_active_id).details()
+        player = client.player.get(player_active_id)
 
         # Verify rankings structure
         assert hasattr(player, "rankings")
@@ -677,7 +677,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_highly_active_id).details()
+        player = client.player.get(player_highly_active_id)
 
         assert isinstance(player, Player)
         assert player.player_id == player_highly_active_id
@@ -699,7 +699,7 @@ class TestPlayerHandleDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        player = client.player(player_active_id).details()
+        player = client.player.get(player_active_id)
 
         # Verify all Player model fields exist
         assert hasattr(player, "player_id")
@@ -1199,7 +1199,7 @@ class TestPlayerCrossMethodValidation:
         client = IfpaClient(api_key=api_key)
 
         # Get known player (Dwayne Smith) directly
-        player = client.player(player_highly_active_id).details()
+        player = client.player.get(player_highly_active_id)
 
         # Verify player data integrity
         assert player.player_id == player_highly_active_id

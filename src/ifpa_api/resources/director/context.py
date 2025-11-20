@@ -6,6 +6,7 @@ Provides methods for accessing information about a specific tournament director.
 from __future__ import annotations
 
 from ifpa_api.core.base import BaseResourceContext
+from ifpa_api.core.deprecation import issue_deprecation_warning
 from ifpa_api.models.common import TimePeriod
 from ifpa_api.models.director import Director, DirectorTournamentsResponse
 
@@ -24,7 +25,12 @@ class _DirectorContext(BaseResourceContext[int | str]):
     """
 
     def details(self) -> Director:
-        """Get detailed information about this director.
+        """Get detailed information about this director (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`DirectorClient.get` instead. For example, use
+            ``client.director.get(1000)`` instead of ``client.director(1000).details()``.
+            This method will be removed in version 1.0.0.
 
         Returns:
             Director information including statistics and profile
@@ -34,11 +40,19 @@ class _DirectorContext(BaseResourceContext[int | str]):
 
         Example:
             ```python
+            # Deprecated usage
             director = client.director(1000).details()
-            print(f"Director: {director.name}")
-            print(f"Tournaments: {director.stats.tournament_count}")
+
+            # Preferred usage
+            director = client.director.get(1000)
             ```
         """
+        issue_deprecation_warning(
+            old_name="director(id).details()",
+            new_name="director.get(id)",
+            version="1.0.0",
+            additional_info="The new get() method provides a more direct API.",
+        )
         response = self._http._request("GET", f"/director/{self._resource_id}")
         return Director.model_validate(response)
 

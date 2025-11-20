@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ifpa_api.core.base import BaseResourceContext
+from ifpa_api.core.deprecation import issue_deprecation_warning
 from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
 from ifpa_api.models.common import RankingSystem, ResultType
 from ifpa_api.models.player import (
@@ -33,7 +34,12 @@ class _PlayerContext(BaseResourceContext[int | str]):
     """
 
     def details(self) -> Player:
-        """Get detailed information about this player.
+        """Get detailed information about this player (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`PlayerClient.get` instead. For example, use
+            ``client.player.get(12345)`` instead of ``client.player(12345).details()``.
+            This method will be removed in version 1.0.0.
 
         Returns:
             Player information including profile and rankings
@@ -43,11 +49,19 @@ class _PlayerContext(BaseResourceContext[int | str]):
 
         Example:
             ```python
+            # Deprecated usage
             player = client.player(12345).details()
-            print(f"{player.first_name} {player.last_name}")
-            print(f"Country: {player.country_name}")
+
+            # Preferred usage
+            player = client.player.get(12345)
             ```
         """
+        issue_deprecation_warning(
+            old_name="player(id).details()",
+            new_name="player.get(id)",
+            version="1.0.0",
+            additional_info="The new get() method provides a more direct API.",
+        )
         response = self._http._request("GET", f"/player/{self._resource_id}")
         # API returns {"player": [player_object]}
         if isinstance(response, dict) and "player" in response:

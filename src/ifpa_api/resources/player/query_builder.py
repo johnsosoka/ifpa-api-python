@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
 from ifpa_api.core.query_builder import QueryBuilder
-from ifpa_api.models.player import PlayerSearchResponse
+from ifpa_api.models.player import PlayerSearchResponse, PlayerSearchResult
 
 if TYPE_CHECKING:
     from ifpa_api.core.http import _HttpClient
@@ -126,7 +126,7 @@ class PlayerQueryBuilder(
 
         Example:
             ```python
-            results = client.player.query("John").country("US").get()
+            results = client.player.search("John").country("US").get()
             print(f"Found {len(results.search)} players")
             for player in results.search:
                 print(f"{player.first_name} {player.last_name}")
@@ -134,3 +134,58 @@ class PlayerQueryBuilder(
         """
         response = self._http._request("GET", "/player/search", params=self._params)
         return PlayerSearchResponse.model_validate(response)
+
+    def first(self) -> PlayerSearchResult:
+        """Get the first result from the search.
+
+        This is a convenience method that executes the query and returns
+        only the first result.
+
+        Returns:
+            The first search result
+
+        Raises:
+            IfpaApiError: If the API request fails
+            IndexError: If the search returns no results
+
+        Example:
+            ```python
+            # Get first player matching search
+            player = client.player.search("Smith").first()
+
+            # With filters
+            player = (client.player.search("John")
+                .country("US")
+                .first())
+            ```
+        """
+        results = self.get()
+        if not results.search:
+            raise IndexError("Search returned no results")
+        return results.search[0]
+
+    def first_or_none(self) -> PlayerSearchResult | None:
+        """Get the first result from the search, or None if no results.
+
+        This is a convenience method that executes the query and returns
+        the first result, or None if the search returns no results.
+
+        Returns:
+            The first search result, or None if no results found
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            player = client.player.search("Smith").first_or_none()
+            if player:
+                print(f"Found: {player.first_name}")
+            else:
+                print("No results found")
+            ```
+        """
+        try:
+            return self.first()
+        except IndexError:
+            return None

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
 from ifpa_api.core.exceptions import IfpaClientValidationError
 from ifpa_api.core.query_builder import QueryBuilder
-from ifpa_api.models.tournaments import TournamentSearchResponse
+from ifpa_api.models.tournaments import TournamentSearchResponse, TournamentSearchResult
 
 if TYPE_CHECKING:
     from ifpa_api.core.http import _HttpClient
@@ -162,7 +162,7 @@ class TournamentQueryBuilder(
 
         Example:
             ```python
-            results = client.tournament.query("Championship").country("US").get()
+            results = client.tournament.search("Championship").country("US").get()
             print(f"Found {len(results.tournaments)} tournaments")
             for tournament in results.tournaments:
                 print(f"{tournament.tournament_name} on {tournament.event_date}")
@@ -181,3 +181,58 @@ class TournamentQueryBuilder(
 
         response = self._http._request("GET", "/tournament/search", params=self._params)
         return TournamentSearchResponse.model_validate(response)
+
+    def first(self) -> TournamentSearchResult:
+        """Get the first result from the search.
+
+        This is a convenience method that executes the query and returns
+        only the first result.
+
+        Returns:
+            The first search result
+
+        Raises:
+            IfpaApiError: If the API request fails
+            IndexError: If the search returns no results
+
+        Example:
+            ```python
+            # Get first tournament matching search
+            tournament = client.tournament.search("PAPA").first()
+
+            # With filters
+            tournament = (client.tournament.search("Championship")
+                .country("US")
+                .first())
+            ```
+        """
+        results = self.get()
+        if not results.tournaments:
+            raise IndexError("Search returned no results")
+        return results.tournaments[0]
+
+    def first_or_none(self) -> TournamentSearchResult | None:
+        """Get the first result from the search, or None if no results.
+
+        This is a convenience method that executes the query and returns
+        the first result, or None if the search returns no results.
+
+        Returns:
+            The first search result, or None if no results found
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            tournament = client.tournament.search("PAPA").first_or_none()
+            if tournament:
+                print(f"Found: {tournament.tournament_name}")
+            else:
+                print("No results found")
+            ```
+        """
+        try:
+            return self.first()
+        except IndexError:
+            return None

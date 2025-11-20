@@ -10,8 +10,8 @@ Example:
     # Initialize client (uses IFPA_API_KEY environment variable)
     client = IfpaClient()
 
-    # Get player information
-    player = client.player(12345).details()
+    # Get player information (preferred method)
+    player = client.player.get(12345)
     print(f"{player.first_name} {player.last_name}")
 
     # Get rankings
@@ -20,16 +20,17 @@ Example:
         print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
 
     # Get tournament results
-    results = client.player(12345).results(
+    results = client.player.get_results(
+        12345,
         ranking_system=RankingSystem.MAIN,
         result_type=ResultType.ACTIVE
     )
 
-    # Search for directors
-    directors = client.director.query("Josh").get()
+    # Search for directors (preferred method)
+    directors = client.director.search("Josh").get()
 
     # Get director's tournaments
-    tournaments = client.director(1000).tournaments(TimePeriod.PAST)
+    tournaments = client.director.get_tournaments(1000, TimePeriod.PAST)
     ```
 """
 

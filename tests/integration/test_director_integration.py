@@ -47,7 +47,7 @@ class TestDirectorClientIntegration:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.director.query().get()
+        result = client.director.search().get()
 
         assert isinstance(result, DirectorSearchResponse)
         # API should return some directors
@@ -59,7 +59,7 @@ class TestDirectorClientIntegration:
         client = IfpaClient(api_key=api_key)
 
         # Search with country filter
-        result = client.director.query().country(country_code).get()
+        result = client.director.search().country(country_code).get()
 
         assert result.directors is not None
         assert isinstance(result.directors, list)
@@ -79,7 +79,7 @@ class TestDirectorSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.director.query().get()
+        result = client.director.search().get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -92,7 +92,7 @@ class TestDirectorSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for common name that should have results
-        result = client.director.query("Josh").get()
+        result = client.director.search("Josh").get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -112,7 +112,7 @@ class TestDirectorSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for directors in a major city
-        result = client.director.query().city("Chicago").get()
+        result = client.director.search().city("Chicago").get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -141,7 +141,7 @@ class TestDirectorSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for directors in California
-        result = client.director.query().state("CA").get()
+        result = client.director.search().state("CA").get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -161,7 +161,7 @@ class TestDirectorSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.director.query().country(country_code).get()
+        result = client.director.search().country(country_code).get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -176,7 +176,7 @@ class TestDirectorSearchAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search with name and country filters
-        result = client.director.query("Josh").country(country_code).get()
+        result = client.director.search("Josh").country(country_code).get()
 
         assert isinstance(result, DirectorSearchResponse)
         assert result.directors is not None
@@ -190,7 +190,7 @@ class TestDirectorSearchAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        result = client.director.query("A").get()
+        result = client.director.search("A").get()
 
         # Validate response structure
         assert hasattr(result, "directors")
@@ -308,7 +308,7 @@ class TestDirectorContextIntegration:
         assert director_id is not None, "Could not find test director"
 
         # Get director details
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
 
         assert isinstance(director, Director)
         assert director.director_id == director_id
@@ -321,7 +321,7 @@ class TestDirectorContextIntegration:
 
         # Use very high ID that doesn't exist
         with pytest.raises(IfpaApiError) as exc_info:
-            client.director(99999999).details()
+            client.director.get(99999999)
 
         assert exc_info.value.status_code == 400
         assert "not found" in exc_info.value.message.lower()
@@ -380,7 +380,7 @@ class TestDirectorDetailsAudit:
         director_id = get_test_director_id(client)
         assert director_id is not None, "Could not find test director"
 
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
 
         assert isinstance(director, Director)
         assert director.director_id == director_id
@@ -396,7 +396,7 @@ class TestDirectorDetailsAudit:
 
         # Use very high ID that doesn't exist
         with pytest.raises(IfpaApiError) as exc_info:
-            client.director(99999999).details()
+            client.director.get(99999999)
 
         assert exc_info.value.status_code in [400, 404]
         print(
@@ -412,7 +412,7 @@ class TestDirectorDetailsAudit:
         director_id = get_test_director_id(client)
         assert director_id is not None
 
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
 
         # Validate base fields
         assert hasattr(director, "director_id")
@@ -438,7 +438,7 @@ class TestDirectorDetailsAudit:
         director_id = get_test_director_id(client)
         assert director_id is not None
 
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
 
         if director.stats is not None:
             stats = director.stats
@@ -483,7 +483,7 @@ class TestDirectorDetailsAudit:
         assert director_id is not None
 
         # Pass ID as string
-        director = client.director(str(director_id)).details()
+        director = client.director.get(str(director_id))
 
         assert director.director_id == director_id
         print(f"✓ details() with string director_id='{director_id}' successful")
@@ -495,7 +495,7 @@ class TestDirectorDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        director = client.director(director_highly_active_id).details()
+        director = client.director.get(director_highly_active_id)
 
         assert isinstance(director, Director)
         assert director.director_id == director_highly_active_id
@@ -523,7 +523,7 @@ class TestDirectorDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        director = client.director(director_international_id).details()
+        director = client.director.get(director_international_id)
 
         assert isinstance(director, Director)
         assert director.director_id == director_international_id
@@ -542,7 +542,7 @@ class TestDirectorDetailsAudit:
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        director = client.director(director_low_activity_id).details()
+        director = client.director.get(director_low_activity_id)
 
         assert isinstance(director, Director)
         assert director.director_id == director_low_activity_id
@@ -732,10 +732,10 @@ class TestDirectorCrossMethodValidation:
         client = IfpaClient(api_key=api_key)
 
         # Get director details first
-        director_details = client.director(director_active_id).details()
+        director_details = client.director.get(director_active_id)
 
         # Search for director by name
-        search_result = client.director.query(director_details.name).get()
+        search_result = client.director.search(director_details.name).get()
 
         assert search_result.directors is not None
         assert len(search_result.directors) > 0
@@ -768,7 +768,7 @@ class TestDirectorCrossMethodValidation:
         client = IfpaClient(api_key=api_key)
 
         # Get director details with stats
-        director = client.director(director_active_id).details()
+        director = client.director.get(director_active_id)
         assert director.stats is not None
         assert director.stats.tournament_count is not None
 
@@ -792,7 +792,7 @@ class TestDirectorCrossMethodValidation:
         client = IfpaClient(api_key=api_key)
 
         # Search with country filter
-        result = client.director.query().country(country_code).get()
+        result = client.director.search().country(country_code).get()
 
         assert result.directors is not None
         assert len(result.directors) > 0
@@ -811,9 +811,9 @@ class TestDirectorCrossMethodValidation:
         client = IfpaClient(api_key=api_key)
 
         # Perform multiple operations with same client
-        details1 = client.director(director_active_id).details()
+        details1 = client.director.get(director_active_id)
         tournaments = client.director(director_active_id).tournaments(TimePeriod.PAST)
-        details2 = client.director(director_active_id).details()
+        details2 = client.director.get(director_active_id)
 
         # Verify consistency across calls
         assert details1.director_id == director_active_id
@@ -841,12 +841,12 @@ class TestDirectorsOverallAudit:
         client = IfpaClient(api_key=api_key)
 
         # Search for directors
-        search_result = client.director.query("Josh").get()
+        search_result = client.director.search("Josh").get()
         assert len(search_result.directors) > 0
 
         # Get details for first result
         director_id = search_result.directors[0].director_id
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
 
         assert director.director_id == director_id
         print("✓ Workflow: search → details successful")
@@ -861,7 +861,7 @@ class TestDirectorsOverallAudit:
         assert director_id is not None
 
         # Get director details
-        director = client.director(director_id).details()
+        director = client.director.get(director_id)
         assert director.stats is not None
 
         # Get their tournaments
@@ -887,7 +887,7 @@ class TestDirectorsOverallAudit:
 
         # Search with unlikely combination
         result = (
-            client.director.query("ZzZzUnlikelyName999XxX")
+            client.director.search("ZzZzUnlikelyName999XxX")
             .country("XX")  # Invalid country code
             .get()
         )
@@ -903,8 +903,8 @@ class TestDirectorsOverallAudit:
         client = IfpaClient(api_key=api_key)
 
         # Perform multiple operations with same client
-        search1 = client.director.query("Josh").get()
-        search2 = client.director.query().country("US").get()
+        search1 = client.director.search("Josh").get()
+        search2 = client.director.search().country("US").get()
         country_dirs = client.director.country_directors()
 
         assert search1.directors is not None
@@ -920,7 +920,7 @@ class TestDirectorsOverallAudit:
         client = IfpaClient(api_key=api_key)
 
         # Get director details
-        director = client.director(director_international_id).details()
+        director = client.director.get(director_international_id)
         assert director.director_id == director_international_id
         assert director.country_code != "US"
 

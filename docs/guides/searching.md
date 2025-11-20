@@ -12,8 +12,8 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Chain filters to build a query
-results: PlayerSearchResponse = (client.player.query("Smith")
+# Chain filters to build a search
+results: PlayerSearchResponse = (client.player.search("Smith")
     .country("US")
     .state("ID")
     .limit(10)
@@ -40,7 +40,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: PlayerSearchResponse = client.player.query("Smith").get()
+results: PlayerSearchResponse = client.player.search("Smith").get()
 
 print(f"Found {len(results.search)} players")
 for player in results.search:
@@ -58,18 +58,18 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Search by country
-us_players: PlayerSearchResponse = (client.player.query("John")
+us_players: PlayerSearchResponse = (client.player.search("John")
     .country("US")
     .get())
 
 # Search by state/province
-id_players: PlayerSearchResponse = (client.player.query("John")
+id_players: PlayerSearchResponse = (client.player.search("John")
     .country("US")
     .state("ID")
     .get())
 
 # Search by city (must include country and state)
-boise_players: PlayerSearchResponse = (client.player.query()
+boise_players: PlayerSearchResponse = (client.player.search()
     .country("US")
     .state("ID")
     .city("Boise")
@@ -87,7 +87,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Find all PAPA winners
-papa_winners: PlayerSearchResponse = (client.player.query()
+papa_winners: PlayerSearchResponse = (client.player.search()
     .tournament("PAPA")
     .position(1)
     .limit(20)
@@ -98,7 +98,7 @@ for player in papa_winners.search:
     print(f"{player.first_name} {player.last_name} (Rank: #{player.wppr_rank})")
 
 # Find players who competed in specific tournaments
-pinburgh_players: PlayerSearchResponse = (client.player.query()
+pinburgh_players: PlayerSearchResponse = (client.player.search()
     .tournament("Pinburgh")
     .limit(50)
     .get())
@@ -115,7 +115,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Find Johns in Idaho who competed in tournaments
-results: PlayerSearchResponse = (client.player.query("John")
+results: PlayerSearchResponse = (client.player.search("John")
     .country("US")
     .state("ID")
     .tournament("Idaho")
@@ -123,7 +123,7 @@ results: PlayerSearchResponse = (client.player.query("John")
     .get())
 
 # Location-only search (no name required)
-wa_players: PlayerSearchResponse = (client.player.query()
+wa_players: PlayerSearchResponse = (client.player.search()
     .country("US")
     .state("WA")
     .limit(25)
@@ -140,16 +140,16 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Create a reusable base query for US players
-us_query = client.player.query().country("US")
+# Create a reusable base search for US players
+us_search = client.player.search().country("US")
 
-# Derive state-specific queries from the base
-wa_players: PlayerSearchResponse = us_query.state("WA").limit(25).get()
-id_players: PlayerSearchResponse = us_query.state("ID").limit(25).get()
-or_players: PlayerSearchResponse = us_query.state("OR").limit(25).get()
+# Derive state-specific searches from the base
+wa_players: PlayerSearchResponse = us_search.state("WA").limit(25).get()
+id_players: PlayerSearchResponse = us_search.state("ID").limit(25).get()
+or_players: PlayerSearchResponse = us_search.state("OR").limit(25).get()
 
-# The base query remains unchanged!
-ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
+# The base search remains unchanged!
+ca_players: PlayerSearchResponse = us_search.state("CA").limit(25).get()
 ```
 
 This pattern is especially useful when building dashboards or reports:
@@ -160,20 +160,20 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Base query for championship winners
-champions_query = client.player.query().position(1)
+# Base search for championship winners
+champions_search = client.player.search().position(1)
 
 # Get winners from different tournaments
-papa_champs: PlayerSearchResponse = champions_query.tournament("PAPA").limit(10).get()
-pinburgh_champs: PlayerSearchResponse = champions_query.tournament("Pinburgh").limit(10).get()
-tilt_champs: PlayerSearchResponse = champions_query.tournament("TILT").limit(10).get()
+papa_champs: PlayerSearchResponse = champions_search.tournament("PAPA").limit(10).get()
+pinburgh_champs: PlayerSearchResponse = champions_search.tournament("Pinburgh").limit(10).get()
+tilt_champs: PlayerSearchResponse = champions_search.tournament("TILT").limit(10).get()
 ```
 
 ### Player Query Methods
 
 | Method | Parameter Type | Description |
 |--------|----------------|-------------|
-| `.query(name)` | `str` | Player name (partial match, case insensitive) |
+| `.search(name)` | `str` | Player name (partial match, case insensitive) |
 | `.country(code)` | `str` | Country name or 2-digit code (e.g., "US", "CA") |
 | `.state(code)` | `str` | State/province code (2-digit, e.g., "ID", "WA") |
 | `.city(name)` | `str` | City name |
@@ -181,7 +181,9 @@ tilt_champs: PlayerSearchResponse = champions_query.tournament("TILT").limit(10)
 | `.position(pos)` | `int` | Finishing position in tournament |
 | `.offset(start)` | `int` | Pagination offset (0-based) |
 | `.limit(count)` | `int` | Maximum number of results |
-| `.get()` | - | Execute query and return results |
+| `.get()` | - | Execute search and return results |
+| `.first()` | - | Get first result (raises IndexError if none) |
+| `.first_or_none()` | - | Get first result or None if empty |
 
 ## Director Search
 
@@ -196,7 +198,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: DirectorSearchResponse = client.director.query("Josh").get()
+results: DirectorSearchResponse = client.director.search("Josh").get()
 
 print(f"Found {len(results.directors)} directors")
 for director in results.directors:
@@ -214,19 +216,19 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Search by country
-us_directors: DirectorSearchResponse = (client.director.query("Josh")
+us_directors: DirectorSearchResponse = (client.director.search("Josh")
     .country("US")
     .get())
 
 # Search by state and city
-il_directors: DirectorSearchResponse = (client.director.query()
+il_directors: DirectorSearchResponse = (client.director.search()
     .country("US")
     .state("IL")
     .city("Chicago")
     .get())
 
 # Location-only search (no name required)
-wa_directors: DirectorSearchResponse = (client.director.query()
+wa_directors: DirectorSearchResponse = (client.director.search()
     .country("US")
     .state("WA")
     .limit(50)
@@ -242,7 +244,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a reusable base query for US directors
-us_directors_query = client.director.query().country("US")
+us_directors_query = client.director.search().country("US")
 
 # Derive state-specific queries
 il_directors: DirectorSearchResponse = us_directors_query.state("IL").limit(25).get()
@@ -257,13 +259,15 @@ ca_directors: DirectorSearchResponse = us_directors_query.state("CA").limit(25).
 
 | Method | Parameter Type | Description |
 |--------|----------------|-------------|
-| `.query(name)` | `str` | Director name (partial match, case insensitive) |
+| `.search(name)` | `str` | Director name (partial match, case insensitive) |
 | `.country(code)` | `str` | Country name or code (e.g., "US", "CA") |
 | `.state(stateprov)` | `str` | State/province code (e.g., "IL", "WA") |
 | `.city(city)` | `str` | City name |
 | `.offset(start_position)` | `int` | Pagination offset (0-based) |
 | `.limit(count)` | `int` | Maximum number of results |
-| `.get()` | - | Execute query and return results |
+| `.get()` | - | Execute search and return results |
+| `.first()` | - | Get first result (raises IndexError if none) |
+| `.first_or_none()` | - | Get first result or None if empty |
 
 ## Tournament Search
 
@@ -278,7 +282,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+results: TournamentSearchResponse = client.tournament.search("PAPA").get()
 
 print(f"Found {len(results.tournaments)} tournaments")
 for tournament in results.tournaments:
@@ -296,14 +300,14 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Search by country and state
-wa_tournaments: TournamentSearchResponse = (client.tournament.query("Championship")
+wa_tournaments: TournamentSearchResponse = (client.tournament.search("Championship")
     .country("US")
     .state("WA")
     .limit(25)
     .get())
 
 # Search by city
-portland_tournaments: TournamentSearchResponse = (client.tournament.query()
+portland_tournaments: TournamentSearchResponse = (client.tournament.search()
     .city("Portland")
     .state("OR")
     .country("US")
@@ -321,13 +325,13 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Search for tournaments in 2024
-results_2024: TournamentSearchResponse = (client.tournament.query()
+results_2024: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .date_range("2024-01-01", "2024-12-31")
     .get())
 
 # Find tournaments in a specific month
-jan_2024: TournamentSearchResponse = (client.tournament.query()
+jan_2024: TournamentSearchResponse = (client.tournament.search()
     .date_range("2024-01-01", "2024-01-31")
     .country("US")
     .get())
@@ -338,7 +342,7 @@ from datetime import datetime, timedelta
 today: datetime = datetime.now()
 next_month: datetime = today + timedelta(days=30)
 
-upcoming: TournamentSearchResponse = (client.tournament.query()
+upcoming: TournamentSearchResponse = (client.tournament.search()
     .date_range(
         today.strftime("%Y-%m-%d"),
         next_month.strftime("%Y-%m-%d")
@@ -356,14 +360,14 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Find women's tournaments
-women_tournaments: TournamentSearchResponse = (client.tournament.query()
+women_tournaments: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .tournament_type("women")
     .limit(25)
     .get())
 
 # Find youth tournaments
-youth_tournaments: TournamentSearchResponse = (client.tournament.query()
+youth_tournaments: TournamentSearchResponse = (client.tournament.search()
     .tournament_type("youth")
     .limit(25)
     .get())
@@ -378,7 +382,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a reusable base query for 2024 tournaments
-year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
+year_2024 = client.tournament.search().date_range("2024-01-01", "2024-12-31")
 
 # Derive specific queries
 us_2024: TournamentSearchResponse = year_2024.country("US").limit(100).get()
@@ -400,7 +404,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Find all women's tournaments in the Pacific Northwest during 2024
-pnw_women_2024: TournamentSearchResponse = (client.tournament.query()
+pnw_women_2024: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .date_range("2024-01-01", "2024-12-31")
     .tournament_type("women")
@@ -408,7 +412,7 @@ pnw_women_2024: TournamentSearchResponse = (client.tournament.query()
     .get())
 
 # Search for championship events in a specific city with date range
-pdx_championships: TournamentSearchResponse = (client.tournament.query("Championship")
+pdx_championships: TournamentSearchResponse = (client.tournament.search("Championship")
     .city("Portland")
     .state("OR")
     .country("US")
@@ -420,7 +424,7 @@ pdx_championships: TournamentSearchResponse = (client.tournament.query("Champion
 
 | Method | Parameter Type | Description |
 |--------|----------------|-------------|
-| `.query(name)` | `str` | Tournament name (partial match, case insensitive) |
+| `.search(name)` | `str` | Tournament name (partial match, case insensitive) |
 | `.city(city)` | `str` | Filter by city name |
 | `.state(stateprov)` | `str` | Filter by state/province code |
 | `.country(country)` | `str` | Filter by country code (e.g., "US", "CA") |
@@ -428,7 +432,9 @@ pdx_championships: TournamentSearchResponse = (client.tournament.query("Champion
 | `.tournament_type(type)` | `str` | Tournament type (e.g., "open", "women", "youth") |
 | `.offset(start_position)` | `int` | Pagination offset (0-based) |
 | `.limit(count)` | `int` | Maximum number of results |
-| `.get()` | - | Execute query and return results |
+| `.get()` | - | Execute search and return results |
+| `.first()` | - | Get first result (raises IndexError if none) |
+| `.first_or_none()` | - | Get first result or None if empty |
 
 ## Error Handling
 
@@ -443,7 +449,7 @@ client: IfpaClient = IfpaClient()
 
 try:
     # Valid query
-    results: PlayerSearchResponse = (client.player.query("Smith")
+    results: PlayerSearchResponse = (client.player.search("Smith")
         .country("US")
         .state("ID")
         .get())
@@ -471,14 +477,14 @@ client: IfpaClient = IfpaClient()
 
 try:
     # Invalid date format - raises error
-    results = (client.tournament.query()
+    results = (client.tournament.search()
         .date_range("01-01-2024", "12-31-2024")  # Wrong format!
         .get())
 except IfpaClientValidationError as e:
     print(f"Date format must be YYYY-MM-DD: {e}")
 
 # Correct date format
-results = (client.tournament.query()
+results = (client.tournament.search()
     .date_range("2024-01-01", "2024-12-31")  # Correct format
     .get())
 ```
@@ -513,11 +519,11 @@ def search_players(
         Search results with type safety
     """
     # Start with base query
-    query = client.player.query()
+    query = client.player.search()
 
     # Add filters conditionally
     if name:
-        query = query.query(name)
+        query = query.search(name)
     if country:
         query = query.country(country)
     if state:
@@ -552,7 +558,7 @@ def us_directors_by_state(state_code: str, limit: int = 25) -> DirectorSearchRes
     Returns:
         Directors from the specified state
     """
-    results: DirectorSearchResponse = (client.director.query()
+    results: DirectorSearchResponse = (client.director.search()
         .country("US")
         .state(state_code)
         .limit(limit)
@@ -579,7 +585,7 @@ states: list[str] = ["WA", "OR", "ID"]
 all_players: list[PlayerSearchResult] = []
 
 for state_code in states:
-    results: PlayerSearchResponse = (client.player.query("Smith")
+    results: PlayerSearchResponse = (client.player.search("Smith")
         .country("US")
         .state(state_code)
         .limit(10)
@@ -602,10 +608,10 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Good - type hint present
-results: PlayerSearchResponse = client.player.query("Smith").get()
+results: PlayerSearchResponse = client.player.search("Smith").get()
 
 # Bad - no type hint (still works but loses IDE support)
-results = client.player.query("Smith").get()
+results = client.player.search("Smith").get()
 ```
 
 ### 2. Store and Reuse Base Queries
@@ -617,13 +623,13 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Good - reusable base query
-us_query = client.player.query().country("US")
+us_query = client.player.search().country("US")
 wa_players: PlayerSearchResponse = us_query.state("WA").get()
 or_players: PlayerSearchResponse = us_query.state("OR").get()
 
 # Bad - rebuilding query each time
-wa_players = client.player.query().country("US").state("WA").get()
-or_players = client.player.query().country("US").state("OR").get()
+wa_players = client.player.search().country("US").state("WA").get()
+or_players = client.player.search().country("US").state("OR").get()
 ```
 
 ### 3. Use Descriptive Variable Names
@@ -635,13 +641,13 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Good - clear intent
-papa_winners: PlayerSearchResponse = (client.player.query()
+papa_winners: PlayerSearchResponse = (client.player.search()
     .tournament("PAPA")
     .position(1)
     .get())
 
 # Bad - unclear purpose
-results: PlayerSearchResponse = (client.player.query()
+results: PlayerSearchResponse = (client.player.search()
     .tournament("PAPA")
     .position(1)
     .get())
@@ -667,7 +673,7 @@ def search_tournaments_by_date(start_date: str, end_date: str) -> TournamentSear
         Search results or None if validation fails
     """
     try:
-        results: TournamentSearchResponse = (client.tournament.query()
+        results: TournamentSearchResponse = (client.tournament.search()
             .date_range(start_date, end_date)
             .get())
         return results
@@ -685,13 +691,13 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Good - reasonable limit
-results: PlayerSearchResponse = (client.player.query("Smith")
+results: PlayerSearchResponse = (client.player.search("Smith")
     .country("US")
     .limit(100)
     .get())
 
 # Bad - no limit (may return thousands of results)
-results: PlayerSearchResponse = (client.player.query("Smith")
+results: PlayerSearchResponse = (client.player.search("Smith")
     .country("US")
     .get())
 ```
@@ -720,13 +726,13 @@ client: IfpaClient = IfpaClient()
 results: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
 
 # NEW (recommended):
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 
 # OLD (deprecated):
 results = client.director.search(name="Josh", country="US", stateprov="IL")
 
 # NEW (recommended):
-results = client.director.query("Josh").country("US").state("IL").get()
+results = client.director.search("Josh").country("US").state("IL").get()
 ```
 
 ## Related Resources

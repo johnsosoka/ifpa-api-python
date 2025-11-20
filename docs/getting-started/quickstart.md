@@ -21,7 +21,7 @@ from ifpa_api.models.player import Player
 client: IfpaClient = IfpaClient()
 
 # Get information about a player - Dwayne Smith, highly active player from Boise, ID
-player: Player = client.player(25584).details()
+player: Player = client.player.get(25584)
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Country: {player.country_name}")
 
@@ -48,8 +48,8 @@ from ifpa_api.models.player import PlayerSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Query by name - Find players named "Smith" in Idaho
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+# Search by name - Find players named "Smith" in Idaho
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
@@ -57,8 +57,8 @@ for player in results.search:
 # 25584: Dwayne Smith
 # 47585: Debbie Smith
 
-# Query with filters - Find players named "John" in Idaho
-results: PlayerSearchResponse = client.player.query("John").state("ID").country("US").limit(5).get()
+# Search with filters - Find players named "John" in Idaho
+results: PlayerSearchResponse = client.player.search("John").state("ID").country("US").limit(5).get()
 ```
 
 ### Get Rankings
@@ -89,8 +89,8 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client: IfpaClient = IfpaClient()
 
-# Query for tournaments with filters
-tournaments: TournamentSearchResponse = client.tournament.query("Pinball").state("WA").get()
+# Search for tournaments with filters
+tournaments: TournamentSearchResponse = client.tournament.search("Pinball").state("WA").get()
 
 for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name}")
@@ -107,11 +107,11 @@ from ifpa_api.models.tournaments import Tournament, TournamentResultsResponse
 client: IfpaClient = IfpaClient()
 
 # Get tournament details
-tournament: Tournament = client.tournament(12345).details()
+tournament: Tournament = client.tournament.get(12345)
 print(f"Tournament: {tournament.tournament_name}")
 
 # Get results
-results: TournamentResultsResponse = client.tournament(12345).results()
+results: TournamentResultsResponse = client.tournament.get_results(12345)
 for result in results.results:
     print(f"{result.position}. {result.player_name}")
 ```
@@ -126,7 +126,8 @@ from ifpa_api.models.player import PlayerResultsResponse
 client: IfpaClient = IfpaClient()
 
 # Get active tournament results
-results: PlayerResultsResponse = client.player(12345).results(
+results: PlayerResultsResponse = client.player.get_results(
+    12345,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -144,7 +145,7 @@ from ifpa_api.models.player import PvpComparison
 client: IfpaClient = IfpaClient()
 
 # Head-to-head comparison
-pvp: PvpComparison = client.player(12345).pvp(67890)
+pvp: PvpComparison = client.player.get_pvp(12345, 67890)
 print(f"Player 1 Wins: {pvp.player1_wins}")
 print(f"Player 2 Wins: {pvp.player2_wins}")
 print(f"Ties: {pvp.ties}")
@@ -198,7 +199,7 @@ from ifpa_api.models.player import Player
 from ifpa_api.models.rankings import RankingsResponse
 
 with IfpaClient() as client:
-    player: Player = client.player(12345).details()
+    player: Player = client.player.get(12345)
     rankings: RankingsResponse = client.rankings.wppr(count=100)
     # Client automatically closed when exiting
 ```
@@ -219,7 +220,7 @@ from ifpa_api.models.player import Player
 client: IfpaClient = IfpaClient()
 
 try:
-    player: Player = client.player(12345).details()
+    player: Player = client.player.get(12345)
     print(f"Found player: {player.first_name} {player.last_name}")
 except MissingApiKeyError:
     print("Error: No API key configured")
@@ -307,11 +308,12 @@ from ifpa_api.models.player import PlayerResultsResponse
 client: IfpaClient = IfpaClient()
 
 # Use enums for type safety - Get Josh Rainwater's tournaments
-past_tournaments: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
-upcoming: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.FUTURE)
+past_tournaments: DirectorTournamentsResponse = client.director.get_tournaments(1533, TimePeriod.PAST)
+upcoming: DirectorTournamentsResponse = client.director.get_tournaments(1533, TimePeriod.FUTURE)
 
 # Get active results for main ranking system
-results: PlayerResultsResponse = client.player(12345).results(
+results: PlayerResultsResponse = client.player.get_results(
+    12345,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -333,7 +335,7 @@ def analyze_player(player_id: int) -> None:
     with IfpaClient() as client:
         try:
             # Get player details
-            player: Player = client.player(player_id).details()
+            player: Player = client.player.get(player_id)
             print(f"\n=== {player.first_name} {player.last_name} ===")
             print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
 
@@ -344,7 +346,8 @@ def analyze_player(player_id: int) -> None:
 
             # Get recent tournament results
             print("\n--- Recent Results ---")
-            results: PlayerResultsResponse = client.player(player_id).results(
+            results: PlayerResultsResponse = client.player.get_results(
+                player_id,
                 ranking_system=RankingSystem.MAIN,
                 result_type=ResultType.ACTIVE
             )

@@ -12,14 +12,18 @@ from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
 
-# The callable pattern in action
+# The preferred method (v0.4.0+)
+player: Player = client.player.get(25584)
+
+# The callable pattern (deprecated but still works)
 player: Player = client.player(25584).details()
 ```
 
-Breaking this down:
+Breaking this down (preferred method):
 1. `client.player` - Access the player resource
-2. `client.player(25584)` - "Call" it with a player ID to create a player context
-3. `client.player(25584).details()` - Call a method on that context to get data
+2. `client.player.get(25584)` - Call `.get()` with a player ID to fetch data directly
+
+The callable pattern (`client.player(25584).details()`) still works but issues deprecation warnings.
 
 ## Why Use the Callable Pattern?
 
@@ -34,11 +38,12 @@ from ifpa_api.models.common import RankingSystem, ResultType
 
 client: IfpaClient = IfpaClient()
 
-# IDE knows this returns a Player
-player: Player = client.player(25584).details()
+# IDE knows this returns a Player (preferred method)
+player: Player = client.player.get(25584)
 
-# IDE knows this returns PlayerResultsResponse
-results: PlayerResultsResponse = client.player(25584).results(
+# IDE knows this returns PlayerResultsResponse (preferred method)
+results: PlayerResultsResponse = client.player.get_results(
+    25584,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -59,8 +64,8 @@ from ifpa_api.models.player import PvpComparison
 
 client: IfpaClient = IfpaClient()
 
-# Read like English: "Get player 25584's PvP comparison with player 47585"
-pvp: PvpComparison = client.player(25584).pvp(47585)
+# Read like English: "Get player 25584's PvP comparison with player 47585" (preferred)
+pvp: PvpComparison = client.player.get_pvp(25584, 47585)
 ```
 
 ### Resource Scoping
@@ -75,14 +80,14 @@ from ifpa_api.models.tournaments import Tournament
 
 client: IfpaClient = IfpaClient()
 
-# Player operations
-player: Player = client.player(25584).details()
+# Player operations (preferred method)
+player: Player = client.player.get(25584)
 
-# Director operations
-director: Director = client.director(1533).details()
+# Director operations (preferred method)
+director: Director = client.director.get(1533)
 
-# Tournament operations
-tournament: Tournament = client.tournament(7070).details()
+# Tournament operations (preferred method)
+tournament: Tournament = client.tournament.get(7070)
 ```
 
 ## Player Resource Examples
@@ -97,8 +102,8 @@ from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
 
-# Get Dwayne Smith's profile (Player ID: 25584)
-player: Player = client.player(25584).details()
+# Get Dwayne Smith's profile (Player ID: 25584) - preferred method
+player: Player = client.player.get(25584)
 
 print(f"Name: {player.first_name} {player.last_name}")
 print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
@@ -118,8 +123,9 @@ from ifpa_api.models.common import RankingSystem, ResultType
 
 client: IfpaClient = IfpaClient()
 
-# Get active tournament results for Dwayne Smith
-results: PlayerResultsResponse = client.player(25584).results(
+# Get active tournament results for Dwayne Smith (preferred method)
+results: PlayerResultsResponse = client.player.get_results(
+    25584,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -139,8 +145,8 @@ from ifpa_api.core.exceptions import PlayersNeverMetError
 client: IfpaClient = IfpaClient()
 
 try:
-    # Compare Dwayne Smith (25584) vs Debbie Smith (47585)
-    pvp: PvpComparison = client.player(25584).pvp(47585)
+    # Compare Dwayne Smith (25584) vs Debbie Smith (47585) - preferred method
+    pvp: PvpComparison = client.player.get_pvp(25584, 47585)
 
     print(f"{pvp.player1_name} vs {pvp.player2_name}")
     print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
@@ -159,8 +165,8 @@ from ifpa_api.models.player import PvpAllCompetitors
 
 client: IfpaClient = IfpaClient()
 
-# Get summary of all competitors Dwayne Smith has faced
-summary: PvpAllCompetitors = client.player(25584).pvp_all()
+# Get summary of all competitors Dwayne Smith has faced (preferred method)
+summary: PvpAllCompetitors = client.player.get_pvp_all(25584)
 
 print(f"Player ID: {summary.player_id}")
 print(f"Total competitors faced: {summary.total_competitors}")
@@ -174,8 +180,8 @@ from ifpa_api.models.player import RankingHistory
 
 client: IfpaClient = IfpaClient()
 
-# Get Dwayne Smith's ranking history over time
-history: RankingHistory = client.player(25584).history()
+# Get Dwayne Smith's ranking history over time (preferred method)
+history: RankingHistory = client.player.get_history(25584)
 
 print(f"System: {history.system}")
 print(f"Active: {history.active_flag}")
@@ -197,8 +203,8 @@ from ifpa_api.models.director import Director
 
 client: IfpaClient = IfpaClient()
 
-# Get Josh Rainwater's director profile (Director ID: 1533)
-director: Director = client.director(1533).details()
+# Get Josh Rainwater's director profile (Director ID: 1533) - preferred method
+director: Director = client.director.get(1533)
 
 print(f"Name: {director.name}")
 print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
@@ -218,8 +224,8 @@ from ifpa_api.models.common import TimePeriod
 
 client: IfpaClient = IfpaClient()
 
-# Get past tournaments directed by Josh Rainwater
-past: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
+# Get past tournaments directed by Josh Rainwater (preferred method)
+past: DirectorTournamentsResponse = client.director.get_tournaments(1533, TimePeriod.PAST)
 
 print(f"Director: {past.director_name}")
 print(f"Total past tournaments: {past.total_count}")
@@ -240,8 +246,8 @@ from ifpa_api.models.common import TimePeriod
 
 client: IfpaClient = IfpaClient()
 
-# Get future tournaments for Erik Thoren (highly active director)
-upcoming: DirectorTournamentsResponse = client.director(1151).tournaments(TimePeriod.FUTURE)
+# Get future tournaments for Erik Thoren (highly active director) - preferred method
+upcoming: DirectorTournamentsResponse = client.director.get_tournaments(1151, TimePeriod.FUTURE)
 
 print(f"Upcoming tournaments: {upcoming.total_count}")
 
@@ -263,8 +269,8 @@ from ifpa_api.models.tournaments import Tournament
 
 client: IfpaClient = IfpaClient()
 
-# Get PAPA 17 tournament details (Tournament ID: 7070)
-tournament: Tournament = client.tournament(7070).details()
+# Get PAPA 17 tournament details (Tournament ID: 7070) - preferred method
+tournament: Tournament = client.tournament.get(7070)
 
 print(f"Name: {tournament.tournament_name}")
 print(f"Event: {tournament.event_name}")
@@ -283,8 +289,8 @@ from ifpa_api.models.tournaments import TournamentResultsResponse
 
 client: IfpaClient = IfpaClient()
 
-# Get results for PAPA 17
-results: TournamentResultsResponse = client.tournament(7070).results()
+# Get results for PAPA 17 (preferred method)
+results: TournamentResultsResponse = client.tournament.get_results(7070)
 
 print(f"Tournament: {results.tournament_name}")
 print(f"Date: {results.event_date}")
@@ -304,8 +310,8 @@ from ifpa_api.models.tournaments import TournamentFormatsResponse
 
 client: IfpaClient = IfpaClient()
 
-# Get format information for PAPA 17
-formats: TournamentFormatsResponse = client.tournament(7070).formats()
+# Get format information for PAPA 17 (preferred method)
+formats: TournamentFormatsResponse = client.tournament.get_formats(7070)
 
 print(f"Tournament ID: {formats.tournament_id}")
 print(f"Formats used: {len(formats.formats)}")
@@ -403,9 +409,10 @@ from ifpa_api.models.common import RankingSystem, ResultType
 
 client: IfpaClient = IfpaClient()
 
-# Callable pattern - more intuitive and type-safe
-player: Player = client.player(25584).details()
-results: PlayerResultsResponse = client.player(25584).results(
+# Preferred methods - more direct and intuitive
+player: Player = client.player.get(25584)
+results: PlayerResultsResponse = client.player.get_results(
+    25584,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
@@ -438,13 +445,14 @@ def analyze_player_performance(player_id: int) -> dict[str, any]:
     Returns:
         Dictionary with player analysis data
     """
-    # All return types are known at compile time
-    player: Player = client.player(player_id).details()
-    results: PlayerResultsResponse = client.player(player_id).results(
+    # All return types are known at compile time (using preferred methods)
+    player: Player = client.player.get(player_id)
+    results: PlayerResultsResponse = client.player.get_results(
+        player_id,
         ranking_system=RankingSystem.MAIN,
         result_type=ResultType.ACTIVE
     )
-    history: RankingHistory = client.player(player_id).history()
+    history: RankingHistory = client.player.get_history(player_id)
 
     return {
         "name": f"{player.first_name} {player.last_name}",
@@ -469,10 +477,18 @@ from ifpa_api.resources.player.context import _PlayerContext
 
 client: IfpaClient = IfpaClient()
 
-# Create a player context
-dwayne_context: _PlayerContext = client.player(25584)
+# Using preferred methods (recommended approach)
+player_id = 25584
+player = client.player.get(player_id)
+results = client.player.get_results(
+    player_id,
+    ranking_system=RankingSystem.MAIN,
+    result_type=ResultType.ACTIVE
+)
+history = client.player.get_history(player_id)
 
-# Use it multiple times (each call makes a fresh API request)
+# Using context pattern (deprecated but still works)
+dwayne_context: _PlayerContext = client.player(25584)
 player = dwayne_context.details()
 results = dwayne_context.results(
     ranking_system=RankingSystem.MAIN,
@@ -495,7 +511,7 @@ player_ids: list[int] = [25584, 47585, 52913]  # Dwayne, Debbie, Dave
 
 players: list[Player] = []
 for player_id in player_ids:
-    player: Player = client.player(player_id).details()
+    player: Player = client.player.get(player_id)
     players.append(player)
     print(f"Loaded: {player.first_name} {player.last_name}")
 ```
@@ -520,14 +536,8 @@ def get_player_safely(player_id: int) -> Player | None:
     Returns:
         Player object or None if not found
     """
-    try:
-        player: Player = client.player(player_id).details()
-        return player
-    except IfpaApiError as e:
-        if e.status_code == 404:
-            print(f"Player {player_id} not found")
-            return None
-        raise
+    # Using convenience method (even cleaner!)
+    return client.player.get_or_none(player_id)
 
 def compare_players_safely(player1_id: int, player2_id: int) -> PvpComparison | None:
     """Compare two players with error handling.
@@ -540,7 +550,7 @@ def compare_players_safely(player1_id: int, player2_id: int) -> PvpComparison | 
         PvP comparison or None if players never met
     """
     try:
-        pvp: PvpComparison = client.player(player1_id).pvp(player2_id)
+        pvp: PvpComparison = client.player.get_pvp(player1_id, player2_id)
         return pvp
     except PlayersNeverMetError:
         print(f"Players {player1_id} and {player2_id} have never competed")
@@ -557,11 +567,11 @@ from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
 
-# Good - type hint present
-player: Player = client.player(25584).details()
+# Good - type hint present (using preferred method)
+player: Player = client.player.get(25584)
 
 # Bad - no type hint (still works but loses IDE support)
-player = client.player(25584).details()
+player = client.player.get(25584)
 ```
 
 ### 2. Import Specific Types
@@ -583,14 +593,16 @@ from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod
 
 client: IfpaClient = IfpaClient()
 
-# Good - type-safe enums
-results = client.player(25584).results(
+# Good - type-safe enums (using preferred method)
+results = client.player.get_results(
+    25584,
     ranking_system=RankingSystem.MAIN,
     result_type=ResultType.ACTIVE
 )
 
 # Bad - magic strings (still works but no type safety)
-results = client.player(25584).results(
+results = client.player.get_results(
+    25584,
     ranking_system="MAIN",
     result_type="ACTIVE"
 )
@@ -605,8 +617,14 @@ from ifpa_api.models.player import Player
 
 client: IfpaClient = IfpaClient()
 
+# Using convenience method (recommended)
+player = client.player.get_or_none(99999999)
+if player is None:
+    print("Player not found")
+
+# Or with explicit error handling
 try:
-    player: Player = client.player(99999999).details()
+    player: Player = client.player.get(99999999)
 except IfpaApiError as e:
     if e.status_code == 404:
         print("Player not found")

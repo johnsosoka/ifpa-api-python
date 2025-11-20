@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ifpa_api.core.base import BaseResourceContext
+from ifpa_api.core.deprecation import issue_deprecation_warning
 from ifpa_api.core.exceptions import IfpaApiError, TournamentNotLeagueError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
@@ -41,7 +42,12 @@ class _TournamentContext(BaseResourceContext[int | str]):
     """
 
     def details(self) -> Tournament:
-        """Get detailed information about this tournament.
+        """Get detailed information about this tournament (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`TournamentClient.get` instead. For example, use
+            ``client.tournament.get(12345)`` instead of ``client.tournament(12345).details()``.
+            This method will be removed in version 1.0.0.
 
         Returns:
             Tournament information including venue, date, and details
@@ -51,12 +57,19 @@ class _TournamentContext(BaseResourceContext[int | str]):
 
         Example:
             ```python
+            # Deprecated usage
             tournament = client.tournament(12345).details()
-            print(f"Tournament: {tournament.tournament_name}")
-            print(f"Players: {tournament.player_count}")
-            print(f"Date: {tournament.event_date}")
+
+            # Preferred usage
+            tournament = client.tournament.get(12345)
             ```
         """
+        issue_deprecation_warning(
+            old_name="tournament(id).details()",
+            new_name="tournament.get(id)",
+            version="1.0.0",
+            additional_info="The new get() method provides a more direct API.",
+        )
         response = self._http._request("GET", f"/tournament/{self._resource_id}")
         return Tournament.model_validate(response)
 

@@ -23,7 +23,7 @@ class TestPlayerHandle:
     """Test cases for PlayerHandle resource-specific operations."""
 
     def test_get_player(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test getting a specific player's details."""
+        """Test getting a specific player's details using .get()."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/12345",
             json={
@@ -45,7 +45,7 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        player = client.player(12345).details()
+        player = client.player.get(12345)
 
         assert isinstance(player, Player)
         assert player.player_id == 12345
@@ -71,7 +71,7 @@ class TestPlayerHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        player = client.player("12345").details()
+        player = client.player.get("12345")
 
         assert player.player_id == 12345
 
@@ -428,6 +428,209 @@ class TestPlayerHandle:
         assert exc_info.value.player_id == 99999999
         assert exc_info.value.opponent_id == 67890
 
+    def test_player_get_or_none_found(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none returns player when found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/12345",
+            json={
+                "player": [
+                    {
+                        "player_id": 12345,
+                        "first_name": "John",
+                        "last_name": "Smith",
+                    }
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        player = client.player.get_or_none(12345)
+
+        assert player is not None
+        assert player.player_id == 12345
+        assert player.first_name == "John"
+
+    def test_player_get_or_none_not_found(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none returns None for 404."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/99999",
+            status_code=404,
+            json={"error": "Player not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        player = client.player.get_or_none(99999)
+
+        assert player is None
+
+    def test_player_get_or_none_other_error(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none raises for non-404 errors."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/12345",
+            status_code=500,
+            json={"error": "Internal server error"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.player.get_or_none(12345)
+
+        assert exc_info.value.status_code == 500
+
+    def test_player_exists_true(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test exists returns True when player found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/12345",
+            json={
+                "player": [
+                    {
+                        "player_id": 12345,
+                        "first_name": "John",
+                        "last_name": "Smith",
+                    }
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        assert client.player.exists(12345) is True
+
+    def test_player_exists_false(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test exists returns False when player not found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/99999",
+            status_code=404,
+            json={"error": "Player not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        assert client.player.exists(99999) is False
+
+    def test_player_search_first(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test first() returns first search result."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={
+                "search": [
+                    {
+                        "player_id": 1,
+                        "first_name": "John",
+                        "last_name": "Smith",
+                        "wppr_rank": "100",
+                    },
+                    {
+                        "player_id": 2,
+                        "first_name": "Jane",
+                        "last_name": "Smith",
+                        "wppr_rank": "200",
+                    },
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.player.search("Smith").first()
+
+        assert result.player_id == 1
+        assert result.first_name == "John"
+
+    def test_player_search_first_no_results(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test first() raises IndexError when no results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={"search": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(IndexError, match="no results"):
+            client.player.search("NonExistent").first()
+
+    def test_player_search_first_or_none_found(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test first_or_none() returns first result when found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={
+                "search": [
+                    {
+                        "player_id": 1,
+                        "first_name": "John",
+                        "last_name": "Smith",
+                        "wppr_rank": "100",
+                    }
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.player.search("Smith").first_or_none()
+
+        assert result is not None
+        assert result.player_id == 1
+
+    def test_player_search_first_or_none_no_results(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test first_or_none() returns None when no results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={"search": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.player.search("NonExistent").first_or_none()
+
+        assert result is None
+
+
+class TestPlayerDeprecationWarnings:
+    """Test cases for deprecated methods."""
+
+    def test_player_query_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that query() issues deprecation warning."""
+        import warnings
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/search",
+            json={"search": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            client.player.query("test").get()
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "query()" in str(w[0].message)
+            assert "search()" in str(w[0].message)
+
+    def test_player_details_deprecation_warning(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that details() issues deprecation warning."""
+        import warnings
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/player/12345",
+            json={
+                "player": [
+                    {
+                        "player_id": 12345,
+                        "first_name": "John",
+                        "last_name": "Smith",
+                    }
+                ]
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            client.player(12345).details()
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "details()" in str(w[0].message)
+            assert "get" in str(w[0].message)
+
 
 class TestPlayersIntegration:
     """Integration tests ensuring PlayersClient and PlayerHandle work together."""
@@ -442,7 +645,7 @@ class TestPlayersIntegration:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.player(99999).details()
+            client.player.get(99999)
 
         assert exc_info.value.status_code == 404
 
@@ -450,8 +653,8 @@ class TestPlayersIntegration:
 class TestPlayerQueryBuilder:
     """Test cases for the new fluent query builder pattern."""
 
-    def test_simple_query(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test simple player name query."""
+    def test_simple_search(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test simple player name search."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={
@@ -468,7 +671,7 @@ class TestPlayerQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        results = client.player.query("John").get()
+        results = client.player.search("John").get()
 
         assert isinstance(results, PlayerSearchResponse)
         assert len(results.search) == 1
@@ -478,67 +681,67 @@ class TestPlayerQueryBuilder:
         assert mock_requests.last_request is not None
         assert "name=john" in mock_requests.last_request.query.lower()
 
-    def test_query_with_country_filter(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query with country filter."""
+    def test_search_with_country_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with country filter."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query("John").country("US").get()
+        client.player.search("John").country("US").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "name=john" in query.lower()
         assert "country=us" in query.lower()
 
-    def test_query_with_state_filter(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query with state filter."""
+    def test_search_with_state_filter(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with state filter."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query("Smith").state("WA").get()
+        client.player.search("Smith").state("WA").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "name=smith" in query.lower()
         assert "stateprov=wa" in query.lower()
 
-    def test_query_with_tournament_and_position(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query with tournament and position filters."""
+    def test_search_with_tournament_and_position(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with tournament and position filters."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query().tournament("PAPA").position(1).get()
+        client.player.search().tournament("PAPA").position(1).get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "tournament=papa" in query.lower()
         assert "tourpos=1" in query
 
-    def test_query_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query with pagination (offset and limit)."""
+    def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with pagination (offset and limit)."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query("Smith").offset(25).limit(50).get()
+        client.player.search("Smith").offset(25).limit(50).get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "start_pos=26" in query
         assert "count=50" in query
 
-    def test_query_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
+    def test_search_chaining_all_filters(self, mock_requests: requests_mock.Mocker) -> None:
         """Test chaining all available filters together."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
@@ -546,9 +749,9 @@ class TestPlayerQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query("John").country("US").state("WA").tournament("PAPA").position(1).offset(
-            0
-        ).limit(25).get()
+        client.player.search("John").country("US").state("WA").tournament("PAPA").position(
+            1
+        ).offset(0).limit(25).get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -560,8 +763,8 @@ class TestPlayerQueryBuilder:
         assert "start_pos=1" in query
         assert "count=25" in query
 
-    def test_query_immutability(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that query builder is immutable - each method returns new instance."""
+    def test_search_immutability(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that search builder is immutable - each method returns new instance."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
@@ -569,32 +772,32 @@ class TestPlayerQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
 
-        # Create base query
-        base_query = client.player.query().country("US")
+        # Create base search
+        base_search = client.player.search().country("US")
 
-        # Create two derivative queries
-        wa_query = base_query.state("WA")
-        or_query = base_query.state("OR")
+        # Create two derivative searches
+        wa_search = base_search.state("WA")
+        or_search = base_search.state("OR")
 
-        # Execute both queries
-        wa_query.get()
+        # Execute both searches
+        wa_search.get()
         wa_request = mock_requests.last_request
         assert wa_request is not None
         assert "stateprov=wa" in wa_request.query.lower()
         assert "stateprov=or" not in wa_request.query.lower()
 
-        or_query.get()
+        or_search.get()
         or_request = mock_requests.last_request
         assert or_request is not None
         assert "stateprov=or" in or_request.query.lower()
         assert "stateprov=wa" not in or_request.query.lower()
 
-        # Verify both queries have country=US
+        # Verify both searches have country=US
         assert "country=us" in wa_request.query.lower()
         assert "country=us" in or_request.query.lower()
 
-    def test_query_reuse(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test that query can be reused multiple times (immutability)."""
+    def test_search_reuse(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that search can be reused multiple times (immutability)."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
@@ -602,31 +805,31 @@ class TestPlayerQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
 
-        # Create a reusable query
-        us_query = client.player.query().country("US")
+        # Create a reusable search
+        us_search = client.player.search().country("US")
 
         # Execute it multiple times with different additional filters
-        us_query.state("WA").limit(10).get()
-        us_query.state("OR").limit(20).get()
-        us_query.state("CA").limit(30).get()
+        us_search.state("WA").limit(10).get()
+        us_search.state("OR").limit(20).get()
+        us_search.state("CA").limit(30).get()
 
-        # Base query should still be unchanged
-        us_query.get()
+        # Base search should still be unchanged
+        us_search.get()
         final_request = mock_requests.last_request
         assert final_request is not None
         assert "country=us" in final_request.query.lower()
         # Should not have any of the state filters from previous calls
         assert "stateprov" not in final_request.query.lower()
 
-    def test_empty_query(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query with no name (filter-only query)."""
+    def test_empty_search(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search with no name (filter-only search)."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
         )
 
         client = IfpaClient(api_key="test-key")
-        client.player.query().country("US").state("WA").get()
+        client.player.search().country("US").state("WA").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -635,8 +838,8 @@ class TestPlayerQueryBuilder:
         # Should not have a name parameter
         assert "name=" not in query.lower()
 
-    def test_query_with_initial_name(self, mock_requests: requests_mock.Mocker) -> None:
-        """Test query() method with initial name parameter."""
+    def test_search_with_initial_name(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test search() method with initial name parameter."""
         mock_requests.get(
             "https://api.ifpapinball.com/player/search",
             json={"search": []},
@@ -644,21 +847,21 @@ class TestPlayerQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
         # Test both ways of setting name
-        client.player.query("John").get()
+        client.player.search("John").get()
         assert mock_requests.last_request is not None
         assert "name=john" in mock_requests.last_request.query.lower()
 
         # Also test chaining after initial name
-        client.player.query("Jane").country("CA").get()
+        client.player.search("Jane").country("CA").get()
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "name=jane" in query.lower()
         assert "country=ca" in query.lower()
 
-    def test_query_builder_repr(self) -> None:
-        """Test query builder string representation."""
+    def test_search_builder_repr(self) -> None:
+        """Test search builder string representation."""
         client = IfpaClient(api_key="test-key")
-        builder = client.player.query("John").country("US")
+        builder = client.player.search("John").country("US")
 
         # Should show class name and params
         repr_str = repr(builder)
@@ -684,11 +887,11 @@ class TestPlayerQueryBuilderIntegration:
         client = IfpaClient(api_key="test-key")
 
         # Start with broad search
-        broad_results = client.player.query("Test").limit(100).get()
+        broad_results = client.player.search("Test").limit(100).get()
         assert len(broad_results.search) == 100
 
         # Refine to specific country
-        client.player.query("Test").country("US").limit(50).get()
+        client.player.search("Test").country("US").limit(50).get()
         assert mock_requests.last_request is not None
         assert "country=us" in mock_requests.last_request.query.lower()
 
@@ -701,8 +904,8 @@ class TestPlayerQueryBuilderIntegration:
 
         client = IfpaClient(api_key="test-key")
 
-        # Create base query
-        base = client.player.query("Smith").country("US")
+        # Create base search
+        base = client.player.search("Smith").country("US")
 
         # Get pages
         page1 = base.offset(0).limit(25)

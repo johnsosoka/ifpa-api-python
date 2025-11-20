@@ -48,7 +48,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.query("Pinball").get()
+        result = client.tournament.search("Pinball").get()
 
         assert isinstance(result, TournamentSearchResponse)
         assert len(result.tournaments) == 1
@@ -75,7 +75,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.query().city("Portland").state("OR").country("US").get()
+        result = client.tournament.search().city("Portland").state("OR").country("US").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -101,7 +101,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.query().date_range("2024-07-01", "2024-07-31").get()
+        result = client.tournament.search().date_range("2024-07-01", "2024-07-31").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -126,7 +126,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.query().tournament_type("women").get()
+        result = client.tournament.search().tournament_type("women").get()
 
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
@@ -145,7 +145,7 @@ class TestTournamentsClient:
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.tournament.query().offset(0).limit(50).get()
+        result = client.tournament.search().offset(0).limit(50).get()
 
         assert len(result.tournaments) == 50
         assert mock_requests.last_request is not None
@@ -180,7 +180,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament(12345).details()
+        tournament = client.tournament.get(12345)
 
         assert isinstance(tournament, Tournament)
         assert tournament.tournament_id == 12345
@@ -200,7 +200,7 @@ class TestTournamentHandle:
         )
 
         client = IfpaClient(api_key="test-key")
-        tournament = client.tournament("12345").details()
+        tournament = client.tournament.get("12345")
 
         assert tournament.tournament_id == 12345
 
@@ -372,12 +372,12 @@ class TestTournamentsIntegration:
         client = IfpaClient(api_key="test-key")
 
         # Search for tournament using query builder
-        search_results = client.tournament.query("Championship").get()
+        search_results = client.tournament.search("Championship").get()
         assert len(search_results.tournaments) == 1
 
         # Get full details using the ID from search
         tournament_id = search_results.tournaments[0].tournament_id
-        full_tournament = client.tournament(tournament_id).details()
+        full_tournament = client.tournament.get(tournament_id)
 
         assert full_tournament.tournament_id == 12345
         assert full_tournament.location_name == "Pinball Paradise"
@@ -393,7 +393,7 @@ class TestTournamentsIntegration:
 
         client = IfpaClient(api_key="test-key")
         with pytest.raises(IfpaApiError) as exc_info:
-            client.tournament(99999).details()
+            client.tournament.get(99999)
 
         assert exc_info.value.status_code == 404
 
@@ -442,7 +442,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        results = client.tournament.query("PAPA").get()
+        results = client.tournament.search("PAPA").get()
 
         assert isinstance(results, TournamentSearchResponse)
         assert len(results.tournaments) == 1
@@ -460,7 +460,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query("Championship").country("US").get()
+        client.tournament.search("Championship").country("US").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -475,7 +475,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query().state("OR").get()
+        client.tournament.search().state("OR").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -489,7 +489,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query().city("Portland").get()
+        client.tournament.search().city("Portland").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -503,7 +503,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+        client.tournament.search().date_range("2024-01-01", "2024-12-31").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -518,7 +518,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query().tournament_type("women").get()
+        client.tournament.search().tournament_type("women").get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -532,7 +532,7 @@ class TestTournamentQueryBuilder:
         )
 
         client = IfpaClient(api_key="test-key")
-        client.tournament.query("Championship").offset(25).limit(50).get()
+        client.tournament.search("Championship").offset(25).limit(50).get()
 
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
@@ -548,7 +548,7 @@ class TestTournamentQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
         (
-            client.tournament.query("Championship")
+            client.tournament.search("Championship")
             .country("US")
             .state("WA")
             .city("Seattle")
@@ -580,27 +580,27 @@ class TestTournamentQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
 
-        # Create base query
-        base_query = client.tournament.query().country("US")
+        # Create base search
+        base_search = client.tournament.search().country("US")
 
-        # Create two derivative queries
-        wa_query = base_query.state("WA")
-        or_query = base_query.state("OR")
+        # Create two derivative searches
+        wa_search = base_search.state("WA")
+        or_search = base_search.state("OR")
 
-        # Execute both queries
-        wa_query.get()
+        # Execute both searches
+        wa_search.get()
         wa_request = mock_requests.last_request
         assert wa_request is not None
         assert "stateprov=wa" in wa_request.query.lower()
         assert "stateprov=or" not in wa_request.query.lower()
 
-        or_query.get()
+        or_search.get()
         or_request = mock_requests.last_request
         assert or_request is not None
         assert "stateprov=or" in or_request.query.lower()
         assert "stateprov=wa" not in or_request.query.lower()
 
-        # Verify both queries have country=US
+        # Verify both searches have country=US
         assert "country=us" in wa_request.query.lower()
         assert "country=us" in or_request.query.lower()
 
@@ -660,7 +660,7 @@ class TestTournamentQueryBuilder:
         assert "name=papa" in mock_requests.last_request.query.lower()
 
         # Also test chaining after initial name
-        client.tournament.query("Championship").country("US").get()
+        client.tournament.search("Championship").country("US").get()
         assert mock_requests.last_request is not None
         query = mock_requests.last_request.query
         assert "name=championship" in query.lower()
@@ -709,7 +709,7 @@ class TestTournamentQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
         # Should not raise an error
-        client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+        client.tournament.search().date_range("2024-01-01", "2024-12-31").get()
 
     def test_date_range_validation_both_absent(self, mock_requests: requests_mock.Mocker) -> None:
         """Test that get() succeeds when both dates are absent."""
@@ -720,7 +720,7 @@ class TestTournamentQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
         # Should not raise an error
-        client.tournament.query("Championship").country("US").get()
+        client.tournament.search("Championship").country("US").get()
 
     def test_date_range_invalid_start_date_format(self) -> None:
         """Test that date_range() raises error with invalid start_date format."""
@@ -751,7 +751,7 @@ class TestTournamentQueryBuilder:
 
         client = IfpaClient(api_key="test-key")
         # Should not raise an error
-        result = client.tournament.query().date_range("2024-01-01", "2024-12-31").get()
+        result = client.tournament.search().date_range("2024-01-01", "2024-12-31").get()
         assert isinstance(result, TournamentSearchResponse)
 
 
@@ -900,3 +900,200 @@ def test_list_formats(mock_requests: requests_mock.Mocker) -> None:
     assert result.qualifying_formats[0].name == "Best Game"
     assert result.qualifying_formats[1].description is None
     assert result.finals_formats[0].name == "Single Elimination"
+
+
+class TestTournamentConvenienceMethods:
+    """Test cases for tournament convenience methods."""
+
+    def test_tournament_get_or_none_found(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none returns tournament when found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345",
+            json={
+                "tournament_id": 12345,
+                "tournament_name": "Championship 2024",
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        tournament = client.tournament.get_or_none(12345)
+
+        assert tournament is not None
+        assert tournament.tournament_id == 12345
+        assert tournament.tournament_name == "Championship 2024"
+
+    def test_tournament_get_or_none_not_found(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none returns None for 404."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/99999",
+            status_code=404,
+            json={"error": "Tournament not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        tournament = client.tournament.get_or_none(99999)
+
+        assert tournament is None
+
+    def test_tournament_get_or_none_other_error(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test get_or_none raises for non-404 errors."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345",
+            status_code=500,
+            json={"error": "Internal server error"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.tournament.get_or_none(12345)
+
+        assert exc_info.value.status_code == 500
+
+    def test_tournament_exists_true(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test exists returns True when tournament found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345",
+            json={
+                "tournament_id": 12345,
+                "tournament_name": "Championship 2024",
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        assert client.tournament.exists(12345) is True
+
+    def test_tournament_exists_false(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test exists returns False when tournament not found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/99999",
+            status_code=404,
+            json={"error": "Tournament not found"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        assert client.tournament.exists(99999) is False
+
+    def test_tournament_search_first(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test first() returns first search result."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 12345,
+                        "tournament_name": "PAPA Championship",
+                        "event_date": "2024-06-15",
+                    },
+                    {
+                        "tournament_id": 12346,
+                        "tournament_name": "PAPA Open",
+                        "event_date": "2024-07-15",
+                    },
+                ],
+                "total_results": 2,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.search("PAPA").first()
+
+        assert result.tournament_id == 12345
+        assert result.tournament_name == "PAPA Championship"
+
+    def test_tournament_search_first_no_results(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test first() raises IndexError when no results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(IndexError, match="no results"):
+            client.tournament.search("NonExistent").first()
+
+    def test_tournament_search_first_or_none_found(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test first_or_none() returns first result when found."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 12345,
+                        "tournament_name": "PAPA Championship",
+                        "event_date": "2024-06-15",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.search("PAPA").first_or_none()
+
+        assert result is not None
+        assert result.tournament_id == 12345
+
+    def test_tournament_search_first_or_none_no_results(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test first_or_none() returns None when no results."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.search("NonExistent").first_or_none()
+
+        assert result is None
+
+
+class TestTournamentDeprecationWarnings:
+    """Test cases for deprecated methods."""
+
+    def test_tournament_query_deprecation_warning(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that query() issues deprecation warning."""
+        import warnings
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={"tournaments": [], "total_results": 0},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            client.tournament.query("test").get()
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "query()" in str(w[0].message)
+            assert "search()" in str(w[0].message)
+
+    def test_tournament_details_deprecation_warning(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test that details() issues deprecation warning."""
+        import warnings
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/12345",
+            json={
+                "tournament_id": 12345,
+                "tournament_name": "Championship 2024",
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            client.tournament(12345).details()
+
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "details()" in str(w[0].message)
+            assert "get" in str(w[0].message)
