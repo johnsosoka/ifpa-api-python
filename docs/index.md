@@ -119,7 +119,7 @@ The client provides access to 46 IFPA API v2.1 endpoints across 7 resources:
 | **Tournaments** | Search tournaments, view results and details | 5 | ✅ `.get()`, `.search()` |
 | **Rankings** | WPPR, women, youth, pro, and custom rankings | 9 | 📋 Collection only |
 | **Series** | Tournament series standings and statistics | 8 | 📋 Collection only |
-| **Stats** | Player/tournament statistics by region and period | 10 | 📋 Collection only |
+| **Stats** | Geographic distributions, historical trends, overall IFPA statistics | 10 | 📋 Collection only |
 | **Reference** | Countries and states lookup | 2 | 📋 Collection only |
 
 ## Complete Example
@@ -202,6 +202,7 @@ client.close()
 - [Tournaments](resources/tournaments.md) - Tournament data
 - [Rankings](resources/rankings.md) - WPPR rankings
 - [Series](resources/series.md) - Series standings
+- [Stats](resources/stats.md) - Statistical data and trends
 
 ## License
 

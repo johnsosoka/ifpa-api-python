@@ -24,6 +24,7 @@ ifpa_api/
 │   ├── rankings.py    # Rankings models
 │   ├── tournaments.py # Tournament models
 │   ├── series.py      # Series models
+│   ├── stats.py       # Stats models
 │   ├── reference.py   # Reference data models
 │   └── calendar.py    # Calendar models
 └── resources/         # Resource clients and handles
@@ -32,6 +33,7 @@ ifpa_api/
     ├── rankings.py    # RankingsClient
     ├── tournaments.py # TournamentsClient, TournamentHandle
     ├── series.py      # SeriesClient, SeriesHandle
+    ├── stats.py       # StatsClient
     └── reference.py   # ReferenceClient
 ```
 
@@ -179,6 +181,44 @@ active = client.series.list(active_only=True)  # List active series only
 standings = client.series("NACS").standings()  # Get overall standings
 card = client.series("PAPA").player_card(12345, "OH")  # Get player's series card
 region = client.series("NACS").region_standings("OH")  # Get region standings
+```
+
+#### `stats`
+
+Returns the stats resource client.
+
+```python
+@property
+def stats(self) -> StatsClient
+```
+
+**Usage:**
+
+```python
+# Geographic statistics
+country_stats = client.stats.country_players(rank_type="OPEN")
+state_stats = client.stats.state_players()
+
+# Historical trends
+events = client.stats.events_by_year()
+players = client.stats.players_by_year()
+
+# Tournament rankings
+largest = client.stats.largest_tournaments()
+lucrative = client.stats.lucrative_tournaments(major="Y")
+
+# Player activity over time
+points = client.stats.points_given_period(
+    start_date="2024-01-01",
+    end_date="2024-12-31"
+)
+active = client.stats.events_attended_period(
+    start_date="2024-01-01",
+    end_date="2024-12-31"
+)
+
+# Overall IFPA statistics
+overall = client.stats.overall(system_code="OPEN")
 ```
 
 #### `reference`
