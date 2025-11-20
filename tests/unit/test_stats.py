@@ -3,10 +3,6 @@
 Tests the stats resource client using mocked HTTP requests with real API responses.
 """
 
-import json
-from pathlib import Path
-from typing import Any
-
 import pytest
 import requests_mock
 
@@ -26,27 +22,38 @@ from ifpa_api.models.stats import (
 )
 
 
-def load_fixture(filename: str) -> dict[str, Any]:
-    """Load a fixture from scripts/stats_responses/.
-
-    Args:
-        filename: Name of the fixture file (e.g., "country_players_open.json")
-
-    Returns:
-        Parsed JSON fixture as a dictionary
-    """
-    fixture_path = Path(__file__).parent.parent.parent / "scripts" / "stats_responses" / filename
-    with open(fixture_path) as f:
-        return json.load(f)
-
-
 class TestStatsClientCountryPlayers:
     """Test cases for country_players endpoint."""
 
     def test_country_players_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test country_players with default parameters (OPEN)."""
-        fixture = load_fixture("country_players_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/country_players", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "47101",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "Canada",
+                        "country_code": "CA",
+                        "player_count": "4473",
+                        "stats_rank": 2,
+                    },
+                    {
+                        "country_name": "Australia",
+                        "country_code": "AU",
+                        "player_count": "3385",
+                        "stats_rank": 3,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.country_players()
@@ -70,8 +77,27 @@ class TestStatsClientCountryPlayers:
 
     def test_country_players_with_rank_type(self, mock_requests: requests_mock.Mocker) -> None:
         """Test country_players with WOMEN rank_type."""
-        fixture = load_fixture("country_players_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/country_players", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "7173",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "Canada",
+                        "country_code": "CA",
+                        "player_count": "862",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.country_players(rank_type="WOMEN")
@@ -91,8 +117,18 @@ class TestStatsClientStatePlayers:
 
     def test_state_players_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test state_players with default parameters (OPEN)."""
-        fixture = load_fixture("state_players_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/state_players", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_players",
+            json={
+                "type": "Players by State (North America)",
+                "rank_type": "OPEN",
+                "stats": [
+                    {"stateprov": "Unknown", "player_count": "38167", "stats_rank": 1},
+                    {"stateprov": "CA", "player_count": "662", "stats_rank": 2},
+                    {"stateprov": "WA", "player_count": "549", "stats_rank": 3},
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.state_players()
@@ -116,8 +152,17 @@ class TestStatsClientStatePlayers:
 
     def test_state_players_with_rank_type(self, mock_requests: requests_mock.Mocker) -> None:
         """Test state_players with WOMEN rank_type."""
-        fixture = load_fixture("state_players_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/state_players", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_players",
+            json={
+                "type": "Players by State (North America)",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {"stateprov": "Unknown", "player_count": "5182", "stats_rank": 1},
+                    {"stateprov": "CA", "player_count": "131", "stats_rank": 2},
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.state_players(rank_type="WOMEN")
@@ -137,8 +182,29 @@ class TestStatsClientStateTournaments:
 
     def test_state_tournaments_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test state_tournaments with default parameters (OPEN)."""
-        fixture = load_fixture("state_tournaments_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/state_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_tournaments",
+            json={
+                "type": "Tournaments by State (North America)",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "stateprov": "WA",
+                        "tournament_count": "5729",
+                        "total_points_all": "232841.4800",
+                        "total_points_tournament_value": "39232.8200",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "stateprov": "MI",
+                        "tournament_count": "3469",
+                        "total_points_all": "122382.2200",
+                        "total_points_tournament_value": "29354.8200",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.state_tournaments()
@@ -164,8 +230,29 @@ class TestStatsClientStateTournaments:
 
     def test_state_tournaments_with_rank_type(self, mock_requests: requests_mock.Mocker) -> None:
         """Test state_tournaments with WOMEN rank_type."""
-        fixture = load_fixture("state_tournaments_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/state_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_tournaments",
+            json={
+                "type": "Tournaments by State (North America)",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "stateprov": "TX",
+                        "tournament_count": "458",
+                        "total_points_all": "21036.1100",
+                        "total_points_tournament_value": "5084.3200",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "stateprov": "MI",
+                        "tournament_count": "349",
+                        "total_points_all": "2424.3000",
+                        "total_points_tournament_value": "1104.8000",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.state_tournaments(rank_type="WOMEN")
@@ -185,8 +272,29 @@ class TestStatsClientEventsByYear:
 
     def test_events_by_year_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test events_by_year with default parameters (OPEN)."""
-        fixture = load_fixture("events_by_year_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_by_year", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_by_year",
+            json={
+                "type": "Events Per Year",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "year": "2025",
+                        "country_count": "30",
+                        "tournament_count": "12300",
+                        "player_count": "277684",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "year": "2024",
+                        "country_count": "25",
+                        "tournament_count": "12776",
+                        "player_count": "291118",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_by_year()
@@ -212,8 +320,29 @@ class TestStatsClientEventsByYear:
 
     def test_events_by_year_with_rank_type(self, mock_requests: requests_mock.Mocker) -> None:
         """Test events_by_year with WOMEN rank_type."""
-        fixture = load_fixture("events_by_year_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_by_year", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_by_year",
+            json={
+                "type": "Events Per Year",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "year": "2025",
+                        "country_count": "15",
+                        "tournament_count": "1686",
+                        "player_count": "22992",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "year": "2024",
+                        "country_count": "10",
+                        "tournament_count": "1597",
+                        "player_count": "20927",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_by_year(rank_type="WOMEN")
@@ -228,8 +357,29 @@ class TestStatsClientEventsByYear:
 
     def test_events_by_year_with_country_code(self, mock_requests: requests_mock.Mocker) -> None:
         """Test events_by_year with country_code filter."""
-        fixture = load_fixture("events_by_year_us.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_by_year", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_by_year",
+            json={
+                "type": "Events Per Year",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "year": "2025",
+                        "country_count": "1",
+                        "tournament_count": "9680",
+                        "player_count": "209880",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "year": "2024",
+                        "country_count": "1",
+                        "tournament_count": "10042",
+                        "player_count": "221107",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_by_year(country_code="US")
@@ -249,8 +399,29 @@ class TestStatsClientPlayersByYear:
 
     def test_players_by_year(self, mock_requests: requests_mock.Mocker) -> None:
         """Test players_by_year with no parameters."""
-        fixture = load_fixture("players_by_year.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/players_by_year", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/players_by_year",
+            json={
+                "type": "Players by Year",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "year": "2025",
+                        "current_year_count": "39169",
+                        "previous_year_count": "18453",
+                        "previous_2_year_count": "8278",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "year": "2024",
+                        "current_year_count": "38914",
+                        "previous_year_count": "14683",
+                        "previous_2_year_count": "6707",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.players_by_year()
@@ -279,8 +450,35 @@ class TestStatsClientLargestTournaments:
 
     def test_largest_tournaments_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test largest_tournaments with default parameters (OPEN)."""
-        fixture = load_fixture("largest_tournaments_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/largest_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/largest_tournaments",
+            json={
+                "type": "Largest Tournaments",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "987",
+                        "tournament_id": "34625",
+                        "tournament_name": "Pinburgh Match-Play Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2019-08-03",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "822",
+                        "tournament_id": "26092",
+                        "tournament_name": "Pinburgh Match-Play Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2018-07-28",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.largest_tournaments()
@@ -307,8 +505,35 @@ class TestStatsClientLargestTournaments:
 
     def test_largest_tournaments_with_rank_type(self, mock_requests: requests_mock.Mocker) -> None:
         """Test largest_tournaments with WOMEN rank_type."""
-        fixture = load_fixture("largest_tournaments_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/largest_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/largest_tournaments",
+            json={
+                "type": "Largest Tournaments",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "127",
+                        "tournament_id": "34627",
+                        "tournament_name": "Women's International Pinball Tournament",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2019-08-04",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "86",
+                        "tournament_id": "103188",
+                        "tournament_name": "Expo flipOUT! Womens Big Bracket",
+                        "event_name": "Womens Division",
+                        "tournament_date": "2025-10-18",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.largest_tournaments(rank_type="WOMEN")
@@ -325,8 +550,25 @@ class TestStatsClientLargestTournaments:
         self, mock_requests: requests_mock.Mocker
     ) -> None:
         """Test largest_tournaments with country_code filter."""
-        fixture = load_fixture("largest_tournaments_us.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/largest_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/largest_tournaments",
+            json={
+                "type": "Largest Tournaments",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "987",
+                        "tournament_id": "34625",
+                        "tournament_name": "Pinburgh Match-Play Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2019-08-03",
+                        "stats_rank": 1,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.largest_tournaments(country_code="US")
@@ -345,8 +587,35 @@ class TestStatsClientLucrativeTournaments:
 
     def test_lucrative_tournaments_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test lucrative_tournaments with default parameters (major=Y)."""
-        fixture = load_fixture("lucrative_tournaments_major_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/lucrative_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/lucrative_tournaments",
+            json={
+                "type": "Lucrative Tournaments",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "83318",
+                        "tournament_name": "The Open - IFPA World Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2025-01-26",
+                        "tournament_value": 400.79,
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "78171",
+                        "tournament_name": "IFPA World Pinball Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2024-06-09",
+                        "tournament_value": 393.28,
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.lucrative_tournaments()
@@ -373,8 +642,35 @@ class TestStatsClientLucrativeTournaments:
 
     def test_lucrative_tournaments_non_major(self, mock_requests: requests_mock.Mocker) -> None:
         """Test lucrative_tournaments with major=N."""
-        fixture = load_fixture("lucrative_tournaments_non_major.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/lucrative_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/lucrative_tournaments",
+            json={
+                "type": "Lucrative Tournaments",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "83321",
+                        "tournament_name": "It Never Drains in Southern California",
+                        "event_name": "Classics",
+                        "tournament_date": "2025-01-25",
+                        "tournament_value": 281.01,
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "66353",
+                        "tournament_name": "It Never Drains in Southern California",
+                        "event_name": "Classics",
+                        "tournament_date": "2024-01-06",
+                        "tournament_value": 266.56,
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.lucrative_tournaments(major="N")
@@ -391,8 +687,25 @@ class TestStatsClientLucrativeTournaments:
         self, mock_requests: requests_mock.Mocker
     ) -> None:
         """Test lucrative_tournaments with country_code filter."""
-        fixture = load_fixture("lucrative_tournaments_us.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/lucrative_tournaments", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/lucrative_tournaments",
+            json={
+                "type": "Lucrative Tournaments",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "83318",
+                        "tournament_name": "The Open - IFPA World Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2025-01-26",
+                        "tournament_value": 400.79,
+                        "stats_rank": 1,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.lucrative_tournaments(country_code="US")
@@ -411,8 +724,36 @@ class TestStatsClientPointsGivenPeriod:
 
     def test_points_given_period_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test points_given_period with default parameters."""
-        fixture = load_fixture("points_given_period_default.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/points_given_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            json={
+                "type": "Points given Period",
+                "start_date": "'2024-11-19'",
+                "end_date": "2025-11-19",
+                "return_count": 25,
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "player_id": "49549",
+                        "first_name": "Arvid",
+                        "last_name": "Flygare",
+                        "country_name": "Sweden",
+                        "country_code": "SE",
+                        "wppr_points": "4033.46",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "16004",
+                        "first_name": "Viggo",
+                        "last_name": "Löwgren",
+                        "country_name": "Sweden",
+                        "country_code": "SE",
+                        "wppr_points": "3854.59",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.points_given_period()
@@ -442,8 +783,36 @@ class TestStatsClientPointsGivenPeriod:
 
     def test_points_given_period_with_date_range(self, mock_requests: requests_mock.Mocker) -> None:
         """Test points_given_period with start_date and end_date."""
-        fixture = load_fixture("points_given_period_2024.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/points_given_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            json={
+                "type": "Points given Period",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "player_id": "1605",
+                        "first_name": "Escher",
+                        "last_name": "Lefkoff",
+                        "country_name": "Australia",
+                        "country_code": "AU",
+                        "wppr_points": "4264.61",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "16004",
+                        "first_name": "Viggo",
+                        "last_name": "Löwgren",
+                        "country_name": "Sweden",
+                        "country_code": "SE",
+                        "wppr_points": "3049.80",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.points_given_period(start_date="2024-01-01", end_date="2024-12-31")
@@ -460,8 +829,27 @@ class TestStatsClientPointsGivenPeriod:
 
     def test_points_given_period_with_limit(self, mock_requests: requests_mock.Mocker) -> None:
         """Test points_given_period with limit parameter."""
-        fixture = load_fixture("points_given_period_2024_limit10.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/points_given_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            json={
+                "type": "Points given Period",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "player_id": "1605",
+                        "first_name": "Escher",
+                        "last_name": "Lefkoff",
+                        "country_name": "Australia",
+                        "country_code": "AU",
+                        "wppr_points": "4264.61",
+                        "stats_rank": 1,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.points_given_period(
@@ -486,8 +874,36 @@ class TestStatsClientPointsGivenPeriod:
 
         Note: rank_type="OPEN" is the default so it's not sent as a parameter.
         """
-        fixture = load_fixture("points_given_period_us_2024.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/points_given_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            json={
+                "type": "Points given Period",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "player_id": "40612",
+                        "first_name": "Carlos",
+                        "last_name": "Delaserda",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "wppr_points": "2986.50",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "8202",
+                        "first_name": "Zach",
+                        "last_name": "McCarthy",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "wppr_points": "2940.96",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.points_given_period(
@@ -515,8 +931,35 @@ class TestStatsClientEventsAttendedPeriod:
 
     def test_events_attended_period_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test events_attended_period with default parameters."""
-        fixture = load_fixture("events_attended_period_default.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_attended_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_attended_period",
+            json={
+                "type": "Events attended over a period of time",
+                "start_date": "'2024-11-19'",
+                "end_date": "2025-11-19",
+                "return_count": 25,
+                "stats": [
+                    {
+                        "player_id": "91929",
+                        "first_name": "Nick",
+                        "last_name": "Elliott",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "202",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "55991",
+                        "first_name": "Dawnda",
+                        "last_name": "Durbin",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "200",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_attended_period()
@@ -547,8 +990,35 @@ class TestStatsClientEventsAttendedPeriod:
         self, mock_requests: requests_mock.Mocker
     ) -> None:
         """Test events_attended_period with start_date and end_date."""
-        fixture = load_fixture("events_attended_period_2024.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_attended_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_attended_period",
+            json={
+                "type": "Events attended over a period of time",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "stats": [
+                    {
+                        "player_id": "89391",
+                        "first_name": "Ben",
+                        "last_name": "Fodor",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "199",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "55991",
+                        "first_name": "Dawnda",
+                        "last_name": "Durbin",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "188",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_attended_period(start_date="2024-01-01", end_date="2024-12-31")
@@ -565,8 +1035,26 @@ class TestStatsClientEventsAttendedPeriod:
 
     def test_events_attended_period_with_limit(self, mock_requests: requests_mock.Mocker) -> None:
         """Test events_attended_period with limit parameter."""
-        fixture = load_fixture("events_attended_period_2024_limit10.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_attended_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_attended_period",
+            json={
+                "type": "Events attended over a period of time",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "stats": [
+                    {
+                        "player_id": "89391",
+                        "first_name": "Ben",
+                        "last_name": "Fodor",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "199",
+                        "stats_rank": 1,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_attended_period(
@@ -591,8 +1079,35 @@ class TestStatsClientEventsAttendedPeriod:
 
         Note: rank_type="OPEN" is the default so it's not sent as a parameter.
         """
-        fixture = load_fixture("events_attended_period_us_2024.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/events_attended_period", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_attended_period",
+            json={
+                "type": "Events attended over a period of time",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "return_count": 25,
+                "stats": [
+                    {
+                        "player_id": "89391",
+                        "first_name": "Ben",
+                        "last_name": "Fodor",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "199",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "player_id": "55991",
+                        "first_name": "Dawnda",
+                        "last_name": "Durbin",
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_count": "188",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.events_attended_period(
@@ -620,8 +1135,29 @@ class TestStatsClientOverall:
 
     def test_overall_default(self, mock_requests: requests_mock.Mocker) -> None:
         """Test overall with default system_code (OPEN)."""
-        fixture = load_fixture("overall_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/overall", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/overall",
+            json={
+                "type": "Overall Stats",
+                "system_code": "OPEN",
+                "stats": {
+                    "overall_player_count": 143756,
+                    "active_player_count": 71907,
+                    "tournament_count": 85392,
+                    "tournament_count_last_month": 1202,
+                    "tournament_count_this_year": 14088,
+                    "tournament_player_count": 1956522,
+                    "tournament_player_count_average": 22.9,
+                    "age": {
+                        "age_under_18": 3.47,
+                        "age_18_to_29": 9.4,
+                        "age_30_to_39": 22.7,
+                        "age_40_to_49": 31.07,
+                        "age_50_to_99": 33.36,
+                    },
+                },
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.overall()
@@ -659,8 +1195,29 @@ class TestStatsClientOverall:
         Note: As of 2025-11-19, this is a known API bug where WOMEN returns OPEN data.
         We test that the parameter is correctly passed to the API.
         """
-        fixture = load_fixture("overall_women.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/overall", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/overall",
+            json={
+                "type": "Overall Stats",
+                "system_code": "OPEN",
+                "stats": {
+                    "overall_player_count": 143756,
+                    "active_player_count": 71907,
+                    "tournament_count": 85392,
+                    "tournament_count_last_month": 1202,
+                    "tournament_count_this_year": 14088,
+                    "tournament_player_count": 1956522,
+                    "tournament_player_count_average": 22.9,
+                    "age": {
+                        "age_under_18": 3.47,
+                        "age_18_to_29": 9.4,
+                        "age_30_to_39": 22.7,
+                        "age_40_to_49": 31.07,
+                        "age_50_to_99": 33.36,
+                    },
+                },
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.overall(system_code="WOMEN")
@@ -713,8 +1270,21 @@ class TestStatsClientFieldCoercion:
         self, mock_requests: requests_mock.Mocker
     ) -> None:
         """Test that player_count is coerced from string to int."""
-        fixture = load_fixture("country_players_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/country_players", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "47101",
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.country_players()
@@ -730,8 +1300,29 @@ class TestStatsClientFieldCoercion:
 
         Unlike other stats endpoints, overall returns proper int/float types.
         """
-        fixture = load_fixture("overall_open.json")
-        mock_requests.get("https://api.ifpapinball.com/stats/overall", json=fixture)
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/overall",
+            json={
+                "type": "Overall Stats",
+                "system_code": "OPEN",
+                "stats": {
+                    "overall_player_count": 143756,
+                    "active_player_count": 71907,
+                    "tournament_count": 85392,
+                    "tournament_count_last_month": 1202,
+                    "tournament_count_this_year": 14088,
+                    "tournament_player_count": 1956522,
+                    "tournament_player_count_average": 22.9,
+                    "age": {
+                        "age_under_18": 3.47,
+                        "age_18_to_29": 9.4,
+                        "age_30_to_39": 22.7,
+                        "age_40_to_49": 31.07,
+                        "age_50_to_99": 33.36,
+                    },
+                },
+            },
+        )
 
         client = IfpaClient(api_key="test-key")
         result = client.stats.overall()
