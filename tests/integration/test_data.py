@@ -106,6 +106,29 @@ TEST_DIRECTOR_LOW_ACTIVITY_ID = 3657  # Matt Darst - Willard, MO, USA
 # Common director search patterns
 TEST_DIRECTOR_SEARCH_JOSH = {"name": "Josh", "count": 30}  # Returns ~26 directors
 
+# === SERIES DATA ===
+
+# Active series for testing (verified 2025-11-20)
+TEST_SERIES_ACTIVE_CODE = "NACS"  # North American Championship Series
+TEST_SERIES_ACTIVE_YEAR = 2025  # Current year for series standings
+
+# Active region with substantial data (14,368 players as of 2025-11-20)
+TEST_SERIES_REGION_CODE = "CA"  # California - largest NACS region
+TEST_SERIES_REGION_NAME = "California"
+
+# Player with confirmed series participation (verified 2025-11-20)
+TEST_SERIES_PLAYER_ID = 25584  # Dwayne Smith - Has player card in NACS/CA
+TEST_SERIES_PLAYER_REGION = "CA"  # Player's home region
+
+# Alternative active series for testing
+TEST_SERIES_WOMENS_OPEN = "WNACSO"  # Women's North American Championship Series (Open)
+TEST_SERIES_WOMENS_WOMEN = "WNACSW"  # Women's North American Championship Series (Women)
+TEST_SERIES_AUSTRALIA = "ACS"  # Australian Championship Series
+
+# Expected data ranges (use >= for resilient assertions)
+TEST_SERIES_MIN_REGIONS = 50  # NACS has 59 regions, allow for changes
+TEST_SERIES_MIN_PLAYERS = 10000  # NACS has 14k+ in CA alone
+
 
 # === FIXTURES ===
 
@@ -557,3 +580,82 @@ def director_low_activity_id() -> int:
         ```
     """
     return TEST_DIRECTOR_LOW_ACTIVITY_ID
+
+
+@pytest.fixture
+def series_active_code() -> str:
+    """Active series code for testing.
+
+    Returns:
+        Series code "NACS" (North American Championship Series):
+        - Active in 2025
+        - 59 regions (as of 2025-11-20)
+        - Thousands of active players
+        - Well-established championship series
+
+    Use this fixture for tests requiring an active series with substantial data.
+
+    Example:
+        ```python
+        async def test_series_standings(async_client, series_active_code):
+            standings = await async_client.series(series_active_code).standings()
+            assert standings.series_code == series_active_code
+            assert len(standings.overall_results) >= 50
+        ```
+    """
+    return TEST_SERIES_ACTIVE_CODE
+
+
+@pytest.fixture
+def series_region_code() -> str:
+    """Active series region code for testing.
+
+    Returns:
+        Region code "CA" (California):
+        - Largest NACS region
+        - 14,368 players (as of 2025-11-20)
+        - Active tournament schedule
+        - Current leader: Tim Hansen (Player ID 1376)
+
+    Use this fixture for tests requiring a region with substantial participation.
+
+    Example:
+        ```python
+        async def test_series_player_card(
+            async_client, series_active_code, series_region_code
+        ):
+            card = await async_client.series(series_active_code).player_card(
+                25584, series_region_code
+            )
+            assert card.region_code == series_region_code
+        ```
+    """
+    return TEST_SERIES_REGION_CODE
+
+
+@pytest.fixture
+def series_player_id() -> int:
+    """Player ID with confirmed series participation.
+
+    Returns:
+        Player ID 25584 (Dwayne Smith):
+        - Participates in NACS
+        - Home region: CA (California)
+        - Has active player card with event data
+        - Highly active player with extensive tournament history
+
+    Use this fixture for tests requiring a player with series participation.
+
+    Example:
+        ```python
+        async def test_player_card(
+            async_client, series_active_code, series_player_id, series_region_code
+        ):
+            card = await async_client.series(series_active_code).player_card(
+                series_player_id, series_region_code
+            )
+            assert card.player_id == series_player_id
+            assert len(card.player_card) >= 0
+        ```
+    """
+    return TEST_SERIES_PLAYER_ID
