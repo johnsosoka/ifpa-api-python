@@ -4,41 +4,83 @@ The Player resource provides access to player profiles, rankings, tournament res
 
 ## Quick Example
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Fluent query builder - search for players named "Smith" in Idaho
+            results: PlayerSearchResponse = await client.player.query("Smith").state("ID").get()
 
-# Fluent query builder - search for players named "Smith" in Idaho
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Fluent query builder - search for players named "Smith" in Idaho
+    results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+    ```
 
 ## Search for Players
 
 The **recommended** way to search for players is using the fluent query builder:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: PlayerSearchResponse = await client.player.query("Smith").state("ID").get()
+            for player in results.search:
+                print(f"{player.player_id}: {player.first_name} {player.last_name}")
+                print(f"  Location: {player.city}, {player.state}")
+                print(f"  Current Rank: #{player.wppr_rank}")
 
-# Simple name search
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
-for player in results.search:
-    print(f"{player.player_id}: {player.first_name} {player.last_name}")
-    print(f"  Location: {player.city}, {player.state}")
-    print(f"  Current Rank: #{player.wppr_rank}")
+    asyncio.run(main())
 
-# Output:
-# 25584: Dwayne Smith
-#   Location: Boise, ID
-#   Current Rank: #753
-# 47585: Debbie Smith
-#   Location: Boise, ID
-#   Current Rank: #7078
-```
+    # Output:
+    # 25584: Dwayne Smith
+    #   Location: Boise, ID
+    #   Current Rank: #753
+    # 47585: Debbie Smith
+    #   Location: Boise, ID
+    #   Current Rank: #7078
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Simple name search
+    results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+    for player in results.search:
+        print(f"{player.player_id}: {player.first_name} {player.last_name}")
+        print(f"  Location: {player.city}, {player.state}")
+        print(f"  Current Rank: #{player.wppr_rank}")
+
+    # Output:
+    # 25584: Dwayne Smith
+    #   Location: Boise, ID
+    #   Current Rank: #753
+    # 47585: Debbie Smith
+    #   Location: Boise, ID
+    #   Current Rank: #7078
+    ```
 
 ### Chained Filters
 
@@ -119,33 +161,66 @@ ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
 
 Retrieve detailed information about a specific player:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get player by ID - Dwayne Smith (highly active player from Boise, ID)
+            player: Player = await client.player.get(25584)
 
-# Get player by ID - Dwayne Smith (highly active player from Boise, ID)
-player: Player = client.player(25584).details()
+            print(f"Name: {player.first_name} {player.last_name}")
+            print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
+            print(f"Player ID: {player.player_id}")
+            print(f"IFPA Registered: {player.ifpa_registered}")
+            print(f"Age: {player.age}")
 
-print(f"Name: {player.first_name} {player.last_name}")
-print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
-print(f"Player ID: {player.player_id}")
-print(f"IFPA Registered: {player.ifpa_registered}")
-print(f"Age: {player.age}")
+            # Access rankings across systems
+            for ranking in player.rankings:
+                print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
 
-# Access rankings across systems
-for ranking in player.rankings:
-    print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
+    asyncio.run(main())
 
-# Output:
-# Name: Dwayne Smith
-# Location: Boise, ID, United States
-# Player ID: 25584
-# IFPA Registered: True
-# Age: 55
-# Main: Rank 753, Rating 65.42
-```
+    # Output:
+    # Name: Dwayne Smith
+    # Location: Boise, ID, United States
+    # Player ID: 25584
+    # IFPA Registered: True
+    # Age: 55
+    # Main: Rank 753, Rating 65.42
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player
+
+    client: IfpaClient = IfpaClient()
+
+    # Get player by ID - Dwayne Smith (highly active player from Boise, ID)
+    player: Player = client.player.get(25584)
+
+    print(f"Name: {player.first_name} {player.last_name}")
+    print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
+    print(f"Player ID: {player.player_id}")
+    print(f"IFPA Registered: {player.ifpa_registered}")
+    print(f"Age: {player.age}")
+
+    # Access rankings across systems
+    for ranking in player.rankings:
+        print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
+
+    # Output:
+    # Name: Dwayne Smith
+    # Location: Boise, ID, United States
+    # Player ID: 25584
+    # IFPA Registered: True
+    # Age: 55
+    # Main: Rank 753, Rating 65.42
+    ```
 
 ### Profile Information
 
@@ -178,36 +253,74 @@ except IfpaApiError as e:
 
 Get a player's tournament history:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.common import RankingSystem, ResultType
-from ifpa_api.models.player import PlayerResultsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.common import RankingSystem, ResultType
+    from ifpa_api.models.player import PlayerResultsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get all active results for Dwayne Smith (both parameters required)
+            results: PlayerResultsResponse = await client.player.get_results(
+                25584,
+                ranking_system=RankingSystem.MAIN,
+                result_type=ResultType.ACTIVE
+            )
 
-# Get all active results for Dwayne Smith (both parameters required)
-results: PlayerResultsResponse = client.player(25584).results(
-    ranking_system=RankingSystem.MAIN,
-    result_type=ResultType.ACTIVE
-)
+            print(f"Total results: {results.total_results}")
+            for result in results.results[:3]:  # Show first 3 results
+                print(f"\n{result.tournament_name}")
+                print(f"  Date: {result.event_date}")
+                print(f"  Position: {result.position} of {result.player_count}")
+                print(f"  WPPR Points: {result.current_points}")
+                print(f"  Rating: {result.rating_value}")
 
-print(f"Total results: {results.total_results}")
-for result in results.results[:3]:  # Show first 3 results
-    print(f"\n{result.tournament_name}")
-    print(f"  Date: {result.event_date}")
-    print(f"  Position: {result.position} of {result.player_count}")
-    print(f"  WPPR Points: {result.current_points}")
-    print(f"  Rating: {result.rating_value}")
+    asyncio.run(main())
 
-# Output:
-# Total results: 218
-#
-# Thursday night pinball
-#   Date: 2024-12-05
-#   Position: 4 of 11
-#   WPPR Points: 3.49
-#   Rating: 8.36
-```
+    # Output:
+    # Total results: 218
+    #
+    # Thursday night pinball
+    #   Date: 2024-12-05
+    #   Position: 4 of 11
+    #   WPPR Points: 3.49
+    #   Rating: 8.36
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.common import RankingSystem, ResultType
+    from ifpa_api.models.player import PlayerResultsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get all active results for Dwayne Smith (both parameters required)
+    results: PlayerResultsResponse = client.player.get_results(
+        25584,
+        ranking_system=RankingSystem.MAIN,
+        result_type=ResultType.ACTIVE
+    )
+
+    print(f"Total results: {results.total_results}")
+    for result in results.results[:3]:  # Show first 3 results
+        print(f"\n{result.tournament_name}")
+        print(f"  Date: {result.event_date}")
+        print(f"  Position: {result.position} of {result.player_count}")
+        print(f"  WPPR Points: {result.current_points}")
+        print(f"  Rating: {result.rating_value}")
+
+    # Output:
+    # Total results: 218
+    #
+    # Thursday night pinball
+    #   Date: 2024-12-05
+    #   Position: 4 of 11
+    #   WPPR Points: 3.49
+    #   Rating: 8.36
+    ```
 
 ### Filter Results
 
@@ -261,46 +374,92 @@ inactive: PlayerResultsResponse = client.player(25584).results(
 
 Compare two players' tournament history:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PvpComparison
-from ifpa_api.core.exceptions import PlayersNeverMetError
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PvpComparison
+    from ifpa_api.core.exceptions import PlayersNeverMetError
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            try:
+                # Compare Dwayne Smith vs Debbie Smith (they've played 205 tournaments together)
+                pvp: PvpComparison = await client.player.get_pvp(25584, 47585)
 
-try:
-    # Compare Dwayne Smith vs Debbie Smith (they've played 205 tournaments together)
-    pvp: PvpComparison = client.player(25584).pvp(47585)
+                print(f"Player 1: {pvp.player1_name}")
+                print(f"Player 2: {pvp.player2_name}")
+                print(f"\nHead-to-Head Record:")
+                print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
+                print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
+                print(f"  Ties: {pvp.ties}")
+                print(f"  Total meetings: {pvp.total_meetings}")
 
-    print(f"Player 1: {pvp.player1_name}")
-    print(f"Player 2: {pvp.player2_name}")
-    print(f"\nHead-to-Head Record:")
-    print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
-    print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
-    print(f"  Ties: {pvp.ties}")
-    print(f"  Total meetings: {pvp.total_meetings}")
+                # Show tournament-by-tournament breakdown (first 3)
+                for match in pvp.tournaments[:3]:
+                    winner = "Player 1" if match.winner_player_id == pvp.player1_id else "Player 2"
+                    print(f"\n{match.tournament_name} ({match.event_date})")
+                    print(f"  {pvp.player1_name}: Position {match.player_1_position}")
+                    print(f"  {pvp.player2_name}: Position {match.player_2_position}")
+                    print(f"  Winner: {winner}")
 
-    # Show tournament-by-tournament breakdown (first 3)
-    for match in pvp.tournaments[:3]:
-        winner = "Player 1" if match.winner_player_id == pvp.player1_id else "Player 2"
-        print(f"\n{match.tournament_name} ({match.event_date})")
-        print(f"  {pvp.player1_name}: Position {match.player_1_position}")
-        print(f"  {pvp.player2_name}: Position {match.player_2_position}")
-        print(f"  Winner: {winner}")
+            except PlayersNeverMetError:
+                print("These players have never competed in the same tournament")
 
-except PlayersNeverMetError:
-    print("These players have never competed in the same tournament")
+    asyncio.run(main())
 
-# Output:
-# Player 1: Dwayne Smith
-# Player 2: Debbie Smith
-#
-# Head-to-Head Record:
-#   Dwayne Smith wins: 139
-#   Debbie Smith wins: 66
-#   Ties: 0
-#   Total meetings: 205
-```
+    # Output:
+    # Player 1: Dwayne Smith
+    # Player 2: Debbie Smith
+    #
+    # Head-to-Head Record:
+    #   Dwayne Smith wins: 139
+    #   Debbie Smith wins: 66
+    #   Ties: 0
+    #   Total meetings: 205
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PvpComparison
+    from ifpa_api.core.exceptions import PlayersNeverMetError
+
+    client: IfpaClient = IfpaClient()
+
+    try:
+        # Compare Dwayne Smith vs Debbie Smith (they've played 205 tournaments together)
+        pvp: PvpComparison = client.player.get_pvp(25584, 47585)
+
+        print(f"Player 1: {pvp.player1_name}")
+        print(f"Player 2: {pvp.player2_name}")
+        print(f"\nHead-to-Head Record:")
+        print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
+        print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
+        print(f"  Ties: {pvp.ties}")
+        print(f"  Total meetings: {pvp.total_meetings}")
+
+        # Show tournament-by-tournament breakdown (first 3)
+        for match in pvp.tournaments[:3]:
+            winner = "Player 1" if match.winner_player_id == pvp.player1_id else "Player 2"
+            print(f"\n{match.tournament_name} ({match.event_date})")
+            print(f"  {pvp.player1_name}: Position {match.player_1_position}")
+            print(f"  {pvp.player2_name}: Position {match.player_2_position}")
+            print(f"  Winner: {winner}")
+
+    except PlayersNeverMetError:
+        print("These players have never competed in the same tournament")
+
+    # Output:
+    # Player 1: Dwayne Smith
+    # Player 2: Debbie Smith
+    #
+    # Head-to-Head Record:
+    #   Dwayne Smith wins: 139
+    #   Debbie Smith wins: 66
+    #   Ties: 0
+    #   Total meetings: 205
+    ```
 
 ### Exception Handling
 

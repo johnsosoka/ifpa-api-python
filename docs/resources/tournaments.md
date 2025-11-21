@@ -4,35 +4,71 @@ Search for tournaments and access detailed tournament information, results, form
 
 ## Quick Example
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Fluent query builder - search for PAPA tournaments in Pennsylvania
+            results: TournamentSearchResponse = await client.tournament.query("PAPA").state("PA").get()
 
-# Fluent query builder - search for PAPA tournaments in Pennsylvania
-results: TournamentSearchResponse = client.tournament.query("PAPA").state("PA").get()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Fluent query builder - search for PAPA tournaments in Pennsylvania
+    results: TournamentSearchResponse = client.tournament.query("PAPA").state("PA").get()
+    ```
 
 ## Searching Tournaments (Fluent Query Builder)
 
 The **recommended** way to search for tournaments is using the fluent query builder:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: TournamentSearchResponse = await client.tournament.query("PAPA").get()
 
-# Simple name search
-results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+            print(f"Found {len(results.tournaments)} tournaments")
+            for tournament in results.tournaments:
+                print(f"{tournament.tournament_name} - {tournament.event_date}")
+                print(f"  Location: {tournament.city}, {tournament.stateprov}")
+                print(f"  Players: {tournament.player_count}")
 
-print(f"Found {len(results.tournaments)} tournaments")
-for tournament in results.tournaments:
-    print(f"{tournament.tournament_name} - {tournament.event_date}")
-    print(f"  Location: {tournament.city}, {tournament.stateprov}")
-    print(f"  Players: {tournament.player_count}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Simple name search
+    results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+
+    print(f"Found {len(results.tournaments)} tournaments")
+    for tournament in results.tournaments:
+        print(f"{tournament.tournament_name} - {tournament.event_date}")
+        print(f"  Location: {tournament.city}, {tournament.stateprov}")
+        print(f"  Players: {tournament.player_count}")
+    ```
 
 ### Chained Filters
 
@@ -200,26 +236,52 @@ results: TournamentSearchResponse = (client.tournament.query()
 
 Retrieve detailed information about a specific tournament:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import Tournament
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import Tournament
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get PAPA 17 tournament details (tournament ID 7070)
+            tournament: Tournament = await client.tournament.get(7070)
 
-# Get PAPA 17 tournament details (tournament ID 7070)
-tournament: Tournament = client.tournament(7070).details()
+            print(f"Name: {tournament.tournament_name}")
+            print(f"Event: {tournament.event_name}")
+            print(f"Location: {tournament.city}, {tournament.stateprov}, {tournament.country_name}")
+            print(f"Venue: {tournament.location_name}")
+            print(f"Date: {tournament.event_date}")
+            print(f"Players: {tournament.player_count}")
+            print(f"Machines: {tournament.machine_count}")
+            print(f"Director: {tournament.director_name}")
+            print(f"WPPR Value: {tournament.wppr_value}")
+            print(f"Rating: {tournament.rating_value}")
 
-print(f"Name: {tournament.tournament_name}")
-print(f"Event: {tournament.event_name}")
-print(f"Location: {tournament.city}, {tournament.stateprov}, {tournament.country_name}")
-print(f"Venue: {tournament.location_name}")
-print(f"Date: {tournament.event_date}")
-print(f"Players: {tournament.player_count}")
-print(f"Machines: {tournament.machine_count}")
-print(f"Director: {tournament.director_name}")
-print(f"WPPR Value: {tournament.wppr_value}")
-print(f"Rating: {tournament.rating_value}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import Tournament
+
+    client: IfpaClient = IfpaClient()
+
+    # Get PAPA 17 tournament details (tournament ID 7070)
+    tournament: Tournament = client.tournament.get(7070)
+
+    print(f"Name: {tournament.tournament_name}")
+    print(f"Event: {tournament.event_name}")
+    print(f"Location: {tournament.city}, {tournament.stateprov}, {tournament.country_name}")
+    print(f"Venue: {tournament.location_name}")
+    print(f"Date: {tournament.event_date}")
+    print(f"Players: {tournament.player_count}")
+    print(f"Machines: {tournament.machine_count}")
+    print(f"Director: {tournament.director_name}")
+    print(f"WPPR Value: {tournament.wppr_value}")
+    print(f"Rating: {tournament.rating_value}")
+    ```
 
 ### Tournament Information
 
@@ -237,28 +299,56 @@ Tournament details include:
 
 Access complete tournament standings and player results:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentResultsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import TournamentResultsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get PAPA 17 results
+            results: TournamentResultsResponse = await client.tournament.get_results(7070)
 
-# Get PAPA 17 results
-results: TournamentResultsResponse = client.tournament(7070).results()
+            print(f"Tournament: {results.tournament_name}")
+            print(f"Date: {results.event_date}")
+            print(f"Players: {results.player_count}")
+            print("\nTop 10 Finishers:")
 
-print(f"Tournament: {results.tournament_name}")
-print(f"Date: {results.event_date}")
-print(f"Players: {results.player_count}")
-print("\nTop 10 Finishers:")
+            for result in results.results[:10]:
+                print(f"{result.position}. {result.player_name} ({result.city}, {result.stateprov})")
+                if result.points:
+                    print(f"   WPPR: {result.points:.2f}", end="")
+                if result.ratings_value:
+                    print(f" | Rating: {result.ratings_value:.2f}", end="")
+                print()
 
-for result in results.results[:10]:
-    print(f"{result.position}. {result.player_name} ({result.city}, {result.stateprov})")
-    if result.points:
-        print(f"   WPPR: {result.points:.2f}", end="")
-    if result.ratings_value:
-        print(f" | Rating: {result.ratings_value:.2f}", end="")
-    print()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import TournamentResultsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get PAPA 17 results
+    results: TournamentResultsResponse = client.tournament.get_results(7070)
+
+    print(f"Tournament: {results.tournament_name}")
+    print(f"Date: {results.event_date}")
+    print(f"Players: {results.player_count}")
+    print("\nTop 10 Finishers:")
+
+    for result in results.results[:10]:
+        print(f"{result.position}. {result.player_name} ({result.city}, {result.stateprov})")
+        if result.points:
+            print(f"   WPPR: {result.points:.2f}", end="")
+        if result.ratings_value:
+            print(f" | Rating: {result.ratings_value:.2f}", end="")
+        print()
+    ```
 
 ### Result Details
 

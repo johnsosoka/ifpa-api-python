@@ -1,0 +1,194 @@
+"""Async tournament context for individual tournament operations."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ifpa_api.core.async_base import AsyncBaseResourceContext
+from ifpa_api.core.deprecation import issue_deprecation_warning
+from ifpa_api.core.exceptions import IfpaApiError, TournamentNotLeagueError
+from ifpa_api.models.tournaments import (
+    RelatedTournamentsResponse,
+    Tournament,
+    TournamentFormatsResponse,
+    TournamentLeagueResponse,
+    TournamentResultsResponse,
+    TournamentSubmissionsResponse,
+)
+
+if TYPE_CHECKING:
+    pass
+
+
+class AsyncTournamentContext(AsyncBaseResourceContext[int | str]):
+    """Async context for interacting with a specific tournament.
+
+    This internal class provides async resource-specific methods for a tournament
+    identified by its tournament ID. Instances are returned by calling
+    AsyncTournamentClient with a tournament ID.
+
+    Attributes:
+        _http: The async HTTP client instance
+        _resource_id: The tournament's unique identifier
+        _validate_requests: Whether to validate request parameters
+    """
+
+    async def details(self) -> Tournament:
+        """Get detailed information about this tournament (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`AsyncTournamentClient.get` instead. For example, use
+            ``await client.tournament.get(12345)`` instead of
+            ``await client.tournament(12345).details()``.
+            This method will be removed in version 1.0.0.
+
+        Returns:
+            Tournament information including venue, date, and details
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            # Deprecated usage
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament(12345).details()
+
+            # Preferred usage
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament.get(12345)
+            ```
+        """
+        issue_deprecation_warning(
+            old_name="tournament(id).details()",
+            new_name="tournament.get(id)",
+            version="1.0.0",
+            additional_info="The new get() method provides a more direct API.",
+        )
+        response = await self._http._request("GET", f"/tournament/{self._resource_id}")
+        return Tournament.model_validate(response)
+
+    async def results(self) -> TournamentResultsResponse:
+        """Get results for this tournament.
+
+        Returns:
+            List of player results and standings
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            async with AsyncIfpaClient() as client:
+                results = await client.tournament(12345).results()
+                for result in results.results:
+                    print(f"{result.position}. {result.player_name}: {result.wppr_points} WPPR")
+            ```
+        """
+        response = await self._http._request("GET", f"/tournament/{self._resource_id}/results")
+        return TournamentResultsResponse.model_validate(response)
+
+    async def formats(self) -> TournamentFormatsResponse:
+        """Get format information for this tournament.
+
+        Returns:
+            List of formats used in the tournament
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            async with AsyncIfpaClient() as client:
+                formats = await client.tournament(12345).formats()
+                for fmt in formats.formats:
+                    print(f"Format: {fmt.format_name}")
+                    print(f"Rounds: {fmt.rounds}")
+            ```
+        """
+        response = await self._http._request("GET", f"/tournament/{self._resource_id}/formats")
+        return TournamentFormatsResponse.model_validate(response)
+
+    async def league(self) -> TournamentLeagueResponse:
+        """Get league information for this tournament (if applicable).
+
+        Returns:
+            League session data and format information
+
+        Raises:
+            TournamentNotLeagueError: If the tournament is not a league-format tournament
+            IfpaApiError: If the API request fails for other reasons
+
+        Example:
+            ```python
+            from ifpa_api.exceptions import TournamentNotLeagueError
+
+            async with AsyncIfpaClient() as client:
+                try:
+                    league = await client.tournament(12345).league()
+                    print(f"Total sessions: {league.total_sessions}")
+                    for session in league.sessions:
+                        print(f"{session.session_date}: {session.player_count} players")
+                except TournamentNotLeagueError as e:
+                    print(f"Tournament {e.tournament_id} is not a league")
+            ```
+        """
+        try:
+            response = await self._http._request("GET", f"/tournament/{self._resource_id}/league")
+            return TournamentLeagueResponse.model_validate(response)
+        except IfpaApiError as e:
+            # Convert 404 to semantic exception
+            if e.status_code == 404:
+                raise TournamentNotLeagueError(self._resource_id) from e
+            # Re-raise other API errors
+            raise
+
+    async def submissions(self) -> TournamentSubmissionsResponse:
+        """Get submission information for this tournament.
+
+        Returns:
+            List of tournament submissions
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            async with AsyncIfpaClient() as client:
+                submissions = await client.tournament(12345).submissions()
+                for submission in submissions.submissions:
+                    print(f"{submission.submission_date}: {submission.status}")
+            ```
+        """
+        response = await self._http._request("GET", f"/tournament/{self._resource_id}/submissions")
+        return TournamentSubmissionsResponse.model_validate(response)
+
+    async def related(self) -> RelatedTournamentsResponse:
+        """Get tournaments related to this tournament.
+
+        Returns tournaments that are part of the same tournament series or held at
+        the same venue. This is useful for finding recurring events and historical
+        data for tournament series.
+
+        Returns:
+            RelatedTournamentsResponse with list of related tournaments.
+
+        Raises:
+            IfpaApiError: If the API request fails.
+
+        Example:
+            ```python
+            # Get related tournaments
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament(12345).details()
+                related = await client.tournament(12345).related()
+
+                print(f"Found {len(related.tournament)} related tournaments")
+                for t in related.tournament:
+                    print(f"  {t.event_start_date}: {t.tournament_name}")
+                    if t.winner:
+                        print(f"    Winner: {t.winner.name}")
+            ```
+        """
+        response = await self._http._request("GET", f"/tournament/{self._resource_id}/related")
+        return RelatedTournamentsResponse.model_validate(response)

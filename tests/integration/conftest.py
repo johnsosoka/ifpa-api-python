@@ -1,12 +1,13 @@
 """Fixtures for integration tests."""
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 from datetime import datetime, timedelta
 from typing import Any
 
 import pytest
 
 from ifpa_api import IfpaClient
+from ifpa_api.async_client import AsyncIfpaClient
 from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.director import Director
 from ifpa_api.models.player import Player
@@ -65,6 +66,36 @@ def client(api_key: str) -> Generator[IfpaClient, None, None]:
         yield client_instance
     finally:
         client_instance.close()
+
+
+@pytest.fixture
+async def async_ifpa_client(api_key: str) -> AsyncGenerator[AsyncIfpaClient, None]:
+    """Create a real AsyncIfpaClient for async integration tests.
+
+    This fixture requires IFPA_API_KEY to be set. If not available,
+    tests using this fixture will be skipped.
+
+    Args:
+        api_key: The IFPA API key from the api_key fixture
+
+    Yields:
+        An initialized AsyncIfpaClient instance
+
+    Example:
+        ```python
+        @pytest.mark.asyncio
+        @pytest.mark.integration
+        async def test_get_player(async_ifpa_client):
+            async with async_ifpa_client as client:
+                player = await client.player.get(123456)
+                assert player is not None
+        ```
+    """
+    client_instance = AsyncIfpaClient(api_key=api_key)
+    try:
+        yield client_instance
+    finally:
+        await client_instance.close()
 
 
 def assert_field_present(obj: object, field_name: str, expected_type: type) -> None:

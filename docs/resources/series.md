@@ -46,15 +46,30 @@ print(f"\nFound {len(active_series.series)} active series")
 
 Get overall standings overview for a series across all regions. This returns a summary of each region with current leader and prize fund information.
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.series import SeriesStandingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.series import SeriesStandingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # NACS (North American Championship Series)
+            standings: SeriesStandingsResponse = await client.series("NACS").standings()
 
-# Quick example - NACS (North American Championship Series)
-standings: SeriesStandingsResponse = client.series("NACS").standings()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.series import SeriesStandingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Quick example - NACS (North American Championship Series)
+    standings: SeriesStandingsResponse = client.series("NACS").standings()
+    ```
 
 **Parameters:**
 
@@ -65,38 +80,77 @@ standings: SeriesStandingsResponse = client.series("NACS").standings()
 
 **Complete Example:**
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.series import SeriesStandingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.series import SeriesStandingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get overall standings overview for all regions
+            standings: SeriesStandingsResponse = await client.series("NACS").standings()
 
-# Get overall standings overview for all regions
-standings: SeriesStandingsResponse = client.series("NACS").standings()
+            print(f"Series: {standings.series_code} ({standings.year})")
+            print(f"Total Prize Fund: ${standings.championship_prize_fund}")
 
-print(f"Series: {standings.series_code} ({standings.year})")
-print(f"Total Prize Fund: ${standings.championship_prize_fund}")
+            # Show top 5 regions
+            for region in standings.overall_results[:5]:
+                print(f"\n{region.region_name}: {region.player_count} players")
+                print(f"  Leader: {region.current_leader['player_name']}")
+                print(f"  Prize Fund: ${region.prize_fund}")
 
-# Show top 5 regions
-for region in standings.overall_results[:5]:
-    print(f"\n{region.region_name}: {region.player_count} players")
-    print(f"  Leader: {region.current_leader['player_name']}")
-    print(f"  Prize Fund: ${region.prize_fund}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.series import SeriesStandingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get overall standings overview for all regions
+    standings: SeriesStandingsResponse = client.series("NACS").standings()
+
+    print(f"Series: {standings.series_code} ({standings.year})")
+    print(f"Total Prize Fund: ${standings.championship_prize_fund}")
+
+    # Show top 5 regions
+    for region in standings.overall_results[:5]:
+        print(f"\n{region.region_name}: {region.player_count} players")
+        print(f"  Leader: {region.current_leader['player_name']}")
+        print(f"  Prize Fund: ${region.prize_fund}")
+    ```
 
 ## Get Region-Specific Standings
 
 Get detailed player standings for a specific region in a series.
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.series import SeriesRegionStandingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.series import SeriesRegionStandingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Ohio region in NACS
+            standings: SeriesRegionStandingsResponse = await client.series("NACS").region_standings("OH")
 
-# Quick example - Ohio region in NACS
-standings: SeriesRegionStandingsResponse = client.series("NACS").region_standings("OH")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.series import SeriesRegionStandingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Quick example - Ohio region in NACS
+    standings: SeriesRegionStandingsResponse = client.series("NACS").region_standings("OH")
+    ```
 
 **Parameters:**
 
@@ -138,15 +192,30 @@ standings_page: SeriesRegionStandingsResponse = client.series("NACS").region_sta
 
 Get a player's performance card for a specific series and region.
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.series import SeriesPlayerCard
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.series import SeriesPlayerCard
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Josh Sharpe (Player 14) in Ohio
+            card: SeriesPlayerCard = await client.series("NACS").player_card(14, "OH")
 
-# Quick example - Josh Sharpe (Player 14) in Ohio
-card: SeriesPlayerCard = client.series("NACS").player_card(14, "OH")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.series import SeriesPlayerCard
+
+    client: IfpaClient = IfpaClient()
+
+    # Quick example - Josh Sharpe (Player 14) in Ohio
+    card: SeriesPlayerCard = client.series("NACS").player_card(14, "OH")
+    ```
 
 **Parameters:**
 

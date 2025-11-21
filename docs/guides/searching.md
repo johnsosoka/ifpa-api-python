@@ -6,19 +6,37 @@ The IFPA API Python SDK provides a powerful **Query Builder** pattern for search
 
 The Query Builder pattern allows you to construct searches by chaining filter methods:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Chain filters to build a search
+            results: PlayerSearchResponse = await (client.player.search("Smith")
+                .country("US")
+                .state("ID")
+                .limit(10)
+                .get())
 
-# Chain filters to build a search
-results: PlayerSearchResponse = (client.player.search("Smith")
-    .country("US")
-    .state("ID")
-    .limit(10)
-    .get())
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    with IfpaClient() as client:
+        # Chain filters to build a search
+        results: PlayerSearchResponse = (client.player.search("Smith")
+            .country("US")
+            .state("ID")
+            .limit(10)
+            .get())
+    ```
 
 ### Key Features
 
@@ -33,48 +51,97 @@ Search for players by name, location, tournament participation, and more.
 
 ### Basic Name Search
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: PlayerSearchResponse = await client.player.search("Smith").get()
 
-# Simple name search
-results: PlayerSearchResponse = client.player.search("Smith").get()
+            print(f"Found {len(results.search)} players")
+            for player in results.search:
+                print(f"{player.player_id}: {player.first_name} {player.last_name}")
+                print(f"  Location: {player.city}, {player.state}")
+                print(f"  Rank: #{player.wppr_rank}")
 
-print(f"Found {len(results.search)} players")
-for player in results.search:
-    print(f"{player.player_id}: {player.first_name} {player.last_name}")
-    print(f"  Location: {player.city}, {player.state}")
-    print(f"  Rank: #{player.wppr_rank}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    with IfpaClient() as client:
+        # Simple name search
+        results: PlayerSearchResponse = client.player.search("Smith").get()
+
+        print(f"Found {len(results.search)} players")
+        for player in results.search:
+            print(f"{player.player_id}: {player.first_name} {player.last_name}")
+            print(f"  Location: {player.city}, {player.state}")
+            print(f"  Rank: #{player.wppr_rank}")
+    ```
 
 ### Location Filters
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Search by country
+            us_players: PlayerSearchResponse = await (client.player.search("John")
+                .country("US")
+                .get())
 
-# Search by country
-us_players: PlayerSearchResponse = (client.player.search("John")
-    .country("US")
-    .get())
+            # Search by state/province
+            id_players: PlayerSearchResponse = await (client.player.search("John")
+                .country("US")
+                .state("ID")
+                .get())
 
-# Search by state/province
-id_players: PlayerSearchResponse = (client.player.search("John")
-    .country("US")
-    .state("ID")
-    .get())
+            # Search by city (must include country and state)
+            boise_players: PlayerSearchResponse = await (client.player.search()
+                .country("US")
+                .state("ID")
+                .city("Boise")
+                .get())
 
-# Search by city (must include country and state)
-boise_players: PlayerSearchResponse = (client.player.search()
-    .country("US")
-    .state("ID")
-    .city("Boise")
-    .get())
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    with IfpaClient() as client:
+        # Search by country
+        us_players: PlayerSearchResponse = (client.player.search("John")
+            .country("US")
+            .get())
+
+        # Search by state/province
+        id_players: PlayerSearchResponse = (client.player.search("John")
+            .country("US")
+            .state("ID")
+            .get())
+
+        # Search by city (must include country and state)
+        boise_players: PlayerSearchResponse = (client.player.search()
+            .country("US")
+            .state("ID")
+            .city("Boise")
+            .get())
+    ```
 
 ### Tournament Filters
 
@@ -134,23 +201,45 @@ wa_players: PlayerSearchResponse = (client.player.search()
 
 The Query Builder is **immutable** - each method returns a new instance. This enables powerful query composition:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Create a reusable base search for US players
+            us_search = client.player.search().country("US")
 
-# Create a reusable base search for US players
-us_search = client.player.search().country("US")
+            # Derive state-specific searches from the base (filters are sync, execution is async)
+            wa_players: PlayerSearchResponse = await us_search.state("WA").limit(25).get()
+            id_players: PlayerSearchResponse = await us_search.state("ID").limit(25).get()
+            or_players: PlayerSearchResponse = await us_search.state("OR").limit(25).get()
 
-# Derive state-specific searches from the base
-wa_players: PlayerSearchResponse = us_search.state("WA").limit(25).get()
-id_players: PlayerSearchResponse = us_search.state("ID").limit(25).get()
-or_players: PlayerSearchResponse = us_search.state("OR").limit(25).get()
+            # The base search remains unchanged!
+            ca_players: PlayerSearchResponse = await us_search.state("CA").limit(25).get()
 
-# The base search remains unchanged!
-ca_players: PlayerSearchResponse = us_search.state("CA").limit(25).get()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    with IfpaClient() as client:
+        # Create a reusable base search for US players
+        us_search = client.player.search().country("US")
+
+        # Derive state-specific searches from the base
+        wa_players: PlayerSearchResponse = us_search.state("WA").limit(25).get()
+        id_players: PlayerSearchResponse = us_search.state("ID").limit(25).get()
+        or_players: PlayerSearchResponse = us_search.state("OR").limit(25).get()
+
+        # The base search remains unchanged!
+        ca_players: PlayerSearchResponse = us_search.state("CA").limit(25).get()
+    ```
 
 This pattern is especially useful when building dashboards or reports:
 
@@ -191,21 +280,41 @@ Search for tournament directors by name and location.
 
 ### Basic Director Search
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: DirectorSearchResponse = await client.director.search("Josh").get()
 
-# Simple name search
-results: DirectorSearchResponse = client.director.search("Josh").get()
+            print(f"Found {len(results.directors)} directors")
+            for director in results.directors:
+                print(f"{director.director_id}: {director.name}")
+                print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
+                print(f"  Tournaments: {director.tournament_count}")
 
-print(f"Found {len(results.directors)} directors")
-for director in results.directors:
-    print(f"{director.director_id}: {director.name}")
-    print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
-    print(f"  Tournaments: {director.tournament_count}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+
+    with IfpaClient() as client:
+        # Simple name search
+        results: DirectorSearchResponse = client.director.search("Josh").get()
+
+        print(f"Found {len(results.directors)} directors")
+        for director in results.directors:
+            print(f"{director.director_id}: {director.name}")
+            print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
+            print(f"  Tournaments: {director.tournament_count}")
+    ```
 
 ### Location Filters
 
@@ -275,21 +384,41 @@ Search for tournaments by name, location, date range, and type.
 
 ### Basic Tournament Search
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: TournamentSearchResponse = await client.tournament.search("PAPA").get()
 
-# Simple name search
-results: TournamentSearchResponse = client.tournament.search("PAPA").get()
+            print(f"Found {len(results.tournaments)} tournaments")
+            for tournament in results.tournaments:
+                print(f"{tournament.tournament_name} - {tournament.event_date}")
+                print(f"  Location: {tournament.city}, {tournament.stateprov}")
+                print(f"  Players: {tournament.player_count}")
 
-print(f"Found {len(results.tournaments)} tournaments")
-for tournament in results.tournaments:
-    print(f"{tournament.tournament_name} - {tournament.event_date}")
-    print(f"  Location: {tournament.city}, {tournament.stateprov}")
-    print(f"  Players: {tournament.player_count}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+
+    with IfpaClient() as client:
+        # Simple name search
+        results: TournamentSearchResponse = client.tournament.search("PAPA").get()
+
+        print(f"Found {len(results.tournaments)} tournaments")
+        for tournament in results.tournaments:
+            print(f"{tournament.tournament_name} - {tournament.event_date}")
+            print(f"  Location: {tournament.city}, {tournament.stateprov}")
+            print(f"  Players: {tournament.player_count}")
+    ```
 
 ### Location Filters
 
@@ -318,38 +447,73 @@ portland_tournaments: TournamentSearchResponse = (client.tournament.search()
 
 Use the `.date_range()` method to filter tournaments by date. **Both dates are required** and must be in `YYYY-MM-DD` format:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import TournamentSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+    from datetime import datetime, timedelta
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Search for tournaments in 2024
+            results_2024: TournamentSearchResponse = await (client.tournament.search()
+                .country("US")
+                .date_range("2024-01-01", "2024-12-31")
+                .get())
 
-# Search for tournaments in 2024
-results_2024: TournamentSearchResponse = (client.tournament.search()
-    .country("US")
-    .date_range("2024-01-01", "2024-12-31")
-    .get())
+            # Find tournaments in a specific month
+            jan_2024: TournamentSearchResponse = await (client.tournament.search()
+                .date_range("2024-01-01", "2024-01-31")
+                .country("US")
+                .get())
 
-# Find tournaments in a specific month
-jan_2024: TournamentSearchResponse = (client.tournament.search()
-    .date_range("2024-01-01", "2024-01-31")
-    .country("US")
-    .get())
+            # Use Python datetime for dynamic ranges
+            today: datetime = datetime.now()
+            next_month: datetime = today + timedelta(days=30)
 
-# Use Python datetime for dynamic ranges
-from datetime import datetime, timedelta
+            upcoming: TournamentSearchResponse = await (client.tournament.search()
+                .date_range(
+                    today.strftime("%Y-%m-%d"),
+                    next_month.strftime("%Y-%m-%d")
+                )
+                .country("US")
+                .get())
 
-today: datetime = datetime.now()
-next_month: datetime = today + timedelta(days=30)
+    asyncio.run(main())
+    ```
 
-upcoming: TournamentSearchResponse = (client.tournament.search()
-    .date_range(
-        today.strftime("%Y-%m-%d"),
-        next_month.strftime("%Y-%m-%d")
-    )
-    .country("US")
-    .get())
-```
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import TournamentSearchResponse
+    from datetime import datetime, timedelta
+
+    with IfpaClient() as client:
+        # Search for tournaments in 2024
+        results_2024: TournamentSearchResponse = (client.tournament.search()
+            .country("US")
+            .date_range("2024-01-01", "2024-12-31")
+            .get())
+
+        # Find tournaments in a specific month
+        jan_2024: TournamentSearchResponse = (client.tournament.search()
+            .date_range("2024-01-01", "2024-01-31")
+            .country("US")
+            .get())
+
+        # Use Python datetime for dynamic ranges
+        today: datetime = datetime.now()
+        next_month: datetime = today + timedelta(days=30)
+
+        upcoming: TournamentSearchResponse = (client.tournament.search()
+            .date_range(
+                today.strftime("%Y-%m-%d"),
+                next_month.strftime("%Y-%m-%d")
+            )
+            .country("US")
+            .get())
+    ```
 
 ### Tournament Type Filtering
 
@@ -440,30 +604,59 @@ pdx_championships: TournamentSearchResponse = (client.tournament.search("Champio
 
 Handle errors gracefully when executing queries:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.core.exceptions import IfpaApiError, IfpaClientValidationError
-from ifpa_api.models.player import PlayerSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.core.exceptions import IfpaApiError, IfpaClientValidationError
+    from ifpa_api.models.player import PlayerSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            try:
+                # Valid query
+                results: PlayerSearchResponse = await (client.player.search("Smith")
+                    .country("US")
+                    .state("ID")
+                    .get())
 
-try:
-    # Valid query
-    results: PlayerSearchResponse = (client.player.search("Smith")
-        .country("US")
-        .state("ID")
-        .get())
+                print(f"Found {len(results.search)} players")
 
-    print(f"Found {len(results.search)} players")
+            except IfpaClientValidationError as e:
+                # Validation error (e.g., invalid date format)
+                print(f"Invalid query parameters: {e}")
 
-except IfpaClientValidationError as e:
-    # Validation error (e.g., invalid date format)
-    print(f"Invalid query parameters: {e}")
+            except IfpaApiError as e:
+                # API error
+                print(f"API error [{e.status_code}]: {e.message}")
 
-except IfpaApiError as e:
-    # API error
-    print(f"API error [{e.status_code}]: {e.message}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.core.exceptions import IfpaApiError, IfpaClientValidationError
+    from ifpa_api.models.player import PlayerSearchResponse
+
+    with IfpaClient() as client:
+        try:
+            # Valid query
+            results: PlayerSearchResponse = (client.player.search("Smith")
+                .country("US")
+                .state("ID")
+                .get())
+
+            print(f"Found {len(results.search)} players")
+
+        except IfpaClientValidationError as e:
+            # Validation error (e.g., invalid date format)
+            print(f"Invalid query parameters: {e}")
+
+        except IfpaApiError as e:
+            # API error
+            print(f"API error [{e.status_code}]: {e.message}")
+    ```
 
 ### Date Format Validation
 

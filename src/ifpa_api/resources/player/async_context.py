@@ -1,0 +1,229 @@
+"""Async player context for individual player operations."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from ifpa_api.core.async_base import AsyncBaseResourceContext
+from ifpa_api.core.deprecation import issue_deprecation_warning
+from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
+from ifpa_api.models.common import RankingSystem, ResultType
+from ifpa_api.models.player import (
+    Player,
+    PlayerResultsResponse,
+    PvpAllCompetitors,
+    PvpComparison,
+    RankingHistory,
+)
+
+if TYPE_CHECKING:
+    pass
+
+
+class AsyncPlayerContext(AsyncBaseResourceContext[int | str]):
+    """Async context for interacting with a specific player.
+
+    This internal class provides async resource-specific methods for a player
+    identified by their player ID. Instances are returned by calling
+    AsyncPlayerClient with a player ID.
+
+    Attributes:
+        _http: The async HTTP client instance
+        _resource_id: The player's unique identifier
+        _validate_requests: Whether to validate request parameters
+    """
+
+    async def details(self) -> Player:
+        """Get detailed information about this player (deprecated).
+
+        .. deprecated:: 0.4.0
+            Use :meth:`AsyncPlayerClient.get` instead. For example, use
+            ``await client.player.get(12345)`` instead of ``await client.player(12345).details()``.
+            This method will be removed in version 1.0.0.
+
+        Returns:
+            Player information including profile and rankings
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            # Deprecated usage
+            async with AsyncIfpaClient() as client:
+                player = await client.player(12345).details()
+
+            # Preferred usage
+            async with AsyncIfpaClient() as client:
+                player = await client.player.get(12345)
+            ```
+        """
+        issue_deprecation_warning(
+            old_name="player(id).details()",
+            new_name="player.get(id)",
+            version="1.0.0",
+            additional_info="The new get() method provides a more direct API.",
+        )
+        response = await self._http._request("GET", f"/player/{self._resource_id}")
+        # API returns {"player": [player_object]}
+        if isinstance(response, dict) and "player" in response:
+            player_data = response["player"]
+            if isinstance(player_data, list) and len(player_data) > 0:
+                return Player.model_validate(player_data[0])
+        return Player.model_validate(response)
+
+    async def pvp_all(self) -> PvpAllCompetitors:
+        """Get summary of all players this player has competed against.
+
+        Returns:
+            PvpAllCompetitors containing total count and metadata
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            async with AsyncIfpaClient() as client:
+                summary = await client.player(2643).pvp_all()
+                print(f"Competed against {summary.total_competitors} players")
+            ```
+        """
+        response = await self._http._request("GET", f"/player/{self._resource_id}/pvp")
+        return PvpAllCompetitors.model_validate(response)
+
+    async def pvp(self, opponent_id: int | str) -> PvpComparison:
+        """Get head-to-head comparison between this player and another player.
+
+        Returns detailed head-to-head statistics including wins, losses, ties, and
+        a list of all tournaments where these players have competed against each other.
+
+        Args:
+            opponent_id: ID of the opponent player to compare against.
+
+        Returns:
+            PvpComparison with head-to-head statistics and tournament history.
+
+        Raises:
+            PlayersNeverMetError: If the two players have never competed in the same tournament.
+                Note: This exception is raised by the client to provide a clearer error message
+                when the IFPA API returns a 404 indicating no head-to-head data exists.
+            IfpaApiError: If the API request fails for other reasons.
+
+        Example:
+            ```python
+            from ifpa_api.exceptions import PlayersNeverMetError
+
+            async with AsyncIfpaClient() as client:
+                try:
+                    # Compare two players
+                    pvp = await client.player(12345).pvp(67890)
+                    print(f"Player 1 wins: {pvp.player1_wins}")
+                    print(f"Player 2 wins: {pvp.player2_wins}")
+                    print(f"Total meetings: {pvp.total_meetings}")
+
+                    # List tournaments where they met
+                    for tourney in pvp.tournaments:
+                        winner = tourney.winner_player_id
+                        print(f"  {tourney.event_name}: Winner was player {winner}")
+                except PlayersNeverMetError:
+                    print("These players have never competed together")
+            ```
+        """
+
+        try:
+            response = await self._http._request(
+                "GET", f"/player/{self._resource_id}/pvp/{opponent_id}"
+            )
+
+            # Check for error response (API returns HTTP 200 with error payload)
+            if isinstance(response, dict) and response.get("code") == "404":
+                raise PlayersNeverMetError(self._resource_id, opponent_id)
+
+            return PvpComparison.model_validate(response)
+        except IfpaApiError as e:
+            # Check if this is a 404 indicating players never met
+            if e.status_code == 404:
+                raise PlayersNeverMetError(self._resource_id, opponent_id) from e
+            # Re-raise for other API errors
+            raise
+
+    async def results(
+        self,
+        ranking_system: RankingSystem,
+        result_type: ResultType,
+        start_pos: int | None = None,
+        count: int | None = None,
+    ) -> PlayerResultsResponse:
+        """Get player's tournament results.
+
+        Both ranking_system and result_type are required by the API endpoint.
+
+        Args:
+            ranking_system: Filter by ranking system (Main, Women, Youth, etc.) - REQUIRED
+            result_type: Filter by result activity (active, nonactive, inactive) - REQUIRED
+            start_pos: Starting position for pagination
+            count: Number of results to return
+
+        Returns:
+            List of tournament results
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            # Get all active results
+            async with AsyncIfpaClient() as client:
+                results = await client.player(12345).results(
+                    ranking_system=RankingSystem.MAIN,
+                    result_type=ResultType.ACTIVE
+                )
+
+            # Get paginated results
+            async with AsyncIfpaClient() as client:
+                results = await client.player(12345).results(
+                    ranking_system=RankingSystem.MAIN,
+                    result_type=ResultType.ACTIVE,
+                    start_pos=0,
+                    count=50
+                )
+            ```
+        """
+        # Both parameters are required - build path directly
+        system_value = (
+            ranking_system.value if isinstance(ranking_system, RankingSystem) else ranking_system
+        )
+        type_value = result_type.value if isinstance(result_type, ResultType) else result_type
+
+        path = f"/player/{self._resource_id}/results/{system_value}/{type_value}"
+
+        params = {}
+        if start_pos is not None:
+            params["start_pos"] = start_pos
+        if count is not None:
+            params["count"] = count
+
+        response = await self._http._request("GET", path, params=params)
+        return PlayerResultsResponse.model_validate(response)
+
+    async def history(self) -> RankingHistory:
+        """Get player's WPPR ranking and rating history over time.
+
+        Returns:
+            Historical ranking data with separate rank_history and rating_history arrays
+
+        Raises:
+            IfpaApiError: If the API request fails
+
+        Example:
+            ```python
+            async with AsyncIfpaClient() as client:
+                history = await client.player(12345).history()
+                for entry in history.rank_history:
+                    print(f"{entry.rank_date}: Rank {entry.rank_position}")
+                for entry in history.rating_history:
+                    print(f"{entry.rating_date}: Rating {entry.rating}")
+            ```
+        """
+        response = await self._http._request("GET", f"/player/{self._resource_id}/rank_history")
+        return RankingHistory.model_validate(response)

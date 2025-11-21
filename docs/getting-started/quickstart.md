@@ -2,6 +2,8 @@
 
 This guide will get you up and running with the IFPA API package in just a few minutes.
 
+> **Async Support Available**: This guide shows synchronous examples. For async/await patterns, concurrent requests, and performance optimization, see the [Async Usage Guide](../guides/async-usage.md).
+
 ## Prerequisites
 
 Before you begin, ensure you have:
@@ -290,6 +292,54 @@ client: IfpaClient = IfpaClient(
 )
 ```
 
+## Async/Await Support
+
+The client supports async/await for concurrent requests and non-blocking I/O:
+
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player
+    import asyncio
+
+    async def main():
+        # Use async context manager for automatic cleanup
+        async with AsyncIfpaClient() as client:
+            # All methods are awaitable
+            player: Player = await client.player.get(25584)
+            print(f"Name: {player.first_name} {player.last_name}")
+
+            # Concurrent requests for better performance
+            players = await asyncio.gather(
+                client.player.get(25584),
+                client.player.get(47585),
+                client.player.get(52913)
+            )
+            for p in players:
+                print(f"- {p.first_name} {p.last_name}")
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player
+
+    # Synchronous version (sequential requests)
+    with IfpaClient() as client:
+        player: Player = client.player.get(25584)
+        print(f"Name: {player.first_name} {player.last_name}")
+
+        # Sequential requests (slower than async)
+        player_ids = [25584, 47585, 52913]
+        for pid in player_ids:
+            p = client.player.get(pid)
+            print(f"- {p.first_name} {p.last_name}")
+    ```
+
+> **Performance Tip**: Use `AsyncIfpaClient` with `asyncio.gather()` for concurrent requests. This can significantly improve performance when fetching multiple resources. See the [Async Usage Guide](../guides/async-usage.md) for detailed patterns.
+
 ## Working with Enums
 
 The package provides enums for common parameters:
@@ -367,6 +417,7 @@ if __name__ == "__main__":
 ### Learn Key Patterns
 - [Callable Pattern](../guides/callable-pattern.md) - Understand `client.player(id).details()` pattern
 - [Searching](../guides/searching.md) - Master the Query Builder for powerful searches
+- [Async Usage](../guides/async-usage.md) - Async/await patterns and concurrent requests
 - [Pagination](../guides/pagination.md) - Handle large result sets effectively
 - [Error Handling](../guides/error-handling.md) - Robust error handling strategies
 

@@ -6,18 +6,35 @@ The IFPA API Python SDK uses a **callable pattern** for resource-specific operat
 
 The callable pattern allows you to "call" a resource property with an identifier to create a context for operations on that specific resource:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # The preferred method (v0.4.0+)
+            player: Player = await client.player.get(25584)
 
-# The preferred method (v0.4.0+)
-player: Player = client.player.get(25584)
+            # The callable pattern (deprecated but still works)
+            player: Player = await client.player(25584).details()
 
-# The callable pattern (deprecated but still works)
-player: Player = client.player(25584).details()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player
+
+    with IfpaClient() as client:
+        # The preferred method (v0.4.0+)
+        player: Player = client.player.get(25584)
+
+        # The callable pattern (deprecated but still works)
+        player: Player = client.player(25584).details()
+    ```
 
 Breaking this down (preferred method):
 1. `client.player` - Access the player resource
@@ -31,23 +48,45 @@ The callable pattern (`client.player(25584).details()`) still works but issues d
 
 The callable pattern enables excellent IDE autocomplete and type checking:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player, PlayerResultsResponse
-from ifpa_api.models.common import RankingSystem, ResultType
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player, PlayerResultsResponse
+    from ifpa_api.models.common import RankingSystem, ResultType
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # IDE knows this returns a Player (preferred method)
+            player: Player = await client.player.get(25584)
 
-# IDE knows this returns a Player (preferred method)
-player: Player = client.player.get(25584)
+            # IDE knows this returns PlayerResultsResponse (preferred method)
+            results: PlayerResultsResponse = await client.player.get_results(
+                25584,
+                ranking_system=RankingSystem.MAIN,
+                result_type=ResultType.ACTIVE
+            )
 
-# IDE knows this returns PlayerResultsResponse (preferred method)
-results: PlayerResultsResponse = client.player.get_results(
-    25584,
-    ranking_system=RankingSystem.MAIN,
-    result_type=ResultType.ACTIVE
-)
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player, PlayerResultsResponse
+    from ifpa_api.models.common import RankingSystem, ResultType
+
+    with IfpaClient() as client:
+        # IDE knows this returns a Player (preferred method)
+        player: Player = client.player.get(25584)
+
+        # IDE knows this returns PlayerResultsResponse (preferred method)
+        results: PlayerResultsResponse = client.player.get_results(
+            25584,
+            ranking_system=RankingSystem.MAIN,
+            result_type=ResultType.ACTIVE
+        )
+    ```
 
 Your IDE will:
 - Suggest available methods after `client.player(id).`
@@ -96,23 +135,45 @@ The Player resource provides comprehensive player profile and tournament data.
 
 ### Get Player Profile
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get Dwayne Smith's profile (Player ID: 25584) - preferred method
+            player: Player = await client.player.get(25584)
 
-# Get Dwayne Smith's profile (Player ID: 25584) - preferred method
-player: Player = client.player.get(25584)
+            print(f"Name: {player.first_name} {player.last_name}")
+            print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
+            print(f"IFPA Registered: {player.ifpa_registered}")
 
-print(f"Name: {player.first_name} {player.last_name}")
-print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
-print(f"IFPA Registered: {player.ifpa_registered}")
+            # Access rankings across systems
+            for ranking in player.rankings:
+                print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
 
-# Access rankings across systems
-for ranking in player.rankings:
-    print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player
+
+    with IfpaClient() as client:
+        # Get Dwayne Smith's profile (Player ID: 25584) - preferred method
+        player: Player = client.player.get(25584)
+
+        print(f"Name: {player.first_name} {player.last_name}")
+        print(f"Location: {player.city}, {player.stateprov}, {player.country_name}")
+        print(f"IFPA Registered: {player.ifpa_registered}")
+
+        # Access rankings across systems
+        for ranking in player.rankings:
+            print(f"{ranking.ranking_system}: Rank {ranking.rank}, Rating {ranking.rating}")
+    ```
 
 ### Get Tournament Results
 
@@ -137,25 +198,49 @@ for result in results.results[:5]:
 
 ### Head-to-Head Comparison
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import PvpComparison
-from ifpa_api.core.exceptions import PlayersNeverMetError
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import PvpComparison
+    from ifpa_api.core.exceptions import PlayersNeverMetError
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            try:
+                # Compare Dwayne Smith (25584) vs Debbie Smith (47585) - preferred method
+                pvp: PvpComparison = await client.player.get_pvp(25584, 47585)
 
-try:
-    # Compare Dwayne Smith (25584) vs Debbie Smith (47585) - preferred method
-    pvp: PvpComparison = client.player.get_pvp(25584, 47585)
+                print(f"{pvp.player1_name} vs {pvp.player2_name}")
+                print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
+                print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
+                print(f"  Ties: {pvp.ties}")
+                print(f"  Total meetings: {pvp.total_meetings}")
+            except PlayersNeverMetError:
+                print("These players have never competed together")
 
-    print(f"{pvp.player1_name} vs {pvp.player2_name}")
-    print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
-    print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
-    print(f"  Ties: {pvp.ties}")
-    print(f"  Total meetings: {pvp.total_meetings}")
-except PlayersNeverMetError:
-    print("These players have never competed together")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import PvpComparison
+    from ifpa_api.core.exceptions import PlayersNeverMetError
+
+    with IfpaClient() as client:
+        try:
+            # Compare Dwayne Smith (25584) vs Debbie Smith (47585) - preferred method
+            pvp: PvpComparison = client.player.get_pvp(25584, 47585)
+
+            print(f"{pvp.player1_name} vs {pvp.player2_name}")
+            print(f"  {pvp.player1_name} wins: {pvp.player1_wins}")
+            print(f"  {pvp.player2_name} wins: {pvp.player2_wins}")
+            print(f"  Ties: {pvp.ties}")
+            print(f"  Total meetings: {pvp.total_meetings}")
+        except PlayersNeverMetError:
+            print("These players have never competed together")
+    ```
 
 ### Get PvP Summary
 
@@ -197,23 +282,45 @@ The Director resource provides tournament director profiles and their event hist
 
 ### Get Director Profile
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import Director
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.director import Director
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get Josh Rainwater's director profile (Director ID: 1533) - preferred method
+            director: Director = await client.director.get(1533)
 
-# Get Josh Rainwater's director profile (Director ID: 1533) - preferred method
-director: Director = client.director.get(1533)
+            print(f"Name: {director.name}")
+            print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
 
-print(f"Name: {director.name}")
-print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
+            if director.stats:
+                print(f"Tournaments: {director.stats.tournament_count}")
+                print(f"Unique Players: {director.stats.unique_player_count}")
+                print(f"Highest Value: {director.stats.highest_value}")
 
-if director.stats:
-    print(f"Tournaments: {director.stats.tournament_count}")
-    print(f"Unique Players: {director.stats.unique_player_count}")
-    print(f"Highest Value: {director.stats.highest_value}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.director import Director
+
+    with IfpaClient() as client:
+        # Get Josh Rainwater's director profile (Director ID: 1533) - preferred method
+        director: Director = client.director.get(1533)
+
+        print(f"Name: {director.name}")
+        print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
+
+        if director.stats:
+            print(f"Tournaments: {director.stats.tournament_count}")
+            print(f"Unique Players: {director.stats.unique_player_count}")
+            print(f"Highest Value: {director.stats.highest_value}")
+    ```
 
 ### Get Director's Tournaments
 
@@ -263,23 +370,45 @@ The Tournament resource provides detailed tournament information, results, and f
 
 ### Get Tournament Details
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.tournaments import Tournament
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.tournaments import Tournament
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get PAPA 17 tournament details (Tournament ID: 7070) - preferred method
+            tournament: Tournament = await client.tournament.get(7070)
 
-# Get PAPA 17 tournament details (Tournament ID: 7070) - preferred method
-tournament: Tournament = client.tournament.get(7070)
+            print(f"Name: {tournament.tournament_name}")
+            print(f"Event: {tournament.event_name}")
+            print(f"Location: {tournament.city}, {tournament.stateprov}")
+            print(f"Date: {tournament.event_date}")
+            print(f"Players: {tournament.player_count}")
+            print(f"Director: {tournament.director_name}")
+            print(f"WPPR Value: {tournament.wppr_value}")
 
-print(f"Name: {tournament.tournament_name}")
-print(f"Event: {tournament.event_name}")
-print(f"Location: {tournament.city}, {tournament.stateprov}")
-print(f"Date: {tournament.event_date}")
-print(f"Players: {tournament.player_count}")
-print(f"Director: {tournament.director_name}")
-print(f"WPPR Value: {tournament.wppr_value}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.tournaments import Tournament
+
+    with IfpaClient() as client:
+        # Get PAPA 17 tournament details (Tournament ID: 7070) - preferred method
+        tournament: Tournament = client.tournament.get(7070)
+
+        print(f"Name: {tournament.tournament_name}")
+        print(f"Event: {tournament.event_name}")
+        print(f"Location: {tournament.city}, {tournament.stateprov}")
+        print(f"Date: {tournament.event_date}")
+        print(f"Players: {tournament.player_count}")
+        print(f"Director: {tournament.director_name}")
+        print(f"WPPR Value: {tournament.wppr_value}")
+    ```
 
 ### Get Tournament Results
 
@@ -501,61 +630,140 @@ history = dwayne_context.history()
 
 The callable pattern works well in loops:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            player_ids: list[int] = [25584, 47585, 52913]  # Dwayne, Debbie, Dave
 
-player_ids: list[int] = [25584, 47585, 52913]  # Dwayne, Debbie, Dave
+            players: list[Player] = []
+            for player_id in player_ids:
+                player: Player = await client.player.get(player_id)
+                players.append(player)
+                print(f"Loaded: {player.first_name} {player.last_name}")
 
-players: list[Player] = []
-for player_id in player_ids:
-    player: Player = client.player.get(player_id)
-    players.append(player)
-    print(f"Loaded: {player.first_name} {player.last_name}")
-```
+            # Or use asyncio.gather for concurrent requests
+            players = await asyncio.gather(
+                *[client.player.get(pid) for pid in player_ids]
+            )
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player
+
+    with IfpaClient() as client:
+        player_ids: list[int] = [25584, 47585, 52913]  # Dwayne, Debbie, Dave
+
+        players: list[Player] = []
+        for player_id in player_ids:
+            player: Player = client.player.get(player_id)
+            players.append(player)
+            print(f"Loaded: {player.first_name} {player.last_name}")
+    ```
 
 ### Error Handling with Callable Pattern
 
 Handle errors gracefully with full type information:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
-from ifpa_api.models.player import Player, PvpComparison
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
+    from ifpa_api.models.player import Player, PvpComparison
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def get_player_safely(client: AsyncIfpaClient, player_id: int) -> Player | None:
+        """Get player with error handling.
 
-def get_player_safely(player_id: int) -> Player | None:
-    """Get player with error handling.
+        Args:
+            client: The async client instance
+            player_id: Player identifier
 
-    Args:
-        player_id: Player identifier
+        Returns:
+            Player object or None if not found
+        """
+        # Using convenience method (even cleaner!)
+        return await client.player.get_or_none(player_id)
 
-    Returns:
-        Player object or None if not found
-    """
-    # Using convenience method (even cleaner!)
-    return client.player.get_or_none(player_id)
+    async def compare_players_safely(
+        client: AsyncIfpaClient, player1_id: int, player2_id: int
+    ) -> PvpComparison | None:
+        """Compare two players with error handling.
 
-def compare_players_safely(player1_id: int, player2_id: int) -> PvpComparison | None:
-    """Compare two players with error handling.
+        Args:
+            client: The async client instance
+            player1_id: First player ID
+            player2_id: Second player ID
 
-    Args:
-        player1_id: First player ID
-        player2_id: Second player ID
+        Returns:
+            PvP comparison or None if players never met
+        """
+        try:
+            pvp: PvpComparison = await client.player.get_pvp(player1_id, player2_id)
+            return pvp
+        except PlayersNeverMetError:
+            print(f"Players {player1_id} and {player2_id} have never competed")
+            return None
 
-    Returns:
-        PvP comparison or None if players never met
-    """
-    try:
-        pvp: PvpComparison = client.player.get_pvp(player1_id, player2_id)
-        return pvp
-    except PlayersNeverMetError:
-        print(f"Players {player1_id} and {player2_id} have never competed")
-        return None
-```
+    async def main():
+        async with AsyncIfpaClient() as client:
+            player = await get_player_safely(client, 25584)
+            pvp = await compare_players_safely(client, 25584, 47585)
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.core.exceptions import IfpaApiError, PlayersNeverMetError
+    from ifpa_api.models.player import Player, PvpComparison
+
+    def get_player_safely(client: IfpaClient, player_id: int) -> Player | None:
+        """Get player with error handling.
+
+        Args:
+            client: The client instance
+            player_id: Player identifier
+
+        Returns:
+            Player object or None if not found
+        """
+        # Using convenience method (even cleaner!)
+        return client.player.get_or_none(player_id)
+
+    def compare_players_safely(
+        client: IfpaClient, player1_id: int, player2_id: int
+    ) -> PvpComparison | None:
+        """Compare two players with error handling.
+
+        Args:
+            client: The client instance
+            player1_id: First player ID
+            player2_id: Second player ID
+
+        Returns:
+            PvP comparison or None if players never met
+        """
+        try:
+            pvp: PvpComparison = client.player.get_pvp(player1_id, player2_id)
+            return pvp
+        except PlayersNeverMetError:
+            print(f"Players {player1_id} and {player2_id} have never competed")
+            return None
+
+    with IfpaClient() as client:
+        player = get_player_safely(client, 25584)
+        pvp = compare_players_safely(client, 25584, 47585)
+    ```
 
 ## Best Practices
 

@@ -4,15 +4,30 @@ The Stats resource provides access to IFPA statistical data including geographic
 
 ## Quick Example
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.stats import CountryPlayersResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.stats import CountryPlayersResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get player counts by country
+            stats: CountryPlayersResponse = await client.stats.country_players()
 
-# Get player counts by country
-stats: CountryPlayersResponse = client.stats.country_players()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.stats import CountryPlayersResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get player counts by country
+    stats: CountryPlayersResponse = client.stats.country_players()
+    ```
 
 ## Geographic Statistics
 
@@ -20,35 +35,70 @@ stats: CountryPlayersResponse = client.stats.country_players()
 
 Get comprehensive player count statistics for all countries with registered IFPA players:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.stats import CountryPlayersResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.stats import CountryPlayersResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get all countries with player counts (OPEN rankings)
+            stats: CountryPlayersResponse = await client.stats.country_players(rank_type="OPEN")
 
-# Get all countries with player counts (OPEN rankings)
-stats: CountryPlayersResponse = client.stats.country_players(rank_type="OPEN")
+            print(f"Type: {stats.type}")
+            print(f"Rank Type: {stats.rank_type}")
+            print(f"\nTop 5 Countries by Player Count:")
 
-print(f"Type: {stats.type}")
-print(f"Rank Type: {stats.rank_type}")
-print(f"\nTop 5 Countries by Player Count:")
+            for country in stats.stats[:5]:
+                print(f"{country.stats_rank}. {country.country_name} ({country.country_code})")
+                print(f"   {country.player_count} players")
 
-for country in stats.stats[:5]:
-    print(f"{country.stats_rank}. {country.country_name} ({country.country_code})")
-    print(f"   {country.player_count} players")
+    asyncio.run(main())
 
-# Output:
-# Type: Players by Country
-# Rank Type: OPEN
-#
-# Top 5 Countries by Player Count:
-# 1. United States (US)
-#    47101 players
-# 2. Canada (CA)
-#    6890 players
-# 3. United Kingdom (GB)
-#    5021 players
-```
+    # Output:
+    # Type: Players by Country
+    # Rank Type: OPEN
+    #
+    # Top 5 Countries by Player Count:
+    # 1. United States (US)
+    #    47101 players
+    # 2. Canada (CA)
+    #    6890 players
+    # 3. United Kingdom (GB)
+    #    5021 players
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.stats import CountryPlayersResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get all countries with player counts (OPEN rankings)
+    stats: CountryPlayersResponse = client.stats.country_players(rank_type="OPEN")
+
+    print(f"Type: {stats.type}")
+    print(f"Rank Type: {stats.rank_type}")
+    print(f"\nTop 5 Countries by Player Count:")
+
+    for country in stats.stats[:5]:
+        print(f"{country.stats_rank}. {country.country_name} ({country.country_code})")
+        print(f"   {country.player_count} players")
+
+    # Output:
+    # Type: Players by Country
+    # Rank Type: OPEN
+    #
+    # Top 5 Countries by Player Count:
+    # 1. United States (US)
+    #    47101 players
+    # 2. Canada (CA)
+    #    6890 players
+    # 3. United Kingdom (GB)
+    #    5021 players
+    ```
 
 You can also query women's rankings:
 
@@ -69,29 +119,58 @@ for country in women_stats.stats[:5]:
 
 Get player count statistics for North American states and provinces:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.stats import StatePlayersResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.stats import StatePlayersResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get all states with player counts
+            stats: StatePlayersResponse = await client.stats.state_players(rank_type="OPEN")
 
-# Get all states with player counts
-stats: StatePlayersResponse = client.stats.state_players(rank_type="OPEN")
+            print(f"Type: {stats.type}")
+            print(f"Rank Type: {stats.rank_type}")
+            print(f"\nTop 5 States/Provinces by Player Count:")
 
-print(f"Type: {stats.type}")
-print(f"Rank Type: {stats.rank_type}")
-print(f"\nTop 5 States/Provinces by Player Count:")
+            for state in stats.stats[:5]:
+                print(f"{state.stats_rank}. {state.stateprov}")
+                print(f"   {state.player_count} players")
 
-for state in stats.stats[:5]:
-    print(f"{state.stats_rank}. {state.stateprov}")
-    print(f"   {state.player_count} players")
+            # Filter to specific region via post-processing
+            west_coast = [s for s in stats.stats if s.stateprov in ["WA", "OR", "CA"]]
+            print(f"\nWest Coast States:")
+            for state in west_coast:
+                print(f"  {state.stateprov}: {state.player_count} players")
 
-# Filter to specific region via post-processing
-west_coast = [s for s in stats.stats if s.stateprov in ["WA", "OR", "CA"]]
-print(f"\nWest Coast States:")
-for state in west_coast:
-    print(f"  {state.stateprov}: {state.player_count} players")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.stats import StatePlayersResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get all states with player counts
+    stats: StatePlayersResponse = client.stats.state_players(rank_type="OPEN")
+
+    print(f"Type: {stats.type}")
+    print(f"Rank Type: {stats.rank_type}")
+    print(f"\nTop 5 States/Provinces by Player Count:")
+
+    for state in stats.stats[:5]:
+        print(f"{state.stats_rank}. {state.stateprov}")
+        print(f"   {state.player_count} players")
+
+    # Filter to specific region via post-processing
+    west_coast = [s for s in stats.stats if s.stateprov in ["WA", "OR", "CA"]]
+    print(f"\nWest Coast States:")
+    for state in west_coast:
+        print(f"  {state.stateprov}: {state.player_count} players")
+    ```
 
 ### Tournament Counts by State/Province
 
@@ -123,36 +202,72 @@ for state in stats.stats[:5]:
 
 Track yearly growth trends in international pinball competition:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.stats import EventsByYearResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.stats import EventsByYearResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get global events by year
+            stats: EventsByYearResponse = await client.stats.events_by_year(rank_type="OPEN")
 
-# Get global events by year
-stats: EventsByYearResponse = client.stats.events_by_year(rank_type="OPEN")
+            print(f"Type: {stats.type}")
+            print(f"Rank Type: {stats.rank_type}")
+            print(f"\nGlobal Tournament Activity (Most Recent 5 Years):")
 
-print(f"Type: {stats.type}")
-print(f"Rank Type: {stats.rank_type}")
-print(f"\nGlobal Tournament Activity (Most Recent 5 Years):")
+            for year in stats.stats[:5]:
+                print(f"\n{year.year}:")
+                print(f"  Tournaments: {year.tournament_count}")
+                print(f"  Countries: {year.country_count}")
+                print(f"  Players: {year.player_count}")
 
-for year in stats.stats[:5]:
-    print(f"\n{year.year}:")
-    print(f"  Tournaments: {year.tournament_count}")
-    print(f"  Countries: {year.country_count}")
-    print(f"  Players: {year.player_count}")
+    asyncio.run(main())
 
-# Output:
-# Type: Events Per Year
-# Rank Type: OPEN
-#
-# Global Tournament Activity (Most Recent 5 Years):
-#
-# 2024:
-#   Tournaments: 2847
-#   Countries: 45
-#   Players: 41203
-```
+    # Output:
+    # Type: Events Per Year
+    # Rank Type: OPEN
+    #
+    # Global Tournament Activity (Most Recent 5 Years):
+    #
+    # 2024:
+    #   Tournaments: 2847
+    #   Countries: 45
+    #   Players: 41203
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.stats import EventsByYearResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get global events by year
+    stats: EventsByYearResponse = client.stats.events_by_year(rank_type="OPEN")
+
+    print(f"Type: {stats.type}")
+    print(f"Rank Type: {stats.rank_type}")
+    print(f"\nGlobal Tournament Activity (Most Recent 5 Years):")
+
+    for year in stats.stats[:5]:
+        print(f"\n{year.year}:")
+        print(f"  Tournaments: {year.tournament_count}")
+        print(f"  Countries: {year.country_count}")
+        print(f"  Players: {year.player_count}")
+
+    # Output:
+    # Type: Events Per Year
+    # Rank Type: OPEN
+    #
+    # Global Tournament Activity (Most Recent 5 Years):
+    #
+    # 2024:
+    #   Tournaments: 2847
+    #   Countries: 45
+    #   Players: 41203
+    ```
 
 You can filter by country:
 

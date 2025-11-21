@@ -4,18 +4,31 @@ This guide covers all configuration options available in the IFPA API package.
 
 ## Client Configuration
 
-The `IfpaClient` constructor accepts several configuration parameters:
+Both `IfpaClient` (sync) and `AsyncIfpaClient` (async) accept the same configuration parameters:
 
-```python
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
 
-client = IfpaClient(
-    api_key='your-api-key',  # API key for authentication
-    base_url='https://api.ifpapinball.com',  # API base URL
-    timeout=10.0,  # Request timeout in seconds
-    validate_requests=True  # Enable request validation
-)
-```
+    client = AsyncIfpaClient(
+        api_key='your-api-key',  # API key for authentication
+        base_url='https://api.ifpapinball.com',  # API base URL
+        timeout=10.0,  # Request timeout in seconds
+        validate_requests=True  # Enable request validation
+    )
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    client = IfpaClient(
+        api_key='your-api-key',  # API key for authentication
+        base_url='https://api.ifpapinball.com',  # API base URL
+        timeout=10.0,  # Request timeout in seconds
+        validate_requests=True  # Enable request validation
+    )
+    ```
 
 ## Configuration Options
 
@@ -26,13 +39,23 @@ client = IfpaClient(
 
 Your IFPA API key for authentication.
 
-```python
-# From environment variable (recommended)
-client = IfpaClient()
+=== "Async"
+    ```python
+    # From environment variable (recommended)
+    client = AsyncIfpaClient()
 
-# Explicit key
-client = IfpaClient(api_key='your-api-key')
-```
+    # Explicit key
+    client = AsyncIfpaClient(api_key='your-api-key')
+    ```
+
+=== "Sync"
+    ```python
+    # From environment variable (recommended)
+    client = IfpaClient()
+
+    # Explicit key
+    client = IfpaClient(api_key='your-api-key')
+    ```
 
 See [Authentication](authentication.md) for detailed API key setup.
 
@@ -47,13 +70,23 @@ The base URL for the IFPA API. You typically don't need to change this unless:
 - Testing against a mock server
 - IFPA changes their base URL
 
-```python
-# Default - no need to specify
-client = IfpaClient()
+=== "Async"
+    ```python
+    # Default - no need to specify
+    client = AsyncIfpaClient()
 
-# Custom base URL
-client = IfpaClient(base_url='https://custom-api.example.com')
-```
+    # Custom base URL
+    client = AsyncIfpaClient(base_url='https://custom-api.example.com')
+    ```
+
+=== "Sync"
+    ```python
+    # Default - no need to specify
+    client = IfpaClient()
+
+    # Custom base URL
+    client = IfpaClient(base_url='https://custom-api.example.com')
+    ```
 
 ### Timeout
 
@@ -62,16 +95,29 @@ client = IfpaClient(base_url='https://custom-api.example.com')
 
 Maximum time to wait for API responses. Applies to each individual request.
 
-```python
-# Default 10 second timeout
-client = IfpaClient()
+=== "Async"
+    ```python
+    # Default 10 second timeout
+    client = AsyncIfpaClient()
 
-# Custom timeout
-client = IfpaClient(timeout=30.0)  # 30 seconds
+    # Custom timeout
+    client = AsyncIfpaClient(timeout=30.0)  # 30 seconds
 
-# Shorter timeout for fast-fail behavior
-client = IfpaClient(timeout=5.0)   # 5 seconds
-```
+    # Shorter timeout for fast-fail behavior
+    client = AsyncIfpaClient(timeout=5.0)   # 5 seconds
+    ```
+
+=== "Sync"
+    ```python
+    # Default 10 second timeout
+    client = IfpaClient()
+
+    # Custom timeout
+    client = IfpaClient(timeout=30.0)  # 30 seconds
+
+    # Shorter timeout for fast-fail behavior
+    client = IfpaClient(timeout=5.0)   # 5 seconds
+    ```
 
 **Recommendations**:
 - **Fast operations** (search, single resource): 5-10 seconds
@@ -86,13 +132,23 @@ client = IfpaClient(timeout=5.0)   # 5 seconds
 
 Enable or disable Pydantic validation of request parameters before sending to the API.
 
-```python
-# Validation enabled (recommended)
-client = IfpaClient(validate_requests=True)
+=== "Async"
+    ```python
+    # Validation enabled (recommended)
+    client = AsyncIfpaClient(validate_requests=True)
 
-# Validation disabled (not recommended)
-client = IfpaClient(validate_requests=False)
-```
+    # Validation disabled (not recommended)
+    client = AsyncIfpaClient(validate_requests=False)
+    ```
+
+=== "Sync"
+    ```python
+    # Validation enabled (recommended)
+    client = IfpaClient(validate_requests=True)
+
+    # Validation disabled (not recommended)
+    client = IfpaClient(validate_requests=False)
+    ```
 
 **When to enable** (default):
 - Development and testing
@@ -106,17 +162,33 @@ client = IfpaClient(validate_requests=False)
 
 **Example with validation**:
 
-```python
-from ifpa_api import IfpaClient, IfpaClientValidationError
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient, IfpaClientValidationError
+    import asyncio
 
-client = IfpaClient(validate_requests=True)
+    async def main():
+        async with AsyncIfpaClient(validate_requests=True) as client:
+            try:
+                # This will fail validation before making the request
+                rankings = await client.rankings.wppr(count=500)  # Max is 250
+            except IfpaClientValidationError as e:
+                print(f"Validation error: {e.message}")
 
-try:
-    # This will fail validation before making the request
-    rankings = client.rankings.wppr(count=500)  # Max is 250
-except IfpaClientValidationError as e:
-    print(f"Validation error: {e.message}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient, IfpaClientValidationError
+
+    with IfpaClient(validate_requests=True) as client:
+        try:
+            # This will fail validation before making the request
+            rankings = client.rankings.wppr(count=500)  # Max is 250
+        except IfpaClientValidationError as e:
+            print(f"Validation error: {e.message}")
+    ```
 
 ## Environment Variables
 
@@ -133,135 +205,265 @@ Future environment variables (not currently used):
 
 ## Complete Configuration Example
 
-```python
-import os
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    import os
+    import asyncio
+    from ifpa_api import AsyncIfpaClient
 
-# Load from environment
-api_key = os.getenv('IFPA_API_KEY')
-timeout = float(os.getenv('IFPA_TIMEOUT', '10.0'))
+    # Load from environment
+    api_key = os.getenv('IFPA_API_KEY')
+    timeout = float(os.getenv('IFPA_TIMEOUT', '10.0'))
 
-# Configure client
-client = IfpaClient(
-    api_key=api_key,
-    timeout=timeout,
-    validate_requests=True
-)
+    async def main():
+        # Configure client
+        async with AsyncIfpaClient(
+            api_key=api_key,
+            timeout=timeout,
+            validate_requests=True
+        ) as client:
+            # Use the client
+            player = await client.player.get(25584)
 
-# Use the client
-player = client.player(12345).details()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    import os
+    from ifpa_api import IfpaClient
+
+    # Load from environment
+    api_key = os.getenv('IFPA_API_KEY')
+    timeout = float(os.getenv('IFPA_TIMEOUT', '10.0'))
+
+    # Configure client
+    with IfpaClient(
+        api_key=api_key,
+        timeout=timeout,
+        validate_requests=True
+    ) as client:
+        # Use the client
+        player = client.player.get(25584)
+    ```
 
 ## Configuration Patterns
 
 ### Development Configuration
 
-```python
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
 
-# Development: Longer timeout, strict validation
-dev_client = IfpaClient(
-    timeout=30.0,
-    validate_requests=True
-)
-```
+    # Development: Longer timeout, strict validation
+    dev_client = AsyncIfpaClient(
+        timeout=30.0,
+        validate_requests=True
+    )
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    # Development: Longer timeout, strict validation
+    dev_client = IfpaClient(
+        timeout=30.0,
+        validate_requests=True
+    )
+    ```
 
 ### Production Configuration
 
-```python
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    import os
+    from ifpa_api import AsyncIfpaClient
 
-# Production: Balanced timeout, optional validation
-prod_client = IfpaClient(
-    api_key=os.environ['IFPA_API_KEY'],  # Explicit for production
-    timeout=15.0,
-    validate_requests=True  # Keep enabled for safety
-)
-```
+    # Production: Balanced timeout, optional validation
+    prod_client = AsyncIfpaClient(
+        api_key=os.environ['IFPA_API_KEY'],  # Explicit for production
+        timeout=15.0,
+        validate_requests=True  # Keep enabled for safety
+    )
+    ```
+
+=== "Sync"
+    ```python
+    import os
+    from ifpa_api import IfpaClient
+
+    # Production: Balanced timeout, optional validation
+    prod_client = IfpaClient(
+        api_key=os.environ['IFPA_API_KEY'],  # Explicit for production
+        timeout=15.0,
+        validate_requests=True  # Keep enabled for safety
+    )
+    ```
 
 ### Testing Configuration
 
-```python
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
 
-# Testing: Mock server, fast timeout
-test_client = IfpaClient(
-    api_key='test-key',
-    base_url='http://localhost:8000',  # Mock server
-    timeout=5.0,
-    validate_requests=True
-)
-```
+    # Testing: Mock server, fast timeout
+    test_client = AsyncIfpaClient(
+        api_key='test-key',
+        base_url='http://localhost:8000',  # Mock server
+        timeout=5.0,
+        validate_requests=True
+    )
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    # Testing: Mock server, fast timeout
+    test_client = IfpaClient(
+        api_key='test-key',
+        base_url='http://localhost:8000',  # Mock server
+        timeout=5.0,
+        validate_requests=True
+    )
+    ```
 
 ## Configuration Class Pattern
 
 For complex applications, create a configuration class:
 
-```python
-from dataclasses import dataclass
-from typing import Optional
-import os
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    from dataclasses import dataclass
+    import os
+    from ifpa_api import AsyncIfpaClient
 
-@dataclass
-class IfpaConfig:
-    """IFPA API client configuration."""
-    api_key: str
-    base_url: str = 'https://api.ifpapinball.com'
-    timeout: float = 10.0
-    validate_requests: bool = True
+    @dataclass
+    class IfpaConfig:
+        """IFPA API client configuration."""
+        api_key: str
+        base_url: str = 'https://api.ifpapinball.com'
+        timeout: float = 10.0
+        validate_requests: bool = True
 
-    @classmethod
-    def from_env(cls) -> 'IfpaConfig':
-        """Load configuration from environment variables."""
-        api_key = os.getenv('IFPA_API_KEY')
-        if not api_key:
-            raise ValueError("IFPA_API_KEY not set")
+        @classmethod
+        def from_env(cls) -> 'IfpaConfig':
+            """Load configuration from environment variables."""
+            api_key = os.getenv('IFPA_API_KEY')
+            if not api_key:
+                raise ValueError("IFPA_API_KEY not set")
 
-        return cls(
-            api_key=api_key,
-            base_url=os.getenv('IFPA_BASE_URL', cls.base_url),
-            timeout=float(os.getenv('IFPA_TIMEOUT', cls.timeout)),
-            validate_requests=os.getenv('IFPA_VALIDATE', 'true').lower() == 'true'
-        )
+            return cls(
+                api_key=api_key,
+                base_url=os.getenv('IFPA_BASE_URL', cls.base_url),
+                timeout=float(os.getenv('IFPA_TIMEOUT', str(cls.timeout))),
+                validate_requests=os.getenv('IFPA_VALIDATE', 'true').lower() == 'true'
+            )
 
-    def create_client(self) -> IfpaClient:
-        """Create a configured client."""
-        return IfpaClient(
-            api_key=self.api_key,
-            base_url=self.base_url,
-            timeout=self.timeout,
-            validate_requests=self.validate_requests
-        )
+        def create_async_client(self) -> AsyncIfpaClient:
+            """Create a configured async client."""
+            return AsyncIfpaClient(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                validate_requests=self.validate_requests
+            )
 
-# Usage
-config = IfpaConfig.from_env()
-client = config.create_client()
-```
+    # Usage
+    config = IfpaConfig.from_env()
+    client = config.create_async_client()
+    ```
+
+=== "Sync"
+    ```python
+    from dataclasses import dataclass
+    import os
+    from ifpa_api import IfpaClient
+
+    @dataclass
+    class IfpaConfig:
+        """IFPA API client configuration."""
+        api_key: str
+        base_url: str = 'https://api.ifpapinball.com'
+        timeout: float = 10.0
+        validate_requests: bool = True
+
+        @classmethod
+        def from_env(cls) -> 'IfpaConfig':
+            """Load configuration from environment variables."""
+            api_key = os.getenv('IFPA_API_KEY')
+            if not api_key:
+                raise ValueError("IFPA_API_KEY not set")
+
+            return cls(
+                api_key=api_key,
+                base_url=os.getenv('IFPA_BASE_URL', cls.base_url),
+                timeout=float(os.getenv('IFPA_TIMEOUT', str(cls.timeout))),
+                validate_requests=os.getenv('IFPA_VALIDATE', 'true').lower() == 'true'
+            )
+
+        def create_client(self) -> IfpaClient:
+            """Create a configured client."""
+            return IfpaClient(
+                api_key=self.api_key,
+                base_url=self.base_url,
+                timeout=self.timeout,
+                validate_requests=self.validate_requests
+            )
+
+    # Usage
+    config = IfpaConfig.from_env()
+    client = config.create_client()
+    ```
 
 ## HTTP Session Configuration
 
-The package uses the `requests` library internally. The HTTP client:
+The sync client uses `requests` internally, while the async client uses `httpx`. Both:
 
-- Maintains a persistent session for connection pooling
-- Sets the `X-API-Key` header automatically
-- Handles timeouts and retries
-- Parses JSON responses
+- Maintain persistent sessions for connection pooling
+- Set the `X-API-Key` header automatically
+- Handle timeouts
+- Parse JSON responses
 
-**Connection pooling**: The package reuses HTTP connections for better performance. Always close the client when done:
+**Connection pooling**: Both clients reuse HTTP connections for better performance. Always close the client when done:
 
-```python
-# Option 1: Manual close
-client = IfpaClient()
-try:
-    player = client.player(12345).details()
-finally:
-    client.close()
+=== "Async"
+    ```python
+    import asyncio
 
-# Option 2: Context manager (recommended)
-with IfpaClient() as client:
-    player = client.player(12345).details()
-```
+    # Option 1: Manual close
+    async def main():
+        client = AsyncIfpaClient()
+        try:
+            player = await client.player.get(25584)
+        finally:
+            await client.close()  # Must use await with async client!
+
+    # Option 2: Context manager (recommended)
+    async def main():
+        async with AsyncIfpaClient() as client:
+            player = await client.player.get(25584)
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    # Option 1: Manual close
+    client = IfpaClient()
+    try:
+        player = client.player.get(25584)
+    finally:
+        client.close()
+
+    # Option 2: Context manager (recommended)
+    with IfpaClient() as client:
+        player = client.player.get(25584)
+    ```
+
+!!! warning "Async Client Cleanup"
+    The async client **must** be closed with `await client.close()` if not using a context manager. Failing to close it will leak HTTP connections and cause `ResourceWarning`s.
 
 ## Performance Considerations
 

@@ -15,9 +15,40 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 
 **Complete documentation**: https://johnsosoka.github.io/ifpa-api-python/
 
-## What's New in 0.3.0
+## What's New in 1.0.0
 
-**Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
+**🚀 Full Async Support** - Modern async/await API alongside existing sync client:
+
+```python
+from ifpa_api import AsyncIfpaClient
+import asyncio
+
+async def main():
+    # Async context manager for automatic cleanup
+    async with AsyncIfpaClient() as client:
+        # All operations use async/await
+        player = await client.player.get(12345)
+        rankings = await client.rankings.wppr(count=100)
+
+        # Query builders work the same (filters are sync, execution is async)
+        results = await client.player.search("Smith").country("US").get()
+
+        # Concurrent requests for better performance
+        player, director, tournament = await asyncio.gather(
+            client.player.get(12345),
+            client.director.get(456),
+            client.tournament.get(789)
+        )
+
+asyncio.run(main())
+```
+
+**Dual Client Support** - Choose sync or async based on your needs:
+- `IfpaClient` - Synchronous client (unchanged, 100% backward compatible)
+- `AsyncIfpaClient` - New async client with httpx for modern async applications
+- Both clients share the same API surface and models
+
+**Quality of Life Improvements** (from 0.3.0-0.4.0) - Enhanced debugging, pagination, and error handling:
 
 ```python
 from ifpa_api import (
@@ -95,16 +126,18 @@ standings = client.series("NACS").standings()
 
 ## Features
 
-- **Full Type Safety**: Complete type hints for IDE autocompletion and static analysis
-- **Pydantic Validation**: Request and response validation with helpful error hints
-- **Query Builder Pattern**: Composable, immutable queries with method chaining
-- **Automatic Pagination**: Memory-efficient iteration with `.iterate()` and `.get_all()`
-- **Enhanced Error Context**: All exceptions include request URLs and parameters for debugging
-- **Semantic Exceptions**: Domain-specific errors (PlayersNeverMetError, SeriesPlayerNotFoundError, etc.)
-- **46 API Endpoints**: Complete coverage of IFPA API v2.1 across 7 resources
-- **99% Test Coverage**: Comprehensive unit and integration tests
-- **Context Manager Support**: Automatic resource cleanup
-- **Clear Error Handling**: Structured exception hierarchy for different failure modes
+- **🔄 Async & Sync Support**: Choose between `AsyncIfpaClient` (async/await) or `IfpaClient` (synchronous) - same API, your choice
+- **⚡ Modern Async**: Built with httpx for concurrent requests and better performance in async applications
+- **📘 Full Type Safety**: Complete type hints for IDE autocompletion and static analysis
+- **✅ Pydantic Validation**: Request and response validation with helpful error hints
+- **🔗 Query Builder Pattern**: Composable, immutable queries with method chaining
+- **📄 Automatic Pagination**: Memory-efficient iteration with `.iterate()` and `.get_all()`
+- **🐛 Enhanced Error Context**: All exceptions include request URLs and parameters for debugging
+- **🎯 Semantic Exceptions**: Domain-specific errors (PlayersNeverMetError, SeriesPlayerNotFoundError, etc.)
+- **🌐 46 API Endpoints**: Complete coverage of IFPA API v2.1 across 7 resources
+- **🧪 99% Test Coverage**: Comprehensive unit and integration tests (548 tests passing)
+- **🔒 Context Manager Support**: Automatic resource cleanup for both sync and async
+- **🛡️ Clear Error Handling**: Structured exception hierarchy for different failure modes
 
 ## Installation
 
@@ -181,6 +214,55 @@ with IfpaClient(api_key='your-api-key-here') as client:
     print(player.first_name)
 # Client automatically closed
 ```
+
+## Async Quick Start
+
+For async applications, use `AsyncIfpaClient` with the same API:
+
+```python
+from ifpa_api import AsyncIfpaClient
+import asyncio
+
+async def main():
+    # Always use async context manager
+    async with AsyncIfpaClient(api_key='your-api-key-here') as client:
+        # Get player profile and rankings (with await)
+        player = await client.player.get(2643)
+        print(f"{player.first_name} {player.last_name}")
+        print(f"WPPR Rank: {player.player_stats.current_wppr_rank}")
+
+        # Search players with filters (query builders work the same)
+        results = await client.player.search("John") \
+            .country("US") \
+            .state("CA") \
+            .limit(10) \
+            .get()
+
+        for player in results.search:
+            print(f"{player.first_name} {player.last_name} - {player.city}")
+
+        # Concurrent requests for better performance
+        player, tournament = await asyncio.gather(
+            client.player.get(12345),
+            client.tournament.get(67890)
+        )
+
+        # Async pagination
+        async for player in client.player.search().country("US").iterate(limit=100):
+            print(f"{player.first_name} {player.last_name}")
+
+    # Client automatically closed
+
+# Run async code
+asyncio.run(main())
+```
+
+**Key Differences:**
+- Import `AsyncIfpaClient` instead of `IfpaClient`
+- Use `async with` for context manager
+- Add `await` before all client method calls
+- Use `async for` for iteration
+- Filter methods (`.country()`, `.state()`, `.limit()`) are still sync - only `.get()` needs `await`
 
 ## Core Resources
 

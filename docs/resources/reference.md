@@ -13,15 +13,30 @@ The Reference client provides two main endpoints:
 
 Access the reference client through the main `IfpaClient`:
 
-```python
-from ifpa_api import IfpaClient
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    import asyncio
 
-client = IfpaClient(api_key="your-api-key")
+    async def main():
+        async with AsyncIfpaClient(api_key="your-api-key") as client:
+            # Access reference data
+            countries = await client.reference.countries()
+            state_provs = await client.reference.state_provs()
 
-# Access reference data
-countries = client.reference.countries()
-state_provs = client.reference.state_provs()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    client = IfpaClient(api_key="your-api-key")
+
+    # Access reference data
+    countries = client.reference.countries()
+    state_provs = client.reference.state_provs()
+    ```
 
 ## Countries
 
@@ -29,13 +44,34 @@ state_provs = client.reference.state_provs()
 
 The `countries()` method returns a list of all countries in the IFPA system (typically 62 countries):
 
-```python
-countries = client.reference.countries()
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    import asyncio
 
-# Iterate through all countries
-for country in countries.country:
-    print(f"{country.country_name} ({country.country_code})")
-```
+    async def main():
+        async with AsyncIfpaClient() as client:
+            countries = await client.reference.countries()
+
+            # Iterate through all countries
+            for country in countries.country:
+                print(f"{country.country_name} ({country.country_code})")
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    client = IfpaClient()
+
+    countries = client.reference.countries()
+
+    # Iterate through all countries
+    for country in countries.country:
+        print(f"{country.country_name} ({country.country_code})")
+    ```
 
 **Response fields:**
 
@@ -76,15 +112,38 @@ The `state_provs()` method returns regional subdivisions for countries that have
 
     **Impact**: You cannot use this endpoint to validate all possible state codes that appear in player, director, or tournament records.
 
-```python
-state_provs = client.reference.state_provs()
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    import asyncio
 
-# Iterate through countries and their regions
-for country_region in state_provs.stateprov:
-    print(f"{country_region.country_name}:")
-    for region in country_region.regions:
-        print(f"  - {region.region_name} ({region.region_code})")
-```
+    async def main():
+        async with AsyncIfpaClient() as client:
+            state_provs = await client.reference.state_provs()
+
+            # Iterate through countries and their regions
+            for country_region in state_provs.stateprov:
+                print(f"{country_region.country_name}:")
+                for region in country_region.regions:
+                    print(f"  - {region.region_name} ({region.region_code})")
+
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+
+    client = IfpaClient()
+
+    state_provs = client.reference.state_provs()
+
+    # Iterate through countries and their regions
+    for country_region in state_provs.stateprov:
+        print(f"{country_region.country_name}:")
+        for region in country_region.regions:
+            print(f"  - {region.region_name} ({region.region_code})")
+    ```
 
 **Response fields:**
 

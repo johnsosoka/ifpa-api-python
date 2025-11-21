@@ -45,11 +45,14 @@ nav:
       - Installation: getting-started/installation.md
       - Quick Start: getting-started/quickstart.md
       - Authentication: getting-started/authentication.md
+      - Configuration: getting-started/configuration.md
   - Guides:
+      - Async Usage: guides/async-usage.md
       - Callable Pattern: guides/callable-pattern.md
       - Searching: guides/searching.md
       - Pagination: guides/pagination.md
       - Error Handling: guides/error-handling.md
+      - Known Limitations: guides/known-limitations.md
   - IFPA API Resources:
       - Directors: resources/directors.md
       - Players: resources/players.md
@@ -59,6 +62,7 @@ nav:
       - Stats: resources/stats.md
       - Reference: resources/reference.md
   - API Client Reference:
+      - Overview: api-client-reference/overview.md
       - Client: api-client-reference/client.md
       - Models: api-client-reference/models.md
       - Exceptions: api-client-reference/exceptions.md

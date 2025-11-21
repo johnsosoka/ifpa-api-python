@@ -1,74 +1,65 @@
-"""Tournament resource client with callable pattern.
-
-Main entry point for tournament operations, providing both collection-level
-and resource-level access patterns.
-"""
+"""Async tournament resource client with callable pattern."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ifpa_api.core.base import BaseResourceClient
+from ifpa_api.core.async_base import AsyncBaseResourceClient
 from ifpa_api.core.deprecation import issue_deprecation_warning
 from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.tournaments import Tournament, TournamentFormatsListResponse
 
-from .context import _TournamentContext
-from .query_builder import TournamentQueryBuilder
+from .async_context import AsyncTournamentContext
+from .async_query_builder import AsyncTournamentQueryBuilder
 
 if TYPE_CHECKING:
     pass
 
 
-# ============================================================================
-# Tournament Resource Client - Main Entry Point
-# ============================================================================
+class AsyncTournamentClient(AsyncBaseResourceClient):
+    """Async callable client for tournament operations.
 
-
-class TournamentClient(BaseResourceClient):
-    """Callable client for tournament operations.
-
-    This client provides both collection-level methods (list_formats, league_results) and
-    resource-level access via the callable pattern. Call with a tournament ID to get
+    This client provides both collection-level methods and resource-level
+    access via the callable pattern. Call with a tournament ID to get
     a context for tournament-specific operations.
 
     Attributes:
-        _http: The HTTP client instance
+        _http: The async HTTP client instance
         _validate_requests: Whether to validate request parameters
 
     Example:
         ```python
-        # Collection-level operations
-        results = client.tournament.query("PAPA").get()
-        formats = client.tournament.list_formats()
+        # Query builder pattern (RECOMMENDED)
+        async with AsyncIfpaClient() as client:
+            results = await client.tournament.search("PAPA").country("US").get()
 
         # Resource-level operations
-        tournament = client.tournament(12345).details()
-        results = client.tournament(12345).results()
-        formats = client.tournament(12345).formats()
+        async with AsyncIfpaClient() as client:
+            tournament = await client.tournament(12345).details()
+            results = await client.tournament(12345).results()
         ```
     """
 
-    def __call__(self, tournament_id: int | str) -> _TournamentContext:
+    def __call__(self, tournament_id: int | str) -> AsyncTournamentContext:
         """Get a context for a specific tournament.
 
         Args:
             tournament_id: The tournament's unique identifier
 
         Returns:
-            _TournamentContext instance for accessing tournament-specific operations
+            AsyncTournamentContext instance for accessing tournament-specific operations
 
         Example:
             ```python
             # Get tournament context and access methods
-            tournament = client.tournament(12345).details()
-            results = client.tournament(12345).results()
-            league = client.tournament(12345).league()
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament(12345).details()
+                results = await client.tournament(12345).results()
             ```
         """
-        return _TournamentContext(self._http, tournament_id, self._validate_requests)
+        return AsyncTournamentContext(self._http, tournament_id, self._validate_requests)
 
-    def get(self, tournament_id: int | str) -> Tournament:
+    async def get(self, tournament_id: int | str) -> Tournament:
         """Get tournament by ID directly.
 
         This is a convenience method equivalent to calling tournament(id).details().
@@ -85,15 +76,18 @@ class TournamentClient(BaseResourceClient):
         Example:
             ```python
             # New preferred way
-            tournament = client.tournament.get(12345)
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament.get(12345)
 
             # Old way (still works but deprecated)
-            tournament = client.tournament(12345).details()
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament(12345).details()
             ```
         """
-        return self(tournament_id).details()
+        context = self(tournament_id)
+        return await context.details()
 
-    def get_or_none(self, tournament_id: int | str) -> Tournament | None:
+    async def get_or_none(self, tournament_id: int | str) -> Tournament | None:
         """Get tournament by ID, returning None if not found.
 
         This convenience method wraps get() and returns None instead of raising
@@ -110,15 +104,16 @@ class TournamentClient(BaseResourceClient):
 
         Example:
             ```python
-            tournament = client.tournament.get_or_none(12345)
-            if tournament:
-                print(f"Found: {tournament.tournament_name}")
-            else:
-                print("Tournament not found")
+            async with AsyncIfpaClient() as client:
+                tournament = await client.tournament.get_or_none(12345)
+                if tournament:
+                    print(f"Found: {tournament.tournament_name}")
+                else:
+                    print("Tournament not found")
             ```
         """
         try:
-            return self.get(tournament_id)
+            return await self.get(tournament_id)
         except IfpaApiError as e:
             if e.status_code == 404:
                 return None
@@ -127,7 +122,7 @@ class TournamentClient(BaseResourceClient):
             # API returns empty dict {} for non-existent tournaments which causes validation error
             return None
 
-    def exists(self, tournament_id: int | str) -> bool:
+    async def exists(self, tournament_id: int | str) -> bool:
         """Check if a tournament exists by ID.
 
         This convenience method returns True if the tournament exists, False otherwise.
@@ -145,15 +140,17 @@ class TournamentClient(BaseResourceClient):
 
         Example:
             ```python
-            if client.tournament.exists(12345):
-                print("Tournament exists!")
-            else:
-                print("Tournament not found")
+            async with AsyncIfpaClient() as client:
+                if await client.tournament.exists(12345):
+                    print("Tournament exists!")
+                else:
+                    print("Tournament not found")
             ```
         """
-        return self.get_or_none(tournament_id) is not None
+        tournament = await self.get_or_none(tournament_id)
+        return tournament is not None
 
-    def search(self, name: str = "") -> TournamentQueryBuilder:
+    def search(self, name: str = "") -> AsyncTournamentQueryBuilder:
         """Search for tournaments by name (preferred method).
 
         This method returns a query builder that allows you to compose search
@@ -169,27 +166,30 @@ class TournamentClient(BaseResourceClient):
         Example:
             ```python
             # Simple search
-            results = client.tournament.search("PAPA").get()
+            async with AsyncIfpaClient() as client:
+                results = await client.tournament.search("PAPA").get()
 
             # Chained filters
-            results = (client.tournament.search("Championship")
-                .country("US")
-                .state("WA")
-                .limit(25)
-                .get())
+            async with AsyncIfpaClient() as client:
+                results = await (client.tournament.search("Championship")
+                    .country("US")
+                    .state("WA")
+                    .limit(25)
+                    .get())
 
             # Filter-only search (no name query)
-            results = (client.tournament.search()
-                .date_range("2024-01-01", "2024-12-31")
-                .get())
+            async with AsyncIfpaClient() as client:
+                results = await (client.tournament.search()
+                    .date_range("2024-01-01", "2024-12-31")
+                    .get())
             ```
         """
-        builder = TournamentQueryBuilder(self._http)
+        builder = AsyncTournamentQueryBuilder(self._http)
         if name:
             return builder.query(name)
         return builder
 
-    def query(self, name: str = "") -> TournamentQueryBuilder:
+    def query(self, name: str = "") -> AsyncTournamentQueryBuilder:
         """Create a fluent query builder for searching tournaments (deprecated).
 
         .. deprecated:: 0.4.0
@@ -199,7 +199,7 @@ class TournamentClient(BaseResourceClient):
             name: Optional tournament name to search for (can also be set via .query() on builder)
 
         Returns:
-            TournamentQueryBuilder instance for building the search query
+            AsyncTournamentQueryBuilder instance for building the search query
         """
         issue_deprecation_warning(
             old_name="query()",
@@ -209,7 +209,7 @@ class TournamentClient(BaseResourceClient):
         )
         return self.search(name)
 
-    def list_formats(self) -> TournamentFormatsListResponse:
+    async def list_formats(self) -> TournamentFormatsListResponse:
         """Get list of all available tournament format types.
 
         Returns a comprehensive list of format types used for tournament qualifying
@@ -225,23 +225,24 @@ class TournamentClient(BaseResourceClient):
         Example:
             ```python
             # Get all tournament formats
-            formats = client.tournament.list_formats()
+            async with AsyncIfpaClient() as client:
+                formats = await client.tournament.list_formats()
 
-            print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
-            for fmt in formats.qualifying_formats:
-                print(f"  {fmt.format_id}: {fmt.name}")
+                print(f"Qualifying formats ({len(formats.qualifying_formats)}):")
+                for fmt in formats.qualifying_formats:
+                    print(f"  {fmt.format_id}: {fmt.name}")
 
-            print(f"\\nFinals formats ({len(formats.finals_formats)}):")
-            for fmt in formats.finals_formats:
-                print(f"  {fmt.format_id}: {fmt.name}")
+                print(f"\\nFinals formats ({len(formats.finals_formats)}):")
+                for fmt in formats.finals_formats:
+                    print(f"  {fmt.format_id}: {fmt.name}")
 
-            # Find a specific format
-            swiss = next(
-                f for f in formats.qualifying_formats
-                if "swiss" in f.name.lower()
-            )
-            print(f"\\nSwiss format ID: {swiss.format_id}")
+                # Find a specific format
+                swiss = next(
+                    f for f in formats.qualifying_formats
+                    if "swiss" in f.name.lower()
+                )
+                print(f"\\nSwiss format ID: {swiss.format_id}")
             ```
         """
-        response = self._http._request("GET", "/tournament/formats")
+        response = await self._http._request("GET", "/tournament/formats")
         return TournamentFormatsListResponse.model_validate(response)

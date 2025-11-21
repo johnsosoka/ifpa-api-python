@@ -4,38 +4,77 @@ The Director resource provides access to tournament director information, their 
 
 ## Quick Example
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Fluent query builder - search for directors named "Josh" in the US
+            results: DirectorSearchResponse = await client.director.query("Josh").country("US").get()
 
-# Fluent query builder - search for directors named "Josh" in the US
-results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Fluent query builder - search for directors named "Josh" in the US
+    results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+    ```
 
 ## Searching Directors (Fluent Query Builder)
 
 The **recommended** way to search for directors is using the fluent query builder:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import DirectorSearchResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Simple name search
+            results: DirectorSearchResponse = await client.director.query("Josh").get()
+            for director in results.directors:
+                print(f"{director.director_id}: {director.name}")
+                print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
+                print(f"  Tournaments Directed: {director.tournament_count}")
 
-# Simple name search
-results: DirectorSearchResponse = client.director.query("Josh").get()
-for director in results.directors:
-    print(f"{director.director_id}: {director.name}")
-    print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
-    print(f"  Tournaments Directed: {director.tournament_count}")
+    asyncio.run(main())
 
-# Output:
-# 1533: Josh Sharpe
-#   Location: Chicago, IL, United States
-#   Tournaments Directed: 45
-```
+    # Output:
+    # 1533: Josh Sharpe
+    #   Location: Chicago, IL, United States
+    #   Tournaments Directed: 45
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.director import DirectorSearchResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Simple name search
+    results: DirectorSearchResponse = client.director.query("Josh").get()
+    for director in results.directors:
+        print(f"{director.director_id}: {director.name}")
+        print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
+        print(f"  Tournaments Directed: {director.tournament_count}")
+
+    # Output:
+    # 1533: Josh Sharpe
+    #   Location: Chicago, IL, United States
+    #   Tournaments Directed: 45
+    ```
 
 ### Chained Filters
 
@@ -116,44 +155,88 @@ Access individual director information using the callable pattern. These methods
 
 Retrieve detailed information about a specific tournament director:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.director import Director
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.director import Director
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get director by ID - Josh Rainwater (1533) from Columbia, SC
+            director: Director = await client.director.get(1533)
 
-# Get director by ID - Josh Rainwater (1533) from Columbia, SC
-director: Director = client.director(1533).details()
+            print(f"Name: {director.name}")
+            print(f"Director ID: {director.director_id}")
+            print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
 
-print(f"Name: {director.name}")
-print(f"Director ID: {director.director_id}")
-print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
+            # Access director statistics
+            if director.stats:
+                print(f"\nDirector Statistics:")
+                print(f"  Total Tournaments: {director.stats.tournament_count}")
+                print(f"  Unique Venues: {director.stats.unique_location_count}")
+                print(f"  Total Players: {director.stats.total_player_count}")
+                print(f"  Unique Players: {director.stats.unique_player_count}")
+                print(f"  Largest Event: {director.stats.largest_event_count} players")
+                print(f"  Average Tournament Value: {director.stats.average_value}")
+                print(f"  Highest Tournament Value: {director.stats.highest_value}")
 
-# Access director statistics
-if director.stats:
-    print(f"\nDirector Statistics:")
-    print(f"  Total Tournaments: {director.stats.tournament_count}")
-    print(f"  Unique Venues: {director.stats.unique_location_count}")
-    print(f"  Total Players: {director.stats.total_player_count}")
-    print(f"  Unique Players: {director.stats.unique_player_count}")
-    print(f"  Largest Event: {director.stats.largest_event_count} players")
-    print(f"  Average Tournament Value: {director.stats.average_value}")
-    print(f"  Highest Tournament Value: {director.stats.highest_value}")
+    asyncio.run(main())
 
-# Output:
-# Name: Josh Rainwater
-# Director ID: 1533
-# Location: Columbia, SC, United States
-#
-# Director Statistics:
-#   Total Tournaments: 13
-#   Unique Venues: 1
-#   Total Players: 347
-#   Unique Players: 120
-#   Largest Event: 41 players
-#   Average Tournament Value: 5.89
-#   Highest Tournament Value: 11.82
-```
+    # Output:
+    # Name: Josh Rainwater
+    # Director ID: 1533
+    # Location: Columbia, SC, United States
+    #
+    # Director Statistics:
+    #   Total Tournaments: 13
+    #   Unique Venues: 1
+    #   Total Players: 347
+    #   Unique Players: 120
+    #   Largest Event: 41 players
+    #   Average Tournament Value: 5.89
+    #   Highest Tournament Value: 11.82
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.director import Director
+
+    client: IfpaClient = IfpaClient()
+
+    # Get director by ID - Josh Rainwater (1533) from Columbia, SC
+    director: Director = client.director.get(1533)
+
+    print(f"Name: {director.name}")
+    print(f"Director ID: {director.director_id}")
+    print(f"Location: {director.city}, {director.stateprov}, {director.country_name}")
+
+    # Access director statistics
+    if director.stats:
+        print(f"\nDirector Statistics:")
+        print(f"  Total Tournaments: {director.stats.tournament_count}")
+        print(f"  Unique Venues: {director.stats.unique_location_count}")
+        print(f"  Total Players: {director.stats.total_player_count}")
+        print(f"  Unique Players: {director.stats.unique_player_count}")
+        print(f"  Largest Event: {director.stats.largest_event_count} players")
+        print(f"  Average Tournament Value: {director.stats.average_value}")
+        print(f"  Highest Tournament Value: {director.stats.highest_value}")
+
+    # Output:
+    # Name: Josh Rainwater
+    # Director ID: 1533
+    # Location: Columbia, SC, United States
+    #
+    # Director Statistics:
+    #   Total Tournaments: 13
+    #   Unique Venues: 1
+    #   Total Players: 347
+    #   Unique Players: 120
+    #   Largest Event: 41 players
+    #   Average Tournament Value: 5.89
+    #   Highest Tournament Value: 11.82
+    ```
 
 #### Director Profile Information
 
@@ -190,38 +273,80 @@ except IfpaApiError as e:
 
 Access a director's tournament history:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.common import TimePeriod
-from ifpa_api.models.director import DirectorTournamentsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.common import TimePeriod
+    from ifpa_api.models.director import DirectorTournamentsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get past tournaments for Josh Rainwater (1533)
+            past: DirectorTournamentsResponse = await client.director.get_tournaments(
+                1533, TimePeriod.PAST
+            )
 
-# Get past tournaments for Josh Rainwater (1533)
-past: DirectorTournamentsResponse = client.director(1533).tournaments(TimePeriod.PAST)
+            print(f"Director: {past.director_name}")
+            print(f"Total past tournaments: {past.total_count}")
 
-print(f"Director: {past.director_name}")
-print(f"Total past tournaments: {past.total_count}")
+            for tournament in past.tournaments[:3]:  # Show first 3
+                print(f"\n{tournament.tournament_name}")
+                print(f"  Date: {tournament.event_date}")
+                print(f"  Location: {tournament.location_name}")
+                print(f"  City: {tournament.city}, {tournament.stateprov}")
+                print(f"  Players: {tournament.player_count}")
+                print(f"  Value: {tournament.value}")
 
-for tournament in past.tournaments[:3]:  # Show first 3
-    print(f"\n{tournament.tournament_name}")
-    print(f"  Date: {tournament.event_date}")
-    print(f"  Location: {tournament.location_name}")
-    print(f"  City: {tournament.city}, {tournament.stateprov}")
-    print(f"  Players: {tournament.player_count}")
-    print(f"  Value: {tournament.value}")
+    asyncio.run(main())
 
-# Output:
-# Director: Josh Rainwater
-# Total past tournaments: 13
-#
-# South Carolina Pinball Championship
-#   Date: 2024-03-16
-#   Location: Cinnebarre
-#   City: Columbia, SC
-#   Players: 41
-#   Value: 11.82
-```
+    # Output:
+    # Director: Josh Rainwater
+    # Total past tournaments: 13
+    #
+    # South Carolina Pinball Championship
+    #   Date: 2024-03-16
+    #   Location: Cinnebarre
+    #   City: Columbia, SC
+    #   Players: 41
+    #   Value: 11.82
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.common import TimePeriod
+    from ifpa_api.models.director import DirectorTournamentsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get past tournaments for Josh Rainwater (1533)
+    past: DirectorTournamentsResponse = client.director.get_tournaments(
+        1533, TimePeriod.PAST
+    )
+
+    print(f"Director: {past.director_name}")
+    print(f"Total past tournaments: {past.total_count}")
+
+    for tournament in past.tournaments[:3]:  # Show first 3
+        print(f"\n{tournament.tournament_name}")
+        print(f"  Date: {tournament.event_date}")
+        print(f"  Location: {tournament.location_name}")
+        print(f"  City: {tournament.city}, {tournament.stateprov}")
+        print(f"  Players: {tournament.player_count}")
+        print(f"  Value: {tournament.value}")
+
+    # Output:
+    # Director: Josh Rainwater
+    # Total past tournaments: 13
+    #
+    # South Carolina Pinball Championship
+    #   Date: 2024-03-16
+    #   Location: Cinnebarre
+    #   City: Columbia, SC
+    #   Players: 41
+    #   Value: 11.82
+    ```
 
 #### Get Upcoming Tournaments
 

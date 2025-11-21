@@ -25,65 +25,130 @@ The IFPA API client enables Python developers to access pinball rankings, tourna
 
 The v0.4.0 fluent API makes common operations simple and intuitive:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player, PlayerSearchResponse
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player, PlayerSearchResponse
 
-# Initialize client with API key
-client = IfpaClient(api_key="your-api-key")
+    # Initialize client with API key
+    client = IfpaClient(api_key="your-api-key")
 
-# === New Fluent API (v0.4.0+) ===
+    # === New Fluent API (v0.4.0+) ===
 
-# Direct resource access - simple and clear
-player: Player = client.player.get(25584)  # Dwayne Smith, Rank #753
-print(f"Player: {player.first_name} {player.last_name}")
+    # Direct resource access - simple and clear
+    player: Player = client.player.get(25584)  # Dwayne Smith, Rank #753
+    print(f"Player: {player.first_name} {player.last_name}")
 
-# Safe access - returns None instead of raising exception
-maybe_player: Player | None = client.player.get_or_none(999999)
-if maybe_player:
-    print(f"Found: {maybe_player.first_name}")
+    # Safe access - returns None instead of raising exception
+    maybe_player: Player | None = client.player.get_or_none(999999)
+    if maybe_player:
+        print(f"Found: {maybe_player.first_name}")
 
-# Quick existence check
-if client.player.exists(25584):
-    print("Player exists!")
+    # Quick existence check
+    if client.player.exists(25584):
+        print("Player exists!")
 
-# Search with new .search() method
-results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
-print(f"Found {len(results.search)} Smiths in Idaho")
+    # Search with new .search() method
+    results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
+    print(f"Found {len(results.search)} Smiths in Idaho")
 
-# Get first search result directly
-first_smith = client.player.search("Smith").state("ID").first()
-print(f"First result: {first_smith.first_name} {first_smith.last_name}")
+    # Get first search result directly
+    first_smith = client.player.search("Smith").state("ID").first()
+    print(f"First result: {first_smith.first_name} {first_smith.last_name}")
 
-# Safe first result - returns None if no matches
-maybe = client.player.search("NONEXISTENT").first_or_none()
+    # Safe first result - returns None if no matches
+    maybe = client.player.search("NONEXISTENT").first_or_none()
 
-# === Immutable Query Builder ===
+    # === Immutable Query Builder ===
 
-# Build base query and reuse it safely
-us_query = client.player.search().country("US")
-idaho_players = us_query.state("ID").get()     # Doesn't modify us_query
-washington_players = us_query.state("WA").get()  # us_query unchanged!
+    # Build base query and reuse it safely
+    us_query = client.player.search().country("US")
+    idaho_players = us_query.state("ID").get()     # Doesn't modify us_query
+    washington_players = us_query.state("WA").get()  # us_query unchanged!
 
-# === Advanced Filtering ===
+    # === Advanced Filtering ===
 
-# Complex searches with chaining
-papa_winners = (
-    client.player.search()
-    .tournament("PAPA")
-    .position(1)
-    .limit(25)
-    .get()
-)
+    # Complex searches with chaining
+    papa_winners = (
+        client.player.search()
+        .tournament("PAPA")
+        .position(1)
+        .limit(25)
+        .get()
+    )
 
-# === Rankings Access ===
+    # === Rankings Access ===
 
-rankings = client.rankings.wppr(count=10)
-for entry in rankings.rankings:
-    print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
+    rankings = client.rankings.wppr(count=10)
+    for entry in rankings.rankings:
+        print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
 
-client.close()
-```
+    client.close()
+    ```
+
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player, PlayerSearchResponse
+    import asyncio
+
+    async def main():
+        # Initialize async client with API key
+        async with AsyncIfpaClient(api_key="your-api-key") as client:
+            # === New Fluent API (v0.4.0+) ===
+
+            # Direct resource access - simple and clear
+            player: Player = await client.player.get(25584)  # Dwayne Smith, Rank #753
+            print(f"Player: {player.first_name} {player.last_name}")
+
+            # Safe access - returns None instead of raising exception
+            maybe_player: Player | None = await client.player.get_or_none(999999)
+            if maybe_player:
+                print(f"Found: {maybe_player.first_name}")
+
+            # Quick existence check
+            if await client.player.exists(25584):
+                print("Player exists!")
+
+            # Search with new .search() method
+            results: PlayerSearchResponse = await client.player.search("Smith").state("ID").get()
+            print(f"Found {len(results.search)} Smiths in Idaho")
+
+            # Get first search result directly
+            first_smith = await client.player.search("Smith").state("ID").first()
+            print(f"First result: {first_smith.first_name} {first_smith.last_name}")
+
+            # Safe first result - returns None if no matches
+            maybe = await client.player.search("NONEXISTENT").first_or_none()
+
+            # === Immutable Query Builder ===
+
+            # Build base query and reuse it safely
+            us_query = client.player.search().country("US")
+            idaho_players = await us_query.state("ID").get()     # Doesn't modify us_query
+            washington_players = await us_query.state("WA").get()  # us_query unchanged!
+
+            # === Advanced Filtering ===
+
+            # Complex searches with chaining
+            papa_winners = await (
+                client.player.search()
+                .tournament("PAPA")
+                .position(1)
+                .limit(25)
+                .get()
+            )
+
+            # === Rankings Access ===
+
+            rankings = await client.rankings.wppr(count=10)
+            for entry in rankings.rankings:
+                print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
+
+    asyncio.run(main())
+    ```
+
+> **Note**: See the [Async Usage Guide](guides/async-usage.md) for complete async/await documentation including concurrent requests and best practices.
 
 **What's New in v0.4.0:**
 
@@ -126,56 +191,117 @@ The client provides access to 46 IFPA API v2.1 endpoints across 7 resources:
 
 Here's a real-world workflow combining multiple fluent API patterns:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.player import Player, PlayerSearchResponse
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.player import Player, PlayerSearchResponse
 
-client = IfpaClient(api_key="your-api-key")
+    client = IfpaClient(api_key="your-api-key")
 
-# Step 1: Search for players in Idaho
-idaho_players: PlayerSearchResponse = (
-    client.player.search()
-    .country("US")
-    .state("ID")
-    .limit(10)
-    .get()
-)
-print(f"Found {len(idaho_players.search)} players")
+    # Step 1: Search for players in Idaho
+    idaho_players: PlayerSearchResponse = (
+        client.player.search()
+        .country("US")
+        .state("ID")
+        .limit(10)
+        .get()
+    )
+    print(f"Found {len(idaho_players.search)} players")
 
-# Step 2: Get details for the top player
-if idaho_players.search:
-    top_player_id = idaho_players.search[0].player_id
-    top_player: Player = client.player.get(top_player_id)
-    print(f"Top player: {top_player.first_name} {top_player.last_name}")
+    # Step 2: Get details for the top player
+    if idaho_players.search:
+        top_player_id = idaho_players.search[0].player_id
+        top_player: Player = client.player.get(top_player_id)
+        print(f"Top player: {top_player.first_name} {top_player.last_name}")
 
-    if top_player.player_stats:
-        stats = top_player.player_stats['system']['open']
-        print(f"Rank: {stats['current_rank']}")
+        if top_player.player_stats:
+            stats = top_player.player_stats['system']['open']
+            print(f"Rank: {stats['current_rank']}")
 
-# Step 3: Check if a specific player exists
-if client.player.exists(50104):  # John Sosoka
-    player: Player = client.player.get(50104)
-    print(f"Found: {player.first_name} {player.last_name}")
+    # Step 3: Check if a specific player exists
+    if client.player.exists(50104):  # John Sosoka
+        player: Player = client.player.get(50104)
+        print(f"Found: {player.first_name} {player.last_name}")
 
-# Step 4: Find tournaments with safe access
-papa_tournament = client.tournament.search("PAPA").country("US").first_or_none()
-if papa_tournament:
-    print(f"Tournament: {papa_tournament.tournament_name}")
+    # Step 4: Find tournaments with safe access
+    papa_tournament = client.tournament.search("PAPA").country("US").first_or_none()
+    if papa_tournament:
+        print(f"Tournament: {papa_tournament.tournament_name}")
 
-# Step 5: Batch operations with existence checks
-player_ids = [25584, 47585, 52913]  # Active Idaho players
-valid_players: list[Player] = []
+    # Step 5: Batch operations with existence checks
+    player_ids = [25584, 47585, 52913]  # Active Idaho players
+    valid_players: list[Player] = []
 
-for pid in player_ids:
-    if client.player.exists(pid):
-        player = client.player.get(pid)
-        valid_players.append(player)
-        print(f"✓ {player.first_name} {player.last_name}")
+    for pid in player_ids:
+        if client.player.exists(pid):
+            player = client.player.get(pid)
+            valid_players.append(player)
+            print(f"✓ {player.first_name} {player.last_name}")
 
-print(f"Successfully loaded {len(valid_players)} players")
+    print(f"Successfully loaded {len(valid_players)} players")
 
-client.close()
-```
+    client.close()
+    ```
+
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.player import Player, PlayerSearchResponse
+    import asyncio
+
+    async def main():
+        async with AsyncIfpaClient(api_key="your-api-key") as client:
+            # Step 1: Search for players in Idaho
+            idaho_players: PlayerSearchResponse = await (
+                client.player.search()
+                .country("US")
+                .state("ID")
+                .limit(10)
+                .get()
+            )
+            print(f"Found {len(idaho_players.search)} players")
+
+            # Step 2: Get details for the top player
+            if idaho_players.search:
+                top_player_id = idaho_players.search[0].player_id
+                top_player: Player = await client.player.get(top_player_id)
+                print(f"Top player: {top_player.first_name} {top_player.last_name}")
+
+                if top_player.player_stats:
+                    stats = top_player.player_stats['system']['open']
+                    print(f"Rank: {stats['current_rank']}")
+
+            # Step 3: Check if a specific player exists
+            if await client.player.exists(50104):  # John Sosoka
+                player: Player = await client.player.get(50104)
+                print(f"Found: {player.first_name} {player.last_name}")
+
+            # Step 4: Find tournaments with safe access
+            papa_tournament = await client.tournament.search("PAPA").country("US").first_or_none()
+            if papa_tournament:
+                print(f"Tournament: {papa_tournament.tournament_name}")
+
+            # Step 5: Batch operations with concurrent requests (efficient!)
+            player_ids = [25584, 47585, 52913]  # Active Idaho players
+
+            # Check all players concurrently
+            existence_checks = await asyncio.gather(
+                *[client.player.exists(pid) for pid in player_ids]
+            )
+
+            # Fetch existing players concurrently
+            valid_ids = [pid for pid, exists in zip(player_ids, existence_checks) if exists]
+            players = await asyncio.gather(
+                *[client.player.get(pid) for pid in valid_ids]
+            )
+
+            for player in players:
+                print(f"✓ {player.first_name} {player.last_name}")
+
+            print(f"Successfully loaded {len(players)} players")
+
+    asyncio.run(main())
+    ```
 
 ## Getting Help
 
@@ -194,6 +320,7 @@ client.close()
 ### Learn Key Patterns
 - [Fluent API Guide](guides/callable-pattern.md) - Direct `.get()` and safe access patterns
 - [Search Guide](guides/searching.md) - Modern `.search()` with `.first()` helpers
+- [Async Usage](guides/async-usage.md) - Async/await patterns and concurrent requests
 - [Pagination](guides/pagination.md) - Handle large result sets
 
 ### Explore Resources

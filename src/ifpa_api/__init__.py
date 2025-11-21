@@ -34,6 +34,7 @@ Example:
     ```
 """
 
+from ifpa_api.async_client import AsyncIfpaClient
 from ifpa_api.client import IfpaClient
 from ifpa_api.core.exceptions import (
     IfpaApiError,
@@ -46,11 +47,12 @@ from ifpa_api.core.exceptions import (
 )
 from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
-    # Main client
+    # Main clients
     "IfpaClient",
+    "AsyncIfpaClient",
     # Enums
     "TimePeriod",
     "RankingSystem",

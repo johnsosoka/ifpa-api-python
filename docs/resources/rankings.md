@@ -6,51 +6,103 @@ Access various IFPA ranking systems including WPPR, women's, youth, professional
 
 Retrieve the main World Pinball Player Rankings:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import RankingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get top 100 players
+            rankings: RankingsResponse = await client.rankings.wppr(start_pos=0, count=100)
 
-# Get top 100 players
-rankings: RankingsResponse = client.rankings.wppr(start_pos=0, count=100)
+            print(f"Total ranked players: {rankings.total_results}")
+            print(f"Ranking system: {rankings.ranking_system}")
+            print(f"Last updated: {rankings.last_updated}")
 
-print(f"Total ranked players: {rankings.total_results}")
-print(f"Ranking system: {rankings.ranking_system}")
-print(f"Last updated: {rankings.last_updated}")
+            for entry in rankings.rankings:
+                print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
 
-for entry in rankings.rankings:
-    print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get top 100 players
+    rankings: RankingsResponse = client.rankings.wppr(start_pos=0, count=100)
+
+    print(f"Total ranked players: {rankings.total_results}")
+    print(f"Ranking system: {rankings.ranking_system}")
+    print(f"Last updated: {rankings.last_updated}")
+
+    for entry in rankings.rankings:
+        print(f"{entry.rank}. {entry.player_name}: {entry.rating}")
+    ```
 
 ### Filter by Location
 
 Filter rankings by country or region:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import RankingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get US rankings only
+            us_rankings: RankingsResponse = await client.rankings.wppr(
+                country="US",
+                count=100
+            )
 
-# Get US rankings only
-us_rankings: RankingsResponse = client.rankings.wppr(
-    country="US",
-    count=100
-)
+            # Get rankings for specific region
+            region_rankings: RankingsResponse = await client.rankings.wppr(
+                region="Northwest",
+                count=50
+            )
 
-# Get rankings for specific region
-region_rankings: RankingsResponse = client.rankings.wppr(
-    region="Northwest",
-    count=50
-)
+            # Paginated results
+            next_page: RankingsResponse = await client.rankings.wppr(
+                start_pos=100,
+                count=100
+            )
 
-# Paginated results
-next_page: RankingsResponse = client.rankings.wppr(
-    start_pos=100,
-    count=100
-)
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get US rankings only
+    us_rankings: RankingsResponse = client.rankings.wppr(
+        country="US",
+        count=100
+    )
+
+    # Get rankings for specific region
+    region_rankings: RankingsResponse = client.rankings.wppr(
+        region="Northwest",
+        count=50
+    )
+
+    # Paginated results
+    next_page: RankingsResponse = client.rankings.wppr(
+        start_pos=100,
+        count=100
+    )
+    ```
 
 ### WPPR Parameters
 
@@ -65,37 +117,74 @@ next_page: RankingsResponse = client.rankings.wppr(
 
 Access women's ranking system with options for open or women-only tournaments:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import RankingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get women's rankings from all tournaments
+            rankings: RankingsResponse = await client.rankings.women(
+                tournament_type="OPEN",
+                start_pos=0,
+                count=50
+            )
 
-# Get women's rankings from all tournaments
-rankings: RankingsResponse = client.rankings.women(
-    tournament_type="OPEN",
-    start_pos=0,
-    count=50
-)
+            # Get women's rankings from women-only tournaments
+            women_only: RankingsResponse = await client.rankings.women(
+                tournament_type="WOMEN",
+                count=50
+            )
 
-# Get women's rankings from women-only tournaments
-women_only: RankingsResponse = client.rankings.women(
-    tournament_type="WOMEN",
-    count=50
-)
+            # Filter by country
+            us_women: RankingsResponse = await client.rankings.women(
+                tournament_type="OPEN",
+                country="US",
+                count=100
+            )
 
-# Filter by country
-us_women: RankingsResponse = client.rankings.women(
-    tournament_type="OPEN",
-    country="US",
-    count=100
-)
+            for entry in rankings.rankings:
+                print(f"{entry.rank}. {entry.player_name}")
+                print(f"  Rating: {entry.rating}")
+                print(f"  Location: {entry.city}, {entry.stateprov}")
 
-for entry in rankings.rankings:
-    print(f"{entry.rank}. {entry.player_name}")
-    print(f"  Rating: {entry.rating}")
-    print(f"  Location: {entry.city}, {entry.stateprov}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get women's rankings from all tournaments
+    rankings: RankingsResponse = client.rankings.women(
+        tournament_type="OPEN",
+        start_pos=0,
+        count=50
+    )
+
+    # Get women's rankings from women-only tournaments
+    women_only: RankingsResponse = client.rankings.women(
+        tournament_type="WOMEN",
+        count=50
+    )
+
+    # Filter by country
+    us_women: RankingsResponse = client.rankings.women(
+        tournament_type="OPEN",
+        country="US",
+        count=100
+    )
+
+    for entry in rankings.rankings:
+        print(f"{entry.rank}. {entry.player_name}")
+        print(f"  Rating: {entry.rating}")
+        print(f"  Location: {entry.city}, {entry.stateprov}")
+    ```
 
 ### Women's Rankings Parameters
 
@@ -110,29 +199,58 @@ for entry in rankings.rankings:
 
 Access youth player rankings:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import RankingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get top youth players
+            youth: RankingsResponse = await client.rankings.youth(
+                start_pos=0,
+                count=50
+            )
 
-# Get top youth players
-youth: RankingsResponse = client.rankings.youth(
-    start_pos=0,
-    count=50
-)
+            # Filter by country
+            us_youth: RankingsResponse = await client.rankings.youth(
+                country="US",
+                count=100
+            )
 
-# Filter by country
-us_youth: RankingsResponse = client.rankings.youth(
-    country="US",
-    count=100
-)
+            for entry in youth.rankings:
+                print(f"{entry.rank}. {entry.player_name} (Age: {entry.age})")
+                print(f"  Rating: {entry.rating}")
+                print(f"  Active Events: {entry.active_events}")
 
-for entry in youth.rankings:
-    print(f"{entry.rank}. {entry.player_name} (Age: {entry.age})")
-    print(f"  Rating: {entry.rating}")
-    print(f"  Active Events: {entry.active_events}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.rankings import RankingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get top youth players
+    youth: RankingsResponse = client.rankings.youth(
+        start_pos=0,
+        count=50
+    )
+
+    # Filter by country
+    us_youth: RankingsResponse = client.rankings.youth(
+        country="US",
+        count=100
+    )
+
+    for entry in youth.rankings:
+        print(f"{entry.rank}. {entry.player_name} (Age: {entry.age})")
+        print(f"  Rating: {entry.rating}")
+        print(f"  Active Events: {entry.active_events}")
+    ```
 
 ### Youth Rankings Parameters
 
@@ -218,29 +336,58 @@ for entry in pro.rankings:
 
 Get player rankings filtered by a specific country:
 
-```python
-from ifpa_api import IfpaClient
-from ifpa_api.models.rankings import CountryRankingsResponse
+=== "Async"
+    ```python
+    from ifpa_api import AsyncIfpaClient
+    from ifpa_api.models.rankings import CountryRankingsResponse
+    import asyncio
 
-client: IfpaClient = IfpaClient()
+    async def main():
+        async with AsyncIfpaClient() as client:
+            # Get US player rankings
+            us_rankings: CountryRankingsResponse = await client.rankings.by_country(
+                country="US",
+                start_pos=0,
+                count=25
+            )
 
-# Get US player rankings
-us_rankings: CountryRankingsResponse = client.rankings.by_country(
-    country="US",
-    start_pos=0,
-    count=25
-)
+            print(f"Country: {us_rankings.rank_country_name}")
+            print(f"Total players: {us_rankings.total_count}")
+            print(f"Showing: {us_rankings.return_count} results starting at position {us_rankings.start_position}")
 
-print(f"Country: {us_rankings.rank_country_name}")
-print(f"Total players: {us_rankings.total_count}")
-print(f"Showing: {us_rankings.return_count} results starting at position {us_rankings.start_position}")
+            for entry in us_rankings.rankings:
+                print(f"{entry.rank}. {entry.player_name}")
+                print(f"  Rating: {entry.rating}")
+                print(f"  Location: {entry.city}, {entry.stateprov}")
+                print(f"  Active Events: {entry.active_events}")
 
-for entry in us_rankings.rankings:
-    print(f"{entry.rank}. {entry.player_name}")
-    print(f"  Rating: {entry.rating}")
-    print(f"  Location: {entry.city}, {entry.stateprov}")
-    print(f"  Active Events: {entry.active_events}")
-```
+    asyncio.run(main())
+    ```
+
+=== "Sync"
+    ```python
+    from ifpa_api import IfpaClient
+    from ifpa_api.models.rankings import CountryRankingsResponse
+
+    client: IfpaClient = IfpaClient()
+
+    # Get US player rankings
+    us_rankings: CountryRankingsResponse = client.rankings.by_country(
+        country="US",
+        start_pos=0,
+        count=25
+    )
+
+    print(f"Country: {us_rankings.rank_country_name}")
+    print(f"Total players: {us_rankings.total_count}")
+    print(f"Showing: {us_rankings.return_count} results starting at position {us_rankings.start_position}")
+
+    for entry in us_rankings.rankings:
+        print(f"{entry.rank}. {entry.player_name}")
+        print(f"  Rating: {entry.rating}")
+        print(f"  Location: {entry.city}, {entry.stateprov}")
+        print(f"  Active Events: {entry.active_events}")
+    ```
 
 ### Filter by Country Code or Name
 
