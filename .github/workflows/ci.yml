@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - main
+      - develop
       - "feat/**"
       - "bugfix/**"
   pull_request:
     branches:
       - main
+      - develop
 
 # Cancel in-progress runs for the same workflow and branch
 concurrency:

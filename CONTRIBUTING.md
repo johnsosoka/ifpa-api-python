@@ -124,14 +124,19 @@ poetry run pytest
 
 ### 1. Create a Feature Branch
 
-Always create a new branch for your work:
+We use a **develop branch workflow**:
+- `main` - Stable release branch (protected)
+- `develop` - Active development integration branch
+- Feature branches - Created from and merged back to `develop`
+
+Always create a new branch for your work from `develop`:
 
 ```bash
-# Update your main branch
-git checkout main
-git pull upstream main
+# Update your develop branch
+git checkout develop
+git pull upstream develop
 
-# Create a feature branch
+# Create a feature branch from develop
 git checkout -b feature/your-feature-name
 
 # Or for bug fixes
@@ -144,6 +149,11 @@ Branch naming conventions:
 - `docs/description` - Documentation changes
 - `refactor/description` - Code refactoring
 - `test/description` - Test additions/improvements
+
+**Workflow Summary**:
+1. Feature branches are created from `develop`
+2. Pull requests target `develop` (not `main`)
+3. `main` receives periodic releases from `develop` via PR
 
 ### 2. Make Your Changes
 
@@ -386,7 +396,7 @@ git commit -m "test: add integration tests for tournaments"
 git push origin feature/your-feature-name
 ```
 
-Then create a pull request on GitHub with:
+Then create a pull request on GitHub **targeting the `develop` branch** with:
 
 1. **Clear title** describing the change
 2. **Description** including:
