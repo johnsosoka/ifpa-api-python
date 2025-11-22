@@ -6,92 +6,55 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/johnsosoka/ifpa-api-python/branch/main/graph/badge.svg)](https://codecov.io/gh/johnsosoka/ifpa-api-python)
-[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://johnsosoka.github.io/ifpa-api-python/)
+[![Documentation](https://readthedocs.org/projects/ifpa-api/badge/?version=latest)](https://ifpa-api.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **Note**: This is an unofficial client library, not affiliated with or endorsed by IFPA.
 
 A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, and statistics through a clean, type-safe Python interface with Pydantic validation.
 
-**Complete documentation**: https://johnsosoka.github.io/ifpa-api-python/
+**Complete documentation**: https://ifpa-api.readthedocs.io/
 
-## What's New in 0.3.0
+## What's New in 0.4.0
 
-**Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
+**ReadTheDocs Integration** - Professional documentation hosting:
+
+The complete documentation is now hosted on ReadTheDocs for improved accessibility and discoverability. Visit https://ifpa-api.readthedocs.io/ for guides, API reference, and examples.
+
+**Type-Safe Enums** - Enhanced type safety for rankings and tournaments:
 
 ```python
-from ifpa_api import (
-    IfpaClient,
-    IfpaApiError,
-    SeriesPlayerNotFoundError,
-    TournamentNotLeagueError,
+from ifpa_api import IfpaClient, RankingDivision, TournamentSearchType
+
+client = IfpaClient(api_key="your-api-key")
+
+# Rankings with type-safe enum
+rankings = client.rankings.women(
+    tournament_type=RankingDivision.OPEN,
+    count=50
 )
 
-# 1. Enhanced Error Messages - Full request context in exceptions
-try:
-    player = client.player(99999).details()
-except IfpaApiError as e:
-    print(e)  # "[404] Resource not found (URL: https://api.ifpapinball.com/player/99999)"
-    print(e.request_url)  # Direct access to URL
-    print(e.request_params)  # Direct access to query parameters
+# Tournament search with type-safe enum
+tournaments = (client.tournament.search("Championship")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .country("US")
+    .get())
 
-# 2. Pagination Helpers - Automatic pagination for large result sets
-for player in client.player.query().country("US").iterate(limit=100):
-    print(f"{player.first_name} {player.last_name}")
+# IDE autocomplete shows available options
+# - RankingDivision.OPEN / RankingDivision.WOMEN
+# - TournamentSearchType.OPEN / WOMEN / YOUTH / LEAGUE
 
-all_players = client.player.query().country("US").state("WA").get_all()
-
-# 3. Semantic Exceptions - Clear, specific errors for common scenarios
-try:
-    card = client.series("PAPA").player_card(12345, "OH")
-except SeriesPlayerNotFoundError as e:
-    print(f"Player {e.player_id} has no results in {e.series_code}")
-
-# 4. Better Validation Messages - Helpful hints for validation errors
-# Input error now shows: "Invalid parameter 'country': Input should be a valid string
-#                        Hint: Country code should be a 2-letter string like 'US' or 'CA'"
+# Strings still work (backward compatible)
+rankings = client.rankings.women(tournament_type="OPEN", count=50)
 ```
 
-**Query Builder Pattern** - Build complex queries with a fluent, type-safe interface:
+**Benefits:**
+- Type safety: Catch invalid values at development time
+- IDE autocomplete: Discover available division types
+- Self-documenting: Clear what values are valid
+- No breaking changes: Existing code continues to work
 
-```python
-# Immutable query builders allow reuse
-us_players = client.player.query().country("US")
-wa_results = us_players.state("WA").limit(25).get()
-or_results = us_players.state("OR").limit(25).get()  # Base query unchanged
-
-# Chain filters naturally
-tournaments = client.tournament.query("Championship") \
-    .country("US") \
-    .date_range("2024-01-01", "2024-12-31") \
-    .limit(50) \
-    .get()
-
-# Filter without search terms
-results = client.player.query() \
-    .tournament("PAPA") \
-    .position(1) \
-    .get()
-```
-
-**Unified Callable Pattern** - All resources now follow the same intuitive pattern:
-
-```python
-# Individual resource access
-player = client.player(12345).details()
-director = client.director(456).details()
-tournament = client.tournament(789).details()
-
-# Collection queries
-players = client.player.query("John").get()
-directors = client.director.query("Josh").get()
-tournaments = client.tournament.query("PAPA").get()
-
-# Series operations
-standings = client.series("NACS").standings()
-```
-
-**Breaking Changes**: Users upgrading from 0.2.x should review the [Migration Guide](#migration-from-02x).
+This release includes stats resource with 10 endpoints, type-safe enums for stats parameters, enhanced error messages, pagination helpers, and query builder pattern. See [CHANGELOG](CHANGELOG.md) for details.
 
 ## Features
 
@@ -101,7 +64,7 @@ standings = client.series("NACS").standings()
 - **Automatic Pagination**: Memory-efficient iteration with `.iterate()` and `.get_all()`
 - **Enhanced Error Context**: All exceptions include request URLs and parameters for debugging
 - **Semantic Exceptions**: Domain-specific errors (PlayersNeverMetError, SeriesPlayerNotFoundError, etc.)
-- **36 API Endpoints**: Complete coverage of IFPA API v2.1 across 6 resources
+- **46 API Endpoints**: Complete coverage of IFPA API v2.1 across 7 resources
 - **99% Test Coverage**: Comprehensive unit and integration tests
 - **Context Manager Support**: Automatic resource cleanup
 - **Clear Error Handling**: Structured exception hierarchy for different failure modes
@@ -266,6 +229,53 @@ regions = client.series("IFPA").regions(region_code="R1")
 all_series = client.series.list()
 active_only = client.series.list(active=True)
 ```
+
+### Stats
+
+```python
+from ifpa_api import IfpaClient, StatsRankType, SystemCode, MajorTournament
+
+client = IfpaClient()
+
+# Get overall IFPA statistics
+stats = client.stats.overall(system_code=SystemCode.OPEN)
+print(f"Active players: {stats.stats.active_player_count:,}")
+print(f"Tournaments this year: {stats.stats.tournament_count_this_year:,}")
+
+# Get top point earners for a time period
+points = client.stats.points_given_period(
+    rank_type=StatsRankType.OPEN,
+    start_date="2024-01-01",
+    end_date="2024-12-31",
+    limit=25
+)
+for player in points.stats[:10]:
+    print(f"{player.first_name} {player.last_name}: {player.wppr_points} pts")
+
+# Get largest tournaments
+tournaments = client.stats.largest_tournaments(
+    rank_type=StatsRankType.OPEN,
+    country_code="US"
+)
+for tourney in tournaments.stats[:10]:
+    print(f"{tourney.tournament_name}: {tourney.player_count} players")
+
+# Get player counts by country (women's rankings)
+country_stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+for country in country_stats.stats[:10]:
+    print(f"{country.country_name}: {country.player_count:,} players")
+
+# Get most active players in a time period
+active_players = client.stats.events_attended_period(
+    rank_type=StatsRankType.OPEN,
+    start_date="2024-01-01",
+    end_date="2024-12-31",
+    country_code="US",
+    limit=25
+)
+```
+
+**Type Safety**: Stats methods accept typed enums (e.g., `StatsRankType.WOMEN`) or strings for backwards compatibility.
 
 ### Reference Data
 
@@ -489,7 +499,7 @@ poetry run pre-commit run --all-files
 
 ## Resources
 
-- **Documentation**: https://johnsosoka.github.io/ifpa-api-python/
+- **Documentation**: https://ifpa-api.readthedocs.io/
 - **PyPI Package**: https://pypi.org/project/ifpa-api/
 - **GitHub Repository**: https://github.com/johnsosoka/ifpa-api-python
 - **Issue Tracker**: https://github.com/johnsosoka/ifpa-api-python/issues

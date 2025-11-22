@@ -106,7 +106,7 @@ Requires Python 3.11 or higher.
 
 ## API Resources
 
-The client provides access to 36 of 46 IFPA API endpoints:
+The client provides access to 46 of 46 IFPA API endpoints:
 
 | Resource | Description | Endpoints |
 |----------|-------------|-----------|
@@ -115,6 +115,7 @@ The client provides access to 36 of 46 IFPA API endpoints:
 | **Rankings** | WPPR, women, youth, pro, and custom rankings | 9 |
 | **Tournaments** | Search tournaments, view results and details | 6 |
 | **Series** | Tournament series standings and statistics | 8 |
+| **Stats** | Geographic distributions, historical trends, overall IFPA statistics | 10 |
 | **Reference** | Countries and states lookup | 2 |
 
 ## Getting Help
@@ -142,6 +143,7 @@ The client provides access to 36 of 46 IFPA API endpoints:
 - [Tournaments](resources/tournaments.md) - Tournament data
 - [Rankings](resources/rankings.md) - WPPR rankings
 - [Series](resources/series.md) - Series standings
+- [Stats](resources/stats.md) - Statistical data and trends
 
 ## License
 

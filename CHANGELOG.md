@@ -7,6 +7,152 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-11-22
+
+### Added
+
+**ReadTheDocs Integration** - Professional documentation hosting and infrastructure:
+
+- Created `.readthedocs.yaml` configuration file for automated documentation builds
+- Reorganized Poetry dependencies with dedicated `docs` group for MkDocs and mkdocs-material
+- Updated GitHub Actions CI workflow (`.github/workflows/ci.yml`) to use Poetry for docs builds
+- Documentation now available at https://ifpa-api.readthedocs.io/
+- Improved documentation discoverability and accessibility for the Python community
+
+**Type-Safe Enums for Rankings and Tournaments** - Enhanced type safety for improved developer experience:
+
+- `RankingDivision` enum for Rankings resource:
+  - `RankingDivision.OPEN` - Open division rankings
+  - `RankingDivision.WOMEN` - Women's division rankings
+  - Used in `RankingsClient.women()` for `tournament_type` parameter
+- `TournamentSearchType` enum for Tournament search:
+  - `TournamentSearchType.OPEN` - Open division tournaments
+  - `TournamentSearchType.WOMEN` - Women's division tournaments
+  - `TournamentSearchType.YOUTH` - Youth division tournaments
+  - `TournamentSearchType.LEAGUE` - League format tournaments
+  - Used in `TournamentQueryBuilder.tournament_type()` method
+- Both enums maintain full backward compatibility with string parameters via union types (`Enum | str`)
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, RankingDivision, TournamentSearchType
+
+client = IfpaClient()
+
+# Rankings with type-safe enum
+rankings = client.rankings.women(
+    tournament_type=RankingDivision.OPEN,
+    count=50
+)
+
+# Tournament search with type-safe enum
+tournaments = (client.tournament.search("Championship")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .country("US")
+    .get())
+
+# Strings still work (backward compatible)
+rankings = client.rankings.women(tournament_type="OPEN", count=50)
+```
+
+**Benefits:**
+- Type safety: Catch invalid values at development time with mypy
+- IDE autocomplete: Discover available division types
+- Self-documenting: Clear what values are valid
+- No breaking changes: Strings still work for existing code
+
+### Changed
+
+- Moved MkDocs and mkdocs-material from `dev` dependency group to dedicated optional `docs` group
+- Updated project documentation URL in `pyproject.toml` to point to ReadTheDocs
+- Enhanced documentation with comprehensive enum usage examples across Rankings and Tournaments resources
+- Updated `CLAUDE.md` with ReadTheDocs integration and new enum documentation
+
+### Documentation
+
+- Added type-safe enum examples to Rankings resource documentation
+- Added tournament type filtering examples to Tournaments resource documentation
+- Updated installation guide with current version references
+- Improved code examples throughout documentation to demonstrate new enums
+
+## [0.4.0] - 2025-11-21
+
+### Added
+
+**Type-Safe Enums for Stats Parameters** - Added three new enums for improved type safety and IDE autocomplete:
+
+- `StatsRankType.OPEN` and `StatsRankType.WOMEN` for rank_type parameters (used in 8 endpoints)
+- `SystemCode.OPEN` and `SystemCode.WOMEN` for system_code parameter in overall() endpoint
+- `MajorTournament.YES` and `MajorTournament.NO` for major parameter in lucrative_tournaments() endpoint
+- All enums maintain full backwards compatibility with string parameters
+- Union types (`Enum | str`) ensure existing code continues to work without changes
+- Enums are exported from main package: `from ifpa_api import StatsRankType, SystemCode, MajorTournament`
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, StatsRankType, MajorTournament
+
+client = IfpaClient()
+
+# Use enums for type safety (recommended)
+stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+tournaments = client.stats.lucrative_tournaments(
+    rank_type=StatsRankType.WOMEN,
+    major=MajorTournament.YES
+)
+
+# Strings still work (backwards compatible)
+stats = client.stats.country_players(rank_type="WOMEN")
+```
+
+**Benefits:**
+- ✅ Type safety: Catch typos at development time
+- ✅ IDE autocomplete: Discover available values
+- ✅ Self-documenting: Clear what values are valid
+- ✅ No breaking changes: Strings still work
+
+**Stats Resource (NEW)** - 10 operational endpoints for IFPA statistical data:
+
+The Stats API was documented in v0.1.0 as returning 404 errors from the live API. All endpoints are now operational and fully implemented with comprehensive testing.
+
+**Geographic Statistics:**
+- `StatsClient.country_players()` - Player count statistics by country with OPEN/WOMEN ranking support
+- `StatsClient.state_players()` - Player count statistics by state/province (North America)
+- `StatsClient.state_tournaments()` - Tournament counts and WPPR point totals by state
+
+**Historical Trends:**
+- `StatsClient.events_by_year()` - Yearly tournament, player, and country participation trends
+- `StatsClient.players_by_year()` - Player retention statistics across consecutive years
+
+**Tournament Rankings:**
+- `StatsClient.largest_tournaments()` - Top 25 tournaments by player count
+- `StatsClient.lucrative_tournaments()` - Top 25 tournaments by WPPR value with major/non-major filtering
+
+**Period-Based Analytics:**
+- `StatsClient.points_given_period()` - Top point earners for a custom date range
+- `StatsClient.events_attended_period()` - Most active players by tournament attendance for a date range
+
+**System Statistics:**
+- `StatsClient.overall()` - Comprehensive IFPA system metrics including total players, active players, tournament counts, and age distribution
+
+**Implementation Details:**
+- 22 new Pydantic models in `src/ifpa_api/models/stats.py`
+- String-to-int coercion for count fields (API returns strings like "47101")
+- Decimal type for point values to preserve full precision
+- Comprehensive docstrings with practical examples for all endpoints
+- Full integration with existing error handling and validation system
+
+**Known API Issues:**
+- `overall()` endpoint system_code=WOMEN parameter appears to be ignored by the API (returns OPEN data regardless)
+
+### Testing
+- 1333 lines of unit tests with inline mocked responses
+- 642 lines of integration tests against live API
+- 15 new tests specifically for enum type validation and backwards compatibility
+- Stats-specific test fixtures for date ranges and validation helpers
+- All tests passing
+- Maintained 99% code coverage
+
 ## [0.3.0] - 2025-11-18
 
 ### Breaking Changes - Field Name Alignment
@@ -589,7 +735,9 @@ profile = client.player(123).details()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0

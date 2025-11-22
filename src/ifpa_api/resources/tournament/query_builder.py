@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
 from ifpa_api.core.exceptions import IfpaClientValidationError
 from ifpa_api.core.query_builder import QueryBuilder
+from ifpa_api.models.common import TournamentSearchType
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
 if TYPE_CHECKING:
@@ -130,22 +131,39 @@ class TournamentQueryBuilder(
         clone._params["end_date"] = end_date
         return clone
 
-    def tournament_type(self, tournament_type: str) -> Self:
+    def tournament_type(self, tournament_type: TournamentSearchType | str) -> Self:
         """Filter by tournament type.
 
         Args:
-            tournament_type: Tournament type (e.g., "open", "women", "youth")
+            tournament_type: Tournament type filter (open, women, youth, league).
+                Can be string or TournamentSearchType enum.
 
         Returns:
             New TournamentQueryBuilder instance with tournament type filter applied
 
         Example:
             ```python
-            results = client.tournament.query().tournament_type("women").get()
+            from ifpa_api import TournamentSearchType
+
+            # Using enum (preferred)
+            results = (client.tournament.search()
+                .tournament_type(TournamentSearchType.WOMEN)
+                .get())
+
+            # Using string (backwards compatible)
+            results = (client.tournament.search()
+                .tournament_type("women")
+                .get())
             ```
         """
         clone = self._clone()
-        clone._params["tournament_type"] = tournament_type
+        # Extract enum value if enum is passed
+        type_value = (
+            tournament_type.value
+            if isinstance(tournament_type, TournamentSearchType)
+            else tournament_type
+        )
+        clone._params["tournament_type"] = type_value
         return clone
 
     def get(self) -> TournamentSearchResponse:

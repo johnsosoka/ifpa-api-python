@@ -56,6 +56,7 @@ nav:
       - Rankings: resources/rankings.md
       - Tournaments: resources/tournaments.md
       - Series: resources/series.md
+      - Stats: resources/stats.md
       - Reference: resources/reference.md
   - API Client Reference:
       - Client: api-client-reference/client.md

@@ -43,9 +43,19 @@ from ifpa_api.core.exceptions import (
     SeriesPlayerNotFoundError,
     TournamentNotLeagueError,
 )
-from ifpa_api.models.common import RankingSystem, ResultType, TimePeriod, TournamentType
+from ifpa_api.models.common import (
+    MajorTournament,
+    RankingDivision,
+    RankingSystem,
+    ResultType,
+    StatsRankType,
+    SystemCode,
+    TimePeriod,
+    TournamentSearchType,
+    TournamentType,
+)
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     # Main client
@@ -55,6 +65,11 @@ __all__ = [
     "RankingSystem",
     "ResultType",
     "TournamentType",
+    "StatsRankType",
+    "SystemCode",
+    "MajorTournament",
+    "RankingDivision",
+    "TournamentSearchType",
     # Exceptions
     "IfpaError",
     "IfpaApiError",

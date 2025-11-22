@@ -57,8 +57,17 @@ results: TournamentSearchResponse = (client.tournament.query()
     .state("OR")
     .get())
 
-# Filter by tournament type
+# Filter by tournament type (using enum - preferred)
+from ifpa_api import TournamentSearchType
+
 results: TournamentSearchResponse = (client.tournament.query()
+    .country("US")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .limit(25)
+    .get())
+
+# Using strings (backwards compatible)
+results_str: TournamentSearchResponse = (client.tournament.query()
     .country("US")
     .tournament_type("women")
     .limit(25)
@@ -133,9 +142,11 @@ id_tournaments: TournamentSearchResponse = us_query.state("ID").limit(25).get()
 ca_tournaments: TournamentSearchResponse = us_query.state("CA").limit(25).get()
 
 # Create a reusable date range query
+from ifpa_api import TournamentSearchType
+
 year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
 us_2024 = year_2024.country("US").get()
-women_2024 = year_2024.tournament_type("women").get()
+women_2024 = year_2024.tournament_type(TournamentSearchType.WOMEN).get()
 ```
 
 ## Available Filters
@@ -149,7 +160,7 @@ The fluent query builder provides these methods:
 | `.state(stateprov)` | `str` | Filter by state/province code |
 | `.country(country)` | `str` | Filter by country code (e.g., "US", "CA") |
 | `.date_range(start, end)` | `str, str` | Date range filter (both required, YYYY-MM-DD format) |
-| `.tournament_type(type)` | `str` | Tournament type (e.g., "open", "women", "youth") |
+| `.tournament_type(type)` | `TournamentSearchType \| str` | Tournament type (`TournamentSearchType.OPEN`, `WOMEN`, `YOUTH`, `LEAGUE` or strings) |
 | `.offset(start_position)` | `int` | Pagination offset (0-based) |
 | `.limit(count)` | `int` | Maximum number of results |
 | `.get()` | - | Execute query and return results |
@@ -168,7 +179,7 @@ The fluent query builder provides these methods:
 Combine multiple filters for precise searches:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, TournamentSearchType
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
 client: IfpaClient = IfpaClient()
@@ -177,7 +188,7 @@ client: IfpaClient = IfpaClient()
 results: TournamentSearchResponse = (client.tournament.query()
     .country("US")
     .date_range("2024-01-01", "2024-12-31")
-    .tournament_type("women")
+    .tournament_type(TournamentSearchType.WOMEN)
     .limit(100)
     .get())
 

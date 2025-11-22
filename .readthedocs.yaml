@@ -1,0 +1,48 @@
+# Read the Docs configuration file for ifpa-api-python
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required: Specify version 2 for new features and compatibility
+version: 2
+
+# Build environment configuration
+build:
+  os: ubuntu-24.04  # Latest LTS for best package support
+  tools:
+    python: "3.11"  # Match project minimum Python version
+
+  # Custom build steps for Poetry dependency management
+  jobs:
+    post_create_environment:
+      # Install Poetry in ReadTheDocs environment
+      - pip install poetry==1.7.1
+      # Disable Poetry virtual environment creation (RTD manages its own)
+      - poetry config virtualenvs.create false
+
+    post_install:
+      # Install only documentation dependencies using Poetry
+      # --only docs: include the docs dependency group
+      # --no-root: don't install the ifpa-api package itself (not needed for docs)
+      - poetry install --only docs --no-root
+
+# MkDocs configuration
+mkdocs:
+  configuration: mkdocs.yml
+  # ReadTheDocs will automatically run: mkdocs build --site-dir $READTHEDOCS_OUTPUT/html
+
+# Optional: Search configuration
+search:
+  ranking:
+    # Boost API reference pages in search results
+    "api-client-reference/*": 2
+    # Boost getting started content
+    "getting-started/*": 3
+  ignore:
+    # Don't index generated/build artifacts
+    - "site/*"
+
+# Optional: Formats to build (in addition to HTML)
+# formats:
+#   - pdf
+#   - epub
+
+# Note: We don't specify python.install here because Poetry handles all installations

@@ -6,6 +6,7 @@ Tests the rankings resource client using mocked HTTP requests.
 import pytest
 import requests_mock
 
+from ifpa_api import RankingDivision
 from ifpa_api.client import IfpaClient
 from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.rankings import (
@@ -180,6 +181,54 @@ class TestRankingsClientSpecialSystems:
         assert "count=25" in query
         assert "country=us" in query
 
+    def test_women_rankings_with_enum_open(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test women's rankings using RankingDivision.OPEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/women/open",
+            json={
+                "rankings": [
+                    {
+                        "player_id": 1001,
+                        "current_rank": 1,
+                        "name": "Top Woman Player",
+                        "rating_value": 800.5,
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        rankings = client.rankings.women(tournament_type=RankingDivision.OPEN, count=50)
+
+        assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
+        assert "women/open" in mock_requests.last_request.path
+
+    def test_women_rankings_with_enum_women(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test women's rankings using RankingDivision.WOMEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/women/women",
+            json={
+                "rankings": [
+                    {
+                        "player_id": 1002,
+                        "current_rank": 1,
+                        "name": "Top Women-Only Player",
+                        "rating_value": 750.0,
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        rankings = client.rankings.women(tournament_type=RankingDivision.WOMEN, count=50)
+
+        assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
+        assert "women/women" in mock_requests.last_request.path
+
     def test_youth_rankings(self, mock_requests: requests_mock.Mocker) -> None:
         """Test getting youth rankings."""
         mock_requests.get(
@@ -275,6 +324,54 @@ class TestRankingsClientSpecialSystems:
 
         client = IfpaClient(api_key="test-key")
         rankings = client.rankings.pro(ranking_system="WOMEN")
+
+        assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
+        assert "pro/women" in mock_requests.last_request.path
+
+    def test_pro_rankings_with_enum_open(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test pro rankings using RankingDivision.OPEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/pro/open",
+            json={
+                "rankings": [
+                    {
+                        "player_id": 4001,
+                        "current_rank": 1,
+                        "name": "Top Pro Player",
+                        "rating_value": 1200.0,
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        rankings = client.rankings.pro(ranking_system=RankingDivision.OPEN, count=50)
+
+        assert len(rankings.rankings) == 1
+        assert mock_requests.last_request is not None
+        assert "pro/open" in mock_requests.last_request.path
+
+    def test_pro_rankings_with_enum_women(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test pro rankings using RankingDivision.WOMEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/rankings/pro/women",
+            json={
+                "rankings": [
+                    {
+                        "player_id": 4002,
+                        "current_rank": 1,
+                        "name": "Top Women Pro Player",
+                        "rating_value": 1100.0,
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        rankings = client.rankings.pro(ranking_system=RankingDivision.WOMEN, count=50)
 
         assert len(rankings.rankings) == 1
         assert mock_requests.last_request is not None
