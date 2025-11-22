@@ -6,95 +6,55 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/johnsosoka/ifpa-api-python/branch/main/graph/badge.svg)](https://codecov.io/gh/johnsosoka/ifpa-api-python)
-[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://johnsosoka.github.io/ifpa-api-python/)
+[![Documentation](https://readthedocs.org/projects/ifpa-api/badge/?version=latest)](https://ifpa-api.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **Note**: This is an unofficial client library, not affiliated with or endorsed by IFPA.
 
 A typed Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/). Access player rankings, tournament data, and statistics through a clean, type-safe Python interface with Pydantic validation.
 
-**Complete documentation**: https://johnsosoka.github.io/ifpa-api-python/
+**Complete documentation**: https://ifpa-api.readthedocs.io/
 
 ## What's New in 0.4.0
 
-**Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
+**ReadTheDocs Integration** - Professional documentation hosting:
+
+The complete documentation is now hosted on ReadTheDocs for improved accessibility and discoverability. Visit https://ifpa-api.readthedocs.io/ for guides, API reference, and examples.
+
+**Type-Safe Enums** - Enhanced type safety for rankings and tournaments:
 
 ```python
-from ifpa_api import (
-    IfpaClient,
-    IfpaApiError,
-    SeriesPlayerNotFoundError,
-    TournamentNotLeagueError,
-    StatsRankType,
-    MajorTournament,
-    SystemCode,
+from ifpa_api import IfpaClient, RankingDivision, TournamentSearchType
+
+client = IfpaClient(api_key="your-api-key")
+
+# Rankings with type-safe enum
+rankings = client.rankings.women(
+    tournament_type=RankingDivision.OPEN,
+    count=50
 )
 
-# 1. Enhanced Error Messages - Full request context in exceptions
-try:
-    player = client.player(99999).details()
-except IfpaApiError as e:
-    print(e)  # "[404] Resource not found (URL: https://api.ifpapinball.com/player/99999)"
-    print(e.request_url)  # Direct access to URL
-    print(e.request_params)  # Direct access to query parameters
+# Tournament search with type-safe enum
+tournaments = (client.tournament.search("Championship")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .country("US")
+    .get())
 
-# 2. Pagination Helpers - Automatic pagination for large result sets
-for player in client.player.query().country("US").iterate(limit=100):
-    print(f"{player.first_name} {player.last_name}")
+# IDE autocomplete shows available options
+# - RankingDivision.OPEN / RankingDivision.WOMEN
+# - TournamentSearchType.OPEN / WOMEN / YOUTH / LEAGUE
 
-all_players = client.player.query().country("US").state("WA").get_all()
-
-# 3. Semantic Exceptions - Clear, specific errors for common scenarios
-try:
-    card = client.series("PAPA").player_card(12345, "OH")
-except SeriesPlayerNotFoundError as e:
-    print(f"Player {e.player_id} has no results in {e.series_code}")
-
-# 4. Better Validation Messages - Helpful hints for validation errors
-# Input error now shows: "Invalid parameter 'country': Input should be a valid string
-#                        Hint: Country code should be a 2-letter string like 'US' or 'CA'"
+# Strings still work (backward compatible)
+rankings = client.rankings.women(tournament_type="OPEN", count=50)
 ```
 
-**Query Builder Pattern** - Build complex queries with a fluent, type-safe interface:
+**Benefits:**
+- Type safety: Catch invalid values at development time
+- IDE autocomplete: Discover available division types
+- Self-documenting: Clear what values are valid
+- No breaking changes: Existing code continues to work
 
-```python
-# Immutable query builders allow reuse
-us_players = client.player.query().country("US")
-wa_results = us_players.state("WA").limit(25).get()
-or_results = us_players.state("OR").limit(25).get()  # Base query unchanged
-
-# Chain filters naturally
-tournaments = client.tournament.query("Championship") \
-    .country("US") \
-    .date_range("2024-01-01", "2024-12-31") \
-    .limit(50) \
-    .get()
-
-# Filter without search terms
-results = client.player.query() \
-    .tournament("PAPA") \
-    .position(1) \
-    .get()
-```
-
-**Unified Callable Pattern** - All resources now follow the same intuitive pattern:
-
-```python
-# Individual resource access
-player = client.player(12345).details()
-director = client.director(456).details()
-tournament = client.tournament(789).details()
-
-# Collection queries
-players = client.player.query("John").get()
-directors = client.director.query("Josh").get()
-tournaments = client.tournament.query("PAPA").get()
-
-# Series operations
-standings = client.series("NACS").standings()
-```
-
-**Breaking Changes**: Users upgrading from 0.2.x should review the [Migration Guide](#migration-from-02x).
+This release includes stats resource with 10 endpoints, type-safe enums for stats parameters, enhanced error messages, pagination helpers, and query builder pattern. See [CHANGELOG](CHANGELOG.md) for details.
 
 ## Features
 
@@ -539,7 +499,7 @@ poetry run pre-commit run --all-files
 
 ## Resources
 
-- **Documentation**: https://johnsosoka.github.io/ifpa-api-python/
+- **Documentation**: https://ifpa-api.readthedocs.io/
 - **PyPI Package**: https://pypi.org/project/ifpa-api/
 - **GitHub Repository**: https://github.com/johnsosoka/ifpa-api-python
 - **Issue Tracker**: https://github.com/johnsosoka/ifpa-api-python/issues

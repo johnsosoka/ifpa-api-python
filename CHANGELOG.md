@@ -7,6 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-11-22
+
+### Added
+
+**ReadTheDocs Integration** - Professional documentation hosting and infrastructure:
+
+- Created `.readthedocs.yaml` configuration file for automated documentation builds
+- Reorganized Poetry dependencies with dedicated `docs` group for MkDocs and mkdocs-material
+- Updated GitHub Actions CI workflow (`.github/workflows/ci.yml`) to use Poetry for docs builds
+- Documentation now available at https://ifpa-api.readthedocs.io/
+- Improved documentation discoverability and accessibility for the Python community
+
+**Type-Safe Enums for Rankings and Tournaments** - Enhanced type safety for improved developer experience:
+
+- `RankingDivision` enum for Rankings resource:
+  - `RankingDivision.OPEN` - Open division rankings
+  - `RankingDivision.WOMEN` - Women's division rankings
+  - Used in `RankingsClient.women()` for `tournament_type` parameter
+- `TournamentSearchType` enum for Tournament search:
+  - `TournamentSearchType.OPEN` - Open division tournaments
+  - `TournamentSearchType.WOMEN` - Women's division tournaments
+  - `TournamentSearchType.YOUTH` - Youth division tournaments
+  - `TournamentSearchType.LEAGUE` - League format tournaments
+  - Used in `TournamentQueryBuilder.tournament_type()` method
+- Both enums maintain full backward compatibility with string parameters via union types (`Enum | str`)
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, RankingDivision, TournamentSearchType
+
+client = IfpaClient()
+
+# Rankings with type-safe enum
+rankings = client.rankings.women(
+    tournament_type=RankingDivision.OPEN,
+    count=50
+)
+
+# Tournament search with type-safe enum
+tournaments = (client.tournament.search("Championship")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .country("US")
+    .get())
+
+# Strings still work (backward compatible)
+rankings = client.rankings.women(tournament_type="OPEN", count=50)
+```
+
+**Benefits:**
+- Type safety: Catch invalid values at development time with mypy
+- IDE autocomplete: Discover available division types
+- Self-documenting: Clear what values are valid
+- No breaking changes: Strings still work for existing code
+
+### Changed
+
+- Moved MkDocs and mkdocs-material from `dev` dependency group to dedicated optional `docs` group
+- Updated project documentation URL in `pyproject.toml` to point to ReadTheDocs
+- Enhanced documentation with comprehensive enum usage examples across Rankings and Tournaments resources
+- Updated `CLAUDE.md` with ReadTheDocs integration and new enum documentation
+
+### Documentation
+
+- Added type-safe enum examples to Rankings resource documentation
+- Added tournament type filtering examples to Tournaments resource documentation
+- Updated installation guide with current version references
+- Improved code examples throughout documentation to demonstrate new enums
+
 ## [0.4.0] - 2025-11-21
 
 ### Added

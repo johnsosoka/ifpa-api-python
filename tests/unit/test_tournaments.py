@@ -6,6 +6,7 @@ Tests the tournaments resource client and handle using mocked HTTP requests.
 import pytest
 import requests_mock
 
+from ifpa_api import TournamentSearchType
 from ifpa_api.client import IfpaClient
 from ifpa_api.core.exceptions import (
     IfpaApiError,
@@ -131,6 +132,98 @@ class TestTournamentsClient:
         assert len(result.tournaments) == 1
         assert mock_requests.last_request is not None
         assert "tournament_type=women" in mock_requests.last_request.query
+
+    def test_search_with_enum_women(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test tournament search using TournamentSearchType.WOMEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 10004,
+                        "tournament_name": "Women's Championship",
+                        "tournament_type": "women",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.query().tournament_type(TournamentSearchType.WOMEN).get()
+
+        assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
+        assert "tournament_type=women" in mock_requests.last_request.query
+
+    def test_search_with_enum_youth(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test tournament search using TournamentSearchType.YOUTH enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 10005,
+                        "tournament_name": "Youth Championship",
+                        "tournament_type": "youth",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.query().tournament_type(TournamentSearchType.YOUTH).get()
+
+        assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
+        assert "tournament_type=youth" in mock_requests.last_request.query
+
+    def test_search_with_enum_league(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test tournament search using TournamentSearchType.LEAGUE enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 10006,
+                        "tournament_name": "League Tournament",
+                        "tournament_type": "league",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.query().tournament_type(TournamentSearchType.LEAGUE).get()
+
+        assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
+        assert "tournament_type=league" in mock_requests.last_request.query
+
+    def test_search_with_enum_open(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test tournament search using TournamentSearchType.OPEN enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/tournament/search",
+            json={
+                "tournaments": [
+                    {
+                        "tournament_id": 10007,
+                        "tournament_name": "Open Championship",
+                        "tournament_type": "open",
+                    }
+                ],
+                "total_results": 1,
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.tournament.query().tournament_type(TournamentSearchType.OPEN).get()
+
+        assert len(result.tournaments) == 1
+        assert mock_requests.last_request is not None
+        assert "tournament_type=open" in mock_requests.last_request.query
 
     def test_search_with_pagination(self, mock_requests: requests_mock.Mocker) -> None:
         """Test searching tournaments with pagination using query builder."""

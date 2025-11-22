@@ -45,11 +45,13 @@ from ifpa_api.core.exceptions import (
 )
 from ifpa_api.models.common import (
     MajorTournament,
+    RankingDivision,
     RankingSystem,
     ResultType,
     StatsRankType,
     SystemCode,
     TimePeriod,
+    TournamentSearchType,
     TournamentType,
 )
 
@@ -66,6 +68,8 @@ __all__ = [
     "StatsRankType",
     "SystemCode",
     "MajorTournament",
+    "RankingDivision",
+    "TournamentSearchType",
     # Exceptions
     "IfpaError",
     "IfpaApiError",

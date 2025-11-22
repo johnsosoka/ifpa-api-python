@@ -5,6 +5,7 @@ Youth, Pro, and custom rankings.
 """
 
 from ifpa_api.core.base import BaseResourceClient
+from ifpa_api.models.common import RankingDivision
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
     CustomRankingListResponse,
@@ -76,7 +77,7 @@ class RankingsClient(BaseResourceClient):
 
     def women(
         self,
-        tournament_type: str = "OPEN",
+        tournament_type: RankingDivision | str = "OPEN",
         start_pos: int | str | None = None,
         count: int | str | None = None,
         country: str | None = None,
@@ -85,7 +86,7 @@ class RankingsClient(BaseResourceClient):
 
         Args:
             tournament_type: Tournament type filter - "OPEN" for all tournaments or
-                "WOMEN" for women-only tournaments
+                "WOMEN" for women-only tournaments. Accepts RankingDivision enum or string.
             start_pos: Starting position for pagination
             count: Number of results to return (max 250)
             country: Filter by country code
@@ -98,13 +99,32 @@ class RankingsClient(BaseResourceClient):
 
         Example:
             ```python
-            # Get women's rankings from all tournaments
-            rankings = client.rankings.women(tournament_type="OPEN", start_pos=0, count=50)
+            from ifpa_api import RankingDivision
 
-            # Get women's rankings from women-only tournaments
-            women_only = client.rankings.women(tournament_type="WOMEN", count=50)
+            # Get women's rankings from all tournaments (using enum)
+            rankings = client.rankings.women(
+                tournament_type=RankingDivision.OPEN,
+                start_pos=0,
+                count=50
+            )
+
+            # Get women's rankings from women-only tournaments (using enum)
+            women_only = client.rankings.women(
+                tournament_type=RankingDivision.WOMEN,
+                count=50
+            )
+
+            # Using string (backwards compatible)
+            rankings = client.rankings.women(tournament_type="OPEN", count=50)
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        type_value = (
+            tournament_type.value
+            if isinstance(tournament_type, RankingDivision)
+            else tournament_type
+        )
+
         params = {}
         if start_pos is not None:
             params["start_pos"] = start_pos
@@ -114,7 +134,7 @@ class RankingsClient(BaseResourceClient):
             params["country"] = country
 
         response = self._http._request(
-            "GET", f"/rankings/women/{tournament_type.lower()}", params=params
+            "GET", f"/rankings/women/{type_value.lower()}", params=params
         )
         return RankingsResponse.model_validate(response)
 
@@ -190,7 +210,7 @@ class RankingsClient(BaseResourceClient):
 
     def pro(
         self,
-        ranking_system: str = "OPEN",
+        ranking_system: RankingDivision | str = "OPEN",
         start_pos: int | None = None,
         count: int | None = None,
     ) -> RankingsResponse:
@@ -198,7 +218,7 @@ class RankingsClient(BaseResourceClient):
 
         Args:
             ranking_system: Ranking system filter - "OPEN" for open division or
-                "WOMEN" for women's division
+                "WOMEN" for women's division. Accepts RankingDivision enum or string.
             start_pos: Starting position for pagination
             count: Number of results to return (max 250)
 
@@ -210,13 +230,30 @@ class RankingsClient(BaseResourceClient):
 
         Example:
             ```python
-            # Get open division pro rankings
-            rankings = client.rankings.pro(ranking_system="OPEN", start_pos=0, count=50)
+            from ifpa_api import RankingDivision
 
-            # Get women's division pro rankings
-            women_pro = client.rankings.pro(ranking_system="WOMEN", count=50)
+            # Get open division pro rankings (using enum)
+            rankings = client.rankings.pro(
+                ranking_system=RankingDivision.OPEN,
+                start_pos=0,
+                count=50
+            )
+
+            # Get women's division pro rankings (using enum)
+            women_pro = client.rankings.pro(
+                ranking_system=RankingDivision.WOMEN,
+                count=50
+            )
+
+            # Using string (backwards compatible)
+            rankings = client.rankings.pro(ranking_system="OPEN", count=50)
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        system_value = (
+            ranking_system.value if isinstance(ranking_system, RankingDivision) else ranking_system
+        )
+
         params = {}
         if start_pos is not None:
             params["start_pos"] = start_pos
@@ -224,7 +261,7 @@ class RankingsClient(BaseResourceClient):
             params["count"] = count
 
         response = self._http._request(
-            "GET", f"/rankings/pro/{ranking_system.lower()}", params=params
+            "GET", f"/rankings/pro/{system_value.lower()}", params=params
         )
         return RankingsResponse.model_validate(response)
 

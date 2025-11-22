@@ -103,6 +103,59 @@ class MajorTournament(str, Enum):
     NO = "N"
 
 
+class RankingDivision(str, Enum):
+    """Division filter for rankings queries.
+
+    Used in rankings endpoints to filter by player division.
+
+    Attributes:
+        OPEN: Open division (all players)
+        WOMEN: Women's division only
+
+    Example:
+        ```python
+        from ifpa_api import RankingDivision
+
+        # Get women's rankings for open tournaments
+        rankings = client.rankings.women(
+            tournament_type=RankingDivision.OPEN,
+            count=50
+        )
+        ```
+    """
+
+    OPEN = "OPEN"
+    WOMEN = "WOMEN"
+
+
+class TournamentSearchType(str, Enum):
+    """Tournament type filter for search queries.
+
+    Used in tournament search to filter by tournament type/format.
+
+    Attributes:
+        OPEN: Open tournaments (all players)
+        WOMEN: Women-only tournaments
+        YOUTH: Youth tournaments
+        LEAGUE: League-format tournaments
+
+    Example:
+        ```python
+        from ifpa_api import TournamentSearchType
+
+        # Search for women's tournaments
+        results = (client.tournament.search("Championship")
+            .tournament_type(TournamentSearchType.WOMEN)
+            .get())
+        ```
+    """
+
+    OPEN = "open"
+    WOMEN = "women"
+    YOUTH = "youth"
+    LEAGUE = "league"
+
+
 class IfpaBaseModel(BaseModel):
     """Base model for all IFPA SDK Pydantic models.
 

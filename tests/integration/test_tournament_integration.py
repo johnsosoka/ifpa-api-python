@@ -13,7 +13,7 @@ import os
 import pytest
 import requests
 
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, TournamentSearchType
 from ifpa_api.core.exceptions import IfpaApiError, TournamentNotLeagueError
 from ifpa_api.models.tournaments import (
     RelatedTournamentsResponse,
@@ -229,6 +229,67 @@ class TestTournamentSearchIntegration:
             tournament = result.tournaments[0]
             print(f"  Sample: {tournament.tournament_name} (ID: {tournament.tournament_id})")
 
+    def test_search_with_enum_women(self, api_key: str) -> None:
+        """Test search using TournamentSearchType.WOMEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        result = (
+            client.tournament.query().tournament_type(TournamentSearchType.WOMEN).limit(10).get()
+        )
+
+        assert isinstance(result, TournamentSearchResponse)
+        assert result.tournaments is not None
+        print(
+            f"✓ search(tournament_type=WOMEN enum) returned {len(result.tournaments)} tournaments"
+        )
+        if len(result.tournaments) > 0:
+            tournament = result.tournaments[0]
+            print(f"  Sample: {tournament.tournament_name} (ID: {tournament.tournament_id})")
+
+    def test_search_with_enum_youth(self, api_key: str) -> None:
+        """Test search using TournamentSearchType.YOUTH enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        result = (
+            client.tournament.query().tournament_type(TournamentSearchType.YOUTH).limit(10).get()
+        )
+
+        assert isinstance(result, TournamentSearchResponse)
+        assert result.tournaments is not None
+        print(
+            f"✓ search(tournament_type=YOUTH enum) returned {len(result.tournaments)} tournaments"
+        )
+
+    def test_search_with_enum_league(self, api_key: str) -> None:
+        """Test search using TournamentSearchType.LEAGUE enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        result = (
+            client.tournament.query().tournament_type(TournamentSearchType.LEAGUE).limit(10).get()
+        )
+
+        assert isinstance(result, TournamentSearchResponse)
+        assert result.tournaments is not None
+        print(
+            f"✓ search(tournament_type=LEAGUE enum) returned {len(result.tournaments)} tournaments"
+        )
+
+    def test_search_with_enum_open(self, api_key: str) -> None:
+        """Test search using TournamentSearchType.OPEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+
+        result = (
+            client.tournament.query().tournament_type(TournamentSearchType.OPEN).limit(10).get()
+        )
+
+        assert isinstance(result, TournamentSearchResponse)
+        assert result.tournaments is not None
+        print(f"✓ search(tournament_type=OPEN enum) returned {len(result.tournaments)} tournaments")
+
     def test_search_with_pagination(self, api_key: str, count_small: int) -> None:
         """Test search with pagination parameters (start_pos, count)."""
         skip_if_no_api_key()
@@ -425,21 +486,37 @@ class TestTournamentDetailsIntegration:
         assert tournament.tournament_name is not None
 
     def test_details_with_invalid_tournament(self, api_key: str) -> None:
-        """Test details() with an invalid tournament ID raises error."""
+        """Test details() with an invalid tournament ID raises error.
+
+        Note: IFPA API behavior is intermittent:
+        - Sometimes returns 400 error (wrapped as IfpaApiError)
+        - Sometimes returns 200 with empty dict (causes ValidationError)
+        This test accepts both scenarios and logs which occurred.
+        """
         skip_if_no_api_key()
         client = IfpaClient(api_key=api_key)
 
-        # Use a very high ID that shouldn't exist
-        # API returns 200 with empty dict, which causes Pydantic ValidationError
         from pydantic import ValidationError
 
-        with pytest.raises(ValidationError) as exc_info:
-            client.tournament(99999999).details()
+        from ifpa_api.core.exceptions import IfpaApiError
 
-        print(
-            f"✓ details() with invalid ID raised ValidationError "
-            f"(API returned empty data): {exc_info.value}"
-        )
+        # Use a very high ID that shouldn't exist
+        try:
+            client.tournament(99999999).details()
+            pytest.fail("Expected either ValidationError or IfpaApiError, but no error was raised")
+        except ValidationError:
+            # Old API behavior: 200 with empty dict
+            print(
+                "✓ details() with invalid ID raised ValidationError "
+                "(API returned 200 with empty data) - Old behavior"
+            )
+        except IfpaApiError as exc:
+            # New API behavior: 400 with error message
+            assert exc.status_code == 400
+            print(
+                f"✓ details() with invalid ID raised IfpaApiError "
+                f"(API returned 400: {exc.message}) - New behavior"
+            )
 
     def test_details_not_found(self, api_key: str) -> None:
         """Test that getting non-existent tournament raises appropriate error."""

@@ -7,6 +7,7 @@ readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/johnsosoka/ifpa-api-python"
 repository = "https://github.com/johnsosoka/ifpa-api-python"
+documentation = "https://ifpa-api.readthedocs.io/"
 keywords = ["ifpa", "pinball", "api", "client", "sdk"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -25,6 +26,13 @@ python = "^3.11"
 requests = "^2.31.0"
 pydantic = "^2.0.0"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.0"
+mkdocs-material = "^9.5.0"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
 pytest-cov = "^4.1.0"
@@ -34,8 +42,6 @@ ruff = "^0.14.5"
 black = "^24.0.0"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
-mkdocs = "^1.5.0"
-mkdocs-material = "^9.5.0"
 datamodel-code-generator = ">=0.25,<0.36"
 types-requests = "^2.31.0"
 
