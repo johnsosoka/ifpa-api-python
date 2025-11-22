@@ -15,7 +15,7 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 
 **Complete documentation**: https://johnsosoka.github.io/ifpa-api-python/
 
-## What's New in 0.3.0
+## What's New in 0.4.0
 
 **Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
 
@@ -25,6 +25,9 @@ from ifpa_api import (
     IfpaApiError,
     SeriesPlayerNotFoundError,
     TournamentNotLeagueError,
+    StatsRankType,
+    MajorTournament,
+    SystemCode,
 )
 
 # 1. Enhanced Error Messages - Full request context in exceptions
@@ -270,13 +273,18 @@ active_only = client.series.list(active=True)
 ### Stats
 
 ```python
+from ifpa_api import IfpaClient, StatsRankType, SystemCode, MajorTournament
+
+client = IfpaClient()
+
 # Get overall IFPA statistics
-stats = client.stats.overall()
+stats = client.stats.overall(system_code=SystemCode.OPEN)
 print(f"Active players: {stats.stats.active_player_count:,}")
 print(f"Tournaments this year: {stats.stats.tournament_count_this_year:,}")
 
 # Get top point earners for a time period
 points = client.stats.points_given_period(
+    rank_type=StatsRankType.OPEN,
     start_date="2024-01-01",
     end_date="2024-12-31",
     limit=25
@@ -285,23 +293,29 @@ for player in points.stats[:10]:
     print(f"{player.first_name} {player.last_name}: {player.wppr_points} pts")
 
 # Get largest tournaments
-tournaments = client.stats.largest_tournaments(country_code="US")
+tournaments = client.stats.largest_tournaments(
+    rank_type=StatsRankType.OPEN,
+    country_code="US"
+)
 for tourney in tournaments.stats[:10]:
     print(f"{tourney.tournament_name}: {tourney.player_count} players")
 
-# Get player counts by country
-country_stats = client.stats.country_players()
+# Get player counts by country (women's rankings)
+country_stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
 for country in country_stats.stats[:10]:
     print(f"{country.country_name}: {country.player_count:,} players")
 
 # Get most active players in a time period
 active_players = client.stats.events_attended_period(
+    rank_type=StatsRankType.OPEN,
     start_date="2024-01-01",
     end_date="2024-12-31",
     country_code="US",
     limit=25
 )
 ```
+
+**Type Safety**: Stats methods accept typed enums (e.g., `StatsRankType.WOMEN`) or strings for backwards compatibility.
 
 ### Reference Data
 

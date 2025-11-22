@@ -11,6 +11,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+**Type-Safe Enums for Stats Parameters** - Added three new enums for improved type safety and IDE autocomplete:
+
+- `StatsRankType.OPEN` and `StatsRankType.WOMEN` for rank_type parameters (used in 8 endpoints)
+- `SystemCode.OPEN` and `SystemCode.WOMEN` for system_code parameter in overall() endpoint
+- `MajorTournament.YES` and `MajorTournament.NO` for major parameter in lucrative_tournaments() endpoint
+- All enums maintain full backwards compatibility with string parameters
+- Union types (`Enum | str`) ensure existing code continues to work without changes
+- Enums are exported from main package: `from ifpa_api import StatsRankType, SystemCode, MajorTournament`
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, StatsRankType, MajorTournament
+
+client = IfpaClient()
+
+# Use enums for type safety (recommended)
+stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+tournaments = client.stats.lucrative_tournaments(
+    rank_type=StatsRankType.WOMEN,
+    major=MajorTournament.YES
+)
+
+# Strings still work (backwards compatible)
+stats = client.stats.country_players(rank_type="WOMEN")
+```
+
+**Benefits:**
+- ✅ Type safety: Catch typos at development time
+- ✅ IDE autocomplete: Discover available values
+- ✅ Self-documenting: Clear what values are valid
+- ✅ No breaking changes: Strings still work
+
 **Stats Resource (NEW)** - 10 operational endpoints for IFPA statistical data:
 
 The Stats API was documented in v0.1.0 as returning 404 errors from the live API. All endpoints are now operational and fully implemented with comprehensive testing.
@@ -48,6 +80,7 @@ The Stats API was documented in v0.1.0 as returning 404 errors from the live API
 ### Testing
 - 1333 lines of unit tests with inline mocked responses
 - 642 lines of integration tests against live API
+- 15 new tests specifically for enum type validation and backwards compatibility
 - Stats-specific test fixtures for date ranges and validation helpers
 - All tests passing
 - Maintained 99% code coverage

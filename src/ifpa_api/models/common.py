@@ -65,6 +65,44 @@ class TournamentType(str, Enum):
     WOMEN = "women"
 
 
+class StatsRankType(str, Enum):
+    """Ranking type filter for statistical queries.
+
+    Attributes:
+        OPEN: All players/tournaments
+        WOMEN: Women's division only
+    """
+
+    OPEN = "OPEN"
+    WOMEN = "WOMEN"
+
+
+class SystemCode(str, Enum):
+    """System code for overall statistics queries.
+
+    Note: As of 2025-11, API bug causes WOMEN to return OPEN data.
+
+    Attributes:
+        OPEN: Open division statistics
+        WOMEN: Women's division statistics (currently returns OPEN data due to API bug)
+    """
+
+    OPEN = "OPEN"
+    WOMEN = "WOMEN"
+
+
+class MajorTournament(str, Enum):
+    """Major tournament filter for tournament value queries.
+
+    Attributes:
+        YES: Major tournaments only
+        NO: Non-major tournaments only
+    """
+
+    YES = "Y"
+    NO = "N"
+
+
 class IfpaBaseModel(BaseModel):
     """Base model for all IFPA SDK Pydantic models.
 

@@ -7,6 +7,7 @@ tournament metrics, player activity over time periods, and overall IFPA statisti
 from typing import Any
 
 from ifpa_api.core.base import BaseResourceClient
+from ifpa_api.models.common import MajorTournament, StatsRankType, SystemCode
 from ifpa_api.models.stats import (
     CountryPlayersResponse,
     EventsAttendedPeriodResponse,
@@ -41,7 +42,7 @@ class StatsClient(BaseResourceClient):
         _validate_requests: Whether to validate request parameters
     """
 
-    def country_players(self, rank_type: str = "OPEN") -> CountryPlayersResponse:
+    def country_players(self, rank_type: StatsRankType | str = "OPEN") -> CountryPlayersResponse:
         """Get player count statistics by country.
 
         Returns comprehensive list of all countries with registered players,
@@ -49,7 +50,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all players or "WOMEN" for
-                women's rankings. Defaults to "OPEN".
+                women's rankings. Accepts StatsRankType enum or string. Defaults to "OPEN".
 
         Returns:
             CountryPlayersResponse with player counts for each country.
@@ -59,23 +60,28 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
-            # Get all countries with player counts
-            stats = client.stats.country_players(rank_type="OPEN")
+            from ifpa_api import StatsRankType
+
+            # Get all countries with player counts (using enum)
+            stats = client.stats.country_players(rank_type=StatsRankType.OPEN)
             for country in stats.stats[:5]:
                 print(f"{country.country_name}: {country.player_count} players")
 
-            # Get women's rankings by country
+            # Get women's rankings by country (using string for backwards compatibility)
             women_stats = client.stats.country_players(rank_type="WOMEN")
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
 
         response = self._http._request("GET", "/stats/country_players", params=params)
         return CountryPlayersResponse.model_validate(response)
 
-    def state_players(self, rank_type: str = "OPEN") -> StatePlayersResponse:
+    def state_players(self, rank_type: StatsRankType | str = "OPEN") -> StatePlayersResponse:
         """Get player count statistics by state/province.
 
         Returns player counts for North American states and provinces. Includes
@@ -83,7 +89,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all players or "WOMEN" for
-                women's rankings. Defaults to "OPEN".
+                women's rankings. Accepts StatsRankType enum or string. Defaults to "OPEN".
 
         Returns:
             StatePlayersResponse with player counts for each state/province.
@@ -93,8 +99,10 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get all states with player counts
-            stats = client.stats.state_players(rank_type="OPEN")
+            stats = client.stats.state_players(rank_type=StatsRankType.OPEN)
             for state in stats.stats[:5]:
                 print(f"{state.stateprov}: {state.player_count} players")
 
@@ -102,14 +110,19 @@ class StatsClient(BaseResourceClient):
             west_coast = [s for s in stats.stats if s.stateprov in ["WA", "OR", "CA"]]
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
 
         response = self._http._request("GET", "/stats/state_players", params=params)
         return StatePlayersResponse.model_validate(response)
 
-    def state_tournaments(self, rank_type: str = "OPEN") -> StateTournamentsResponse:
+    def state_tournaments(
+        self, rank_type: StatsRankType | str = "OPEN"
+    ) -> StateTournamentsResponse:
         """Get tournament count and points statistics by state/province.
 
         Returns detailed financial/points analysis by state including total
@@ -117,7 +130,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
 
         Returns:
             StateTournamentsResponse with tournament counts and point totals.
@@ -127,24 +140,29 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get tournament statistics by state
-            stats = client.stats.state_tournaments(rank_type="OPEN")
+            stats = client.stats.state_tournaments(rank_type=StatsRankType.OPEN)
             for state in stats.stats[:5]:
                 print(f"{state.stateprov}: {state.tournament_count} tournaments")
                 print(f"  Total Points: {state.total_points_all}")
                 print(f"  Tournament Value: {state.total_points_tournament_value}")
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
 
         response = self._http._request("GET", "/stats/state_tournaments", params=params)
         return StateTournamentsResponse.model_validate(response)
 
     def events_by_year(
         self,
-        rank_type: str = "OPEN",
+        rank_type: StatsRankType | str = "OPEN",
         country_code: str | None = None,
     ) -> EventsByYearResponse:
         """Get statistics about number of events per year.
@@ -154,7 +172,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
             country_code: Optional country code to filter by (e.g., "US", "CA").
 
         Returns:
@@ -165,8 +183,10 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get global events by year
-            stats = client.stats.events_by_year(rank_type="OPEN")
+            stats = client.stats.events_by_year(rank_type=StatsRankType.OPEN)
             for year in stats.stats[:5]:
                 print(f"{year.year}: {year.tournament_count} tournaments")
                 print(f"  Countries: {year.country_count}")
@@ -176,9 +196,12 @@ class StatsClient(BaseResourceClient):
             us_stats = client.stats.events_by_year(country_code="US")
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
         if country_code is not None:
             params["country_code"] = country_code
 
@@ -219,7 +242,7 @@ class StatsClient(BaseResourceClient):
 
     def largest_tournaments(
         self,
-        rank_type: str = "OPEN",
+        rank_type: StatsRankType | str = "OPEN",
         country_code: str | None = None,
     ) -> LargestTournamentsResponse:
         """Get top 25 tournaments by player count.
@@ -229,7 +252,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
             country_code: Optional country code to filter by (e.g., "US", "CA").
 
         Returns:
@@ -240,8 +263,10 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get largest tournaments globally
-            stats = client.stats.largest_tournaments(rank_type="OPEN")
+            stats = client.stats.largest_tournaments(rank_type=StatsRankType.OPEN)
             for tourney in stats.stats[:10]:
                 print(f"{tourney.tournament_name} ({tourney.tournament_date})")
                 print(f"  {tourney.player_count} players")
@@ -251,9 +276,12 @@ class StatsClient(BaseResourceClient):
             us_stats = client.stats.largest_tournaments(country_code="US")
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
         if country_code is not None:
             params["country_code"] = country_code
 
@@ -262,8 +290,8 @@ class StatsClient(BaseResourceClient):
 
     def lucrative_tournaments(
         self,
-        major: str = "Y",
-        rank_type: str = "OPEN",
+        rank_type: StatsRankType | str = "OPEN",
+        major: MajorTournament | str = "Y",
         country_code: str | None = None,
     ) -> LucrativeTournamentsResponse:
         """Get top 25 tournaments by tournament value (WPPR rating).
@@ -272,10 +300,11 @@ class StatsClient(BaseResourceClient):
         the most competitive and prestigious events.
 
         Args:
-            major: Filter by major tournament status - "Y" for major tournaments
-                only (default), "N" for non-major tournaments.
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
+            major: Filter by major tournament status - "Y" for major tournaments
+                only (default), "N" for non-major tournaments. Accepts MajorTournament
+                enum or string.
             country_code: Optional country code to filter by (e.g., "US", "CA").
 
         Returns:
@@ -286,25 +315,34 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
-            # Get highest-value major tournaments
-            stats = client.stats.lucrative_tournaments(major="Y", rank_type="OPEN")
+            from ifpa_api import StatsRankType, MajorTournament
+
+            # Get highest-value major tournaments (using enums)
+            stats = client.stats.lucrative_tournaments(
+                rank_type=StatsRankType.OPEN,
+                major=MajorTournament.YES
+            )
             for tourney in stats.stats[:10]:
                 print(f"{tourney.tournament_name} ({tourney.tournament_date})")
                 print(f"  Value: {tourney.tournament_value}")
                 print(f"  {tourney.country_name}")
 
-            # Get highest-value non-major tournaments
+            # Get highest-value non-major tournaments (using strings)
             non_major = client.stats.lucrative_tournaments(major="N")
 
             # Filter by country
             us_major = client.stats.lucrative_tournaments(country_code="US")
             ```
         """
+        # Extract enum values if enums passed, otherwise use strings directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+        major_value = major.value if isinstance(major, MajorTournament) else major
+
         params: dict[str, Any] = {}
-        if major != "Y":
-            params["major"] = major
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if major_value != "Y":
+            params["major"] = major_value
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
         if country_code is not None:
             params["country_code"] = country_code
 
@@ -313,7 +351,7 @@ class StatsClient(BaseResourceClient):
 
     def points_given_period(
         self,
-        rank_type: str = "OPEN",
+        rank_type: StatsRankType | str = "OPEN",
         country_code: str | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
@@ -326,7 +364,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
             country_code: Optional country code to filter by (e.g., "US", "CA").
             start_date: Start date in YYYY-MM-DD format. If not provided, API
                 uses a default lookback period.
@@ -343,8 +381,11 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get top point earners for 2024
             stats = client.stats.points_given_period(
+                rank_type=StatsRankType.OPEN,
                 start_date="2024-01-01",
                 end_date="2024-12-31",
                 limit=25
@@ -360,9 +401,12 @@ class StatsClient(BaseResourceClient):
             )
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
         if country_code is not None:
             params["country_code"] = country_code
         if start_date is not None:
@@ -377,7 +421,7 @@ class StatsClient(BaseResourceClient):
 
     def events_attended_period(
         self,
-        rank_type: str = "OPEN",
+        rank_type: StatsRankType | str = "OPEN",
         country_code: str | None = None,
         start_date: str | None = None,
         end_date: str | None = None,
@@ -390,7 +434,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             rank_type: Ranking type - "OPEN" for all tournaments or "WOMEN" for
-                women's tournaments. Defaults to "OPEN".
+                women's tournaments. Accepts StatsRankType enum or string. Defaults to "OPEN".
             country_code: Optional country code to filter by (e.g., "US", "CA").
             start_date: Start date in YYYY-MM-DD format. If not provided, API
                 uses a default lookback period.
@@ -407,8 +451,11 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
+            from ifpa_api import StatsRankType
+
             # Get most active players in 2024
             stats = client.stats.events_attended_period(
+                rank_type=StatsRankType.OPEN,
                 start_date="2024-01-01",
                 end_date="2024-12-31",
                 limit=25
@@ -425,9 +472,12 @@ class StatsClient(BaseResourceClient):
             )
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        rank_value = rank_type.value if isinstance(rank_type, StatsRankType) else rank_type
+
         params: dict[str, Any] = {}
-        if rank_type != "OPEN":
-            params["rank_type"] = rank_type
+        if rank_value != "OPEN":
+            params["rank_type"] = rank_value
         if country_code is not None:
             params["country_code"] = country_code
         if start_date is not None:
@@ -440,7 +490,7 @@ class StatsClient(BaseResourceClient):
         response = self._http._request("GET", "/stats/events_attended_period", params=params)
         return EventsAttendedPeriodResponse.model_validate(response)
 
-    def overall(self, system_code: str = "OPEN") -> OverallStatsResponse:
+    def overall(self, system_code: SystemCode | str = "OPEN") -> OverallStatsResponse:
         """Get overall WPPR system statistics.
 
         Returns aggregate statistics about the entire IFPA system including
@@ -451,7 +501,7 @@ class StatsClient(BaseResourceClient):
 
         Args:
             system_code: Ranking system - "OPEN" for open division or "WOMEN"
-                for women's division. Defaults to "OPEN".
+                for women's division. Accepts SystemCode enum or string. Defaults to "OPEN".
 
         Returns:
             OverallStatsResponse with comprehensive IFPA system statistics.
@@ -465,8 +515,10 @@ class StatsClient(BaseResourceClient):
 
         Example:
             ```python
-            # Get overall IFPA statistics
-            stats = client.stats.overall(system_code="OPEN")
+            from ifpa_api import SystemCode
+
+            # Get overall IFPA statistics (using enum)
+            stats = client.stats.overall(system_code=SystemCode.OPEN)
             print(f"Total players: {stats.stats.overall_player_count}")
             print(f"Active players: {stats.stats.active_player_count}")
             print(f"Total tournaments: {stats.stats.tournament_count}")
@@ -482,9 +534,12 @@ class StatsClient(BaseResourceClient):
             print(f"50+: {age.age_50_to_99}%")
             ```
         """
+        # Extract enum value if enum passed, otherwise use string directly
+        system_value = system_code.value if isinstance(system_code, SystemCode) else system_code
+
         params: dict[str, Any] = {}
-        if system_code != "OPEN":
-            params["system_code"] = system_code
+        if system_value != "OPEN":
+            params["system_code"] = system_value
 
         response = self._http._request("GET", "/stats/overall", params=params)
         return OverallStatsResponse.model_validate(response)

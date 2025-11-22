@@ -25,6 +25,7 @@ import pytest
 
 from ifpa_api import IfpaClient
 from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.common import MajorTournament, StatsRankType, SystemCode
 from ifpa_api.models.stats import (
     CountryPlayersResponse,
     EventsAttendedPeriodResponse,
@@ -34,6 +35,7 @@ from ifpa_api.models.stats import (
     OverallStatsResponse,
     PlayersByYearResponse,
     PointsGivenPeriodResponse,
+    PointsGivenPeriodStat,
     StatePlayersResponse,
     StateTournamentsResponse,
 )
@@ -421,6 +423,64 @@ class TestStatsPlayerActivity:
             assert first_stat.tournament_count > 0
             assert first_stat.stats_rank == 1
 
+    def test_recent_activity_smoke_test(
+        self, client: IfpaClient, stats_date_range_180_days: tuple[str, str]
+    ) -> None:
+        """Sanity check: IFPA should have activity in last 180 days.
+
+        This test catches data availability issues that might make all
+        period tests pass with empty results.
+
+        Args:
+            client: IFPA API client fixture
+            stats_date_range_180_days: 180-day date range fixture
+        """
+        start_date, end_date = stats_date_range_180_days
+        result = client.stats.points_given_period(
+            start_date=start_date, end_date=end_date, limit=100
+        )
+
+        assert len(result.stats) > 0, (
+            f"No WPPR points awarded in 180 days ({start_date} to {end_date}). "
+            "This suggests IFPA data issue or API downtime."
+        )
+        assert isinstance(result.stats[0], PointsGivenPeriodStat)
+
+    def test_period_endpoints_smoke_test(
+        self, client: IfpaClient, stats_date_range_90_days: tuple[str, str]
+    ) -> None:
+        """Quick smoke test for period-based endpoints with last 90 days.
+
+        Validates that period endpoints work and return reasonable data
+        for a recent, small date range.
+
+        Args:
+            client: IFPA API client fixture
+            stats_date_range_90_days: 90-day date range fixture
+        """
+        # Use last 90 days from fixture
+        start_date, end_date = stats_date_range_90_days
+
+        # Test 1: Points given period
+        points_result = client.stats.points_given_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+        assert isinstance(points_result, PointsGivenPeriodResponse)
+        assert points_result.start_date == start_date
+        assert points_result.end_date == end_date
+        # May be empty if no tournaments in period, just check structure
+        assert isinstance(points_result.stats, list)
+
+        # Test 2: Events attended period
+        events_result = client.stats.events_attended_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+        assert isinstance(events_result, EventsAttendedPeriodResponse)
+        assert events_result.start_date == start_date
+        assert events_result.end_date == end_date
+        # May be empty if no events in period, just check structure
+        assert isinstance(events_result.stats, list)
+
 
 # =============================================================================
 # OVERALL STATISTICS
@@ -640,3 +700,177 @@ class TestStatsDataQualityAndErrors:
         result = client.stats.overall(system_code="INVALID")
         assert isinstance(result, OverallStatsResponse)
         assert result.system_code == "OPEN"  # API returns OPEN for invalid codes
+
+
+# =============================================================================
+# PARAMETER VALIDATION
+# =============================================================================
+
+
+@pytest.mark.integration
+class TestStatsParameterValidation:
+    """Test parameter validation behavior."""
+
+    def test_country_players_with_invalid_rank_type(self, client: IfpaClient) -> None:
+        """Test that invalid rank_type is handled appropriately.
+
+        Note: SDK does not validate rank_type client-side. API will reject it.
+        """
+        with pytest.raises((IfpaApiError, ValueError)):
+            client.stats.country_players(rank_type="INVALID")
+
+    def test_overall_with_invalid_system_code(self, client: IfpaClient) -> None:
+        """Test that invalid system_code is handled appropriately.
+
+        Note: As of 2025-11, API accepts any system_code and returns OPEN data.
+        """
+        result = client.stats.overall(system_code="INVALID")
+        assert isinstance(result, OverallStatsResponse)
+        # API bug: Returns OPEN data regardless of system_code
+        assert result.system_code == "OPEN"
+
+
+# =============================================================================
+# ENUM PARAMETER SUPPORT
+# =============================================================================
+
+
+@pytest.mark.integration
+class TestStatsEnumSupport:
+    """Test enum parameter support with real API calls."""
+
+    def test_country_players_with_enum(self, client: IfpaClient) -> None:
+        """Test country_players with StatsRankType enum."""
+        # Use enum parameter
+        result = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+
+        # Verify response
+        assert isinstance(result, CountryPlayersResponse)
+        assert result.type == "Players by Country"
+        assert result.rank_type == "WOMEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure
+        first_stat = result.stats[0]
+        assert hasattr(first_stat, "country_name")
+        assert hasattr(first_stat, "player_count")
+        assert isinstance(first_stat.player_count, int)
+        assert first_stat.player_count > 0
+
+    def test_state_players_with_enum(self, client: IfpaClient) -> None:
+        """Test state_players with StatsRankType enum."""
+        # Use enum parameter
+        result = client.stats.state_players(rank_type=StatsRankType.OPEN)
+
+        # Verify response
+        assert isinstance(result, StatePlayersResponse)
+        assert "Players by State" in result.type
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure
+        first_stat = result.stats[0]
+        assert hasattr(first_stat, "stateprov")
+        assert hasattr(first_stat, "player_count")
+        assert isinstance(first_stat.player_count, int)
+
+    def test_lucrative_tournaments_with_enums(self, client: IfpaClient) -> None:
+        """Test lucrative_tournaments with both StatsRankType and MajorTournament enums."""
+        # Use both enum parameters
+        result = client.stats.lucrative_tournaments(
+            rank_type=StatsRankType.WOMEN, major=MajorTournament.YES
+        )
+
+        # Verify response
+        assert isinstance(result, LucrativeTournamentsResponse)
+        assert result.type == "Lucrative Tournaments"
+        assert result.rank_type == "WOMEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure
+        first_stat = result.stats[0]
+        assert hasattr(first_stat, "tournament_name")
+        assert hasattr(first_stat, "tournament_value")
+        assert isinstance(first_stat.tournament_value, float)
+        assert first_stat.tournament_value > 0
+
+    def test_overall_with_enum(self, client: IfpaClient) -> None:
+        """Test overall with SystemCode enum.
+
+        Note: As of 2025-11-19, API bug causes WOMEN to return OPEN data.
+        This test verifies the enum parameter is accepted.
+        """
+        # Use SystemCode enum
+        result = client.stats.overall(system_code=SystemCode.OPEN)
+
+        # Verify response
+        assert isinstance(result, OverallStatsResponse)
+        assert result.type == "Overall Stats"
+        assert result.system_code == "OPEN"
+
+        # Verify stats object structure
+        stats = result.stats
+        assert hasattr(stats, "overall_player_count")
+        assert hasattr(stats, "active_player_count")
+        assert isinstance(stats.overall_player_count, int)
+        assert isinstance(stats.active_player_count, int)
+        assert stats.overall_player_count > 0
+
+    def test_backward_compatibility_mixed_params(self, client: IfpaClient) -> None:
+        """Test mixing enum and string parameters for backwards compatibility."""
+        # Mix enum (rank_type) with string (country_code)
+        result = client.stats.events_by_year(rank_type=StatsRankType.OPEN, country_code="US")
+
+        # Verify response
+        assert isinstance(result, EventsByYearResponse)
+        assert "Events" in result.type and "Year" in result.type
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure
+        first_stat = result.stats[0]
+        assert hasattr(first_stat, "year")
+        assert hasattr(first_stat, "tournament_count")
+        assert isinstance(first_stat.tournament_count, int)
+
+    def test_largest_tournaments_with_enum(self, client: IfpaClient) -> None:
+        """Test largest_tournaments with StatsRankType enum."""
+        # Use enum parameter
+        result = client.stats.largest_tournaments(rank_type=StatsRankType.OPEN)
+
+        # Verify response
+        assert isinstance(result, LargestTournamentsResponse)
+        assert result.type == "Largest Tournaments"
+        assert result.rank_type == "OPEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure
+        first_stat = result.stats[0]
+        assert hasattr(first_stat, "tournament_name")
+        assert hasattr(first_stat, "player_count")
+        assert isinstance(first_stat.player_count, int)
+        assert first_stat.player_count > 0
+
+    def test_state_tournaments_with_enum(self, client: IfpaClient) -> None:
+        """Test state_tournaments with StatsRankType enum."""
+        # Use enum parameter
+        result = client.stats.state_tournaments(rank_type=StatsRankType.WOMEN)
+
+        # Verify response
+        assert isinstance(result, StateTournamentsResponse)
+        assert "Tournaments by State" in result.type
+        assert result.rank_type == "WOMEN"
+        assert len(result.stats) > 0
+
+        # Verify first entry structure with type checking
+        first_stat = result.stats[0]
+        assert_stats_fields_types(
+            first_stat,
+            {
+                "stateprov": str,
+                "tournament_count": int,
+                "total_points_all": Decimal,
+                "total_points_tournament_value": Decimal,
+                "stats_rank": int,
+            },
+        )
