@@ -8,6 +8,7 @@ import requests_mock
 
 from ifpa_api.client import IfpaClient
 from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.common import MajorTournament, StatsRankType, SystemCode
 from ifpa_api.models.stats import (
     CountryPlayersResponse,
     EventsAttendedPeriodResponse,
@@ -1331,3 +1332,320 @@ class TestStatsClientFieldCoercion:
         assert isinstance(result.stats.overall_player_count, int)
         assert isinstance(result.stats.tournament_player_count_average, float)
         assert isinstance(result.stats.age.age_under_18, float)
+
+
+class TestStatsClientEdgeCases:
+    """Test edge cases and error handling for stats client."""
+
+    def test_country_players_empty_response(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test country_players handles empty stats array."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={"type": "Players by Country", "rank_type": "OPEN", "stats": []},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.stats.country_players()
+
+        assert isinstance(result, CountryPlayersResponse)
+        assert len(result.stats) == 0
+        assert result.type == "Players by Country"
+
+    def test_country_players_missing_required_field(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test country_players raises validation error for missing required fields."""
+        from pydantic import ValidationError
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "OPEN",
+                "stats": [{"country_name": "US"}],  # Missing player_count, stats_rank
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(ValidationError):
+            client.stats.country_players()
+
+    def test_points_given_period_invalid_date_format(
+        self, mock_requests: requests_mock.Mocker
+    ) -> None:
+        """Test points_given_period with invalid date passes to API for validation."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            status_code=400,
+            json={"error": "Invalid date format"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.stats.points_given_period(start_date="not-a-date", end_date="also-not-a-date")
+
+        assert exc_info.value.status_code == 400
+
+
+class TestStatsClientEnumSupport:
+    """Test enum parameter support across stats endpoints."""
+
+    def test_country_players_with_enum(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test country_players accepts StatsRankType enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "7173",
+                        "stats_rank": 1,
+                    },
+                    {
+                        "country_name": "Canada",
+                        "country_code": "CA",
+                        "player_count": "862",
+                        "stats_rank": 2,
+                    },
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Use enum instead of string
+        result = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+
+        # Verify it works
+        assert isinstance(result, CountryPlayersResponse)
+        assert result.rank_type == "WOMEN"
+        assert len(result.stats) > 0
+
+        # Verify correct parameter was sent (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        assert "rank_type=women" in mock_requests.last_request.query
+
+    def test_state_players_with_enum(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test state_players accepts StatsRankType enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_players",
+            json={
+                "type": "Players by State (North America)",
+                "rank_type": "OPEN",
+                "stats": [
+                    {"stateprov": "Unknown", "player_count": "38167", "stats_rank": 1},
+                    {"stateprov": "CA", "player_count": "662", "stats_rank": 2},
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Use enum for OPEN
+        result = client.stats.state_players(rank_type=StatsRankType.OPEN)
+
+        # Verify it works
+        assert isinstance(result, StatePlayersResponse)
+        assert result.rank_type == "OPEN"
+
+        # Verify no parameter sent for default OPEN
+        assert mock_requests.last_request is not None
+        assert mock_requests.last_request.qs == {}
+
+    def test_state_tournaments_with_enum(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test state_tournaments accepts StatsRankType enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/state_tournaments",
+            json={
+                "type": "Tournaments by State (North America)",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "stateprov": "TX",
+                        "tournament_count": "458",
+                        "total_points_all": "21036.1100",
+                        "total_points_tournament_value": "5084.3200",
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Use enum for WOMEN
+        result = client.stats.state_tournaments(rank_type=StatsRankType.WOMEN)
+
+        # Verify it works
+        assert isinstance(result, StateTournamentsResponse)
+        assert result.rank_type == "WOMEN"
+
+        # Verify correct parameter was sent (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        assert "rank_type=women" in mock_requests.last_request.query
+
+    def test_lucrative_tournaments_with_enums(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test lucrative_tournaments accepts both StatsRankType and MajorTournament enums."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/lucrative_tournaments",
+            json={
+                "type": "Lucrative Tournaments",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "tournament_id": "83321",
+                        "tournament_name": "Women's Championship",
+                        "event_name": "Main Tournament",
+                        "tournament_date": "2025-01-25",
+                        "tournament_value": 281.01,
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Use both enums
+        result = client.stats.lucrative_tournaments(
+            rank_type=StatsRankType.WOMEN, major=MajorTournament.NO
+        )
+
+        # Verify it works
+        assert isinstance(result, LucrativeTournamentsResponse)
+        assert result.rank_type == "WOMEN"
+
+        # Verify both parameters were sent correctly (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "rank_type=women" in query
+        assert "major=n" in query
+
+    def test_overall_with_enum(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test overall accepts SystemCode enum."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/overall",
+            json={
+                "type": "Overall Stats",
+                "system_code": "WOMEN",
+                "stats": {
+                    "overall_player_count": 20000,
+                    "active_player_count": 10000,
+                    "tournament_count": 5000,
+                    "tournament_count_last_month": 50,
+                    "tournament_count_this_year": 600,
+                    "tournament_player_count": 150000,
+                    "tournament_player_count_average": 18.5,
+                    "age": {
+                        "age_under_18": 4.2,
+                        "age_18_to_29": 12.1,
+                        "age_30_to_39": 25.3,
+                        "age_40_to_49": 28.4,
+                        "age_50_to_99": 30.0,
+                    },
+                },
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Use SystemCode enum
+        result = client.stats.overall(system_code=SystemCode.WOMEN)
+
+        # Verify it works
+        assert isinstance(result, OverallStatsResponse)
+        assert result.system_code == "WOMEN"
+
+        # Verify correct parameter was sent (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        assert "system_code=women" in mock_requests.last_request.query
+
+    def test_backward_compatibility_with_strings(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that string parameters still work (backwards compatibility)."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "OPEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "47101",
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Still use string (backwards compatible)
+        result = client.stats.country_players(rank_type="OPEN")
+
+        # Should work exactly as before
+        assert isinstance(result, CountryPlayersResponse)
+        assert result.rank_type == "OPEN"
+
+    def test_enum_value_extraction(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that enum .value property is extracted correctly."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        "country_code": "US",
+                        "player_count": "7173",
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Use enum and verify .value is extracted
+        enum_param = StatsRankType.WOMEN
+        assert enum_param.value == "WOMEN"
+
+        result = client.stats.country_players(rank_type=enum_param)
+
+        # Verify request used the value, not the enum object (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        assert "rank_type=women" in mock_requests.last_request.query
+        assert isinstance(result, CountryPlayersResponse)
+
+    def test_mixed_enum_and_string(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test passing enum for rank_type and string for country_code."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/events_by_year",
+            json={
+                "type": "Events Per Year",
+                "rank_type": "WOMEN",
+                "stats": [
+                    {
+                        "year": "2025",
+                        "country_count": "1",
+                        "tournament_count": "1686",
+                        "player_count": "22992",
+                        "stats_rank": 1,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        # Mix enum and string parameters
+        result = client.stats.events_by_year(rank_type=StatsRankType.WOMEN, country_code="US")
+
+        # Verify both parameters work correctly
+        assert isinstance(result, EventsByYearResponse)
+        assert result.rank_type == "WOMEN"
+
+        # Verify parameters were sent (requests_mock lowercases query params)
+        assert mock_requests.last_request is not None
+        query = mock_requests.last_request.query
+        assert "rank_type=women" in query
+        assert "country_code=us" in query

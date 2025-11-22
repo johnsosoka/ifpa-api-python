@@ -399,15 +399,20 @@ def stats_date_range_last_year() -> tuple[str, str]:
 
 
 @pytest.fixture
-def stats_thresholds() -> dict[str, int]:
+def stats_thresholds() -> dict[str, int | str]:
     """Expected minimum thresholds for IFPA overall statistics.
 
     Returns:
         Dictionary of statistic names to minimum expected values
 
-    These thresholds are based on IFPA's size as of 2025 (100,000+ players,
-    2,000+ tournaments per year). If tests fail due to threshold violations,
-    it may indicate either API changes or these thresholds need updating.
+    These thresholds are based on IFPA's size as of 2025-11 (100,000+ players,
+    2,000+ tournaments per year).
+
+    **Review Schedule**: Update thresholds annually or when IFPA announces
+    significant platform changes.
+
+    If tests fail due to threshold violations, check IFPA's current statistics
+    and update these values accordingly.
 
     Example:
         ```python
@@ -418,11 +423,13 @@ def stats_thresholds() -> dict[str, int]:
         ```
     """
     return {
+        "_last_updated": "2025-11",  # Metadata: when thresholds were set
+        "_source": "IFPA stats as of November 2025",
         "overall_player_count": 100000,  # 100k+ registered players
         "active_player_count": 20000,  # 20k+ active in last 2 years
         "tournament_count": 20000,  # 20k+ total tournaments
         "tournament_count_this_year": 500,  # 500+ tournaments this year
-        "tournament_count_last_month": 50,  # 50+ tournaments last month
+        "tournament_count_last_month": 30,  # 30+ tournaments (lowered for seasonal variation)
     }
 
 

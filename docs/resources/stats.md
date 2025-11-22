@@ -5,14 +5,28 @@ The Stats resource provides access to IFPA statistical data including geographic
 ## Quick Example
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import CountryPlayersResponse
 
 client: IfpaClient = IfpaClient()
 
-# Get player counts by country
-stats: CountryPlayersResponse = client.stats.country_players()
+# Get player counts by country (women's rankings)
+stats: CountryPlayersResponse = client.stats.country_players(rank_type=StatsRankType.WOMEN)
 ```
+
+!!! tip "Type Safety with Enums"
+    As of v0.4.0, all stats methods accept typed enums for improved type safety and autocomplete:
+
+    - `StatsRankType.OPEN` and `StatsRankType.WOMEN` for rank_type parameters
+    - `SystemCode.OPEN` and `SystemCode.WOMEN` for system_code parameter
+    - `MajorTournament.YES` and `MajorTournament.NO` for major parameter
+
+    String parameters still work for backwards compatibility:
+    ```python
+    # Both work - enum is recommended
+    stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+    stats = client.stats.country_players(rank_type="WOMEN")
+    ```
 
 ## Geographic Statistics
 
@@ -21,13 +35,13 @@ stats: CountryPlayersResponse = client.stats.country_players()
 Get comprehensive player count statistics for all countries with registered IFPA players:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import CountryPlayersResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get all countries with player counts (OPEN rankings)
-stats: CountryPlayersResponse = client.stats.country_players(rank_type="OPEN")
+stats: CountryPlayersResponse = client.stats.country_players(rank_type=StatsRankType.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"Rank Type: {stats.rank_type}")
@@ -53,13 +67,13 @@ for country in stats.stats[:5]:
 You can also query women's rankings:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import CountryPlayersResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get women's rankings by country
-women_stats: CountryPlayersResponse = client.stats.country_players(rank_type="WOMEN")
+women_stats: CountryPlayersResponse = client.stats.country_players(rank_type=StatsRankType.WOMEN)
 
 for country in women_stats.stats[:5]:
     print(f"{country.country_name}: {country.player_count} players")
@@ -70,13 +84,13 @@ for country in women_stats.stats[:5]:
 Get player count statistics for North American states and provinces:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import StatePlayersResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get all states with player counts
-stats: StatePlayersResponse = client.stats.state_players(rank_type="OPEN")
+stats: StatePlayersResponse = client.stats.state_players(rank_type=StatsRankType.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"Rank Type: {stats.rank_type}")
@@ -98,13 +112,13 @@ for state in west_coast:
 Get detailed tournament statistics including counts and WPPR points awarded by state:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import StateTournamentsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get tournament statistics by state
-stats: StateTournamentsResponse = client.stats.state_tournaments(rank_type="OPEN")
+stats: StateTournamentsResponse = client.stats.state_tournaments(rank_type=StatsRankType.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"Rank Type: {stats.rank_type}")
@@ -124,13 +138,13 @@ for state in stats.stats[:5]:
 Track yearly growth trends in international pinball competition:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import EventsByYearResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get global events by year
-stats: EventsByYearResponse = client.stats.events_by_year(rank_type="OPEN")
+stats: EventsByYearResponse = client.stats.events_by_year(rank_type=StatsRankType.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"Rank Type: {stats.rank_type}")
@@ -157,14 +171,14 @@ for year in stats.stats[:5]:
 You can filter by country:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import EventsByYearResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get US-specific tournament data by year
 us_stats: EventsByYearResponse = client.stats.events_by_year(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     country_code="US"
 )
 
@@ -219,13 +233,13 @@ for year in stats.stats[:5]:
 Get the top 25 tournaments in IFPA history by player count:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import LargestTournamentsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get largest tournaments globally
-stats: LargestTournamentsResponse = client.stats.largest_tournaments(rank_type="OPEN")
+stats: LargestTournamentsResponse = client.stats.largest_tournaments(rank_type=StatsRankType.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"Rank Type: {stats.rank_type}")
@@ -251,14 +265,14 @@ for tourney in stats.stats[:10]:
 Filter by country:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import LargestTournamentsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get largest US tournaments
 us_stats: LargestTournamentsResponse = client.stats.largest_tournaments(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     country_code="US"
 )
 ```
@@ -268,15 +282,15 @@ us_stats: LargestTournamentsResponse = client.stats.largest_tournaments(
 Get the top 25 tournaments by tournament value (WPPR rating), which correlates with competitive prestige:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType, MajorTournament
 from ifpa_api.models.stats import LucrativeTournamentsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get highest-value major tournaments
 stats: LucrativeTournamentsResponse = client.stats.lucrative_tournaments(
-    major="Y",
-    rank_type="OPEN"
+    major=MajorTournament.YES,
+    rank_type=StatsRankType.OPEN
 )
 
 print(f"Type: {stats.type}")
@@ -303,16 +317,16 @@ for tourney in stats.stats[:10]:
 Compare major vs non-major tournaments:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, MajorTournament
 from ifpa_api.models.stats import LucrativeTournamentsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get highest-value major tournaments
-major: LucrativeTournamentsResponse = client.stats.lucrative_tournaments(major="Y")
+major: LucrativeTournamentsResponse = client.stats.lucrative_tournaments(major=MajorTournament.YES)
 
 # Get highest-value non-major tournaments
-non_major: LucrativeTournamentsResponse = client.stats.lucrative_tournaments(major="N")
+non_major: LucrativeTournamentsResponse = client.stats.lucrative_tournaments(major=MajorTournament.NO)
 
 print("Major Tournaments:")
 for t in major.stats[:3]:
@@ -330,14 +344,14 @@ for t in non_major.stats[:3]:
 Get players with the most accumulated WPPR points over a specific time period:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import PointsGivenPeriodResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get top point earners for 2024
 stats: PointsGivenPeriodResponse = client.stats.points_given_period(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     start_date="2024-01-01",
     end_date="2024-12-31",
     limit=25
@@ -369,14 +383,14 @@ for player in stats.stats[:10]:
 Filter by country:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import PointsGivenPeriodResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get top US point earners for 2024
 us_stats: PointsGivenPeriodResponse = client.stats.points_given_period(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     country_code="US",
     start_date="2024-01-01",
     end_date="2024-12-31",
@@ -392,14 +406,14 @@ for player in us_stats.stats:
 Get players who attended the most tournaments during a specific time period:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import EventsAttendedPeriodResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get most active players in 2024
 stats: EventsAttendedPeriodResponse = client.stats.events_attended_period(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     start_date="2024-01-01",
     end_date="2024-12-31",
     limit=25
@@ -430,14 +444,14 @@ for player in stats.stats[:10]:
 Filter by country:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, StatsRankType
 from ifpa_api.models.stats import EventsAttendedPeriodResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get most active US players in 2024
 us_stats: EventsAttendedPeriodResponse = client.stats.events_attended_period(
-    rank_type="OPEN",
+    rank_type=StatsRankType.OPEN,
     country_code="US",
     start_date="2024-01-01",
     end_date="2024-12-31",
@@ -450,13 +464,13 @@ us_stats: EventsAttendedPeriodResponse = client.stats.events_attended_period(
 Get comprehensive aggregate statistics about the entire IFPA system:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, SystemCode
 from ifpa_api.models.stats import OverallStatsResponse
 
 client: IfpaClient = IfpaClient()
 
 # Get overall IFPA statistics
-stats: OverallStatsResponse = client.stats.overall(system_code="OPEN")
+stats: OverallStatsResponse = client.stats.overall(system_code=SystemCode.OPEN)
 
 print(f"Type: {stats.type}")
 print(f"System Code: {stats.system_code}")

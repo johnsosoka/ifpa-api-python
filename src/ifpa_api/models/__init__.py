@@ -7,8 +7,11 @@ response deserialization throughout the SDK.
 from ifpa_api.models.calendar import CalendarEvent, CalendarResponse
 from ifpa_api.models.common import (
     IfpaBaseModel,
+    MajorTournament,
     RankingSystem,
     ResultType,
+    StatsRankType,
+    SystemCode,
     TimePeriod,
     TournamentType,
 )
@@ -127,6 +130,9 @@ __all__ = [
     "RankingSystem",
     "ResultType",
     "TournamentType",
+    "StatsRankType",
+    "SystemCode",
+    "MajorTournament",
     # Director
     "Director",
     "DirectorStats",
