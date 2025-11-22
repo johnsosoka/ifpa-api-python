@@ -729,6 +729,34 @@ else:
     print(f"Found {stats.return_count} results")
 ```
 
+### Response Sizes
+
+Stats endpoints return different sized responses. Understanding typical sizes helps with performance planning.
+
+**Note**: Counts below verified against live IFPA API on 2025-11-22 and will grow as IFPA expands internationally.
+
+**Fixed Size Responses:**
+- `overall()`: Single object with system-wide statistics (not an array)
+- `country_players(rank_type="OPEN")`: 51 countries with active players
+- `country_players(rank_type="WOMEN")`: 27 countries with active women players
+- `state_players()`: 72 states/provinces (North America only)
+
+**Variable Size Responses:**
+- `state_tournaments(rank_type="OPEN")`: 54 states with tournament data
+- `events_by_year()`: One entry per active year (currently 10 years, grows annually)
+- `players_by_year()`: One entry per active year (currently 10 years, grows annually)
+- `largest_tournaments()`: Exactly 25 tournaments (fixed API limit)
+- `lucrative_tournaments()`: Exactly 25 tournaments (fixed API limit)
+
+**Period-Based Responses (varies by date range and limit parameter):**
+- `points_given_period()`: 0 to N results (defaults to max 25 without explicit limit)
+- `events_attended_period()`: 0 to N results (defaults to max 25 without explicit limit)
+
+**Performance Tips**:
+- Period endpoints default to 25 results - use `limit` parameter for larger result sets
+- Wide date ranges (e.g., full year) may hit the default 25-result cap
+- Use smaller date ranges or explicit `limit=100` for comprehensive period queries
+
 ## API Coverage
 
 The Stats resource provides access to all 10 statistical endpoints in the IFPA API v2.1:

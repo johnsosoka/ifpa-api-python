@@ -446,6 +446,41 @@ class TestStatsPlayerActivity:
         )
         assert isinstance(result.stats[0], PointsGivenPeriodStat)
 
+    def test_period_endpoints_smoke_test(
+        self, client: IfpaClient, stats_date_range_90_days: tuple[str, str]
+    ) -> None:
+        """Quick smoke test for period-based endpoints with last 90 days.
+
+        Validates that period endpoints work and return reasonable data
+        for a recent, small date range.
+
+        Args:
+            client: IFPA API client fixture
+            stats_date_range_90_days: 90-day date range fixture
+        """
+        # Use last 90 days from fixture
+        start_date, end_date = stats_date_range_90_days
+
+        # Test 1: Points given period
+        points_result = client.stats.points_given_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+        assert isinstance(points_result, PointsGivenPeriodResponse)
+        assert points_result.start_date == start_date
+        assert points_result.end_date == end_date
+        # May be empty if no tournaments in period, just check structure
+        assert isinstance(points_result.stats, list)
+
+        # Test 2: Events attended period
+        events_result = client.stats.events_attended_period(
+            start_date=start_date, end_date=end_date, limit=10
+        )
+        assert isinstance(events_result, EventsAttendedPeriodResponse)
+        assert events_result.start_date == start_date
+        assert events_result.end_date == end_date
+        # May be empty if no events in period, just check structure
+        assert isinstance(events_result.stats, list)
+
 
 # =============================================================================
 # OVERALL STATISTICS

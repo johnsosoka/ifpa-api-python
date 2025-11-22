@@ -1386,6 +1386,77 @@ class TestStatsClientEdgeCases:
 
         assert exc_info.value.status_code == 400
 
+    def test_points_given_period_empty_results(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test points_given_period handles empty stats array gracefully."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            json={
+                "type": "Points Given in Period",
+                "rank_type": "OPEN",
+                "start_date": "1900-01-01",
+                "end_date": "1900-01-31",
+                "return_count": 0,
+                "stats": [],  # Empty array - no data in this period
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+        result = client.stats.points_given_period(start_date="1900-01-01", end_date="1900-01-31")
+
+        assert isinstance(result, PointsGivenPeriodResponse)
+        assert result.return_count == 0
+        assert len(result.stats) == 0
+        assert result.stats == []
+
+    def test_country_players_malformed_response(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test handling of API response missing required fields."""
+        from pydantic import ValidationError
+
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json={
+                "type": "Players by Country",
+                # Missing rank_type field
+                "stats": [
+                    {
+                        "country_name": "United States",
+                        # Missing player_count field
+                        "tournament_count": 1234,
+                    }
+                ],
+            },
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Should raise validation error
+        with pytest.raises(ValidationError) as exc_info:
+            client.stats.country_players()
+
+        # Verify error mentions the missing field
+        error_str = str(exc_info.value).lower()
+        assert "player_count" in error_str and (
+            "field required" in error_str or "missing" in error_str
+        )
+
+    def test_period_endpoint_invalid_date_format(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test period endpoint with incorrectly formatted date."""
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/points_given_period",
+            status_code=400,
+            json={"error": "Invalid date format"},
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Try with US-style date instead of ISO 8601
+        with pytest.raises(IfpaApiError) as exc_info:
+            client.stats.points_given_period(
+                start_date="01/01/2024", end_date="12/31/2024"  # Wrong format
+            )
+
+        assert exc_info.value.status_code == 400
+
 
 class TestStatsClientEnumSupport:
     """Test enum parameter support across stats endpoints."""
@@ -1649,3 +1720,45 @@ class TestStatsClientEnumSupport:
         query = mock_requests.last_request.query
         assert "rank_type=women" in query
         assert "country_code=us" in query
+
+    def test_stats_enum_string_equivalence(self, mock_requests: requests_mock.Mocker) -> None:
+        """Test that enum and string parameters produce identical API calls."""
+        # Mock response (same for both calls)
+        mock_response = {
+            "type": "Players by Country",
+            "rank_type": "WOMEN",
+            "stats": [
+                {
+                    "country_code": "US",
+                    "country_name": "United States",
+                    "player_count": 5000,
+                    "stats_rank": 1,
+                }
+            ],
+        }
+
+        # Register mock for both calls
+        mock_requests.get(
+            "https://api.ifpapinball.com/stats/country_players",
+            json=mock_response,
+        )
+
+        client = IfpaClient(api_key="test-key")
+
+        # Call 1: Using enum
+        result_enum = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+
+        # Call 2: Using string
+        result_string = client.stats.country_players(rank_type="WOMEN")
+
+        # Both should produce identical results
+        assert result_enum.rank_type == result_string.rank_type
+        assert result_enum.rank_type == "WOMEN"
+        assert len(result_enum.stats) == len(result_string.stats)
+
+        # Verify query parameters were identical
+        history = mock_requests.request_history
+        assert len(history) == 2
+        # Both requests should have sent rank_type=women (lowercase by requests-mock)
+        assert "rank_type=women" in history[0].query.lower()
+        assert "rank_type=women" in history[1].query.lower()

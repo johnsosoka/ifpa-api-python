@@ -15,7 +15,7 @@ A typed Python client for the [IFPA (International Flipper Pinball Association) 
 
 **Complete documentation**: https://johnsosoka.github.io/ifpa-api-python/
 
-## What's New in 0.3.0
+## What's New in 0.4.0
 
 **Quality of Life Improvements** - Enhanced debugging, pagination, and error handling:
 
