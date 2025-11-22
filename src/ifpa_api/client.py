@@ -13,6 +13,7 @@ from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
 from ifpa_api.resources.series import SeriesClient
+from ifpa_api.resources.stats import StatsClient
 from ifpa_api.resources.tournament import TournamentClient
 
 
@@ -102,6 +103,7 @@ class IfpaClient:
         self._reference_client: ReferenceClient | None = None
         self._tournament_client: TournamentClient | None = None
         self._series_client: SeriesClient | None = None
+        self._stats_client: StatsClient | None = None
 
     @property
     def director(self) -> DirectorClient:
@@ -258,6 +260,36 @@ class IfpaClient:
         if self._series_client is None:
             self._series_client = SeriesClient(self._http, self._config.validate_requests)
         return self._series_client
+
+    @property
+    def stats(self) -> StatsClient:
+        """Access the stats resource client.
+
+        Returns:
+            StatsClient instance for accessing statistical data and metrics
+
+        Example:
+            ```python
+            # Get player counts by country
+            country_stats = client.stats.country_players(rank_type="OPEN")
+
+            # Get state/province statistics
+            state_stats = client.stats.state_players()
+
+            # Get overall IFPA statistics
+            overall = client.stats.overall()
+            print(f"Total players: {overall.stats.overall_player_count}")
+
+            # Get points given in a period
+            points = client.stats.points_given_period(
+                start_date="2024-01-01",
+                end_date="2024-12-31"
+            )
+            ```
+        """
+        if self._stats_client is None:
+            self._stats_client = StatsClient(self._http, self._config.validate_requests)
+        return self._stats_client
 
     def close(self) -> None:
         """Close the HTTP client session.

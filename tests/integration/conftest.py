@@ -1,6 +1,8 @@
 """Fixtures for integration tests."""
 
 from collections.abc import Generator
+from datetime import datetime, timedelta
+from typing import Any
 
 import pytest
 
@@ -224,3 +226,225 @@ def validate_test_tournament(client: IfpaClient, tournament_id_param: int) -> To
             )
         # Re-raise unexpected errors
         raise
+
+
+# === STATS-SPECIFIC HELPERS ===
+
+
+def assert_stats_fields_types(obj: object, field_types: dict[str, type]) -> None:
+    """Assert multiple stats fields have correct types.
+
+    Helper function to reduce boilerplate when validating many fields at once.
+    This is particularly useful for stats endpoints that return objects with
+    10+ fields that need type validation.
+
+    Args:
+        obj: Object to validate
+        field_types: Dictionary mapping field names to expected types
+
+    Raises:
+        AssertionError: If any field is missing, None, or wrong type
+
+    Example:
+        ```python
+        assert_stats_fields_types(stats, {
+            "overall_player_count": int,
+            "active_player_count": int,
+            "tournament_count": int,
+            "wppr_value": float,
+        })
+        ```
+    """
+    for field_name, expected_type in field_types.items():
+        assert_field_present(obj, field_name, expected_type)
+
+
+def assert_stats_ranking_list(rankings: list[Any], min_count: int = 1) -> None:
+    """Assert that a stats ranking list is valid.
+
+    Validates:
+    - List is not empty (unless min_count=0)
+    - List has at least min_count items
+    - All items have a stats_rank field
+    - Ranks are in ascending order (1, 2, 3...)
+
+    Args:
+        rankings: List of ranking objects to validate
+        min_count: Minimum expected number of items (default 1)
+
+    Raises:
+        AssertionError: If list is invalid or ranks are out of order
+
+    Example:
+        ```python
+        result = client.stats.country_players()
+        assert_stats_ranking_list(result.stats, min_count=10)
+        ```
+    """
+    assert isinstance(rankings, list), f"Expected list, got {type(rankings)}"
+    assert (
+        len(rankings) >= min_count
+    ), f"Expected at least {min_count} rankings, got {len(rankings)}"
+
+    if len(rankings) > 0:
+        # Validate first item has stats_rank field
+        first_item = rankings[0]
+        assert hasattr(first_item, "stats_rank"), "Ranking item missing 'stats_rank' field"
+
+        # Validate ranks are sequential
+        for i, item in enumerate(rankings, start=1):
+            expected_rank = i
+            actual_rank = int(item.stats_rank)
+            assert actual_rank == expected_rank, (
+                f"Rank out of order at position {i}: "
+                f"expected {expected_rank}, got {actual_rank}"
+            )
+
+
+def assert_numeric_in_range(
+    value: int | float, min_val: int | float, max_val: int | float, field_name: str = "value"
+) -> None:
+    """Assert that a numeric value is within an expected range.
+
+    Args:
+        value: Value to check
+        min_val: Minimum acceptable value (inclusive)
+        max_val: Maximum acceptable value (inclusive)
+        field_name: Name of the field for error messages
+
+    Raises:
+        AssertionError: If value is outside range
+
+    Example:
+        ```python
+        assert_numeric_in_range(stats.overall_player_count, 100000, 200000, "overall_player_count")
+        ```
+    """
+    assert min_val <= value <= max_val, (
+        f"{field_name} out of expected range: {value} " f"(expected {min_val}-{max_val})"
+    )
+
+
+# === STATS FIXTURES ===
+
+
+@pytest.fixture
+def stats_date_range_90_days() -> tuple[str, str]:
+    """Date range for last 90 days (period-based stats queries).
+
+    Returns:
+        Tuple of (start_date, end_date) in YYYY-MM-DD format
+
+    Use this for testing period-based endpoints like points_given_period
+    and events_attended_period. 90 days provides good balance of recent
+    data without being too restrictive.
+
+    Example:
+        ```python
+        def test_points_period(client, stats_date_range_90_days):
+            start, end = stats_date_range_90_days
+            result = client.stats.points_given_period(start, end)
+            assert result is not None
+        ```
+    """
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=90)
+    return (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+
+
+@pytest.fixture
+def stats_date_range_180_days() -> tuple[str, str]:
+    """Date range for last 180 days (extended period stats queries).
+
+    Returns:
+        Tuple of (start_date, end_date) in YYYY-MM-DD format
+
+    Use this for testing period queries that may have sparse data or when
+    you need more results. 180 days captures seasonal patterns.
+
+    Example:
+        ```python
+        def test_events_attended_longer_period(client, stats_date_range_180_days):
+            start, end = stats_date_range_180_days
+            result = client.stats.events_attended_period(start, end)
+            assert len(result.rankings) > 0
+        ```
+    """
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=180)
+    return (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+
+
+@pytest.fixture
+def stats_date_range_last_year() -> tuple[str, str]:
+    """Date range for last full year (annual stats queries).
+
+    Returns:
+        Tuple of (start_date, end_date) in YYYY-MM-DD format
+
+    Use this for testing with a full year of data, useful for annual
+    trends and comparing across seasons.
+
+    Example:
+        ```python
+        def test_annual_activity(client, stats_date_range_last_year):
+            start, end = stats_date_range_last_year
+            result = client.stats.points_given_period(start, end)
+            assert len(result.rankings) >= 100
+        ```
+    """
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    return (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+
+
+@pytest.fixture
+def stats_thresholds() -> dict[str, int]:
+    """Expected minimum thresholds for IFPA overall statistics.
+
+    Returns:
+        Dictionary of statistic names to minimum expected values
+
+    These thresholds are based on IFPA's size as of 2025 (100,000+ players,
+    2,000+ tournaments per year). If tests fail due to threshold violations,
+    it may indicate either API changes or these thresholds need updating.
+
+    Example:
+        ```python
+        def test_overall_stats_reasonable(client, stats_thresholds):
+            stats = client.stats.overall()
+            assert stats.overall_player_count >= stats_thresholds["overall_player_count"]
+            assert stats.tournament_count >= stats_thresholds["tournament_count"]
+        ```
+    """
+    return {
+        "overall_player_count": 100000,  # 100k+ registered players
+        "active_player_count": 20000,  # 20k+ active in last 2 years
+        "tournament_count": 20000,  # 20k+ total tournaments
+        "tournament_count_this_year": 500,  # 500+ tournaments this year
+        "tournament_count_last_month": 50,  # 50+ tournaments last month
+    }
+
+
+@pytest.fixture
+def stats_rank_types() -> list[str]:
+    """List of rank types for parameterized testing.
+
+    Returns:
+        List ["OPEN", "WOMEN"] - the two primary IFPA ranking systems
+
+    Use this for parameterized tests that need to run against both
+    ranking systems.
+
+    Note: "WOMEN" system has a known API bug in overall() endpoint
+    where system_code is always "OPEN" regardless of parameter.
+
+    Example:
+        ```python
+        @pytest.mark.parametrize("rank_type", ["OPEN", "WOMEN"])
+        def test_country_players(client, rank_type):
+            result = client.stats.country_players(rank_type=rank_type)
+            assert result.rank_type == rank_type
+        ```
+    """
+    return ["OPEN", "WOMEN"]
