@@ -86,13 +86,13 @@ from ifpa_api import IfpaClient
 client = IfpaClient(api_key='your-api-key-here')
 
 # Get player profile and rankings
-player = client.player(2643).details()
+player = client.player.get(2643)
 print(f"{player.first_name} {player.last_name}")
 print(f"WPPR Rank: {player.player_stats.current_wppr_rank}")
 print(f"WPPR Points: {player.player_stats.current_wppr_value}")
 
-# Query players with filters
-results = client.player.query("John") \
+# Search for players with filters
+results = client.player.search("John") \
     .country("US") \
     .state("CA") \
     .limit(10) \
@@ -101,18 +101,19 @@ results = client.player.query("John") \
 for player in results.search:
     print(f"{player.first_name} {player.last_name} - {player.city}")
 
-# Get tournament results
-tournament = client.tournament(67890).details()
+# Get tournament details
+tournament = client.tournament.get(67890)
 print(f"{tournament.tournament_name}")
 print(f"Date: {tournament.event_date}")
 print(f"Players: {tournament.tournament_stats.total_players}")
 
+# Get tournament results
 results = client.tournament(67890).results()
 for result in results.results[:5]:
     print(f"{result.position}. {result.player_name}: {result.points} pts")
 
 # Automatic pagination for large datasets
-for player in client.player.query().country("US").iterate(limit=100):
+for player in client.player.search().country("US").iterate(limit=100):
     print(f"{player.first_name} {player.last_name}")
 
 # Close client when done
@@ -140,7 +141,7 @@ client = IfpaClient()
 from ifpa_api import IfpaClient
 
 with IfpaClient(api_key='your-api-key-here') as client:
-    player = client.player(12345).details()
+    player = client.player.get(12345)
     print(player.first_name)
 # Client automatically closed
 ```
@@ -150,18 +151,27 @@ with IfpaClient(api_key='your-api-key-here') as client:
 ### Players
 
 ```python
-# Query with filters
-results = client.player.query("Smith") \
+# Search with filters
+results = client.player.search("Smith") \
     .country("US") \
     .tournament("PAPA") \
     .position(1) \
     .limit(25) \
     .get()
 
-# Individual player operations
+# Convenience methods for individual players
+player = client.player.get(12345)
+player = client.player.get_or_none(12345)  # Returns None if not found
+if client.player.exists(12345):
+    print("Player exists!")
+
+# Get first search result
+first = client.player.search("Smith").first()
+maybe_first = client.player.search("Rare Name").first_or_none()
+
+# Individual player operations (using context)
 from ifpa_api.models.common import RankingSystem, ResultType
 
-player = client.player(12345).details()
 results = client.player(12345).results(RankingSystem.MAIN, ResultType.ACTIVE)
 pvp = client.player(12345).pvp(67890)  # Head-to-head comparison
 history = client.player(12345).history()
@@ -170,34 +180,50 @@ history = client.player(12345).history()
 ### Directors
 
 ```python
-# Query for directors
-results = client.director.query("Josh") \
+# Search for directors
+results = client.director.search("Josh") \
     .city("Seattle") \
     .state("WA") \
     .get()
 
-# Individual director operations
-director = client.director(1533).details()
+# Convenience methods for individual directors
+director = client.director.get(1533)
+director = client.director.get_or_none(1533)  # Returns None if not found
+if client.director.exists(1533):
+    print("Director exists!")
+
+# Individual director operations (using context)
+from ifpa_api.models.common import TimePeriod
+
 tournaments = client.director(1533).tournaments(TimePeriod.PAST)
 
 # Collection operations
-country_dirs = client.director.country_directors()
+country_dirs = client.director.list_country_directors()
 ```
 
 ### Tournaments
 
 ```python
-# Query with date range
-results = client.tournament.query("Championship") \
+# Search with date range
+results = client.tournament.search("Championship") \
     .country("US") \
     .date_range("2024-01-01", "2024-12-31") \
     .limit(50) \
     .get()
 
-# Individual tournament operations
-tournament = client.tournament(12345).details()
+# Convenience methods for individual tournaments
+tournament = client.tournament.get(12345)
+tournament = client.tournament.get_or_none(12345)  # Returns None if not found
+if client.tournament.exists(12345):
+    print("Tournament exists!")
+
+# Individual tournament operations (using context)
 results = client.tournament(12345).results()
 formats = client.tournament(12345).formats()
+league = client.tournament(12345).league()  # For league-format tournaments
+
+# List all tournament formats
+all_formats = client.tournament.list_formats()
 ```
 
 ### Rankings
@@ -220,14 +246,22 @@ custom_systems = client.rankings.custom_list()
 ### Series
 
 ```python
-# Series operations
-standings = client.series("NACS").standings()
+# Convenience methods for series
+standings = client.series.get("NACS")
+standings = client.series.get_or_none("NACS")  # Returns None if not found
+if client.series.exists("NACS"):
+    print("Series exists!")
+
+# Individual series operations (using context)
+from ifpa_api.models.common import TimePeriod
+
 card = client.series("PAPA").player_card(12345, region_code="OH")
-regions = client.series("IFPA").regions(region_code="R1")
+regions = client.series("IFPA").regions(region_code="R1", year=2024)
+overview = client.series("NACS").overview(time_period=TimePeriod.CURRENT)
 
 # List all series
-all_series = client.series.list()
-active_only = client.series.list(active=True)
+all_series = client.series.list_series()
+active_only = client.series.list_series(active_only=True)
 ```
 
 ### Stats
@@ -295,12 +329,12 @@ Use `.iterate()` to process results one at a time without loading everything int
 
 ```python
 # Iterate through all US players efficiently
-for player in client.player.query().country("US").iterate(limit=100):
+for player in client.player.search().country("US").iterate(limit=100):
     print(f"{player.first_name} {player.last_name} - {player.city}")
     # Process each player individually
 
 # Iterate through tournament results with filters
-for tournament in client.tournament.query("Championship").country("US").iterate():
+for tournament in client.tournament.search("Championship").country("US").iterate():
     print(f"{tournament.tournament_name} - {tournament.event_date}")
 ```
 
@@ -310,12 +344,12 @@ Use `.get_all()` when you need all results in a list:
 
 ```python
 # Get all players from Washington state
-all_players = client.player.query().country("US").state("WA").get_all()
+all_players = client.player.search().country("US").state("WA").get_all()
 print(f"Total players: {len(all_players)}")
 
 # Safety limit to prevent excessive memory usage
 try:
-    results = client.player.query().country("US").get_all(max_results=1000)
+    results = client.player.search().country("US").get_all(max_results=1000)
 except ValueError as e:
     print(f"Too many results: {e}")
 ```
@@ -337,7 +371,7 @@ from ifpa_api import IfpaClient, IfpaApiError, MissingApiKeyError
 
 try:
     client = IfpaClient()  # Raises if no API key found
-    player = client.player(99999999).details()
+    player = client.player.get(99999999)
 except MissingApiKeyError:
     print("No API key provided or found in environment")
 except IfpaApiError as e:
@@ -398,7 +432,7 @@ All API errors (v0.3.0+) include full request context:
 
 ```python
 try:
-    results = client.player.query("John").country("INVALID").get()
+    results = client.player.search("John").country("INVALID").get()
 except IfpaApiError as e:
     # Access error details
     print(f"Status: {e.status_code}")
@@ -412,12 +446,14 @@ except IfpaApiError as e:
 
 ### Quick Reference
 
-| 0.2.x | 0.3.0 |
+| 0.2.x | 0.4.0 (Preferred) |
 |-------|-------|
 | `client.tournaments` | `client.tournament` |
-| `client.player.search("name")` | `client.player.query("name").get()` |
-| `client.tournament(id).get()` | `client.tournament(id).details()` |
-| `client.series_handle("CODE")` | `client.series("CODE")` |
+| `client.player.search("name")` | `client.player.search("name").get()` |
+| `client.player(id).details()` | `client.player.get(id)` |
+| `client.tournament(id).get()` | `client.tournament.get(id)` |
+| `client.series_handle("CODE")` | `client.series.get("CODE")` |
+| `client.director.country_directors()` | `client.director.list_country_directors()` |
 
 ### Query Builder Migration
 
@@ -425,28 +461,39 @@ except IfpaApiError as e:
 # Before (0.2.x)
 results = client.player.search(name="John", country="US")
 
-# After (0.3.0)
-results = client.player.query("John").country("US").get()
+# After (0.4.0 - Preferred)
+results = client.player.search("John").country("US").get()
 
-# New capabilities - query reuse
-base_query = client.player.query().country("US")
+# New capabilities - query reuse with immutable pattern
+base_query = client.player.search().country("US")
 wa_players = base_query.state("WA").get()
-or_players = base_query.state("OR").get()
+or_players = base_query.state("OR").get()  # Original query unchanged
 
 # Filter without search term
-winners = client.player.query().tournament("PAPA").position(1).get()
+winners = client.player.search().tournament("PAPA").position(1).get()
+
+# Convenience methods for getting first result
+first = client.player.search("Smith").first()
+maybe_first = client.player.search("Rare").first_or_none()
 ```
 
-### Callable Pattern Changes
+### Resource Access Pattern Changes
 
 ```python
-# Before (0.2.x)
-tournament = client.tournament(12345).get()
+# Before (0.2.x and 0.3.0)
+tournament = client.tournament(12345).details()
+player = client.player(12345).details()
 standings = client.series_handle("NACS").standings()
 
-# After (0.3.0)
-tournament = client.tournament(12345).details()
-standings = client.series("NACS").standings()
+# After (0.4.0 - Preferred)
+tournament = client.tournament.get(12345)
+player = client.player.get(12345)
+standings = client.series.get("NACS")
+
+# New convenience methods
+player = client.player.get_or_none(12345)  # Returns None instead of raising
+if client.player.exists(12345):
+    print("Player exists!")
 ```
 
 See the [CHANGELOG](CHANGELOG.md) for complete migration details.

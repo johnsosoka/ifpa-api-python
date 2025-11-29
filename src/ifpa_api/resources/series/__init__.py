@@ -5,5 +5,7 @@ and statistics.
 """
 
 from .client import SeriesClient
+from .context import _SeriesContext
+from .query_builder import SeriesQueryBuilder
 
-__all__ = ["SeriesClient"]
+__all__ = ["SeriesClient", "_SeriesContext", "SeriesQueryBuilder"]

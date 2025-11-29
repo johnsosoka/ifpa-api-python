@@ -6,7 +6,7 @@ Implements an immutable query builder pattern for searching tournaments.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing import Self
@@ -79,12 +79,22 @@ class TournamentQueryBuilder(
         Returns:
             New TournamentQueryBuilder instance with the name parameter set
 
+        Raises:
+            ValueError: If query() called multiple times in same chain
+
         Example:
             ```python
             results = client.tournament.query("PAPA").get()
             ```
         """
         clone = self._clone()
+        if "name" in clone._params:
+            raise ValueError(
+                f"query() called multiple times in query chain. "
+                f"Previous value: '{clone._params['name']}', "
+                f"Attempted value: '{name}'. "
+                f"This is likely a mistake. Create a new query to change the search term."
+            )
         clone._params["name"] = name
         return clone
 
@@ -141,6 +151,9 @@ class TournamentQueryBuilder(
         Returns:
             New TournamentQueryBuilder instance with tournament type filter applied
 
+        Raises:
+            ValueError: If tournament_type() called multiple times in same chain
+
         Example:
             ```python
             from ifpa_api import TournamentSearchType
@@ -163,8 +176,26 @@ class TournamentQueryBuilder(
             if isinstance(tournament_type, TournamentSearchType)
             else tournament_type
         )
+        if "tournament_type" in clone._params:
+            raise ValueError(
+                f"tournament_type() called multiple times in query chain. "
+                f"Previous value: '{clone._params['tournament_type']}', "
+                f"Attempted value: '{type_value}'. "
+                "This is likely a mistake. Create a new query to change the tournament type filter."
+            )
         clone._params["tournament_type"] = type_value
         return clone
+
+    def _extract_results(self, response: TournamentSearchResponse) -> list[Any]:
+        """Override to use 'tournaments' field instead of 'search'.
+
+        Args:
+            response: The TournamentSearchResponse object
+
+        Returns:
+            List of TournamentSearchResult items from the tournaments field
+        """
+        return response.tournaments
 
     def get(self) -> TournamentSearchResponse:
         """Execute the query and return results.

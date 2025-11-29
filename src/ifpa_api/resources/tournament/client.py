@@ -6,10 +6,12 @@ and resource-level access patterns.
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 from ifpa_api.core.base import BaseResourceClient
-from ifpa_api.models.tournaments import TournamentFormatsListResponse
+from ifpa_api.core.exceptions import IfpaApiError
+from ifpa_api.models.tournaments import Tournament, TournamentFormatsListResponse
 
 from .context import _TournamentContext
 from .query_builder import TournamentQueryBuilder
@@ -66,47 +68,73 @@ class TournamentClient(BaseResourceClient):
         """
         return _TournamentContext(self._http, tournament_id, self._validate_requests)
 
-    def query(self, name: str = "") -> TournamentQueryBuilder:
-        """Create a fluent query builder for searching tournaments.
+    def search(self, name: str = "") -> TournamentQueryBuilder:
+        """Search for tournaments by name (preferred method).
 
-        This is the recommended way to search for tournaments, providing a type-safe
-        and composable interface. The returned builder can be reused and composed
-        thanks to its immutable pattern.
+        This is the preferred method for searching tournaments. The .query() method is deprecated
+        and will be removed in v5.0.0.
 
         Args:
-            name: Optional tournament name to search for (can also be set via .query() on builder)
+            name: Name to search for (optional, can be empty to search all)
 
         Returns:
-            TournamentQueryBuilder instance for building the search query
+            TournamentQueryBuilder instance for chaining filters
 
         Example:
             ```python
-            # Simple name search
-            results = client.tournament.query("PAPA").get()
+            # Search by name
+            results = client.tournament.search("PAPA").get()
 
-            # Chained filters
-            results = (client.tournament.query("Championship")
+            # Search all with filters
+            results = client.tournament.search().country("US").limit(10).get()
+
+            # Chained filters with date range
+            results = (client.tournament.search("Championship")
                 .country("US")
                 .state("WA")
+                .date_range("2024-01-01", "2024-12-31")
                 .limit(25)
                 .get())
 
             # Query reuse (immutable pattern)
-            us_base = client.tournament.query().country("US")
+            us_base = client.tournament.search().country("US")
             wa_tournaments = us_base.state("WA").get()
             or_tournaments = us_base.state("OR").get()  # base unchanged!
-
-            # Empty query to start with filters
-            results = (client.tournament.query()
-                .date_range("2024-01-01", "2024-12-31")
-                .tournament_type("women")
-                .get())
             ```
         """
         builder = TournamentQueryBuilder(self._http)
         if name:
             return builder.query(name)
         return builder
+
+    def query(self, name: str = "") -> TournamentQueryBuilder:
+        """DEPRECATED: Search for tournaments by name.
+
+        .. deprecated:: 4.0.0
+           Use :meth:`search` instead. This method will be removed in v5.0.0.
+
+        Args:
+            name: Name to search for
+
+        Returns:
+            TournamentQueryBuilder instance
+
+        Example:
+            ```python
+            # Old way (deprecated)
+            results = client.tournament.query("PAPA").get()
+
+            # New way (preferred)
+            results = client.tournament.search("PAPA").get()
+            ```
+        """
+        warnings.warn(
+            "The .query() method is deprecated and will be removed in v5.0.0. "
+            "Please use .search() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.search(name)
 
     def list_formats(self) -> TournamentFormatsListResponse:
         """Get list of all available tournament format types.
@@ -144,3 +172,68 @@ class TournamentClient(BaseResourceClient):
         """
         response = self._http._request("GET", "/tournament/formats")
         return TournamentFormatsListResponse.model_validate(response)
+
+    def get(self, tournament_id: int | str) -> Tournament:
+        """Get tournament by ID.
+
+        Args:
+            tournament_id: The tournament's unique identifier
+
+        Returns:
+            Tournament object with complete tournament information
+
+        Raises:
+            IfpaApiError: If tournament not found (404) or other API error
+
+        Example:
+            ```python
+            tournament = client.tournament.get(54321)
+            print(f"{tournament.tournament_name} on {tournament.event_date}")
+            ```
+        """
+        return self(tournament_id).details()
+
+    def get_or_none(self, tournament_id: int | str) -> Tournament | None:
+        """Get tournament by ID, returning None if not found.
+
+        Args:
+            tournament_id: The tournament's unique identifier
+
+        Returns:
+            Tournament object if found, None if not found (404)
+
+        Raises:
+            IfpaApiError: For API errors other than 404
+
+        Example:
+            ```python
+            tournament = client.tournament.get_or_none(54321)
+            if tournament:
+                print(f"Found: {tournament.tournament_name}")
+            else:
+                print("Tournament not found")
+            ```
+        """
+        try:
+            return self.get(tournament_id)
+        except IfpaApiError as e:
+            if e.status_code == 404:
+                return None
+            raise
+
+    def exists(self, tournament_id: int | str) -> bool:
+        """Check if tournament exists.
+
+        Args:
+            tournament_id: The tournament's unique identifier
+
+        Returns:
+            True if tournament exists, False otherwise
+
+        Example:
+            ```python
+            if client.tournament.exists(54321):
+                print("Tournament exists!")
+            ```
+        """
+        return self.get_or_none(tournament_id) is not None

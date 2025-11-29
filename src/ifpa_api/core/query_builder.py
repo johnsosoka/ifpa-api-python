@@ -209,6 +209,43 @@ class QueryBuilder(ABC, Generic[T]):
 
         return results
 
+    def first(self) -> Any:
+        """Get first result from query.
+
+        Returns:
+            First result item
+
+        Raises:
+            ValueError: If query returns no results
+
+        Example:
+            ```python
+            player = client.player.query("Smith").first()
+            ```
+        """
+        results = self._extract_results(self.get())
+        if not results:
+            raise ValueError(
+                "No results found for query. " "Use .first_or_none() if empty results are expected."
+            )
+        return results[0]
+
+    def first_or_none(self) -> Any | None:
+        """Get first result from query, or None if no results.
+
+        Returns:
+            First result item, or None if query returns empty results
+
+        Example:
+            ```python
+            player = client.player.query("RareLastName").first_or_none()
+            if player:
+                print(f"Found: {player.first_name}")
+            ```
+        """
+        results = self._extract_results(self.get())
+        return results[0] if results else None
+
     def __repr__(self) -> str:
         """Return a string representation of the query builder.
 

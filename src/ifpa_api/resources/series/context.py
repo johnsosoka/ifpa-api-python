@@ -3,6 +3,8 @@
 Provides methods for accessing information about a specific tournament series.
 """
 
+import warnings
+
 from ifpa_api.core.base import BaseResourceContext
 from ifpa_api.core.exceptions import IfpaApiError, SeriesPlayerNotFoundError
 from ifpa_api.models.series import (
@@ -36,6 +38,11 @@ class _SeriesContext(BaseResourceContext[str]):
     ) -> SeriesStandingsResponse:
         """Get overall standings for this series across all regions.
 
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. Use direct methods on
+           SeriesClient where available. This warning is informational and this
+           method will continue to work.
+
         Returns an overview of standings for all regions in the series, including
         the current leader and prize fund for each region.
 
@@ -51,14 +58,20 @@ class _SeriesContext(BaseResourceContext[str]):
 
         Example:
             ```python
+            # Old way (deprecated pattern, still works)
             standings = client.series("NACS").standings()
-            print(f"Series: {standings.series_code} ({standings.year})")
-            print(f"Total Prize Fund: ${standings.championship_prize_fund}")
-            for region in standings.overall_results:
-                print(f"{region.region_name}: {region.player_count} players")
-                print(f"  Leader: {region.current_leader['player_name']}")
+
+            # New way (preferred)
+            standings = client.series.get("NACS")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).standings() is deprecated. "
+            "Consider using client.series.get(code) for basic standings access. "
+            "This pattern will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params = {}
         if start_pos is not None:
             params["start_pos"] = start_pos
@@ -77,6 +90,11 @@ class _SeriesContext(BaseResourceContext[str]):
         count: int | None = None,
     ) -> SeriesRegionStandingsResponse:
         """Get detailed player standings for a specific region in this series.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Region-based operations like this
+           legitimately require the context pattern.
 
         Returns the full standings list with individual player rankings for
         a specific region.
@@ -101,6 +119,13 @@ class _SeriesContext(BaseResourceContext[str]):
                 print(f"{player.series_rank}. {player.player_name}: {player.wppr_points} pts")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).region_standings() is deprecated. "
+            "Region-based operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params: dict[str, str | int] = {"region_code": region_code}
         if start_pos is not None:
             params["start_pos"] = start_pos
@@ -119,6 +144,11 @@ class _SeriesContext(BaseResourceContext[str]):
         year: int | None = None,
     ) -> SeriesPlayerCard:
         """Get a player's card for this series.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Region-based operations like this
+           legitimately require the context pattern.
 
         Args:
             player_id: The player's unique identifier
@@ -150,6 +180,13 @@ class _SeriesContext(BaseResourceContext[str]):
                 print(f"{event.tournament_name}: {event.points_earned} pts")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).player_card() is deprecated. "
+            "Region-based operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params: dict[str, str | int] = {"region_code": region_code}
         if year is not None:
             params["year"] = int(year)
@@ -168,6 +205,11 @@ class _SeriesContext(BaseResourceContext[str]):
 
     def regions(self, region_code: str, year: int) -> SeriesRegionsResponse:
         """Get active regions in this series for a specific year.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Year-based operations like this
+           legitimately require the context pattern.
 
         Note: The region_code parameter is required by the API but the endpoint
         returns all active regions for the specified year regardless of the
@@ -191,12 +233,24 @@ class _SeriesContext(BaseResourceContext[str]):
                 print(f"{region.region_name} ({region.region_code})")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).regions() is deprecated. "
+            "Year-based operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params = {"region_code": region_code, "year": year}
         response = self._http._request("GET", f"/series/{self._resource_id}/regions", params=params)
         return SeriesRegionsResponse.model_validate(response)
 
     def stats(self, region_code: str) -> SeriesStats:
         """Get statistics for a specific region in this series.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Region-based operations like this
+           legitimately require the context pattern.
 
         Args:
             region_code: Region code (e.g., "OH", "IL", "CA")
@@ -214,12 +268,24 @@ class _SeriesContext(BaseResourceContext[str]):
             print(f"Average Event Size: {stats.average_event_size}")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).stats() is deprecated. "
+            "Region-based operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params = {"region_code": region_code}
         response = self._http._request("GET", f"/series/{self._resource_id}/stats", params=params)
         return SeriesStats.model_validate(response)
 
     def tournaments(self, region_code: str) -> SeriesTournamentsResponse:
         """Get tournaments for a specific region in this series.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Region-based operations like this
+           legitimately require the context pattern.
 
         Args:
             region_code: Region code (e.g., "OH", "IL", "CA")
@@ -237,6 +303,13 @@ class _SeriesContext(BaseResourceContext[str]):
                 print(f"{tournament.tournament_name} on {tournament.event_date}")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).tournaments() is deprecated. "
+            "Region-based operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         params = {"region_code": region_code}
         response = self._http._request(
             "GET", f"/series/{self._resource_id}/tournaments", params=params
@@ -245,6 +318,11 @@ class _SeriesContext(BaseResourceContext[str]):
 
     def region_reps(self) -> RegionRepsResponse:
         """Get region representatives for this series.
+
+        .. deprecated:: 4.0.0
+           The callable context pattern is deprecated. This warning is informational
+           and this method will continue to work. Series-level operations like this
+           legitimately require the context pattern.
 
         Returns:
             List of region representatives
@@ -259,5 +337,12 @@ class _SeriesContext(BaseResourceContext[str]):
                 print(f"{rep.region_name}: {rep.name} (Player #{rep.player_id})")
             ```
         """
+        warnings.warn(
+            "The callable context pattern client.series(code).region_reps() is deprecated. "
+            "Series-level operations currently require this pattern. "
+            "This method will continue to work but may be removed in v5.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         response = self._http._request("GET", f"/series/{self._resource_id}/region_reps")
         return RegionRepsResponse.model_validate(response)

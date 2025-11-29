@@ -67,12 +67,22 @@ class PlayerQueryBuilder(
         Returns:
             New PlayerQueryBuilder instance with the name parameter set
 
+        Raises:
+            ValueError: If query() called multiple times in same chain
+
         Example:
             ```python
             results = client.player.query("John").get()
             ```
         """
         clone = self._clone()
+        if "name" in clone._params:
+            raise ValueError(
+                f"query() called multiple times in query chain. "
+                f"Previous value: '{clone._params['name']}', "
+                f"Attempted value: '{name}'. "
+                f"This is likely a mistake. Create a new query to change the search term."
+            )
         clone._params["name"] = name
         return clone
 
@@ -85,12 +95,22 @@ class PlayerQueryBuilder(
         Returns:
             New PlayerQueryBuilder instance with the tournament filter applied
 
+        Raises:
+            ValueError: If tournament() called multiple times in same chain
+
         Example:
             ```python
             results = client.player.query().tournament("PAPA").get()
             ```
         """
         clone = self._clone()
+        if "tournament" in clone._params:
+            raise ValueError(
+                f"tournament() called multiple times in query chain. "
+                f"Previous value: '{clone._params['tournament']}', "
+                f"Attempted value: '{tournament_name}'. "
+                f"This is likely a mistake. Create a new query to change the tournament filter."
+            )
         clone._params["tournament"] = tournament_name
         return clone
 
@@ -105,6 +125,9 @@ class PlayerQueryBuilder(
         Returns:
             New PlayerQueryBuilder instance with the position filter applied
 
+        Raises:
+            ValueError: If position() called multiple times in same chain
+
         Example:
             ```python
             # Find all players who won PAPA
@@ -112,6 +135,13 @@ class PlayerQueryBuilder(
             ```
         """
         clone = self._clone()
+        if "tourpos" in clone._params:
+            raise ValueError(
+                f"position() called multiple times in query chain. "
+                f"Previous value: {clone._params['tourpos']}, "
+                f"Attempted value: {finish_position}. "
+                f"This is likely a mistake. Create a new query to change the position filter."
+            )
         clone._params["tourpos"] = finish_position
         return clone
 
