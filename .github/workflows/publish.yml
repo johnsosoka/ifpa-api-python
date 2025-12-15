@@ -32,7 +32,7 @@ jobs:
       tag-version: ${{ steps.get-version.outputs.tag-version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Extract version from tag and pyproject.toml
         id: get-version
@@ -60,7 +60,7 @@ jobs:
     needs: validate-version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -100,7 +100,7 @@ jobs:
     needs: test
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v6
@@ -125,7 +125,7 @@ jobs:
           ls -lh dist/
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dist-packages
           path: dist/
@@ -140,7 +140,7 @@ jobs:
       url: https://test.pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dist-packages
           path: dist/
@@ -196,7 +196,7 @@ jobs:
       url: https://pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dist-packages
           path: dist/
@@ -212,12 +212,12 @@ jobs:
     needs: [validate-version, build, publish-pypi]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: dist-packages
           path: dist/
