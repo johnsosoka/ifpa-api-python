@@ -145,6 +145,9 @@ class LocationFiltersMixin:
         Returns:
             New query builder instance with the country filter applied
 
+        Raises:
+            ValueError: If country() called multiple times in same chain
+
         Example:
             ```python
             # Filter by country code
@@ -157,6 +160,13 @@ class LocationFiltersMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
+        if "country" in clone._params:
+            raise ValueError(
+                f"country() called multiple times in query chain. "
+                f"Previous value: '{clone._params['country']}', "
+                f"Attempted value: '{country_code}'. "
+                f"This is likely a mistake. Create a new query to change filters."
+            )
         clone._params["country"] = country_code
         return clone  # type: ignore[no-any-return]
 
@@ -169,6 +179,9 @@ class LocationFiltersMixin:
         Returns:
             New query builder instance with the state/province filter applied
 
+        Raises:
+            ValueError: If state() called multiple times in same chain
+
         Example:
             ```python
             # US state
@@ -179,6 +192,13 @@ class LocationFiltersMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
+        if "stateprov" in clone._params:
+            raise ValueError(
+                f"state() called multiple times in query chain. "
+                f"Previous value: '{clone._params['stateprov']}', "
+                f"Attempted value: '{stateprov}'. "
+                f"This is likely a mistake. Create a new query to change filters."
+            )
         clone._params["stateprov"] = stateprov
         return clone  # type: ignore[no-any-return]
 
@@ -191,6 +211,9 @@ class LocationFiltersMixin:
         Returns:
             New query builder instance with the city filter applied
 
+        Raises:
+            ValueError: If city() called multiple times in same chain
+
         Example:
             ```python
             # Filter by city
@@ -202,6 +225,13 @@ class LocationFiltersMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
+        if "city" in clone._params:
+            raise ValueError(
+                f"city() called multiple times in query chain. "
+                f"Previous value: '{clone._params['city']}', "
+                f"Attempted value: '{city}'. "
+                f"This is likely a mistake. Create a new query to change filters."
+            )
         clone._params["city"] = city
         return clone  # type: ignore[no-any-return]
 
@@ -252,6 +282,9 @@ class PaginationMixin:
         Returns:
             New query builder instance with the limit set
 
+        Raises:
+            ValueError: If limit() called multiple times in same chain
+
         Example:
             ```python
             # Rankings - count is honored
@@ -266,6 +299,13 @@ class PaginationMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
+        if "count" in clone._params:
+            raise ValueError(
+                f"limit() called multiple times in query chain. "
+                f"Previous value: {clone._params['count']}, "
+                f"Attempted value: {count}. "
+                f"This is likely a mistake. Create a new query to change pagination."
+            )
         clone._params["count"] = count
         return clone  # type: ignore[no-any-return]
 
@@ -282,6 +322,9 @@ class PaginationMixin:
         Returns:
             New query builder instance with the offset set
 
+        Raises:
+            ValueError: If offset() called multiple times in same chain
+
         Example:
             ```python
             # Get second page of results (assuming 25 per page)
@@ -292,5 +335,12 @@ class PaginationMixin:
             ```
         """
         clone = self._clone()  # type: ignore[attr-defined]
+        if "start_pos" in clone._params:
+            raise ValueError(
+                f"offset() called multiple times in query chain. "
+                f"Previous value: {clone._params['start_pos'] - 1}, "
+                f"Attempted value: {start_position}. "
+                f"This is likely a mistake. Create a new query to change pagination."
+            )
         clone._params["start_pos"] = start_position + 1
         return clone  # type: ignore[no-any-return]

@@ -5,7 +5,7 @@ Provides immutable query builder pattern for searching directors.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing import Self
@@ -71,14 +71,35 @@ class DirectorQueryBuilder(
         Returns:
             New DirectorQueryBuilder instance with the name parameter set
 
+        Raises:
+            ValueError: If query() called multiple times in same chain
+
         Example:
             ```python
             results = client.director.query("Josh").get()
             ```
         """
         clone = self._clone()
+        if "name" in clone._params:
+            raise ValueError(
+                f"query() called multiple times in query chain. "
+                f"Previous value: '{clone._params['name']}', "
+                f"Attempted value: '{name}'. "
+                f"This is likely a mistake. Create a new query to change the search term."
+            )
         clone._params["name"] = name
         return clone
+
+    def _extract_results(self, response: DirectorSearchResponse) -> list[Any]:
+        """Override to use 'directors' field instead of 'search'.
+
+        Args:
+            response: The DirectorSearchResponse object
+
+        Returns:
+            List of DirectorSearchResult items from the directors field
+        """
+        return response.directors
 
     def get(self) -> DirectorSearchResponse:
         """Execute the query and return results.
