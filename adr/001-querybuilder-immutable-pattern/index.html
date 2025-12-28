@@ -12,13 +12,9 @@
         <meta name="author" content="John Sosoka">
       
       
-        <link rel="canonical" href="https://johnsosoka.github.io/ifpa-api-python/getting-started/installation/">
+        <link rel="canonical" href="https://johnsosoka.github.io/ifpa-api-python/adr/001-querybuilder-immutable-pattern/">
       
       
-        <link rel="prev" href="../..">
-      
-      
-        <link rel="next" href="../quickstart/">
       
       
         
@@ -29,7 +25,7 @@
     
     
       
-        <title>Installation - IFPA API Documentation</title>
+        <title>ADR 001: QueryBuilder Immutable Pattern - IFPA API Documentation</title>
       
     
     
@@ -82,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#adr-001-querybuilder-immutable-pattern" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              ADR 001: QueryBuilder Immutable Pattern
             
           </span>
         </div>
@@ -299,8 +295,6 @@
       
   
   
-    
-  
   
   
     
@@ -313,11 +307,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -338,7 +334,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -353,37 +349,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
         
   
   
@@ -399,236 +368,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Requirements
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-in-a-virtual-environment-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install in a Virtual Environment (Recommended)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Install in a Virtual Environment (Recommended)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#using-venv-standard-library" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using venv (Standard Library)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#using-poetry" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Using Poetry
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from Source
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upgrading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Upgrading
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uninstalling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Uninstalling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dependencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-version-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python Version Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#platform-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Platform Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#no-module-named-ifpa_api" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        "No module named 'ifpa_api'"
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#import-errors" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Import Errors
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#permission-denied" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Permission Denied
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next Steps
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -641,7 +380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../quickstart/" class="md-nav__link">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
         
   
   
@@ -669,7 +408,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../authentication/" class="md-nav__link">
+      <a href="../../getting-started/authentication/" class="md-nav__link">
         
   
   
@@ -1472,55 +1211,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
+  <a href="#context" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Requirements
+        Context
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-from-pypi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install from PyPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-in-a-virtual-environment-recommended" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Install in a Virtual Environment (Recommended)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Install in a Virtual Environment (Recommended)">
+    <nav class="md-nav" aria-label="Context">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#using-venv-standard-library" class="md-nav__link">
+  <a href="#option-1-mutable-pattern" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using venv (Standard Library)
+        Option 1: Mutable Pattern
       
     </span>
   </a>
@@ -1528,10 +1234,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#using-poetry" class="md-nav__link">
+  <a href="#option-2-immutable-pattern-via-_clone" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Using Poetry
+        Option 2: Immutable Pattern (via _clone())
       
     </span>
   </a>
@@ -1544,99 +1250,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#install-from-source" class="md-nav__link">
+  <a href="#decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Install from Source
+        Decision
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#development-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Development Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upgrading" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Upgrading
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#uninstalling" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Uninstalling
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Dependencies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#python-version-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Python Version Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#platform-support" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Platform Support
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#troubleshooting" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Troubleshooting
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Troubleshooting">
+    <nav class="md-nav" aria-label="Decision">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#no-module-named-ifpa_api" class="md-nav__link">
+  <a href="#rationale" class="md-nav__link">
     <span class="md-ellipsis">
       
-        "No module named 'ifpa_api'"
+        Rationale
       
     </span>
   </a>
@@ -1644,21 +1273,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#import-errors" class="md-nav__link">
+  <a href="#implementation-requirements" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Import Errors
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#permission-denied" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Permission Denied
+        Implementation Requirements
       
     </span>
   </a>
@@ -1671,10 +1289,149 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#consequences" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next Steps
+        Consequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Consequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#positive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Negative
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mitigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mitigation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#correct-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Correct Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#incorrect-implementation-anti-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incorrect Implementation (Anti-Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternatives-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alternatives Considered
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Alternatives Considered">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#builder-with-build-terminal-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builder with .build() Terminal Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explicit-copy-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explicit Copy Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revision-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Revision History
       
     </span>
   </a>
@@ -1701,151 +1458,163 @@
   
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<p>This guide covers how to install the IFPA API package and verify your installation.</p>
-<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Python 3.11 or higher</li>
-<li>pip (Python package installer)</li>
-</ul>
-<h2 id="install-from-pypi">Install from PyPI<a class="headerlink" href="#install-from-pypi" title="Permanent link">&para;</a></h2>
-<p>The simplest way to install the IFPA API package is using pip:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>ifpa-api
+<h1 id="adr-001-querybuilder-immutable-pattern">ADR 001: QueryBuilder Immutable Pattern<a class="headerlink" href="#adr-001-querybuilder-immutable-pattern" title="Permanent link">&para;</a></h1>
+<p><strong>Status:</strong> Accepted
+<strong>Date:</strong> 2025-11-22
+<strong>Decision Makers:</strong> Technical Team
+<strong>Related:</strong> <a href="../../development/resource_api_standards/">Resource API Standards</a></p>
+<h2 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h2>
+<p>QueryBuilder classes enable fluent API patterns for constructing complex queries:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">results</span> <span class="o">=</span> <span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Smith&quot;</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;WA&quot;</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="o">.</span><span class="n">get</span><span class="p">())</span>
 </span></code></pre></div>
-<p>This will install the latest stable version from <a href="https://pypi.org/project/ifpa-api/">PyPI</a>.</p>
-<h2 id="verify-installation">Verify Installation<a class="headerlink" href="#verify-installation" title="Permanent link">&para;</a></h2>
-<p>After installation, verify that the package is installed correctly:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">ifpa_api</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">ifpa_api</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>  <span class="c1"># Should print: 0.4.0</span>
+<p>The decision: Should QueryBuilder instances be <strong>mutable</strong> (methods modify <code>self</code>) or <strong>immutable</strong> (methods return new instances)?</p>
+<h3 id="option-1-mutable-pattern">Option 1: Mutable Pattern<a class="headerlink" href="#option-1-mutable-pattern" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">country</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>  <span class="c1"># Modifies self</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">return</span> <span class="bp">self</span>
 </span></code></pre></div>
-<p>You can also check the installed version using pip:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>show<span class="w"> </span>ifpa-api
+<p><strong>Pros:</strong>
+- Simpler implementation
+- Slightly better performance (no object copying)
+- Common in some builder patterns</p>
+<p><strong>Cons:</strong>
+- Cannot reuse base queries safely
+- Side effects make debugging harder
+- Unpredictable behavior when sharing instances</p>
+<h3 id="option-2-immutable-pattern-via-_clone">Option 2: Immutable Pattern (via <code>_clone()</code>)<a class="headerlink" href="#option-2-immutable-pattern-via-_clone" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">country</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>  <span class="c1"># Create new instance</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">clone</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">return</span> <span class="n">clone</span>
 </span></code></pre></div>
-<h2 id="install-in-a-virtual-environment-recommended">Install in a Virtual Environment (Recommended)<a class="headerlink" href="#install-in-a-virtual-environment-recommended" title="Permanent link">&para;</a></h2>
-<p>It's recommended to install the package in a virtual environment to avoid dependency conflicts:</p>
-<h3 id="using-venv-standard-library">Using venv (Standard Library)<a class="headerlink" href="#using-venv-standard-library" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Create a virtual environment</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
+<p><strong>Pros:</strong>
+- Query reuse without side effects
+- Predictable behavior
+- Enables composition patterns
+- Easier to debug (no hidden mutations)</p>
+<p><strong>Cons:</strong>
+- Slightly more complex implementation
+- Minimal performance overhead from copying</p>
+<h2 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h2>
+<p><strong>Adopt the immutable pattern</strong> for all QueryBuilder implementations.</p>
+<h3 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h3>
+<p>The immutable pattern enables powerful composition and reuse patterns:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Create reusable base query</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">us_query</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Activate the virtual environment</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># On macOS/Linux:</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nb">source</span><span class="w"> </span>venv/bin/activate
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># On Windows:</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Install the package</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>pip<span class="w"> </span>install<span class="w"> </span>ifpa-api
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Derive multiple queries - each is independent</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">wa_players</span> <span class="o">=</span> <span class="n">us_query</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;WA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">or_players</span> <span class="o">=</span> <span class="n">us_query</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;OR&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">ca_players</span> <span class="o">=</span> <span class="n">us_query</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;CA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Base query unchanged - can continue using</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">midwest</span> <span class="o">=</span> <span class="n">us_query</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;IL&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span></code></pre></div>
-<h3 id="using-poetry">Using Poetry<a class="headerlink" href="#using-poetry" title="Permanent link">&para;</a></h3>
-<p>If you're using Poetry for dependency management:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Add to your project</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>poetry<span class="w"> </span>add<span class="w"> </span>ifpa-api
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Or install in a new project</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>poetry<span class="w"> </span>init
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>poetry<span class="w"> </span>add<span class="w"> </span>ifpa-api
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>poetry<span class="w"> </span>install
-</span></code></pre></div>
-<h2 id="install-from-source">Install from Source<a class="headerlink" href="#install-from-source" title="Permanent link">&para;</a></h2>
-<p>To install the latest development version from GitHub:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/johnsosoka/ifpa-api-python.git
-</span></code></pre></div>
-<p>Or clone the repository and install locally:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/johnsosoka/ifpa-api-python.git
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nb">cd</span><span class="w"> </span>ifpa-api-python
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
-</span></code></pre></div>
-<h2 id="development-installation">Development Installation<a class="headerlink" href="#development-installation" title="Permanent link">&para;</a></h2>
-<p>If you want to contribute to the package, follow the <a href="../../contributing/">Contributing Guide</a> for development setup instructions.</p>
-<p>Quick version:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Clone the repository</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/johnsosoka/ifpa-api-python.git
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nb">cd</span><span class="w"> </span>ifpa-api-python
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="c1"># Install Poetry</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>curl<span class="w"> </span>-sSL<span class="w"> </span>https://install.python-poetry.org<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="c1"># Install dependencies</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>poetry<span class="w"> </span>install
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="c1"># Install pre-commit hooks</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>poetry<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
-</span></code></pre></div>
-<h2 id="upgrading">Upgrading<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h2>
-<p>To upgrade to the latest version:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>ifpa-api
-</span></code></pre></div>
-<p>With Poetry:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>poetry<span class="w"> </span>update<span class="w"> </span>ifpa-api
-</span></code></pre></div>
-<h2 id="uninstalling">Uninstalling<a class="headerlink" href="#uninstalling" title="Permanent link">&para;</a></h2>
-<p>To remove the package:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>pip<span class="w"> </span>uninstall<span class="w"> </span>ifpa-api
-</span></code></pre></div>
-<p>With Poetry:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>poetry<span class="w"> </span>remove<span class="w"> </span>ifpa-api
-</span></code></pre></div>
-<h2 id="dependencies">Dependencies<a class="headerlink" href="#dependencies" title="Permanent link">&para;</a></h2>
-<p>The package has minimal dependencies:</p>
-<ul>
-<li><strong>requests</strong> (^2.31.0) - HTTP library for API requests</li>
-<li><strong>pydantic</strong> (^2.0.0) - Data validation and settings management</li>
-</ul>
-<p>These dependencies will be automatically installed when you install the package.</p>
-<h2 id="python-version-support">Python Version Support<a class="headerlink" href="#python-version-support" title="Permanent link">&para;</a></h2>
-<p>The package requires Python 3.11 or higher. Support for Python versions follows the official Python release cycle:</p>
-<ul>
-<li><strong>Supported</strong>: Python 3.11, 3.12</li>
-<li><strong>Not Supported</strong>: Python 3.10 and earlier</li>
-</ul>
-<h2 id="platform-support">Platform Support<a class="headerlink" href="#platform-support" title="Permanent link">&para;</a></h2>
-<p>The package is platform-independent and works on:</p>
-<ul>
-<li>macOS</li>
-<li>Linux</li>
-<li>Windows</li>
-</ul>
-<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<h3 id="no-module-named-ifpa_api">"No module named 'ifpa_api'"<a class="headerlink" href="#no-module-named-ifpa_api" title="Permanent link">&para;</a></h3>
-<p>If you get this error, ensure:</p>
+<p>With mutable pattern, this would fail because <code>.state("WA")</code> modifies <code>us_query</code>, corrupting all subsequent uses.</p>
+<h3 id="implementation-requirements">Implementation Requirements<a class="headerlink" href="#implementation-requirements" title="Permanent link">&para;</a></h3>
 <ol>
-<li>The package is installed in the correct environment</li>
-<li>You're using the correct Python interpreter</li>
-<li>The installation completed successfully</li>
+<li>
+<p><strong>All filter methods must use <code>_clone()</code>:</strong>
+   <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">filter_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>  <span class="c1"># REQUIRED</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">clone</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">return</span> <span class="n">clone</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong><code>_clone()</code> performs shallow copy with explicit params copy:</strong>
+   <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">_clone</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">clone</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># Shallow copy</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">clone</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># Deep copy params dict</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">return</span> <span class="n">clone</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Never modify <code>self._params</code> directly in filter methods</strong></p>
+</li>
 </ol>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Check which Python you&#39;re using</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>which<span class="w"> </span>python3
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>python3<span class="w"> </span>--version
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="c1"># Check if package is installed</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>pip<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ifpa-api
+<h2 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h2>
+<h3 id="positive">Positive<a class="headerlink" href="#positive" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Query Reuse:</strong> Users can create base queries and derive variations</li>
+<li><strong>Predictability:</strong> No hidden mutations, easier to reason about code</li>
+<li><strong>Testing:</strong> Immutable objects easier to test and mock</li>
+<li><strong>Concurrency:</strong> Safe to use in concurrent contexts (though HTTP client may not be)</li>
+</ul>
+<h3 id="negative">Negative<a class="headerlink" href="#negative" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Memory:</strong> Creates new objects for each method call (negligible impact)</li>
+<li><strong>Performance:</strong> Minimal overhead from copying small parameter dictionaries</li>
+<li><strong>Learning Curve:</strong> Developers familiar with mutable builders may find this unexpected</li>
+</ul>
+<h3 id="mitigation">Mitigation<a class="headerlink" href="#mitigation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Document immutable behavior clearly in QueryBuilder docstrings</li>
+<li>Provide examples demonstrating query reuse patterns</li>
+<li>Include warning in code review checklist about using <code>_clone()</code></li>
+</ul>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="correct-implementation">Correct Implementation<a class="headerlink" href="#correct-implementation" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PlayerQueryBuilder</span><span class="p">(</span><span class="n">QueryBuilder</span><span class="p">[</span><span class="n">PlayerSearchResponse</span><span class="p">]):</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">country</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">country_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clone</span><span class="p">()</span>  <span class="c1"># Creates new instance</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        <span class="n">clone</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">country_code</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="k">return</span> <span class="n">clone</span>
 </span></code></pre></div>
-<h3 id="import-errors">Import Errors<a class="headerlink" href="#import-errors" title="Permanent link">&para;</a></h3>
-<p>If you encounter import errors with dependencies:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Reinstall with --force-reinstall</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>pip<span class="w"> </span>install<span class="w"> </span>--force-reinstall<span class="w"> </span>ifpa-api
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="c1"># Or with --no-cache-dir</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>pip<span class="w"> </span>install<span class="w"> </span>--no-cache-dir<span class="w"> </span>ifpa-api
+<h3 id="incorrect-implementation-anti-pattern">Incorrect Implementation (Anti-Pattern)<a class="headerlink" href="#incorrect-implementation-anti-pattern" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PlayerQueryBuilder</span><span class="p">(</span><span class="n">QueryBuilder</span><span class="p">[</span><span class="n">PlayerSearchResponse</span><span class="p">]):</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">country</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">country_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">country_code</span>  <span class="c1"># WRONG: Mutates self</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        <span class="k">return</span> <span class="bp">self</span>
 </span></code></pre></div>
-<h3 id="permission-denied">Permission Denied<a class="headerlink" href="#permission-denied" title="Permanent link">&para;</a></h3>
-<p>If you get permission errors during installation:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Install for current user only</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>ifpa-api
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># Or use a virtual environment (recommended)</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>venv
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nb">source</span><span class="w"> </span>venv/bin/activate
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>pip<span class="w"> </span>install<span class="w"> </span>ifpa-api
+<h2 id="alternatives-considered">Alternatives Considered<a class="headerlink" href="#alternatives-considered" title="Permanent link">&para;</a></h2>
+<h3 id="builder-with-build-terminal-method">Builder with <code>.build()</code> Terminal Method<a class="headerlink" href="#builder-with-build-terminal-method" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">query</span> <span class="o">=</span> <span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Smith&quot;</span><span class="p">)</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;WA&quot;</span><span class="p">)</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="o">.</span><span class="n">build</span><span class="p">())</span>  <span class="c1"># Terminal operation</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">results</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
 </span></code></pre></div>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<p>Now that you have the package installed:</p>
-<ol>
-<li><a href="../authentication/">Set up authentication</a></li>
-<li><a href="../quickstart/">Follow the quick start guide</a></li>
-<li><a href="../../resources/directors/">Explore usage examples</a></li>
-</ol>
+<p><strong>Rejected because:</strong>
+- Extra method call for no benefit
+- Less fluent API (two-step: build → execute)
+- Still requires immutability for safe reuse</p>
+<h3 id="explicit-copy-method">Explicit Copy Method<a class="headerlink" href="#explicit-copy-method" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">base</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">wa_query</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;WA&quot;</span><span class="p">)</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="n">or_query</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;OR&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Rejected because:</strong>
+- Burdens users with explicit copying
+- Easy to forget <code>.copy()</code> and introduce bugs
+- Less ergonomic API</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://effectivepython.com/">Effective Python: Item 23 - Accept Functions Instead of Classes for Simple Interfaces</a></li>
+<li><a href="https://python-patterns.guide/gang-of-four/composition-over-inheritance/">Python Patterns - Immutable Objects</a></li>
+<li>QueryBuilder base implementation: <code>src/ifpa_api/core/query_builder.py</code></li>
+</ul>
+<h2 id="revision-history">Revision History<a class="headerlink" href="#revision-history" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Author</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-11-22</td>
+<td>Technical Team</td>
+<td>Initial ADR documenting immutable pattern decision</td>
+</tr>
+</tbody>
+</table>
 
 
 

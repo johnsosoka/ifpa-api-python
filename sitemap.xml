@@ -9,6 +9,18 @@
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
+         <loc>https://johnsosoka.github.io/ifpa-api-python/adr/001-querybuilder-immutable-pattern/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://johnsosoka.github.io/ifpa-api-python/adr/002-parameter-overwriting-detection/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://johnsosoka.github.io/ifpa-api-python/adr/003-convenience-methods-vs-callable-pattern/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
          <loc>https://johnsosoka.github.io/ifpa-api-python/api-client-reference/changelog/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
@@ -30,6 +42,10 @@
     </url>
     <url>
          <loc>https://johnsosoka.github.io/ifpa-api-python/development/code-style/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://johnsosoka.github.io/ifpa-api-python/development/resource_api_standards/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>
@@ -90,6 +106,10 @@
     </url>
     <url>
          <loc>https://johnsosoka.github.io/ifpa-api-python/resources/series/</loc>
+         <lastmod>2025-12-28</lastmod>
+    </url>
+    <url>
+         <loc>https://johnsosoka.github.io/ifpa-api-python/resources/stats/</loc>
          <lastmod>2025-12-28</lastmod>
     </url>
     <url>

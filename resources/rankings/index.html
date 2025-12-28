@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
@@ -33,7 +33,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -1195,6 +1195,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../stats/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stats
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/" class="md-nav__link">
         
   
@@ -1999,35 +2027,41 @@
 </table>
 <h2 id="womens-rankings">Women's Rankings<a class="headerlink" href="#womens-rankings" title="Permanent link">&para;</a></h2>
 <p>Access women's ranking system with options for open or women-only tournaments:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span><span class="p">,</span> <span class="n">RankingDivision</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.rankings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RankingsResponse</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Get women&#39;s rankings from all tournaments</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Get women&#39;s rankings from all tournaments (using enum - preferred)</span>
 </span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">rankings</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">women</span><span class="p">(</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="s2">&quot;OPEN&quot;</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="n">RankingDivision</span><span class="o">.</span><span class="n">OPEN</span><span class="p">,</span>
 </span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">start_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 </span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># Get women&#39;s rankings from women-only tournaments</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># Get women&#39;s rankings from women-only tournaments (using enum)</span>
 </span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="n">women_only</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">women</span><span class="p">(</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="s2">&quot;WOMEN&quot;</span><span class="p">,</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="n">RankingDivision</span><span class="o">.</span><span class="n">WOMEN</span><span class="p">,</span>
 </span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
 </span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">)</span>
 </span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="c1"># Filter by country</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="n">us_women</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">women</span><span class="p">(</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="c1"># Using strings (backwards compatible)</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="n">rankings_str</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">women</span><span class="p">(</span>
 </span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="s2">&quot;OPEN&quot;</span><span class="p">,</span>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">country</span><span class="o">=</span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">100</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="p">)</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">rankings</span><span class="o">.</span><span class="n">rankings</span><span class="p">:</span>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rating: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">city</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">stateprov</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">)</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="c1"># Filter by country</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="n">us_women</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">women</span><span class="p">(</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="n">tournament_type</span><span class="o">=</span><span class="n">RankingDivision</span><span class="o">.</span><span class="n">OPEN</span><span class="p">,</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="n">country</span><span class="o">=</span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">100</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="p">)</span>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">rankings</span><span class="o">.</span><span class="n">rankings</span><span class="p">:</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rating: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-35"><a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">city</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">stateprov</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="womens-rankings-parameters">Women's Rankings Parameters<a class="headerlink" href="#womens-rankings-parameters" title="Permanent link">&para;</a></h3>
 <table>
@@ -2041,8 +2075,8 @@
 <tbody>
 <tr>
 <td><code>tournament_type</code></td>
-<td><code>str</code></td>
-<td>Tournament filter: "OPEN" for all tournaments, "WOMEN" for women-only (default: "OPEN")</td>
+<td><code>RankingDivision \| str</code></td>
+<td>Tournament filter: <code>RankingDivision.OPEN</code> or "OPEN" for all tournaments, <code>RankingDivision.WOMEN</code> or "WOMEN" for women-only (default: "OPEN")</td>
 </tr>
 <tr>
 <td><code>start_pos</code></td>
@@ -2163,29 +2197,35 @@
 </table>
 <h2 id="professional-circuit-rankings">Professional Circuit Rankings<a class="headerlink" href="#professional-circuit-rankings" title="Permanent link">&para;</a></h2>
 <p>Access professional circuit rankings for open and women's divisions:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span><span class="p">,</span> <span class="n">RankingDivision</span>
 </span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.rankings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RankingsResponse</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Get open division pro rankings</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Get open division pro rankings (using enum - preferred)</span>
 </span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">pro</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">pro</span><span class="p">(</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">ranking_system</span><span class="o">=</span><span class="s2">&quot;OPEN&quot;</span><span class="p">,</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">ranking_system</span><span class="o">=</span><span class="n">RankingDivision</span><span class="o">.</span><span class="n">OPEN</span><span class="p">,</span>
 </span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">start_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 </span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
 </span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="p">)</span>
 </span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># Get women&#39;s division pro rankings</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># Get women&#39;s division pro rankings (using enum)</span>
 </span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">women_pro</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">pro</span><span class="p">(</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">ranking_system</span><span class="o">=</span><span class="s2">&quot;WOMEN&quot;</span><span class="p">,</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">ranking_system</span><span class="o">=</span><span class="n">RankingDivision</span><span class="o">.</span><span class="n">WOMEN</span><span class="p">,</span>
 </span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
 </span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="p">)</span>
 </span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">pro</span><span class="o">.</span><span class="n">rankings</span><span class="p">:</span>
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rating: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Best Finish: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">best_finish</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  WPPR Points: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="c1"># Using strings (backwards compatible)</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="n">pro_str</span><span class="p">:</span> <span class="n">RankingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">rankings</span><span class="o">.</span><span class="n">pro</span><span class="p">(</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="n">ranking_system</span><span class="o">=</span><span class="s2">&quot;OPEN&quot;</span><span class="p">,</span>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="p">)</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">pro</span><span class="o">.</span><span class="n">rankings</span><span class="p">:</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rating: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">rating</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Best Finish: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">best_finish</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  WPPR Points: </span><span class="si">{</span><span class="n">entry</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h3 id="pro-rankings-parameters">Pro Rankings Parameters<a class="headerlink" href="#pro-rankings-parameters" title="Permanent link">&para;</a></h3>
 <table>
@@ -2199,8 +2239,8 @@
 <tbody>
 <tr>
 <td><code>ranking_system</code></td>
-<td><code>str</code></td>
-<td>Division filter: "OPEN" for open division, "WOMEN" for women's division (default: "OPEN")</td>
+<td><code>RankingDivision \| str</code></td>
+<td>Division filter: <code>RankingDivision.OPEN</code> or "OPEN" for open division, <code>RankingDivision.WOMEN</code> or "WOMEN" for women's division (default: "OPEN")</td>
 </tr>
 <tr>
 <td><code>start_pos</code></td>
@@ -2615,10 +2655,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>
