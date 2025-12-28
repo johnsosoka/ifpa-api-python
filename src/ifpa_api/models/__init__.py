@@ -7,8 +7,11 @@ response deserialization throughout the SDK.
 from ifpa_api.models.calendar import CalendarEvent, CalendarResponse
 from ifpa_api.models.common import (
     IfpaBaseModel,
+    MajorTournament,
     RankingSystem,
     ResultType,
+    StatsRankType,
+    SystemCode,
     TimePeriod,
     TournamentType,
 )
@@ -76,6 +79,29 @@ from ifpa_api.models.series import (
     SeriesTournament,
     SeriesTournamentsResponse,
 )
+from ifpa_api.models.stats import (
+    AgeGenderStats,
+    CountryPlayersResponse,
+    CountryPlayerStat,
+    EventsAttendedPeriodResponse,
+    EventsAttendedPeriodStat,
+    EventsByYearResponse,
+    EventsByYearStat,
+    LargestTournamentsResponse,
+    LargestTournamentStat,
+    LucrativeTournamentsResponse,
+    LucrativeTournamentStat,
+    OverallStats,
+    OverallStatsResponse,
+    PlayersByYearResponse,
+    PlayersByYearStat,
+    PointsGivenPeriodResponse,
+    PointsGivenPeriodStat,
+    StatePlayersResponse,
+    StatePlayerStat,
+    StateTournamentsResponse,
+    StateTournamentStat,
+)
 from ifpa_api.models.tournaments import (
     FormatDefinition,
     LeagueSession,
@@ -104,6 +130,9 @@ __all__ = [
     "RankingSystem",
     "ResultType",
     "TournamentType",
+    "StatsRankType",
+    "SystemCode",
+    "MajorTournament",
     # Director
     "Director",
     "DirectorStats",
@@ -183,4 +212,26 @@ __all__ = [
     # Calendar
     "CalendarEvent",
     "CalendarResponse",
+    # Stats
+    "CountryPlayerStat",
+    "CountryPlayersResponse",
+    "StatePlayerStat",
+    "StatePlayersResponse",
+    "StateTournamentStat",
+    "StateTournamentsResponse",
+    "EventsByYearStat",
+    "EventsByYearResponse",
+    "PlayersByYearStat",
+    "PlayersByYearResponse",
+    "LargestTournamentStat",
+    "LargestTournamentsResponse",
+    "LucrativeTournamentStat",
+    "LucrativeTournamentsResponse",
+    "PointsGivenPeriodStat",
+    "PointsGivenPeriodResponse",
+    "EventsAttendedPeriodStat",
+    "EventsAttendedPeriodResponse",
+    "AgeGenderStats",
+    "OverallStats",
+    "OverallStatsResponse",
 ]

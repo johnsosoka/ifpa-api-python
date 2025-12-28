@@ -6,7 +6,7 @@ Implements an immutable query builder pattern for searching tournaments.
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing import Self
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 from ifpa_api.core.base import LocationFiltersMixin, PaginationMixin
 from ifpa_api.core.exceptions import IfpaClientValidationError
 from ifpa_api.core.query_builder import QueryBuilder
+from ifpa_api.models.common import TournamentSearchType
 from ifpa_api.models.tournaments import TournamentSearchResponse
 
 if TYPE_CHECKING:
@@ -78,12 +79,22 @@ class TournamentQueryBuilder(
         Returns:
             New TournamentQueryBuilder instance with the name parameter set
 
+        Raises:
+            ValueError: If query() called multiple times in same chain
+
         Example:
             ```python
             results = client.tournament.query("PAPA").get()
             ```
         """
         clone = self._clone()
+        if "name" in clone._params:
+            raise ValueError(
+                f"query() called multiple times in query chain. "
+                f"Previous value: '{clone._params['name']}', "
+                f"Attempted value: '{name}'. "
+                f"This is likely a mistake. Create a new query to change the search term."
+            )
         clone._params["name"] = name
         return clone
 
@@ -130,23 +141,61 @@ class TournamentQueryBuilder(
         clone._params["end_date"] = end_date
         return clone
 
-    def tournament_type(self, tournament_type: str) -> Self:
+    def tournament_type(self, tournament_type: TournamentSearchType | str) -> Self:
         """Filter by tournament type.
 
         Args:
-            tournament_type: Tournament type (e.g., "open", "women", "youth")
+            tournament_type: Tournament type filter (open, women, youth, league).
+                Can be string or TournamentSearchType enum.
 
         Returns:
             New TournamentQueryBuilder instance with tournament type filter applied
 
+        Raises:
+            ValueError: If tournament_type() called multiple times in same chain
+
         Example:
             ```python
-            results = client.tournament.query().tournament_type("women").get()
+            from ifpa_api import TournamentSearchType
+
+            # Using enum (preferred)
+            results = (client.tournament.search()
+                .tournament_type(TournamentSearchType.WOMEN)
+                .get())
+
+            # Using string (backwards compatible)
+            results = (client.tournament.search()
+                .tournament_type("women")
+                .get())
             ```
         """
         clone = self._clone()
-        clone._params["tournament_type"] = tournament_type
+        # Extract enum value if enum is passed
+        type_value = (
+            tournament_type.value
+            if isinstance(tournament_type, TournamentSearchType)
+            else tournament_type
+        )
+        if "tournament_type" in clone._params:
+            raise ValueError(
+                f"tournament_type() called multiple times in query chain. "
+                f"Previous value: '{clone._params['tournament_type']}', "
+                f"Attempted value: '{type_value}'. "
+                "This is likely a mistake. Create a new query to change the tournament type filter."
+            )
+        clone._params["tournament_type"] = type_value
         return clone
+
+    def _extract_results(self, response: TournamentSearchResponse) -> list[Any]:
+        """Override to use 'tournaments' field instead of 'search'.
+
+        Args:
+            response: The TournamentSearchResponse object
+
+        Returns:
+            List of TournamentSearchResult items from the tournaments field
+        """
+        return response.tournaments
 
     def get(self) -> TournamentSearchResponse:
         """Execute the query and return results.

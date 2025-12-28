@@ -66,27 +66,33 @@ next_page: RankingsResponse = client.rankings.wppr(
 Access women's ranking system with options for open or women-only tournaments:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, RankingDivision
 from ifpa_api.models.rankings import RankingsResponse
 
 client: IfpaClient = IfpaClient()
 
-# Get women's rankings from all tournaments
+# Get women's rankings from all tournaments (using enum - preferred)
 rankings: RankingsResponse = client.rankings.women(
-    tournament_type="OPEN",
+    tournament_type=RankingDivision.OPEN,
     start_pos=0,
     count=50
 )
 
-# Get women's rankings from women-only tournaments
+# Get women's rankings from women-only tournaments (using enum)
 women_only: RankingsResponse = client.rankings.women(
-    tournament_type="WOMEN",
+    tournament_type=RankingDivision.WOMEN,
+    count=50
+)
+
+# Using strings (backwards compatible)
+rankings_str: RankingsResponse = client.rankings.women(
+    tournament_type="OPEN",
     count=50
 )
 
 # Filter by country
 us_women: RankingsResponse = client.rankings.women(
-    tournament_type="OPEN",
+    tournament_type=RankingDivision.OPEN,
     country="US",
     count=100
 )
@@ -101,7 +107,7 @@ for entry in rankings.rankings:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `tournament_type` | `str` | Tournament filter: "OPEN" for all tournaments, "WOMEN" for women-only (default: "OPEN") |
+| `tournament_type` | `RankingDivision \| str` | Tournament filter: `RankingDivision.OPEN` or "OPEN" for all tournaments, `RankingDivision.WOMEN` or "WOMEN" for women-only (default: "OPEN") |
 | `start_pos` | `int \| str` | Starting position for pagination |
 | `count` | `int \| str` | Number of results to return (max 250) |
 | `country` | `str` | Filter by country code |
@@ -181,21 +187,27 @@ for entry in virtual.rankings:
 Access professional circuit rankings for open and women's divisions:
 
 ```python
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, RankingDivision
 from ifpa_api.models.rankings import RankingsResponse
 
 client: IfpaClient = IfpaClient()
 
-# Get open division pro rankings
+# Get open division pro rankings (using enum - preferred)
 pro: RankingsResponse = client.rankings.pro(
-    ranking_system="OPEN",
+    ranking_system=RankingDivision.OPEN,
     start_pos=0,
     count=50
 )
 
-# Get women's division pro rankings
+# Get women's division pro rankings (using enum)
 women_pro: RankingsResponse = client.rankings.pro(
-    ranking_system="WOMEN",
+    ranking_system=RankingDivision.WOMEN,
+    count=50
+)
+
+# Using strings (backwards compatible)
+pro_str: RankingsResponse = client.rankings.pro(
+    ranking_system="OPEN",
     count=50
 )
 
@@ -210,7 +222,7 @@ for entry in pro.rankings:
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `ranking_system` | `str` | Division filter: "OPEN" for open division, "WOMEN" for women's division (default: "OPEN") |
+| `ranking_system` | `RankingDivision \| str` | Division filter: `RankingDivision.OPEN` or "OPEN" for open division, `RankingDivision.WOMEN` or "WOMEN" for women's division (default: "OPEN") |
 | `start_pos` | `int` | Starting position for pagination |
 | `count` | `int` | Number of results to return (max 250) |
 

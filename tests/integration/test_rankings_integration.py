@@ -22,7 +22,7 @@ Run with: pytest -m integration
 import pytest
 from pydantic import ValidationError
 
-from ifpa_api import IfpaClient
+from ifpa_api import IfpaClient, RankingDivision
 from ifpa_api.core.exceptions import IfpaApiError
 from ifpa_api.models.rankings import (
     CountryRankingsResponse,
@@ -312,6 +312,26 @@ class TestWomenRankings:
         assert isinstance(result, RankingsResponse)
         assert len(result.rankings) > 0
 
+    def test_women_with_enum_open(self, api_key: str) -> None:
+        """Test women() with RankingDivision.OPEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+        result = client.rankings.women(tournament_type=RankingDivision.OPEN, count=25)
+
+        assert isinstance(result, RankingsResponse)
+        assert len(result.rankings) > 0
+        assert result.rankings[0].player_id is not None
+
+    def test_women_with_enum_women(self, api_key: str) -> None:
+        """Test women() with RankingDivision.WOMEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+        result = client.rankings.women(tournament_type=RankingDivision.WOMEN, count=25)
+
+        assert isinstance(result, RankingsResponse)
+        assert len(result.rankings) > 0
+        assert result.rankings[0].player_id is not None
+
 
 # =============================================================================
 # YOUTH RANKINGS
@@ -472,6 +492,25 @@ class TestProRankings:
 
         assert isinstance(result, RankingsResponse)
         # API doesn't respect start_pos/count, just verify we get results
+        assert len(result.rankings) > 0
+
+    def test_pro_with_enum_open(self, api_key: str) -> None:
+        """Test pro() with RankingDivision.OPEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+        result = client.rankings.pro(ranking_system=RankingDivision.OPEN, count=25)
+
+        assert isinstance(result, RankingsResponse)
+        assert len(result.rankings) > 0
+        assert result.rankings[0].player_id is not None
+
+    def test_pro_with_enum_women(self, api_key: str) -> None:
+        """Test pro() with RankingDivision.WOMEN enum."""
+        skip_if_no_api_key()
+        client = IfpaClient(api_key=api_key)
+        result = client.rankings.pro(ranking_system=RankingDivision.WOMEN, count=25)
+
+        assert isinstance(result, RankingsResponse)
         assert len(result.rankings) > 0
 
 

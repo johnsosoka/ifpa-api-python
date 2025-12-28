@@ -9,6 +9,7 @@ from ifpa_api.resources.player import PlayerClient
 from ifpa_api.resources.rankings import RankingsClient
 from ifpa_api.resources.reference import ReferenceClient
 from ifpa_api.resources.series import SeriesClient
+from ifpa_api.resources.stats import StatsClient
 from ifpa_api.resources.tournament import TournamentClient
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "ReferenceClient",
     "TournamentClient",
     "SeriesClient",
+    "StatsClient",
 ]

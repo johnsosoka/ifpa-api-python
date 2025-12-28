@@ -7,6 +7,360 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2025-11-22
+
+### Added
+
+**Convenience Methods** - Simplified resource access with Pythonic patterns:
+
+- Added `.get(id)` method to all ID-based resources (Player, Director, Tournament, Series)
+  - Get resource by ID, raises `IfpaApiError` on 404
+  - Example: `player = client.player.get(12345)`
+- Added `.get_or_none(id)` method to all ID-based resources
+  - Returns None on 404 instead of raising exception
+  - Example: `player = client.player.get_or_none(99999)`
+- Added `.exists(id)` method to all ID-based resources
+  - Boolean check for resource existence
+  - Example: `if client.player.exists(12345): ...`
+
+**QueryBuilder Improvements** - Enhanced fluent query interface:
+
+- Added `.first()` method to QueryBuilder base class
+  - Get first result from query, raises ValueError if empty
+  - Example: `player = client.player.search("Smith").first()`
+- Added `.first_or_none()` method to QueryBuilder base class
+  - Get first result or None if empty
+  - Example: `player = client.player.search("Rare").first_or_none()`
+- Fixed `.iterate()` and `.get_all()` for Director and Tournament QueryBuilders
+  - Override `_extract_results()` to handle different response field names
+  - Director uses `response.directors`, Tournament uses `response.tournaments`
+
+**Series Resource Modernization** - Brought Series to parity with other resources:
+
+- Created `SeriesQueryBuilder` with immutable pattern
+  - Client-side `.name()` filtering (case-insensitive, partial matches)
+  - Server-side `.active_only()` filtering
+  - Full support for `.first()`, `.first_or_none()`, `.iterate()`, `.get_all()`
+- Added `.search()` method to SeriesClient
+  - Example: `series = client.series.search("Circuit").get()`
+- Added convenience methods (`.get()`, `.get_or_none()`, `.exists()`)
+- Added deprecation warnings to Series context methods
+
+**API Standards Documentation** - Comprehensive developer resources:
+
+- Created `docs/development/resource_api_standards.md`
+  - Complete guidelines for resource implementation
+  - Code examples, decision matrices, implementation checklists
+  - QueryBuilder patterns, error handling, type safety requirements
+- Created Architecture Decision Records (ADRs) in `docs/adr/`:
+  - ADR 001: QueryBuilder Immutable Pattern
+  - ADR 002: Parameter Overwriting Detection Strategy
+  - ADR 003: Convenience Methods vs Callable Pattern
+
+**Parameter Overwriting Detection** - Prevents silent query mistakes:
+
+- All QueryBuilder filter methods now detect duplicate calls
+- Raises `ValueError` with helpful error message showing previous and attempted values
+- Applied to LocationFiltersMixin, PaginationMixin, and all resource-specific filters
+- Example error: `country() called multiple times. Previous: 'US', Attempted: 'CA'`
+
+### Changed
+
+**Naming Standardization** - Consistent method naming across all resources:
+
+- Added `.search()` as preferred method for all searchable resources
+  - Player, Director, Tournament, Series now use `.search()`
+  - Deprecates `.query()` method (will be removed in v5.0.0)
+  - Example: `results = client.player.search("John").get()`
+- Standardized collection method naming with `list_*` prefix
+  - Added `.list_country_directors()` (deprecates `.country_directors()`)
+  - Added `.list_series()` (deprecates `.list()`)
+  - Example: `directors = client.director.list_country_directors()`
+
+**Documentation Updates** - All examples updated to v4.0 patterns:
+
+- README.md updated with convenience methods and `.search()` examples
+- CLAUDE.md updated with current API patterns
+- All docstrings updated with deprecation notices and migration guidance
+
+### Deprecated
+
+**Query Methods** - Use `.search()` instead (removal in v5.0.0):
+
+- `PlayerClient.query()` → Use `.search()`
+- `DirectorClient.query()` → Use `.search()`
+- `TournamentClient.query()` → Use `.search()`
+
+**Collection Methods** - Use `list_*` naming (removal in v5.0.0):
+
+- `DirectorClient.country_directors()` → Use `.list_country_directors()`
+- `SeriesClient.list()` → Use `.list_series()`
+
+**Series Context Methods** - Informational warnings (no removal planned):
+
+- All Series context methods now issue deprecation warnings
+- Methods remain functional for region/year-based operations
+- Warnings acknowledge that these operations currently require context pattern
+
+### Migration Guide
+
+#### Convenience Methods
+
+**Before (v0.4.0 and earlier):**
+```python
+# Get player details
+player = client.player(12345).details()
+
+# Check if exists (required try/except)
+try:
+    player = client.player(99999).details()
+except IfpaApiError:
+    print("Player not found")
+```
+
+**After (v4.0.0):**
+```python
+# Get player details (preferred)
+player = client.player.get(12345)
+
+# Get or None (null-safe)
+player = client.player.get_or_none(99999)
+if player:
+    print(f"Found: {player.first_name}")
+
+# Existence check
+if client.player.exists(12345):
+    print("Player exists!")
+```
+
+#### Search Method Naming
+
+**Before:**
+```python
+results = client.player.query("Smith").get()
+results = client.director.query("Josh").get()
+```
+
+**After:**
+```python
+results = client.player.search("Smith").get()
+results = client.director.search("Josh").get()
+```
+
+#### Collection Method Naming
+
+**Before:**
+```python
+directors = client.director.country_directors()
+series = client.series.list()
+```
+
+**After:**
+```python
+directors = client.director.list_country_directors()
+series = client.series.list_series()
+```
+
+#### QueryBuilder Convenience
+
+**Before:**
+```python
+results = client.player.search("Smith").get()
+if len(results.search) > 0:
+    first = results.search[0]
+```
+
+**After:**
+```python
+# Get first result directly
+first = client.player.search("Smith").first()
+
+# Or null-safe
+first = client.player.search("Rare").first_or_none()
+```
+
+#### Series Query Builder
+
+**New in v4.0.0:**
+```python
+# Search series by name
+series = client.series.search("Circuit").get()
+
+# Active series only
+active = client.series.search().active_only().get()
+
+# Combined filters
+results = client.series.search("North American").active_only().get()
+
+# Convenience methods
+nacs = client.series.search("NACS").first()
+```
+
+### Technical Details
+
+**Breaking Changes:** None. All changes are backward-compatible with deprecation warnings.
+
+**Test Coverage:** 96% (420 tests, all passing)
+
+**Type Safety:** 100% type coverage maintained with mypy strict mode
+
+**Code Quality:**
+- Eliminated ~800-1000 lines of duplicated code through base classes and mixins
+- Consistent error handling across all resources
+- Parameter overwriting detection prevents user mistakes
+- Immutable QueryBuilder pattern enables safe query reuse
+
+**Deprecation Timeline:**
+- v4.0.0 (Current): Deprecation warnings issued, both APIs work
+- v4.x: Maintain both APIs with warnings
+- v5.0.0: Remove deprecated methods (breaking changes)
+
+## [0.4.0] - 2025-11-22
+
+### Added
+
+**ReadTheDocs Integration** - Professional documentation hosting and infrastructure:
+
+- Created `.readthedocs.yaml` configuration file for automated documentation builds
+- Reorganized Poetry dependencies with dedicated `docs` group for MkDocs and mkdocs-material
+- Updated GitHub Actions CI workflow (`.github/workflows/ci.yml`) to use Poetry for docs builds
+- Documentation now available at https://ifpa-api.readthedocs.io/
+- Improved documentation discoverability and accessibility for the Python community
+
+**Type-Safe Enums for Rankings and Tournaments** - Enhanced type safety for improved developer experience:
+
+- `RankingDivision` enum for Rankings resource:
+  - `RankingDivision.OPEN` - Open division rankings
+  - `RankingDivision.WOMEN` - Women's division rankings
+  - Used in `RankingsClient.women()` for `tournament_type` parameter
+- `TournamentSearchType` enum for Tournament search:
+  - `TournamentSearchType.OPEN` - Open division tournaments
+  - `TournamentSearchType.WOMEN` - Women's division tournaments
+  - `TournamentSearchType.YOUTH` - Youth division tournaments
+  - `TournamentSearchType.LEAGUE` - League format tournaments
+  - Used in `TournamentQueryBuilder.tournament_type()` method
+- Both enums maintain full backward compatibility with string parameters via union types (`Enum | str`)
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, RankingDivision, TournamentSearchType
+
+client = IfpaClient()
+
+# Rankings with type-safe enum
+rankings = client.rankings.women(
+    tournament_type=RankingDivision.OPEN,
+    count=50
+)
+
+# Tournament search with type-safe enum
+tournaments = (client.tournament.search("Championship")
+    .tournament_type(TournamentSearchType.WOMEN)
+    .country("US")
+    .get())
+
+# Strings still work (backward compatible)
+rankings = client.rankings.women(tournament_type="OPEN", count=50)
+```
+
+**Benefits:**
+- Type safety: Catch invalid values at development time with mypy
+- IDE autocomplete: Discover available division types
+- Self-documenting: Clear what values are valid
+- No breaking changes: Strings still work for existing code
+
+### Changed
+
+- Moved MkDocs and mkdocs-material from `dev` dependency group to dedicated optional `docs` group
+- Updated project documentation URL in `pyproject.toml` to point to ReadTheDocs
+- Enhanced documentation with comprehensive enum usage examples across Rankings and Tournaments resources
+- Updated `CLAUDE.md` with ReadTheDocs integration and new enum documentation
+
+### Documentation
+
+- Added type-safe enum examples to Rankings resource documentation
+- Added tournament type filtering examples to Tournaments resource documentation
+- Updated installation guide with current version references
+- Improved code examples throughout documentation to demonstrate new enums
+
+## [0.4.0] - 2025-11-21
+
+### Added
+
+**Type-Safe Enums for Stats Parameters** - Added three new enums for improved type safety and IDE autocomplete:
+
+- `StatsRankType.OPEN` and `StatsRankType.WOMEN` for rank_type parameters (used in 8 endpoints)
+- `SystemCode.OPEN` and `SystemCode.WOMEN` for system_code parameter in overall() endpoint
+- `MajorTournament.YES` and `MajorTournament.NO` for major parameter in lucrative_tournaments() endpoint
+- All enums maintain full backwards compatibility with string parameters
+- Union types (`Enum | str`) ensure existing code continues to work without changes
+- Enums are exported from main package: `from ifpa_api import StatsRankType, SystemCode, MajorTournament`
+
+**Usage Example:**
+```python
+from ifpa_api import IfpaClient, StatsRankType, MajorTournament
+
+client = IfpaClient()
+
+# Use enums for type safety (recommended)
+stats = client.stats.country_players(rank_type=StatsRankType.WOMEN)
+tournaments = client.stats.lucrative_tournaments(
+    rank_type=StatsRankType.WOMEN,
+    major=MajorTournament.YES
+)
+
+# Strings still work (backwards compatible)
+stats = client.stats.country_players(rank_type="WOMEN")
+```
+
+**Benefits:**
+- ✅ Type safety: Catch typos at development time
+- ✅ IDE autocomplete: Discover available values
+- ✅ Self-documenting: Clear what values are valid
+- ✅ No breaking changes: Strings still work
+
+**Stats Resource (NEW)** - 10 operational endpoints for IFPA statistical data:
+
+The Stats API was documented in v0.1.0 as returning 404 errors from the live API. All endpoints are now operational and fully implemented with comprehensive testing.
+
+**Geographic Statistics:**
+- `StatsClient.country_players()` - Player count statistics by country with OPEN/WOMEN ranking support
+- `StatsClient.state_players()` - Player count statistics by state/province (North America)
+- `StatsClient.state_tournaments()` - Tournament counts and WPPR point totals by state
+
+**Historical Trends:**
+- `StatsClient.events_by_year()` - Yearly tournament, player, and country participation trends
+- `StatsClient.players_by_year()` - Player retention statistics across consecutive years
+
+**Tournament Rankings:**
+- `StatsClient.largest_tournaments()` - Top 25 tournaments by player count
+- `StatsClient.lucrative_tournaments()` - Top 25 tournaments by WPPR value with major/non-major filtering
+
+**Period-Based Analytics:**
+- `StatsClient.points_given_period()` - Top point earners for a custom date range
+- `StatsClient.events_attended_period()` - Most active players by tournament attendance for a date range
+
+**System Statistics:**
+- `StatsClient.overall()` - Comprehensive IFPA system metrics including total players, active players, tournament counts, and age distribution
+
+**Implementation Details:**
+- 22 new Pydantic models in `src/ifpa_api/models/stats.py`
+- String-to-int coercion for count fields (API returns strings like "47101")
+- Decimal type for point values to preserve full precision
+- Comprehensive docstrings with practical examples for all endpoints
+- Full integration with existing error handling and validation system
+
+**Known API Issues:**
+- `overall()` endpoint system_code=WOMEN parameter appears to be ignored by the API (returns OPEN data regardless)
+
+### Testing
+- 1333 lines of unit tests with inline mocked responses
+- 642 lines of integration tests against live API
+- 15 new tests specifically for enum type validation and backwards compatibility
+- Stats-specific test fixtures for date ranges and validation helpers
+- All tests passing
+- Maintained 99% code coverage
+
 ## [0.3.0] - 2025-11-18
 
 ### Breaking Changes - Field Name Alignment
@@ -589,7 +943,9 @@ profile = client.player(123).details()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.1.0...v0.2.0
