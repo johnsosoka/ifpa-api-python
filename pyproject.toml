@@ -1,16 +1,16 @@
 [tool.poetry]
 name = "ifpa-api"
-version = "0.4.0"
+version = "0.4.1"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/johnsosoka/ifpa-api-python"
 repository = "https://github.com/johnsosoka/ifpa-api-python"
-documentation = "https://ifpa-api.readthedocs.io/"
+documentation = "https://johnsosoka.github.io/ifpa-api-python/"
 keywords = ["ifpa", "pinball", "api", "client", "sdk"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",

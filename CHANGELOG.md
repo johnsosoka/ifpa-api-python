@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2025-12-28
+
+### Fixed
+
+- Fixed documentation URLs pointing to non-functional ReadTheDocs; now correctly points to GitHub Pages
+- Updated development status from "Alpha" to "Beta" in PyPI classifiers
+- Fixed documentation badge in README to show correct status
+
+### Changed
+
+- **CI/CD Resilience**: Split integration tests into separate non-blocking job
+  - Unit tests, linting, and type checking must pass (required for build)
+  - Integration tests run separately with `continue-on-error: true`
+  - External IFPA API timeouts no longer fail the CI badge
+  - Increased integration test timeout to 30 seconds per test
+
 ## [0.4.0] - 2025-12-28
 
 ### Added
