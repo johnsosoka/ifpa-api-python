@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [4.0.0] - 2025-11-22
+## [0.4.0] - 2025-12-28
 
 ### Added
 
@@ -70,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `.search()` as preferred method for all searchable resources
   - Player, Director, Tournament, Series now use `.search()`
-  - Deprecates `.query()` method (will be removed in v5.0.0)
+  - Deprecates `.query()` method (will be removed in v0.5.0)
   - Example: `results = client.player.search("John").get()`
 - Standardized collection method naming with `list_*` prefix
   - Added `.list_country_directors()` (deprecates `.country_directors()`)
@@ -85,13 +85,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-**Query Methods** - Use `.search()` instead (removal in v5.0.0):
+**Query Methods** - Use `.search()` instead (removal in v0.5.0):
 
 - `PlayerClient.query()` → Use `.search()`
 - `DirectorClient.query()` → Use `.search()`
 - `TournamentClient.query()` → Use `.search()`
 
-**Collection Methods** - Use `list_*` naming (removal in v5.0.0):
+**Collection Methods** - Use `list_*` naming (removal in v0.5.0):
 
 - `DirectorClient.country_directors()` → Use `.list_country_directors()`
 - `SeriesClient.list()` → Use `.list_series()`
@@ -118,7 +118,7 @@ except IfpaApiError:
     print("Player not found")
 ```
 
-**After (v4.0.0):**
+**After (v0.4.0):**
 ```python
 # Get player details (preferred)
 player = client.player.get(12345)
@@ -181,7 +181,7 @@ first = client.player.search("Rare").first_or_none()
 
 #### Series Query Builder
 
-**New in v4.0.0:**
+**New in v0.4.0:**
 ```python
 # Search series by name
 series = client.series.search("Circuit").get()
@@ -211,15 +211,11 @@ nacs = client.series.search("NACS").first()
 - Immutable QueryBuilder pattern enables safe query reuse
 
 **Deprecation Timeline:**
-- v4.0.0 (Current): Deprecation warnings issued, both APIs work
-- v4.x: Maintain both APIs with warnings
-- v5.0.0: Remove deprecated methods (breaking changes)
+- v0.4.0 (Current): Deprecation warnings issued, both APIs work
+- v0.4.x: Maintain both APIs with warnings
+- v0.5.0: Remove deprecated methods (breaking changes)
 
-## [0.4.0] - 2025-11-22
-
-### Added
-
-**ReadTheDocs Integration** - Professional documentation hosting and infrastructure:
+### ReadTheDocs Integration - Professional documentation hosting and infrastructure:
 
 - Created `.readthedocs.yaml` configuration file for automated documentation builds
 - Reorganized Poetry dependencies with dedicated `docs` group for MkDocs and mkdocs-material
@@ -283,9 +279,7 @@ rankings = client.rankings.women(tournament_type="OPEN", count=50)
 - Updated installation guide with current version references
 - Improved code examples throughout documentation to demonstrate new enums
 
-## [0.4.0] - 2025-11-21
-
-### Added
+### Stats Resource and Type-Safe Enums
 
 **Type-Safe Enums for Stats Parameters** - Added three new enums for improved type safety and IDE autocomplete:
 
