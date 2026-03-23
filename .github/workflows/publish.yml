@@ -125,7 +125,7 @@ jobs:
           ls -lh dist/
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: dist-packages
           path: dist/
@@ -140,7 +140,7 @@ jobs:
       url: https://test.pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-packages
           path: dist/
@@ -196,7 +196,7 @@ jobs:
       url: https://pypi.org/project/ifpa-api/
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-packages
           path: dist/
@@ -217,7 +217,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: dist-packages
           path: dist/
