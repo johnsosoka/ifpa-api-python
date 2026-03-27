@@ -30,7 +30,7 @@ ifpa_api/
     ├── director.py    # DirectorClient (callable pattern)
     ├── player.py      # PlayerClient (callable pattern)
     ├── rankings.py    # RankingsClient
-    ├── tournaments.py # TournamentsClient, TournamentHandle
+    ├── tournament.py # TournamentClient, TournamentContext
     ├── series.py      # SeriesClient, SeriesHandle
     └── reference.py   # ReferenceClient
 ```
@@ -126,7 +126,7 @@ Returns the players resource client. Supports both collection operations and cal
 
 ```python
 @property
-def player(self) -> PlayersClient
+def player(self) -> PlayerClient
 ```
 
 **Usage:**
@@ -223,7 +223,7 @@ pvp = player_handle.pvp(47585)  # Compare with Debbie Smith
 history = player_handle.history()  # Get ranking history
 ```
 
-**Note:** The `client.player` property returns a `PlayersClient` which is callable, providing a unified interface for both collection and resource-specific operations.
+**Note:** The `client.player` property returns a `PlayerClient` which is callable, providing a unified interface for both collection and resource-specific operations.
 
 #### `tournament(tournament_id)`
 

@@ -15,12 +15,12 @@ The IFPA API client enables Python developers to access pinball rankings, tourna
 - **Fully Typed**: Complete type hints for IDE autocompletion and type checking
 - **Pydantic Models**: Automatic request/response validation with detailed error messages
 - **Resource-Oriented**: Intuitive access patterns matching the IFPA API structure
-- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints across 6 resources
+- **Comprehensive Coverage**: 46 IFPA API v2.1 endpoints across 7 resources
 - **Pagination Support**: Built-in support for paginated endpoints with query builder methods
 - **Clear Error Handling**: Exception hierarchy for different failure scenarios
 - **Well Tested**: 99% test coverage with unit and integration tests
 
-> Alpha Release: This library is under active development, with significant and breaking changes being released as we work towards v1.0.0, which will be considered our stable release.
+> Beta Release: This library is under active development. The API is stabilizing as we work towards v1.0.0, which will be considered our stable release.
 
 ## Quick Example
 

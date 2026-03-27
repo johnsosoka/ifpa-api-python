@@ -88,8 +88,10 @@ client = IfpaClient(api_key='your-api-key-here')
 # Get player profile and rankings
 player = client.player.get(2643)
 print(f"{player.first_name} {player.last_name}")
-print(f"WPPR Rank: {player.player_stats.current_wppr_rank}")
-print(f"WPPR Points: {player.player_stats.current_wppr_value}")
+# Access stats via dictionary structure
+stats = player.player_stats["system"]["open"]
+print(f"WPPR Rank: {stats['current_rank']}")
+print(f"WPPR Points: {stats['active_points']}")
 
 # Search for players with filters
 results = client.player.search("John") \
