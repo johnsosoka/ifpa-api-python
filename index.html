@@ -1569,13 +1569,13 @@
 <li><strong>Fully Typed</strong>: Complete type hints for IDE autocompletion and type checking</li>
 <li><strong>Pydantic Models</strong>: Automatic request/response validation with detailed error messages</li>
 <li><strong>Resource-Oriented</strong>: Intuitive access patterns matching the IFPA API structure</li>
-<li><strong>Comprehensive Coverage</strong>: 36 IFPA API v2.1 endpoints across 6 resources</li>
+<li><strong>Comprehensive Coverage</strong>: 46 IFPA API v2.1 endpoints across 7 resources</li>
 <li><strong>Pagination Support</strong>: Built-in support for paginated endpoints with query builder methods</li>
 <li><strong>Clear Error Handling</strong>: Exception hierarchy for different failure scenarios</li>
 <li><strong>Well Tested</strong>: 99% test coverage with unit and integration tests</li>
 </ul>
 <blockquote>
-<p>Alpha Release: This library is under active development, with significant and breaking changes being released as we work towards v1.0.0, which will be considered our stable release.</p>
+<p>Beta Release: This library is under active development. The API is stabilizing as we work towards v1.0.0, which will be considered our stable release.</p>
 </blockquote>
 <h2 id="quick-example">Quick Example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h2>
 <p>This example demonstrates the fluent query builder API and callable pattern using real IFPA data:</p>
@@ -1588,11 +1588,11 @@
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># === Fluent Query Builder Pattern ===</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># Simple query - search by name</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">results</span><span class="p">:</span> <span class="n">PlayerSearchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Smith&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">results</span><span class="p">:</span> <span class="n">PlayerSearchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Smith&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">search</span><span class="p">)</span><span class="si">}</span><span class="s2"> players named Smith&quot;</span><span class="p">)</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
 </span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># Build a base query for US players - demonstrates immutable query builder</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">us_query</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">query</span><span class="p">()</span><span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">us_query</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">country</span><span class="p">(</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Reuse the base query for different states (immutable pattern!)</span>
 </span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">idaho_players</span><span class="p">:</span> <span class="n">PlayerSearchResponse</span> <span class="o">=</span> <span class="n">us_query</span><span class="o">.</span><span class="n">state</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -1615,7 +1615,7 @@
 </span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>
 </span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="c1"># Find all PAPA tournament winners using filter-only query</span>
 </span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="n">papa_winners</span><span class="p">:</span> <span class="n">PlayerSearchResponse</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>    <span class="n">client</span><span class="o">.</span><span class="n">player</span><span class="o">.</span><span class="n">search</span><span class="p">()</span>
 </span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>    <span class="o">.</span><span class="n">tournament</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span>
 </span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>    <span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>    <span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
@@ -1638,7 +1638,7 @@
 </span></code></pre></div>
 <p><strong>Key Patterns Demonstrated:</strong></p>
 <ul>
-<li><strong>Fluent Query Builder</strong>: Immutable, composable queries with <code>.query()</code>, <code>.country()</code>, <code>.state()</code>, <code>.limit()</code></li>
+<li><strong>Fluent Query Builder</strong>: Immutable, composable queries with <code>.search()</code>, <code>.country()</code>, <code>.state()</code>, <code>.limit()</code></li>
 <li><strong>Query Reusability</strong>: Base queries can be safely reused without side effects (immutable pattern)</li>
 <li><strong>Callable Pattern</strong>: Direct resource access via <code>client.player(25584).details()</code></li>
 <li><strong>Advanced Filtering</strong>: Chain multiple filters like <code>.tournament()</code> and <code>.position()</code> for complex queries</li>

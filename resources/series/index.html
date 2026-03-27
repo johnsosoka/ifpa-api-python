@@ -857,6 +857,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#search-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Series
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search Series">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-builder-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Builder Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chained-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chained Filters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-reuse-immutable-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Reuse (Immutable Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-reference-to-seriesquerybuilder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Reference to SeriesQueryBuilder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-overall-series-standings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1394,6 +1455,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#search-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search Series
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Search Series">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-builder-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Builder Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chained-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chained Filters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-reuse-immutable-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Reuse (Immutable Pattern)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-reference-to-seriesquerybuilder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-Reference to SeriesQueryBuilder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-overall-series-standings" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1571,15 +1693,123 @@
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">active_series</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">active_series</span><span class="o">.</span><span class="n">series</span><span class="p">)</span><span class="si">}</span><span class="s2"> active series&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="get-overall-series-standings">Get Overall Series Standings<a class="headerlink" href="#get-overall-series-standings" title="Permanent link">&para;</a></h2>
-<p>Get overall standings overview for a series across all regions. This returns a summary of each region with current leader and prize fund information.</p>
+<h2 id="search-series">Search Series<a class="headerlink" href="#search-series" title="Permanent link">&para;</a></h2>
+<p>The <strong>recommended</strong> way to search for series is using the fluent query builder:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStandingsResponse</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesListResponse</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Quick example - NACS (North American Championship Series)</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Search by name (client-side filtering)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">results</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Circuit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">for</span> <span class="n">series</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">series</span><span class="p">:</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series</span><span class="o">.</span><span class="n">series_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">series</span><span class="o">.</span><span class="n">series_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Active: </span><span class="si">{</span><span class="n">series</span><span class="o">.</span><span class="n">active</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># Output:</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="c1"># NACS: North American Championship Series</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1">#   Active: True</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1"># PACS: Pacific Championship Series</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="c1">#   Active: True</span>
+</span></code></pre></div>
+<h3 id="query-builder-methods">Query Builder Methods<a class="headerlink" href="#query-builder-methods" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.search(name)</code></td>
+<td><code>str</code></td>
+<td>Series name or code (partial match, case insensitive)</td>
+</tr>
+<tr>
+<td><code>.name(name)</code></td>
+<td><code>str</code></td>
+<td>Alias for search - filter by name (client-side)</td>
+</tr>
+<tr>
+<td><code>.active_only(active)</code></td>
+<td><code>bool</code></td>
+<td>Filter to active/inactive series (server-side)</td>
+</tr>
+<tr>
+<td><code>.get()</code></td>
+<td>-</td>
+<td>Execute query and return results</td>
+</tr>
+<tr>
+<td><code>.first()</code></td>
+<td>-</td>
+<td>Get first result or None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Client-Side Filtering</p>
+<p>The IFPA API only provides a list endpoint for series. Name filtering is performed
+client-side by the SDK, matching against both <code>series_name</code> and <code>series_code</code> fields.
+Use <code>.active_only()</code> for server-side filtering.</p>
+</div>
+<h3 id="chained-filters">Chained Filters<a class="headerlink" href="#chained-filters" title="Permanent link">&para;</a></h3>
+<p>The fluent API allows method chaining for complex queries:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesListResponse</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Search by name and filter to active series</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">results</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;North American&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">active_only</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Get only active series (no name filter)</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">active</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">active_only</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># Get only inactive series</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">inactive</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">active_only</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="c1"># Use first() to get a single result</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="n">nacs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="k">if</span> <span class="n">nacs</span><span class="p">:</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found: </span><span class="si">{</span><span class="n">nacs</span><span class="o">.</span><span class="n">series_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="query-reuse-immutable-pattern">Query Reuse (Immutable Pattern)<a class="headerlink" href="#query-reuse-immutable-pattern" title="Permanent link">&para;</a></h3>
+<p>The query builder is immutable - each method returns a new instance, allowing query reuse:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesListResponse</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Create a reusable base query for active series</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">active_query</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="o">.</span><span class="n">search</span><span class="p">()</span><span class="o">.</span><span class="n">active_only</span><span class="p">()</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Derive specific searches from the base</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">circuit_series</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">active_query</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;Circuit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">championship_series</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">active_query</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;Championship&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="c1"># The base query remains unchanged and can be reused</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="n">papa_series</span><span class="p">:</span> <span class="n">SeriesListResponse</span> <span class="o">=</span> <span class="n">active_query</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</span></code></pre></div>
+<h3 id="cross-reference-to-seriesquerybuilder">Cross-Reference to SeriesQueryBuilder<a class="headerlink" href="#cross-reference-to-seriesquerybuilder" title="Permanent link">&para;</a></h3>
+<p>For advanced usage, you can import and use the <code>SeriesQueryBuilder</code> directly:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.resources.series.query_builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesQueryBuilder</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># The query builder is typically accessed via client.series.search()</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># but can be instantiated directly for advanced scenarios</span>
+</span></code></pre></div>
+<p>See the <a href="../api-client-reference/series-query-builder.md">SeriesQueryBuilder API Reference</a> for complete details.</p>
+<h2 id="get-overall-series-standings">Get Overall Series Standings<a class="headerlink" href="#get-overall-series-standings" title="Permanent link">&para;</a></h2>
+<p>Get overall standings overview for a series across all regions. This returns a summary of each region with current leader and prize fund information.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStandingsResponse</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Quick example - NACS (North American Championship Series)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
 </span></code></pre></div>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1607,32 +1837,32 @@
 </tbody>
 </table>
 <p><strong>Complete Example:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStandingsResponse</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Get overall standings overview for all regions</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Series: </span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">series_code</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">year</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Prize Fund: $</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">championship_prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># Show top 5 regions</span>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">standings</span><span class="o">.</span><span class="n">overall_results</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Leader: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">current_leader</span><span class="p">[</span><span class="s1">&#39;player_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Prize Fund: $</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStandingsResponse</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># Get overall standings overview for all regions</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Series: </span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">series_code</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">year</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Prize Fund: $</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">championship_prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="c1"># Show top 5 regions</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">standings</span><span class="o">.</span><span class="n">overall_results</span><span class="p">[:</span><span class="mi">5</span><span class="p">]:</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Leader: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">current_leader</span><span class="p">[</span><span class="s1">&#39;player_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Prize Fund: $</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="get-region-specific-standings">Get Region-Specific Standings<a class="headerlink" href="#get-region-specific-standings" title="Permanent link">&para;</a></h2>
 <p>Get detailed player standings for a specific region in a series.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionStandingsResponse</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Quick example - Ohio region in NACS</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionStandingsResponse</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># Quick example - Ohio region in NACS</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1666,39 +1896,39 @@
 </tbody>
 </table>
 <p><strong>Complete Example:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionStandingsResponse</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Get detailed standings for Ohio region</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Region: </span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prize Fund: $</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Players: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="o">.</span><span class="n">standings</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="c1"># Show top 10 players</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">standings</span><span class="o">.</span><span class="n">standings</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">series_rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2"> pts&quot;</span><span class="p">)</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Events: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2"> | Wins: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">win_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
-</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="c1"># Paginated region standings (50 results starting from position 0)</span>
-</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="n">standings_page</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span>
-</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span>
-</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    <span class="n">start_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
-</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionStandingsResponse</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># Get detailed standings for Ohio region</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Region: </span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prize Fund: $</span><span class="si">{</span><span class="n">standings</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Players: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">standings</span><span class="o">.</span><span class="n">standings</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="c1"># Show top 10 players</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">standings</span><span class="o">.</span><span class="n">standings</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">series_rank</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2"> pts&quot;</span><span class="p">)</span>
+</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Events: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2"> | Wins: </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">win_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>
+</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="c1"># Paginated region standings (50 results starting from position 0)</span>
+</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="n">standings_page</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span>
+</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span>
+</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>    <span class="n">start_pos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>    <span class="n">count</span><span class="o">=</span><span class="mi">50</span>
+</span><span id="__span-9-23"><a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="get-players-series-card">Get Player's Series Card<a class="headerlink" href="#get-players-series-card" title="Permanent link">&para;</a></h2>
 <p>Get a player's performance card for a specific series and region.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesPlayerCard</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Quick example - Josh Sharpe (Player 14) in Ohio</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">card</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesPlayerCard</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Quick example - Josh Sharpe (Player 14) in Ohio</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">card</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1732,45 +1962,45 @@
 </tbody>
 </table>
 <p><strong>Complete Example:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesPlayerCard</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="c1"># Get current year card for Josh Sharpe in Ohio region</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="n">card</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">player_id</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>  <span class="c1"># Josh Sharpe</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="p">)</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Player: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Position: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">current_position</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Points: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">total_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Event History:&quot;</span><span class="p">)</span>
-</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>
-</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="c1"># Show all events on player&#39;s card</span>
-</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">card</span><span class="o">.</span><span class="n">player_card</span><span class="p">:</span>
-</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">tournament_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2"> pts&quot;</span><span class="p">)</span>
-</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">region_event_rank</span><span class="p">:</span>
-</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Rank: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">region_event_rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>
-</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="c1"># Get card for specific year (2023)</span>
-</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="n">card_2023</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span>
-</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>    <span class="n">player_id</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
-</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span>
-</span><span id="__span-7-27"><a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>    <span class="n">year</span><span class="o">=</span><span class="mi">2023</span>
-</span><span id="__span-7-28"><a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="p">)</span>
-</span><span id="__span-7-29"><a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2023 Card: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">card_2023</span><span class="o">.</span><span class="n">player_card</span><span class="p">)</span><span class="si">}</span><span class="s2"> events&quot;</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesPlayerCard</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># Get current year card for Josh Sharpe in Ohio region</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">card</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>    <span class="n">player_id</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>  <span class="c1"># Josh Sharpe</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="p">)</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Player: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">player_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Position: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">current_position</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total Points: </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">total_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Event History:&quot;</span><span class="p">)</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="c1"># Show all events on player&#39;s card</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a><span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">card</span><span class="o">.</span><span class="n">player_card</span><span class="p">:</span>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">tournament_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">}</span><span class="s2"> pts&quot;</span><span class="p">)</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">region_event_rank</span><span class="p">:</span>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Rank: </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">region_event_rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="c1"># Get card for specific year (2023)</span>
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="n">card_2023</span><span class="p">:</span> <span class="n">SeriesPlayerCard</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">player_card</span><span class="p">(</span>
+</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>    <span class="n">player_id</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>    <span class="n">region_code</span><span class="o">=</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span>
+</span><span id="__span-11-27"><a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>    <span class="n">year</span><span class="o">=</span><span class="mi">2023</span>
+</span><span id="__span-11-28"><a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="p">)</span>
+</span><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2023 Card: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">card_2023</span><span class="o">.</span><span class="n">player_card</span><span class="p">)</span><span class="si">}</span><span class="s2"> events&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="get-active-regions">Get Active Regions<a class="headerlink" href="#get-active-regions" title="Permanent link">&para;</a></h2>
 <p>Get list of active regions in a series for a specific year.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionsResponse</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1"># Quick example - Get 2024 NACS regions</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">regions</span><span class="p">:</span> <span class="n">SeriesRegionsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionsResponse</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># Quick example - Get 2024 NACS regions</span>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">regions</span><span class="p">:</span> <span class="n">SeriesRegionsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">API Behavior</p>
@@ -1803,219 +2033,219 @@ active regions for the year regardless of the <code>region_code</code> value pro
 </tbody>
 </table>
 <p><strong>Complete Example:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionsResponse</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># Get all active regions for 2024 (region_code is required but not used for filtering)</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">regions</span><span class="p">:</span> <span class="n">SeriesRegionsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active Regions for 2024:&quot;</span><span class="p">)</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span><span class="o">.</span><span class="n">active_regions</span><span class="p">:</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_code</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>    <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="p">:</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Players: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">event_count</span><span class="p">:</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Events: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="get-series-statistics">Get Series Statistics<a class="headerlink" href="#get-series-statistics" title="Permanent link">&para;</a></h2>
-<p>Get aggregate statistics for a specific region in a series.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStats</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Quick example - Ohio region stats</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p><strong>Parameters:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>region_code</code></td>
-<td><code>str</code></td>
-<td>Yes</td>
-<td>Region code (e.g., "OH", "IL", "CA")</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Complete Example:</strong></p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStats</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># Get statistics for Ohio region in NACS</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ohio Region Statistics:&quot;</span><span class="p">)</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Events: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_events</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Players: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_players</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Participations: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_participations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Average Event Size: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">average_event_size</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="get-series-tournaments">Get Series Tournaments<a class="headerlink" href="#get-series-tournaments" title="Permanent link">&para;</a></h2>
-<p>Get tournaments for a specific region in a series.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesTournamentsResponse</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># Quick example - Ohio tournaments in NACS</span>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="n">tournaments</span><span class="p">:</span> <span class="n">SeriesTournamentsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tournaments</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p><strong>Parameters:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Required</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>region_code</code></td>
-<td><code>str</code></td>
-<td>Yes</td>
-<td>Region code (e.g., "OH", "IL", "CA")</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Complete Example:</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesTournamentsResponse</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesRegionsResponse</span>
 </span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>
 </span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Get tournaments for Ohio region in NACS</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">tournaments</span><span class="p">:</span> <span class="n">SeriesTournamentsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tournaments</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="c1"># Get all active regions for 2024 (region_code is required but not used for filtering)</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">regions</span><span class="p">:</span> <span class="n">SeriesRegionsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="mi">2024</span><span class="p">)</span>
 </span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
-</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ohio NACS Tournaments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tournaments</span><span class="o">.</span><span class="n">tournaments</span><span class="p">)</span><span class="si">}</span><span class="s2"> total):&quot;</span><span class="p">)</span>
-</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="k">for</span> <span class="n">tournament</span> <span class="ow">in</span> <span class="n">tournaments</span><span class="o">.</span><span class="n">tournaments</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>  <span class="c1"># Show first 10</span>
-</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">tournament_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Date: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">event_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">city</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">stateprov</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>    <span class="k">if</span> <span class="n">tournament</span><span class="o">.</span><span class="n">event_value</span><span class="p">:</span>
-</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Value: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">event_value</span><span class="si">}</span><span class="s2"> WPPR points&quot;</span><span class="p">)</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Active Regions for 2024:&quot;</span><span class="p">)</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span><span class="o">.</span><span class="n">active_regions</span><span class="p">:</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_code</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>    <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="p">:</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Players: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>    <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">event_count</span><span class="p">:</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    Events: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<h2 id="get-region-representatives">Get Region Representatives<a class="headerlink" href="#get-region-representatives" title="Permanent link">&para;</a></h2>
-<p>Get list of region representatives for a series.</p>
+<h2 id="get-series-statistics">Get Series Statistics<a class="headerlink" href="#get-series-statistics" title="Permanent link">&para;</a></h2>
+<p>Get aggregate statistics for a specific region in a series.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegionRepsResponse</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStats</span>
 </span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
 </span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>
-</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="c1"># Quick example - Get PAPA region reps</span>
-</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">reps</span><span class="p">:</span> <span class="n">RegionRepsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_reps</span><span class="p">()</span>
+</span><span id="__span-14-6"><a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="c1"># Quick example - Ohio region stats</span>
+</span><span id="__span-14-7"><a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p><strong>Parameters:</strong> None</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>region_code</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Region code (e.g., "OH", "IL", "CA")</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Complete Example:</strong></p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
-</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegionRepsResponse</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesStats</span>
 </span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>
 </span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
 </span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
-</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="c1"># Get region representatives for PAPA series</span>
-</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">reps</span><span class="p">:</span> <span class="n">RegionRepsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_reps</span><span class="p">()</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="c1"># Get statistics for Ohio region in NACS</span>
+</span><span id="__span-15-7"><a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
 </span><span id="__span-15-8"><a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
-</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PAPA Series Region Representatives:&quot;</span><span class="p">)</span>
-</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">reps</span><span class="o">.</span><span class="n">representative</span><span class="p">:</span>
-</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">region_code</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rep: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Player ID: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">player_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-15-14"><a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>    <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">profile_photo</span><span class="p">:</span>
-</span><span id="__span-15-15"><a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Photo: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">profile_photo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-15-9"><a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ohio Region Statistics:&quot;</span><span class="p">)</span>
+</span><span id="__span-15-10"><a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Events: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_events</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-15-11"><a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Players: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_players</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-15-12"><a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Participations: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_participations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-15-13"><a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Average Event Size: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">average_event_size</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="get-series-tournaments">Get Series Tournaments<a class="headerlink" href="#get-series-tournaments" title="Permanent link">&para;</a></h2>
+<p>Get tournaments for a specific region in a series.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesTournamentsResponse</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="c1"># Quick example - Ohio tournaments in NACS</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="n">tournaments</span><span class="p">:</span> <span class="n">SeriesTournamentsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tournaments</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>region_code</code></td>
+<td><code>str</code></td>
+<td>Yes</td>
+<td>Region code (e.g., "OH", "IL", "CA")</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Complete Example:</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeriesTournamentsResponse</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1"># Get tournaments for Ohio region in NACS</span>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="n">tournaments</span><span class="p">:</span> <span class="n">SeriesTournamentsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tournaments</span><span class="p">(</span><span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ohio NACS Tournaments (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tournaments</span><span class="o">.</span><span class="n">tournaments</span><span class="p">)</span><span class="si">}</span><span class="s2"> total):&quot;</span><span class="p">)</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="k">for</span> <span class="n">tournament</span> <span class="ow">in</span> <span class="n">tournaments</span><span class="o">.</span><span class="n">tournaments</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>  <span class="c1"># Show first 10</span>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">tournament_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Date: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">event_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Location: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">city</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">stateprov</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>    <span class="k">if</span> <span class="n">tournament</span><span class="o">.</span><span class="n">event_value</span><span class="p">:</span>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Value: </span><span class="si">{</span><span class="n">tournament</span><span class="o">.</span><span class="n">event_value</span><span class="si">}</span><span class="s2"> WPPR points&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="get-region-representatives">Get Region Representatives<a class="headerlink" href="#get-region-representatives" title="Permanent link">&para;</a></h2>
+<p>Get list of region representatives for a series.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegionRepsResponse</span>
+</span><span id="__span-18-3"><a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>
+</span><span id="__span-18-4"><a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-18-5"><a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>
+</span><span id="__span-18-6"><a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="c1"># Quick example - Get PAPA region reps</span>
+</span><span id="__span-18-7"><a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="n">reps</span><span class="p">:</span> <span class="n">RegionRepsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_reps</span><span class="p">()</span>
+</span></code></pre></div>
+<p><strong>Parameters:</strong> None</p>
+<p><strong>Complete Example:</strong></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegionRepsResponse</span>
+</span><span id="__span-19-3"><a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+</span><span id="__span-19-4"><a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-19-5"><a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>
+</span><span id="__span-19-6"><a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="c1"># Get region representatives for PAPA series</span>
+</span><span id="__span-19-7"><a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="n">reps</span><span class="p">:</span> <span class="n">RegionRepsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="s2">&quot;PAPA&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">region_reps</span><span class="p">()</span>
+</span><span id="__span-19-8"><a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>
+</span><span id="__span-19-9"><a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PAPA Series Region Representatives:&quot;</span><span class="p">)</span>
+</span><span id="__span-19-10"><a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">reps</span><span class="o">.</span><span class="n">representative</span><span class="p">:</span>
+</span><span id="__span-19-11"><a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">region_code</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span id="__span-19-12"><a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Rep: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-19-13"><a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Player ID: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">player_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-19-14"><a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>    <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">profile_photo</span><span class="p">:</span>
+</span><span id="__span-19-15"><a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Photo: </span><span class="si">{</span><span class="n">rep</span><span class="o">.</span><span class="n">profile_photo</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="complete-example-series-analysis">Complete Example: Series Analysis<a class="headerlink" href="#complete-example-series-analysis" title="Permanent link">&para;</a></h2>
 <p>Here's a complete example analyzing a series across regions using real test data:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span><span class="p">,</span> <span class="n">IfpaApiError</span>
-</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">SeriesStandingsResponse</span><span class="p">,</span>
-</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="n">SeriesRegionStandingsResponse</span><span class="p">,</span>
-</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>    <span class="n">SeriesStats</span><span class="p">,</span>
-</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">)</span>
-</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>
-</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>
-</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">analyze_series</span><span class="p">(</span><span class="n">series_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze a series and specific region.</span>
-</span><span id="__span-16-11"><a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>
-</span><span id="__span-16-12"><a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="sd">    Args:</span>
-</span><span id="__span-16-13"><a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="sd">        series_code: Series code (e.g., &quot;NACS&quot;, &quot;PAPA&quot;)</span>
-</span><span id="__span-16-14"><a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="sd">        region_code: Region code (e.g., &quot;OH&quot;, &quot;IL&quot;)</span>
-</span><span id="__span-16-15"><a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>
-</span><span id="__span-16-16"><a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="sd">    Example:</span>
-</span><span id="__span-16-17"><a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="sd">        analyze_series(&quot;NACS&quot;, &quot;OH&quot;)</span>
-</span><span id="__span-16-18"><a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-16-19"><a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a>    <span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
-</span><span id="__span-16-20"><a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a>    <span class="k">with</span> <span class="n">client</span><span class="p">:</span>
-</span><span id="__span-16-21"><a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a>        <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-16-22"><a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a>            <span class="c1"># Get overall standings across all regions</span>
-</span><span id="__span-16-23"><a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a>            <span class="n">overall</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
-</span><span id="__span-16-24"><a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a>
-</span><span id="__span-16-25"><a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-26"><a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_code</span><span class="si">}</span><span class="s2"> Series - </span><span class="si">{</span><span class="n">overall</span><span class="o">.</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-27"><a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Championship Prize Fund: $</span><span class="si">{</span><span class="n">overall</span><span class="o">.</span><span class="n">championship_prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-28"><a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-29"><a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a>
-</span><span id="__span-16-30"><a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a>            <span class="c1"># Show top 5 regions</span>
-</span><span id="__span-16-31"><a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 5 Regions (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">overall</span><span class="o">.</span><span class="n">overall_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> total):&quot;</span><span class="p">)</span>
-</span><span id="__span-16-32"><a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">overall</span><span class="o">.</span><span class="n">overall_results</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-</span><span id="__span-16-33"><a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-34"><a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Players: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-35"><a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Leader: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">current_leader</span><span class="p">[</span><span class="s1">&#39;player_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-36"><a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Prize Fund: $</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-37"><a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a>
-</span><span id="__span-16-38"><a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a>            <span class="c1"># Get detailed region standings</span>
-</span><span id="__span-16-39"><a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-40"><a id="__codelineno-16-40" name="__codelineno-16-40" href="#__codelineno-16-40"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region_code</span><span class="si">}</span><span class="s2"> Region Detailed Standings&quot;</span><span class="p">)</span>
-</span><span id="__span-16-41"><a id="__codelineno-16-41" name="__codelineno-16-41" href="#__codelineno-16-41"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-42"><a id="__codelineno-16-42" name="__codelineno-16-42" href="#__codelineno-16-42"></a>
-</span><span id="__span-16-43"><a id="__codelineno-16-43" name="__codelineno-16-43" href="#__codelineno-16-43"></a>            <span class="n">region_standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="__span-16-44"><a id="__codelineno-16-44" name="__codelineno-16-44" href="#__codelineno-16-44"></a>                <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="n">region_code</span><span class="p">)</span>
-</span><span id="__span-16-45"><a id="__codelineno-16-45" name="__codelineno-16-45" href="#__codelineno-16-45"></a>            <span class="p">)</span>
-</span><span id="__span-16-46"><a id="__codelineno-16-46" name="__codelineno-16-46" href="#__codelineno-16-46"></a>
-</span><span id="__span-16-47"><a id="__codelineno-16-47" name="__codelineno-16-47" href="#__codelineno-16-47"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Region: </span><span class="si">{</span><span class="n">region_standings</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-48"><a id="__codelineno-16-48" name="__codelineno-16-48" href="#__codelineno-16-48"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prize Fund: $</span><span class="si">{</span><span class="n">region_standings</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-49"><a id="__codelineno-16-49" name="__codelineno-16-49" href="#__codelineno-16-49"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 10 Players:&quot;</span><span class="p">)</span>
-</span><span id="__span-16-50"><a id="__codelineno-16-50" name="__codelineno-16-50" href="#__codelineno-16-50"></a>
-</span><span id="__span-16-51"><a id="__codelineno-16-51" name="__codelineno-16-51" href="#__codelineno-16-51"></a>            <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">region_standings</span><span class="o">.</span><span class="n">standings</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
-</span><span id="__span-16-52"><a id="__codelineno-16-52" name="__codelineno-16-52" href="#__codelineno-16-52"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">series_rank</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">player_name</span><span class="si">:</span><span class="s2">30s</span><span class="si">}</span><span class="s2"> &quot;</span>
-</span><span id="__span-16-53"><a id="__codelineno-16-53" name="__codelineno-16-53" href="#__codelineno-16-53"></a>                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">:</span><span class="s2">6.2f</span><span class="si">}</span><span class="s2"> pts &quot;</span>
-</span><span id="__span-16-54"><a id="__codelineno-16-54" name="__codelineno-16-54" href="#__codelineno-16-54"></a>                      <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2"> events, </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">win_count</span><span class="si">}</span><span class="s2"> wins)&quot;</span><span class="p">)</span>
-</span><span id="__span-16-55"><a id="__codelineno-16-55" name="__codelineno-16-55" href="#__codelineno-16-55"></a>
-</span><span id="__span-16-56"><a id="__codelineno-16-56" name="__codelineno-16-56" href="#__codelineno-16-56"></a>            <span class="c1"># Get region statistics</span>
-</span><span id="__span-16-57"><a id="__codelineno-16-57" name="__codelineno-16-57" href="#__codelineno-16-57"></a>            <span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="n">region_code</span><span class="p">)</span>
-</span><span id="__span-16-58"><a id="__codelineno-16-58" name="__codelineno-16-58" href="#__codelineno-16-58"></a>
-</span><span id="__span-16-59"><a id="__codelineno-16-59" name="__codelineno-16-59" href="#__codelineno-16-59"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-60"><a id="__codelineno-16-60" name="__codelineno-16-60" href="#__codelineno-16-60"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region_code</span><span class="si">}</span><span class="s2"> Region Statistics&quot;</span><span class="p">)</span>
-</span><span id="__span-16-61"><a id="__codelineno-16-61" name="__codelineno-16-61" href="#__codelineno-16-61"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-62"><a id="__codelineno-16-62" name="__codelineno-16-62" href="#__codelineno-16-62"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Events: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_events</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-63"><a id="__codelineno-16-63" name="__codelineno-16-63" href="#__codelineno-16-63"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Players: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_players</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-64"><a id="__codelineno-16-64" name="__codelineno-16-64" href="#__codelineno-16-64"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Participations: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_participations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-65"><a id="__codelineno-16-65" name="__codelineno-16-65" href="#__codelineno-16-65"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Average Event Size: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">average_event_size</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
-</span><span id="__span-16-66"><a id="__codelineno-16-66" name="__codelineno-16-66" href="#__codelineno-16-66"></a>
-</span><span id="__span-16-67"><a id="__codelineno-16-67" name="__codelineno-16-67" href="#__codelineno-16-67"></a>        <span class="k">except</span> <span class="n">IfpaApiError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-16-68"><a id="__codelineno-16-68" name="__codelineno-16-68" href="#__codelineno-16-68"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-16-69"><a id="__codelineno-16-69" name="__codelineno-16-69" href="#__codelineno-16-69"></a>
-</span><span id="__span-16-70"><a id="__codelineno-16-70" name="__codelineno-16-70" href="#__codelineno-16-70"></a>
-</span><span id="__span-16-71"><a id="__codelineno-16-71" name="__codelineno-16-71" href="#__codelineno-16-71"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-</span><span id="__span-16-72"><a id="__codelineno-16-72" name="__codelineno-16-72" href="#__codelineno-16-72"></a>    <span class="c1"># Analyze NACS Ohio region (real test data)</span>
-</span><span id="__span-16-73"><a id="__codelineno-16-73" name="__codelineno-16-73" href="#__codelineno-16-73"></a>    <span class="n">analyze_series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">)</span>
-</span><span id="__span-16-74"><a id="__codelineno-16-74" name="__codelineno-16-74" href="#__codelineno-16-74"></a>
-</span><span id="__span-16-75"><a id="__codelineno-16-75" name="__codelineno-16-75" href="#__codelineno-16-75"></a>    <span class="c1"># You can also try:</span>
-</span><span id="__span-16-76"><a id="__codelineno-16-76" name="__codelineno-16-76" href="#__codelineno-16-76"></a>    <span class="c1"># analyze_series(&quot;PAPA&quot;, &quot;OH&quot;)  # PAPA series in Ohio</span>
-</span><span id="__span-16-77"><a id="__codelineno-16-77" name="__codelineno-16-77" href="#__codelineno-16-77"></a>    <span class="c1"># analyze_series(&quot;NACS&quot;, &quot;IL&quot;)  # NACS Illinois region</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">IfpaClient</span><span class="p">,</span> <span class="n">IfpaApiError</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ifpa_api.models.series</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-20-3"><a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="n">SeriesStandingsResponse</span><span class="p">,</span>
+</span><span id="__span-20-4"><a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="n">SeriesRegionStandingsResponse</span><span class="p">,</span>
+</span><span id="__span-20-5"><a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    <span class="n">SeriesStats</span><span class="p">,</span>
+</span><span id="__span-20-6"><a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="p">)</span>
+</span><span id="__span-20-7"><a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>
+</span><span id="__span-20-8"><a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
+</span><span id="__span-20-9"><a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="k">def</span><span class="w"> </span><span class="nf">analyze_series</span><span class="p">(</span><span class="n">series_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-20-10"><a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze a series and specific region.</span>
+</span><span id="__span-20-11"><a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>
+</span><span id="__span-20-12"><a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="sd">    Args:</span>
+</span><span id="__span-20-13"><a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="sd">        series_code: Series code (e.g., &quot;NACS&quot;, &quot;PAPA&quot;)</span>
+</span><span id="__span-20-14"><a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="sd">        region_code: Region code (e.g., &quot;OH&quot;, &quot;IL&quot;)</span>
+</span><span id="__span-20-15"><a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>
+</span><span id="__span-20-16"><a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="sd">    Example:</span>
+</span><span id="__span-20-17"><a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a><span class="sd">        analyze_series(&quot;NACS&quot;, &quot;OH&quot;)</span>
+</span><span id="__span-20-18"><a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="__span-20-19"><a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>    <span class="n">client</span><span class="p">:</span> <span class="n">IfpaClient</span> <span class="o">=</span> <span class="n">IfpaClient</span><span class="p">()</span>
+</span><span id="__span-20-20"><a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>    <span class="k">with</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="__span-20-21"><a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>        <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-20-22"><a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>            <span class="c1"># Get overall standings across all regions</span>
+</span><span id="__span-20-23"><a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>            <span class="n">overall</span><span class="p">:</span> <span class="n">SeriesStandingsResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">standings</span><span class="p">()</span>
+</span><span id="__span-20-24"><a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>
+</span><span id="__span-20-25"><a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-26"><a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_code</span><span class="si">}</span><span class="s2"> Series - </span><span class="si">{</span><span class="n">overall</span><span class="o">.</span><span class="n">year</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-27"><a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Championship Prize Fund: $</span><span class="si">{</span><span class="n">overall</span><span class="o">.</span><span class="n">championship_prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-28"><a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-29"><a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a>
+</span><span id="__span-20-30"><a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a>            <span class="c1"># Show top 5 regions</span>
+</span><span id="__span-20-31"><a id="__codelineno-20-31" name="__codelineno-20-31" href="#__codelineno-20-31"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 5 Regions (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">overall</span><span class="o">.</span><span class="n">overall_results</span><span class="p">)</span><span class="si">}</span><span class="s2"> total):&quot;</span><span class="p">)</span>
+</span><span id="__span-20-32"><a id="__codelineno-20-32" name="__codelineno-20-32" href="#__codelineno-20-32"></a>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">overall</span><span class="o">.</span><span class="n">overall_results</span><span class="p">[:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+</span><span id="__span-20-33"><a id="__codelineno-20-33" name="__codelineno-20-33" href="#__codelineno-20-33"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-34"><a id="__codelineno-20-34" name="__codelineno-20-34" href="#__codelineno-20-34"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Players: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">player_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-35"><a id="__codelineno-20-35" name="__codelineno-20-35" href="#__codelineno-20-35"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Leader: </span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">current_leader</span><span class="p">[</span><span class="s1">&#39;player_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-36"><a id="__codelineno-20-36" name="__codelineno-20-36" href="#__codelineno-20-36"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;   Prize Fund: $</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-37"><a id="__codelineno-20-37" name="__codelineno-20-37" href="#__codelineno-20-37"></a>
+</span><span id="__span-20-38"><a id="__codelineno-20-38" name="__codelineno-20-38" href="#__codelineno-20-38"></a>            <span class="c1"># Get detailed region standings</span>
+</span><span id="__span-20-39"><a id="__codelineno-20-39" name="__codelineno-20-39" href="#__codelineno-20-39"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-40"><a id="__codelineno-20-40" name="__codelineno-20-40" href="#__codelineno-20-40"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region_code</span><span class="si">}</span><span class="s2"> Region Detailed Standings&quot;</span><span class="p">)</span>
+</span><span id="__span-20-41"><a id="__codelineno-20-41" name="__codelineno-20-41" href="#__codelineno-20-41"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-42"><a id="__codelineno-20-42" name="__codelineno-20-42" href="#__codelineno-20-42"></a>
+</span><span id="__span-20-43"><a id="__codelineno-20-43" name="__codelineno-20-43" href="#__codelineno-20-43"></a>            <span class="n">region_standings</span><span class="p">:</span> <span class="n">SeriesRegionStandingsResponse</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="__span-20-44"><a id="__codelineno-20-44" name="__codelineno-20-44" href="#__codelineno-20-44"></a>                <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">region_standings</span><span class="p">(</span><span class="n">region_code</span><span class="p">)</span>
+</span><span id="__span-20-45"><a id="__codelineno-20-45" name="__codelineno-20-45" href="#__codelineno-20-45"></a>            <span class="p">)</span>
+</span><span id="__span-20-46"><a id="__codelineno-20-46" name="__codelineno-20-46" href="#__codelineno-20-46"></a>
+</span><span id="__span-20-47"><a id="__codelineno-20-47" name="__codelineno-20-47" href="#__codelineno-20-47"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Region: </span><span class="si">{</span><span class="n">region_standings</span><span class="o">.</span><span class="n">region_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-48"><a id="__codelineno-20-48" name="__codelineno-20-48" href="#__codelineno-20-48"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Prize Fund: $</span><span class="si">{</span><span class="n">region_standings</span><span class="o">.</span><span class="n">prize_fund</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-49"><a id="__codelineno-20-49" name="__codelineno-20-49" href="#__codelineno-20-49"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Top 10 Players:&quot;</span><span class="p">)</span>
+</span><span id="__span-20-50"><a id="__codelineno-20-50" name="__codelineno-20-50" href="#__codelineno-20-50"></a>
+</span><span id="__span-20-51"><a id="__codelineno-20-51" name="__codelineno-20-51" href="#__codelineno-20-51"></a>            <span class="k">for</span> <span class="n">player</span> <span class="ow">in</span> <span class="n">region_standings</span><span class="o">.</span><span class="n">standings</span><span class="p">[:</span><span class="mi">10</span><span class="p">]:</span>
+</span><span id="__span-20-52"><a id="__codelineno-20-52" name="__codelineno-20-52" href="#__codelineno-20-52"></a>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">series_rank</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">player_name</span><span class="si">:</span><span class="s2">30s</span><span class="si">}</span><span class="s2"> &quot;</span>
+</span><span id="__span-20-53"><a id="__codelineno-20-53" name="__codelineno-20-53" href="#__codelineno-20-53"></a>                      <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">wppr_points</span><span class="si">:</span><span class="s2">6.2f</span><span class="si">}</span><span class="s2"> pts &quot;</span>
+</span><span id="__span-20-54"><a id="__codelineno-20-54" name="__codelineno-20-54" href="#__codelineno-20-54"></a>                      <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">event_count</span><span class="si">}</span><span class="s2"> events, </span><span class="si">{</span><span class="n">player</span><span class="o">.</span><span class="n">win_count</span><span class="si">}</span><span class="s2"> wins)&quot;</span><span class="p">)</span>
+</span><span id="__span-20-55"><a id="__codelineno-20-55" name="__codelineno-20-55" href="#__codelineno-20-55"></a>
+</span><span id="__span-20-56"><a id="__codelineno-20-56" name="__codelineno-20-56" href="#__codelineno-20-56"></a>            <span class="c1"># Get region statistics</span>
+</span><span id="__span-20-57"><a id="__codelineno-20-57" name="__codelineno-20-57" href="#__codelineno-20-57"></a>            <span class="n">stats</span><span class="p">:</span> <span class="n">SeriesStats</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">series_code</span><span class="p">)</span><span class="o">.</span><span class="n">stats</span><span class="p">(</span><span class="n">region_code</span><span class="p">)</span>
+</span><span id="__span-20-58"><a id="__codelineno-20-58" name="__codelineno-20-58" href="#__codelineno-20-58"></a>
+</span><span id="__span-20-59"><a id="__codelineno-20-59" name="__codelineno-20-59" href="#__codelineno-20-59"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-60"><a id="__codelineno-20-60" name="__codelineno-20-60" href="#__codelineno-20-60"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">region_code</span><span class="si">}</span><span class="s2"> Region Statistics&quot;</span><span class="p">)</span>
+</span><span id="__span-20-61"><a id="__codelineno-20-61" name="__codelineno-20-61" href="#__codelineno-20-61"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">60</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-62"><a id="__codelineno-20-62" name="__codelineno-20-62" href="#__codelineno-20-62"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Events: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_events</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-63"><a id="__codelineno-20-63" name="__codelineno-20-63" href="#__codelineno-20-63"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Players: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_players</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-64"><a id="__codelineno-20-64" name="__codelineno-20-64" href="#__codelineno-20-64"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total Participations: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">total_participations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-65"><a id="__codelineno-20-65" name="__codelineno-20-65" href="#__codelineno-20-65"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Average Event Size: </span><span class="si">{</span><span class="n">stats</span><span class="o">.</span><span class="n">average_event_size</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> players&quot;</span><span class="p">)</span>
+</span><span id="__span-20-66"><a id="__codelineno-20-66" name="__codelineno-20-66" href="#__codelineno-20-66"></a>
+</span><span id="__span-20-67"><a id="__codelineno-20-67" name="__codelineno-20-67" href="#__codelineno-20-67"></a>        <span class="k">except</span> <span class="n">IfpaApiError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-20-68"><a id="__codelineno-20-68" name="__codelineno-20-68" href="#__codelineno-20-68"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-20-69"><a id="__codelineno-20-69" name="__codelineno-20-69" href="#__codelineno-20-69"></a>
+</span><span id="__span-20-70"><a id="__codelineno-20-70" name="__codelineno-20-70" href="#__codelineno-20-70"></a>
+</span><span id="__span-20-71"><a id="__codelineno-20-71" name="__codelineno-20-71" href="#__codelineno-20-71"></a><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+</span><span id="__span-20-72"><a id="__codelineno-20-72" name="__codelineno-20-72" href="#__codelineno-20-72"></a>    <span class="c1"># Analyze NACS Ohio region (real test data)</span>
+</span><span id="__span-20-73"><a id="__codelineno-20-73" name="__codelineno-20-73" href="#__codelineno-20-73"></a>    <span class="n">analyze_series</span><span class="p">(</span><span class="s2">&quot;NACS&quot;</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">)</span>
+</span><span id="__span-20-74"><a id="__codelineno-20-74" name="__codelineno-20-74" href="#__codelineno-20-74"></a>
+</span><span id="__span-20-75"><a id="__codelineno-20-75" name="__codelineno-20-75" href="#__codelineno-20-75"></a>    <span class="c1"># You can also try:</span>
+</span><span id="__span-20-76"><a id="__codelineno-20-76" name="__codelineno-20-76" href="#__codelineno-20-76"></a>    <span class="c1"># analyze_series(&quot;PAPA&quot;, &quot;OH&quot;)  # PAPA series in Ohio</span>
+</span><span id="__span-20-77"><a id="__codelineno-20-77" name="__codelineno-20-77" href="#__codelineno-20-77"></a>    <span class="c1"># analyze_series(&quot;NACS&quot;, &quot;IL&quot;)  # NACS Illinois region</span>
 </span></code></pre></div>
 <h2 id="real-test-data-reference">Real Test Data Reference<a class="headerlink" href="#real-test-data-reference" title="Permanent link">&para;</a></h2>
 <p>All examples above use real, testable data from integration tests:</p>
