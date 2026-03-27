@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-03-26
+
+### Security
+
+- Updated `requests` from `^2.31.0` to `^2.33.0` to fix CVE-2026-25645
+- Updated `urllib3` to `^2.6.3` to fix CVE-2026-21441
+
 ## [0.4.1] - 2025-12-28
 
 ### Fixed

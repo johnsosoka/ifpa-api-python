@@ -90,6 +90,7 @@ jobs:
 
       - name: Run integration tests (if API key available)
         if: ${{ env.IFPA_API_KEY != '' }}
+        continue-on-error: true  # Integration tests are informational only - external API issues should not block publish
         env:
           IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
         run: poetry run pytest -v -m "integration"
