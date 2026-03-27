@@ -35,7 +35,7 @@ Example:
 
 **Steps to Reproduce**:
 1. Initialize client with valid API key
-2. Call `client.player.query("José").get()`
+2. Call `client.player.search("José").get()`
 3. Observe error
 
 **Expected**: Returns players matching "José"
@@ -263,7 +263,7 @@ def test_search_players():
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.player.query("John").get()
+        result = client.player.search("John").get()
 
         assert len(result.search) == 1
         assert result.search[0].player_id == 12345

@@ -111,8 +111,8 @@ def director(self) -> DirectorClient
 
 ```python
 # Collection operations
-results = client.director.query("Josh").get()  # Query directors
-results = client.director.query("Josh").country("US").state("IL").get()  # With filters
+results = client.director.search("Josh").get()  # Query directors
+results = client.director.search("Josh").country("US").state("IL").get()  # With filters
 country_dirs = client.director.country_directors()  # Get country directors
 
 # Individual director operations (callable pattern)
@@ -133,8 +133,8 @@ def player(self) -> PlayerClient
 
 ```python
 # Collection operations
-results = client.player.query("Smith").state("ID").get()  # Query Idaho Smiths
-results = client.player.query("Smith").state("ID").country("US").limit(10).get()  # With filters
+results = client.player.search("Smith").state("ID").get()  # Query Idaho Smiths
+results = client.player.search("Smith").state("ID").country("US").limit(10).get()  # With filters
 
 # Individual player operations (callable pattern)
 player = client.player(25584).details()  # Get Dwayne Smith's details

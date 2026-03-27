@@ -36,7 +36,7 @@ client: IfpaClient = IfpaClient(api_key="your-api-key-here")
 # === Fluent Query Builder Pattern ===
 
 # Simple query - search by name
-results: PlayerSearchResponse = client.player.query("Smith").get()
+results: PlayerSearchResponse = client.player.search("Smith").get()
 print(f"Found {len(results.search)} players named Smith")
 
 # Build a base query for US players - demonstrates immutable query builder
@@ -63,7 +63,7 @@ if player.player_stats:
 
 # Find all PAPA tournament winners using filter-only query
 papa_winners: PlayerSearchResponse = (
-    client.player.query()
+    client.player.search()
     .tournament("PAPA")
     .position(1)
     .limit(25)

@@ -95,7 +95,7 @@ def search_players(name: str, count: int | None = None) -> PlayerSearchResponse:
 
     Example:
         ```python
-        results = client.player.query("John").limit(25).get()
+        results = client.player.search("John").limit(25).get()
         ```
     """
 ```

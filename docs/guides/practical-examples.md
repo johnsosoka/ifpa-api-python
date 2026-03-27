@@ -215,7 +215,7 @@ if __name__ == "__main__":
     export_rankings_to_csv(f"wppr_rankings_{timestamp}.csv", count=100)
 
     # Export search results
-    results = client.player.query("Smith").country("US").limit(50).get()
+    results = client.player.search("Smith").country("US").limit(50).get()
     export_players_to_csv(f"smith_players_{timestamp}.csv", results)
 
     # Export as JSON for further processing
