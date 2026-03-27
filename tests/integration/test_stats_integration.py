@@ -230,6 +230,7 @@ class TestStatsHistoricalTrends:
 class TestStatsTournamentRankings:
     """Test tournament ranking statistics endpoints."""
 
+    @pytest.mark.timeout(60)  # Slow endpoint - allow 60 seconds
     @pytest.mark.parametrize("rank_type", ["OPEN", "WOMEN"])
     def test_largest_tournaments_by_rank_type(self, client: IfpaClient, rank_type: str) -> None:
         """Test largest_tournaments() with different ranking systems.
