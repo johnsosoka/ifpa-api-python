@@ -553,7 +553,8 @@ class TestDirectorDetailsAudit:
             assert director.stats.tournament_count is not None
             # Note: Tournament count may increase over time as director runs more events
             # Just verify we got reasonable data back
-            print(f"  Tournament count: {director.stats.tournament_count} (threshold: {LOW_ACTIVITY_THRESHOLD})")
+            threshold = LOW_ACTIVITY_THRESHOLD
+            print(f"  Tournament count: {director.stats.tournament_count} (threshold: {threshold})")
             print("✓ details() for low activity director successful")
             print(f"  Director: {director.name}")
             print(f"  Tournament count: {director.stats.tournament_count}")
