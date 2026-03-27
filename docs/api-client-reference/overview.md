@@ -26,7 +26,7 @@ ifpa_api/
     ├── director.py    # DirectorClient (callable pattern)
     ├── player.py      # PlayerClient (callable pattern)
     ├── rankings.py    # RankingsClient
-    ├── tournaments.py # TournamentsClient, TournamentHandle
+    ├── tournament.py # TournamentClient, TournamentContext
     ├── series.py      # SeriesClient, SeriesHandle
     └── reference.py   # ReferenceClient
 ```
@@ -76,7 +76,7 @@ from ifpa_api import (
 | `DirectorClient` | Search directors, get country directors |
 | `PlayersClient` | Search players |
 | `RankingsClient` | Access ranking systems |
-| `TournamentsClient` | Search tournaments |
+| `TournamentClient` | Search tournaments |
 | `SeriesClient` | List series |
 | `ReferenceClient` | Get countries and state/province data |
 

@@ -49,7 +49,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Query by name - Find players named "Smith" in Idaho
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
 
@@ -58,7 +58,7 @@ for player in results.search:
 # 47585: Debbie Smith
 
 # Query with filters - Find players named "John" in Idaho
-results: PlayerSearchResponse = client.player.query("John").state("ID").country("US").limit(5).get()
+results: PlayerSearchResponse = client.player.search("John").state("ID").country("US").limit(5).get()
 ```
 
 ### Get Rankings
@@ -90,7 +90,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Query for tournaments with filters
-tournaments: TournamentSearchResponse = client.tournament.query("Pinball").state("WA").get()
+tournaments: TournamentSearchResponse = client.tournament.search("Pinball").state("WA").get()
 
 for tournament in tournaments.tournaments:
     print(f"{tournament.tournament_name}")

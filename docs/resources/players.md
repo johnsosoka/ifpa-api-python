@@ -11,7 +11,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Fluent query builder - search for players named "Smith" in Idaho
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 ```
 
 ## Search for Players
@@ -25,7 +25,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
     print(f"  Location: {player.city}, {player.state}")
@@ -51,21 +51,21 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Chain multiple filters
-results: PlayerSearchResponse = (client.player.query("John")
+results: PlayerSearchResponse = (client.player.search("John")
     .country("US")
     .state("ID")
     .limit(5)
     .get())
 
 # Filter by tournament participation
-results: PlayerSearchResponse = (client.player.query()
+results: PlayerSearchResponse = (client.player.search()
     .tournament("PAPA")
     .position(1)
     .limit(10)
     .get())
 
 # Location-only search (no name query)
-results: PlayerSearchResponse = (client.player.query()
+results: PlayerSearchResponse = (client.player.search()
     .country("US")
     .state("ID")
     .limit(25)
@@ -83,7 +83,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a reusable base query for US players
-us_query = client.player.query().country("US")
+us_query = client.player.search().country("US")
 
 # Derive state-specific queries from the base
 wa_players: PlayerSearchResponse = us_query.state("WA").limit(25).get()
@@ -98,7 +98,7 @@ ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
 
 | Method | Parameter | Description |
 |--------|-----------|-------------|
-| `.query(name)` | `str` | Player name (partial match, case insensitive) |
+| `.search(name)` | `str` | Player name (partial match, case insensitive) |
 | `.state(code)` | `str` | State/province code (2-digit, e.g., "ID", "WA") |
 | `.country(code)` | `str` | Country name or 2-digit code (e.g., "US", "CA") |
 | `.tournament(name)` | `str` | Tournament name (partial strings accepted) |
@@ -113,7 +113,7 @@ ca_players: PlayerSearchResponse = us_query.state("CA").limit(25).get()
 
 !!! info "Migration from 0.2.x"
     The `client.player.search(name="John")` method was removed in v0.3.0.
-    Use the fluent query builder instead: `client.player.query("John").get()`
+    Use the fluent query builder instead: `client.player.search("John").get()`
 
 ## Get Player Profile
 
@@ -521,7 +521,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a base query for tournament winners
-winners_query = client.player.query().position(1)
+winners_query = client.player.search().position(1)
 
 # Derive specific tournament queries
 papa_winners: PlayerSearchResponse = winners_query.tournament("PAPA").limit(10).get()
@@ -555,7 +555,7 @@ These are API-level issues, not SDK bugs. For the most reliable experience:
     results: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
 
     # New (0.3.0+):
-    results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+    results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
     ```
 
     The query builder is immutable and chainable, enabling query reuse and better type safety.

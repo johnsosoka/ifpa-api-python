@@ -30,7 +30,7 @@ ifpa_api/
     ├── director.py    # DirectorClient (callable pattern)
     ├── player.py      # PlayerClient (callable pattern)
     ├── rankings.py    # RankingsClient
-    ├── tournaments.py # TournamentsClient, TournamentHandle
+    ├── tournament.py # TournamentClient, TournamentContext
     ├── series.py      # SeriesClient, SeriesHandle
     └── reference.py   # ReferenceClient
 ```
@@ -111,8 +111,8 @@ def director(self) -> DirectorClient
 
 ```python
 # Collection operations
-results = client.director.query("Josh").get()  # Query directors
-results = client.director.query("Josh").country("US").state("IL").get()  # With filters
+results = client.director.search("Josh").get()  # Query directors
+results = client.director.search("Josh").country("US").state("IL").get()  # With filters
 country_dirs = client.director.country_directors()  # Get country directors
 
 # Individual director operations (callable pattern)
@@ -126,15 +126,15 @@ Returns the players resource client. Supports both collection operations and cal
 
 ```python
 @property
-def player(self) -> PlayersClient
+def player(self) -> PlayerClient
 ```
 
 **Usage:**
 
 ```python
 # Collection operations
-results = client.player.query("Smith").state("ID").get()  # Query Idaho Smiths
-results = client.player.query("Smith").state("ID").country("US").limit(10).get()  # With filters
+results = client.player.search("Smith").state("ID").get()  # Query Idaho Smiths
+results = client.player.search("Smith").state("ID").country("US").limit(10).get()  # With filters
 
 # Individual player operations (callable pattern)
 player = client.player(25584).details()  # Get Dwayne Smith's details
@@ -223,7 +223,7 @@ pvp = player_handle.pvp(47585)  # Compare with Debbie Smith
 history = player_handle.history()  # Get ranking history
 ```
 
-**Note:** The `client.player` property returns a `PlayersClient` which is callable, providing a unified interface for both collection and resource-specific operations.
+**Note:** The `client.player` property returns a `PlayerClient` which is callable, providing a unified interface for both collection and resource-specific operations.
 
 #### `tournament(tournament_id)`
 

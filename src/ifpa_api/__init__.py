@@ -26,7 +26,7 @@ Example:
     )
 
     # Search for directors
-    directors = client.director.query("Josh").get()
+    directors = client.director.search("Josh").get()
 
     # Get director's tournaments
     tournaments = client.director(1000).tournaments(TimePeriod.PAST)

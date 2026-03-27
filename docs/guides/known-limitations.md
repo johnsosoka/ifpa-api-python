@@ -12,7 +12,7 @@ This guide documents known bugs and limitations in the IFPA API that affect the 
 The `stateprov` filter in both player and director search endpoints returns incorrect results due to case-insensitive substring matching instead of exact matching.
 
 !!! warning "Tournament Search Works Correctly"
-    The state/province filter works correctly in tournament search (`.tournament.query().state()`), which uses exact matching. This bug only affects player and director search.
+    The state/province filter works correctly in tournament search (`.tournament.search().state()`), which uses exact matching. This bug only affects player and director search.
 
 #### Root Cause
 
@@ -36,7 +36,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Request players from California (CA)
-ca_players: PlayerSearchResponse = (client.player.query()
+ca_players: PlayerSearchResponse = (client.player.search()
     .state("CA")
     .get())
 
@@ -57,7 +57,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Get broader results
-results: PlayerSearchResponse = client.player.query("Smith").get()
+results: PlayerSearchResponse = client.player.search("Smith").get()
 
 # Filter client-side for exact state match
 ca_players = [p for p in results.search if p.state == "CA" and p.country_code == "US"]
@@ -74,7 +74,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Request directors from Washington (WA)
-wa_directors: DirectorSearchResponse = (client.director.query()
+wa_directors: DirectorSearchResponse = (client.director.search()
     .state("WA")
     .get())
 
@@ -93,7 +93,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Get all US directors with a name filter
-results: DirectorSearchResponse = (client.director.query("Josh")
+results: DirectorSearchResponse = (client.director.search("Josh")
     .country("US")
     .get())
 
@@ -109,9 +109,9 @@ Player, director, and tournament search endpoints return a **fixed 50 results pe
     Rankings endpoints DO honor the `count` parameter and support variable page sizes. This limitation only affects search endpoints.
 
 **Affected Endpoints**:
-- `client.player.query()` - Fixed 50 results
-- `client.director.query()` - Fixed 50 results
-- `client.tournament.query()` - Fixed 50 results
+- `client.player.search()` - Fixed 50 results
+- `client.director.search()` - Fixed 50 results
+- `client.tournament.search()` - Fixed 50 results
 
 **Symptom**: Using `.limit(n)` where n < 50 still returns 50 results.
 
@@ -122,7 +122,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Request 10 results, but get 50
-result: PlayerSearchResponse = client.player.query("Smith").limit(10).get()
+result: PlayerSearchResponse = client.player.search("Smith").limit(10).get()
 print(len(result.search))  # 50, not 10
 ```
 
@@ -137,20 +137,20 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Get first page (results 1-50)
-page1: PlayerSearchResponse = client.player.query("Smith").offset(0).get()
+page1: PlayerSearchResponse = client.player.search("Smith").offset(0).get()
 
 # Get second page (results 51-100)
-page2: PlayerSearchResponse = client.player.query("Smith").offset(50).get()
+page2: PlayerSearchResponse = client.player.search("Smith").offset(50).get()
 
 # Get third page (results 101-150)
-page3: PlayerSearchResponse = client.player.query("Smith").offset(100).get()
+page3: PlayerSearchResponse = client.player.search("Smith").offset(100).get()
 ```
 
 If you need fewer results, slice client-side:
 
 ```python
 # Get only first 10 results
-result: PlayerSearchResponse = client.player.query("Smith").limit(10).get()
+result: PlayerSearchResponse = client.player.search("Smith").limit(10).get()
 first_10 = result.search[:10]
 ```
 

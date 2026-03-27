@@ -42,6 +42,103 @@ active_series: SeriesListResponse = client.series.list(active_only=True)
 print(f"\nFound {len(active_series.series)} active series")
 ```
 
+## Search Series
+
+The **recommended** way to search for series is using the fluent query builder:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesListResponse
+
+client: IfpaClient = IfpaClient()
+
+# Search by name (client-side filtering)
+results: SeriesListResponse = client.series.search("Circuit").get()
+for series in results.series:
+    print(f"{series.series_code}: {series.series_name}")
+    print(f"  Active: {series.active}")
+
+# Output:
+# NACS: North American Championship Series
+#   Active: True
+# PACS: Pacific Championship Series
+#   Active: True
+```
+
+### Query Builder Methods
+
+| Method | Parameter | Description |
+|--------|-----------|-------------|
+| `.search(name)` | `str` | Series name or code (partial match, case insensitive) |
+| `.name(name)` | `str` | Alias for search - filter by name (client-side) |
+| `.active_only(active)` | `bool` | Filter to active/inactive series (server-side) |
+| `.get()` | - | Execute query and return results |
+| `.first()` | - | Get first result or None |
+
+!!! note "Client-Side Filtering"
+    The IFPA API only provides a list endpoint for series. Name filtering is performed
+    client-side by the SDK, matching against both `series_name` and `series_code` fields.
+    Use `.active_only()` for server-side filtering.
+
+### Chained Filters
+
+The fluent API allows method chaining for complex queries:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesListResponse
+
+client: IfpaClient = IfpaClient()
+
+# Search by name and filter to active series
+results: SeriesListResponse = client.series.search("North American").active_only().get()
+
+# Get only active series (no name filter)
+active: SeriesListResponse = client.series.search().active_only().get()
+
+# Get only inactive series
+inactive: SeriesListResponse = client.series.search().active_only(False).get()
+
+# Use first() to get a single result
+nacs = client.series.search("NACS").first()
+if nacs:
+    print(f"Found: {nacs.series_name}")
+```
+
+### Query Reuse (Immutable Pattern)
+
+The query builder is immutable - each method returns a new instance, allowing query reuse:
+
+```python
+from ifpa_api import IfpaClient
+from ifpa_api.models.series import SeriesListResponse
+
+client: IfpaClient = IfpaClient()
+
+# Create a reusable base query for active series
+active_query = client.series.search().active_only()
+
+# Derive specific searches from the base
+circuit_series: SeriesListResponse = active_query.name("Circuit").get()
+championship_series: SeriesListResponse = active_query.name("Championship").get()
+
+# The base query remains unchanged and can be reused
+papa_series: SeriesListResponse = active_query.name("PAPA").get()
+```
+
+### Cross-Reference to SeriesQueryBuilder
+
+For advanced usage, you can import and use the `SeriesQueryBuilder` directly:
+
+```python
+from ifpa_api.resources.series.query_builder import SeriesQueryBuilder
+
+# The query builder is typically accessed via client.series.search()
+# but can be instantiated directly for advanced scenarios
+```
+
+See the [SeriesQueryBuilder API Reference](../api-client-reference/series-query-builder.md) for complete details.
+
 ## Get Overall Series Standings
 
 Get overall standings overview for a series across all regions. This returns a summary of each region with current leader and prize fund information.

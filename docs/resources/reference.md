@@ -183,7 +183,7 @@ def is_valid_state(country_code: str, state_code: str) -> bool:
 
 # Validate before making API call
 if is_valid_country("US") and is_valid_state("US", "CA"):
-    players = client.player.query().country("US").state("CA").get()
+    players = client.player.search().country("US").state("CA").get()
 ```
 
 ### Converting Country Names to Codes

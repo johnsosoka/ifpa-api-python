@@ -118,7 +118,7 @@ def test_search_players():
         )
 
         client = IfpaClient(api_key="test-key")
-        result = client.player.query("John").get()
+        result = client.player.search("John").get()
 
         assert len(result.search) == 1
         assert result.search[0].player_id == 12345
@@ -135,7 +135,7 @@ from ifpa_api import IfpaClient
 @pytest.mark.integration
 def test_search_players_integration(client: IfpaClient):
     """Test querying for real players."""
-    result = client.player.query("Josh").get()
+    result = client.player.search("Josh").get()
 
     assert len(result.search) > 0
     assert all(hasattr(p, "player_id") for p in result.search)

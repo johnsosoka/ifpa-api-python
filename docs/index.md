@@ -15,12 +15,12 @@ The IFPA API client enables Python developers to access pinball rankings, tourna
 - **Fully Typed**: Complete type hints for IDE autocompletion and type checking
 - **Pydantic Models**: Automatic request/response validation with detailed error messages
 - **Resource-Oriented**: Intuitive access patterns matching the IFPA API structure
-- **Comprehensive Coverage**: 36 IFPA API v2.1 endpoints across 6 resources
+- **Comprehensive Coverage**: 46 IFPA API v2.1 endpoints across 7 resources
 - **Pagination Support**: Built-in support for paginated endpoints with query builder methods
 - **Clear Error Handling**: Exception hierarchy for different failure scenarios
 - **Well Tested**: 99% test coverage with unit and integration tests
 
-> Alpha Release: This library is under active development, with significant and breaking changes being released as we work towards v1.0.0, which will be considered our stable release.
+> Beta Release: This library is under active development. The API is stabilizing as we work towards v1.0.0, which will be considered our stable release.
 
 ## Quick Example
 
@@ -36,11 +36,11 @@ client: IfpaClient = IfpaClient(api_key="your-api-key-here")
 # === Fluent Query Builder Pattern ===
 
 # Simple query - search by name
-results: PlayerSearchResponse = client.player.query("Smith").get()
+results: PlayerSearchResponse = client.player.search("Smith").get()
 print(f"Found {len(results.search)} players named Smith")
 
 # Build a base query for US players - demonstrates immutable query builder
-us_query = client.player.query().country("US")
+us_query = client.player.search().country("US")
 
 # Reuse the base query for different states (immutable pattern!)
 idaho_players: PlayerSearchResponse = us_query.state("ID").limit(10).get()
@@ -63,7 +63,7 @@ if player.player_stats:
 
 # Find all PAPA tournament winners using filter-only query
 papa_winners: PlayerSearchResponse = (
-    client.player.query()
+    client.player.search()
     .tournament("PAPA")
     .position(1)
     .limit(25)
@@ -87,7 +87,7 @@ client.close()
 
 **Key Patterns Demonstrated:**
 
-- **Fluent Query Builder**: Immutable, composable queries with `.query()`, `.country()`, `.state()`, `.limit()`
+- **Fluent Query Builder**: Immutable, composable queries with `.search()`, `.country()`, `.state()`, `.limit()`
 - **Query Reusability**: Base queries can be safely reused without side effects (immutable pattern)
 - **Callable Pattern**: Direct resource access via `client.player(25584).details()`
 - **Advanced Filtering**: Chain multiple filters like `.tournament()` and `.position()` for complex queries
