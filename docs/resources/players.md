@@ -11,7 +11,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Fluent query builder - search for players named "Smith" in Idaho
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 ```
 
 ## Search for Players
@@ -25,7 +25,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
 for player in results.search:
     print(f"{player.player_id}: {player.first_name} {player.last_name}")
     print(f"  Location: {player.city}, {player.state}")
@@ -555,7 +555,7 @@ These are API-level issues, not SDK bugs. For the most reliable experience:
     results: PlayerSearchResponse = client.player.search(name="Smith", stateprov="ID")
 
     # New (0.3.0+):
-    results: PlayerSearchResponse = client.player.query("Smith").state("ID").get()
+    results: PlayerSearchResponse = client.player.search("Smith").state("ID").get()
     ```
 
     The query builder is immutable and chainable, enabling query reuse and better type safety.

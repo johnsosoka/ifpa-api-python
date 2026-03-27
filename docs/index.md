@@ -40,7 +40,7 @@ results: PlayerSearchResponse = client.player.query("Smith").get()
 print(f"Found {len(results.search)} players named Smith")
 
 # Build a base query for US players - demonstrates immutable query builder
-us_query = client.player.query().country("US")
+us_query = client.player.search().country("US")
 
 # Reuse the base query for different states (immutable pattern!)
 idaho_players: PlayerSearchResponse = us_query.state("ID").limit(10).get()
@@ -87,7 +87,7 @@ client.close()
 
 **Key Patterns Demonstrated:**
 
-- **Fluent Query Builder**: Immutable, composable queries with `.query()`, `.country()`, `.state()`, `.limit()`
+- **Fluent Query Builder**: Immutable, composable queries with `.search()`, `.country()`, `.state()`, `.limit()`
 - **Query Reusability**: Base queries can be safely reused without side effects (immutable pattern)
 - **Callable Pattern**: Direct resource access via `client.player(25584).details()`
 - **Advanced Filtering**: Chain multiple filters like `.tournament()` and `.position()` for complex queries
