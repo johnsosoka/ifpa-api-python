@@ -146,57 +146,31 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
-  integration-test:
-    name: Integration Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Integration tests are informational only - external API timeouts should not fail the build
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12"]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.7.1
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v5
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-integration
-
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
-        run: poetry install --no-interaction
-
-      - name: Run integration tests
-        env:
-          IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
-        run: |
-          if [ -n "$IFPA_API_KEY" ]; then
-            echo "Running integration tests with API key..."
-            poetry run pytest -v -m "integration" --timeout=30
-          else
-            echo "Skipping integration tests (no API key available)"
-          fi
+  # DISABLED: Integration tests temporarily disabled due to external API flakiness
+  # and data drift issues. See GitHub Issue #51 for re-enabling.
+  # Run locally with: pytest -m integration (requires IFPA_API_KEY)
+  # integration-test:
+  #   name: Integration Tests (Python ${{ matrix.python-version }})
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   continue-on-error: true
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.11", "3.12"]
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - uses: actions/setup-python@v6
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - uses: snok/install-poetry@v1
+  #       with:
+  #         version: 1.7.1
+  #         virtualenvs-in-project: true
+  #     - run: poetry install --no-interaction
+  #     - run: poetry run pytest -v -m "integration" --timeout=30
+  #       env:
+  #         IFPA_API_KEY: ${{ secrets.IFPA_API_KEY }}
 
   build:
     name: Build Package
