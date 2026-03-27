@@ -36,6 +36,7 @@ from tests.integration.helpers import get_test_tournament_id, skip_if_no_api_key
 class TestTournamentSearchIntegration:
     """Integration tests for TournamentsClient.search() method."""
 
+    @pytest.mark.timeout(60)  # Slow endpoint - allow 60 seconds
     def test_search_no_parameters(self, api_key: str) -> None:
         """Test search with no parameters returns results."""
         skip_if_no_api_key()
