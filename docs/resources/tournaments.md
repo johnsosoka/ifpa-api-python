@@ -11,7 +11,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Fluent query builder - search for PAPA tournaments in Pennsylvania
-results: TournamentSearchResponse = client.tournament.query("PAPA").state("PA").get()
+results: TournamentSearchResponse = client.tournament.search("PAPA").state("PA").get()
 ```
 
 ## Searching Tournaments (Fluent Query Builder)
@@ -25,7 +25,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+results: TournamentSearchResponse = client.tournament.search("PAPA").get()
 
 print(f"Found {len(results.tournaments)} tournaments")
 for tournament in results.tournaments:
@@ -45,14 +45,14 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Chain multiple filters
-results: TournamentSearchResponse = (client.tournament.query("Championship")
+results: TournamentSearchResponse = (client.tournament.search("Championship")
     .country("US")
     .state("WA")
     .limit(25)
     .get())
 
 # Location-only search (no name query)
-results: TournamentSearchResponse = (client.tournament.query()
+results: TournamentSearchResponse = (client.tournament.search()
     .city("Portland")
     .state("OR")
     .get())
@@ -60,14 +60,14 @@ results: TournamentSearchResponse = (client.tournament.query()
 # Filter by tournament type (using enum - preferred)
 from ifpa_api import TournamentSearchType
 
-results: TournamentSearchResponse = (client.tournament.query()
+results: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .tournament_type(TournamentSearchType.WOMEN)
     .limit(25)
     .get())
 
 # Using strings (backwards compatible)
-results_str: TournamentSearchResponse = (client.tournament.query()
+results_str: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .tournament_type("women")
     .limit(25)
@@ -85,7 +85,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Search for tournaments in 2024
-results: TournamentSearchResponse = (client.tournament.query()
+results: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .date_range("2024-01-01", "2024-12-31")
     .get())
@@ -96,7 +96,7 @@ from datetime import datetime, timedelta
 today = datetime.now()
 next_month = today + timedelta(days=30)
 
-upcoming: TournamentSearchResponse = (client.tournament.query()
+upcoming: TournamentSearchResponse = (client.tournament.search()
     .date_range(
         today.strftime("%Y-%m-%d"),
         next_month.strftime("%Y-%m-%d")
@@ -115,7 +115,7 @@ upcoming: TournamentSearchResponse = (client.tournament.query()
 
     try:
         # Invalid format - raises error
-        results = client.tournament.query().date_range("01-01-2024", "12-31-2024").get()
+        results = client.tournament.search().date_range("01-01-2024", "12-31-2024").get()
     except IfpaClientValidationError as e:
         print(f"Invalid date format: {e}")
     ```
@@ -131,7 +131,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a reusable base query for US tournaments
-us_query = client.tournament.query().country("US")
+us_query = client.tournament.search().country("US")
 
 # Derive state-specific queries from the base
 wa_tournaments: TournamentSearchResponse = us_query.state("WA").limit(25).get()
@@ -144,7 +144,7 @@ ca_tournaments: TournamentSearchResponse = us_query.state("CA").limit(25).get()
 # Create a reusable date range query
 from ifpa_api import TournamentSearchType
 
-year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
+year_2024 = client.tournament.search().date_range("2024-01-01", "2024-12-31")
 us_2024 = year_2024.country("US").get()
 women_2024 = year_2024.tournament_type(TournamentSearchType.WOMEN).get()
 ```
@@ -155,7 +155,7 @@ The fluent query builder provides these methods:
 
 | Method | Parameter | Description |
 |--------|-----------|-------------|
-| `.query(name)` | `str` | Tournament name (partial match, case insensitive) |
+| `.search(name)` | `str` | Tournament name (partial match, case insensitive) |
 | `.city(city)` | `str` | Filter by city name |
 | `.state(stateprov)` | `str` | Filter by state/province code |
 | `.country(country)` | `str` | Filter by country code (e.g., "US", "CA") |
@@ -167,7 +167,7 @@ The fluent query builder provides these methods:
 
 !!! info "Migration from 0.2.x"
     The `client.tournament.search(name="PAPA")` method was removed in v0.3.0.
-    Use the fluent query builder instead: `client.tournament.query("PAPA").get()`
+    Use the fluent query builder instead: `client.tournament.search("PAPA").get()`
 
 !!! success "State Filter Works Correctly"
     Tournament search uses **exact matching** for state/province filtering, unlike player and director search which have a substring matching bug. You can reliably filter tournaments by state code without false positives.
@@ -185,7 +185,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Find all women's tournaments in the Pacific Northwest during 2024
-results: TournamentSearchResponse = (client.tournament.query()
+results: TournamentSearchResponse = (client.tournament.search()
     .country("US")
     .date_range("2024-01-01", "2024-12-31")
     .tournament_type(TournamentSearchType.WOMEN)
@@ -193,13 +193,13 @@ results: TournamentSearchResponse = (client.tournament.query()
     .get())
 
 # Search for championship events in a specific city
-results: TournamentSearchResponse = (client.tournament.query("Championship")
+results: TournamentSearchResponse = (client.tournament.search("Championship")
     .city("Portland")
     .state("OR")
     .get())
 
 # Find recent tournaments with pagination
-results: TournamentSearchResponse = (client.tournament.query()
+results: TournamentSearchResponse = (client.tournament.search()
     .date_range("2024-11-01", "2024-11-30")
     .country("US")
     .offset(0)
@@ -542,7 +542,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a base query for 2024 tournaments
-year_2024 = client.tournament.query().date_range("2024-01-01", "2024-12-31")
+year_2024 = client.tournament.search().date_range("2024-01-01", "2024-12-31")
 
 # Derive specific queries
 us_tournaments: TournamentSearchResponse = year_2024.country("US").limit(100).get()
@@ -567,7 +567,7 @@ def get_all_tournaments(name: str, page_size: int = 100):
     start_pos = 0
 
     while True:
-        results: TournamentSearchResponse = (client.tournament.query(name)
+        results: TournamentSearchResponse = (client.tournament.search(name)
             .offset(start_pos)
             .limit(page_size)
             .get())
@@ -600,7 +600,7 @@ print(f"Found {len(championships)} championship tournaments")
     results: TournamentSearchResponse = client.tournament.search(name="PAPA")
 
     # New (0.3.0+):
-    results: TournamentSearchResponse = client.tournament.query("PAPA").get()
+    results: TournamentSearchResponse = client.tournament.search("PAPA").get()
     ```
 
     Complex queries with filters:
@@ -616,7 +616,7 @@ print(f"Found {len(championships)} championship tournaments")
     )
 
     # New (0.3.0+):
-    results = client.tournament.query("Championship") \
+    results = client.tournament.search("Championship") \
         .city("Portland") \
         .state("OR") \
         .date_range("2024-01-01", "2024-12-31") \

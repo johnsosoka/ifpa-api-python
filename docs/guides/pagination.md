@@ -165,7 +165,7 @@ from ifpa_api.models.player import PlayerSearchResponse
 client: IfpaClient = IfpaClient()
 
 # First page - players named "Smith" in the US
-page1: PlayerSearchResponse = (client.player.query("Smith")
+page1: PlayerSearchResponse = (client.player.search("Smith")
     .country("US")
     .offset(0)
     .limit(25)
@@ -181,14 +181,14 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # First page of US directors
-page1: DirectorSearchResponse = (client.director.query()
+page1: DirectorSearchResponse = (client.director.search()
     .country("US")
     .offset(0)
     .limit(50)
     .get())
 
 # Second page
-page2: DirectorSearchResponse = (client.director.query()
+page2: DirectorSearchResponse = (client.director.search()
     .country("US")
     .offset(50)
     .limit(50)
@@ -207,7 +207,7 @@ from ifpa_api.models.tournaments import TournamentSearchResponse
 client: IfpaClient = IfpaClient()
 
 # First page of 2024 tournaments
-page1: TournamentSearchResponse = (client.tournament.query()
+page1: TournamentSearchResponse = (client.tournament.search()
     .date_range("2024-01-01", "2024-12-31")
     .country("US")
     .offset(0)
@@ -215,7 +215,7 @@ page1: TournamentSearchResponse = (client.tournament.query()
     .get())
 
 # Second page
-page2: TournamentSearchResponse = (client.tournament.query()
+page2: TournamentSearchResponse = (client.tournament.search()
     .date_range("2024-01-01", "2024-12-31")
     .country("US")
     .offset(100)
@@ -237,7 +237,7 @@ from ifpa_api.models.director import DirectorSearchResponse, DirectorQueryBuilde
 client: IfpaClient = IfpaClient()
 
 # Create base query
-us_directors_query: DirectorQueryBuilder = client.director.query().country("US").limit(50)
+us_directors_query: DirectorQueryBuilder = client.director.search().country("US").limit(50)
 
 # Fetch multiple pages from same base query
 page1: DirectorSearchResponse = us_directors_query.offset(0).get()

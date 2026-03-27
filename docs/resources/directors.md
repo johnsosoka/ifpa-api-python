@@ -11,7 +11,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Fluent query builder - search for directors named "Josh" in the US
-results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+results: DirectorSearchResponse = client.director.search("Josh").country("US").get()
 ```
 
 ## Searching Directors (Fluent Query Builder)
@@ -25,7 +25,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Simple name search
-results: DirectorSearchResponse = client.director.query("Josh").get()
+results: DirectorSearchResponse = client.director.search("Josh").get()
 for director in results.directors:
     print(f"{director.director_id}: {director.name}")
     print(f"  Location: {director.city}, {director.stateprov}, {director.country_name}")
@@ -48,7 +48,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Chain multiple filters
-results: DirectorSearchResponse = (client.director.query("Sharpe")
+results: DirectorSearchResponse = (client.director.search("Sharpe")
     .country("US")
     .state("IL")
     .city("Chicago")
@@ -56,14 +56,14 @@ results: DirectorSearchResponse = (client.director.query("Sharpe")
     .get())
 
 # Location-only search (no name query)
-results: DirectorSearchResponse = (client.director.query()
+results: DirectorSearchResponse = (client.director.search()
     .country("US")
     .state("IL")
     .limit(50)
     .get())
 
 # Country filter with pagination
-results: DirectorSearchResponse = (client.director.query()
+results: DirectorSearchResponse = (client.director.search()
     .country("US")
     .offset(0)
     .limit(100)
@@ -81,7 +81,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a reusable base query for US directors
-us_query = client.director.query().country("US")
+us_query = client.director.search().country("US")
 
 # Derive state-specific queries from the base
 il_directors: DirectorSearchResponse = us_query.state("IL").limit(25).get()
@@ -96,7 +96,7 @@ ca_directors: DirectorSearchResponse = us_query.state("CA").limit(25).get()
 
 | Method | Parameter | Description |
 |--------|-----------|-------------|
-| `.query(name)` | `str` | Director name (partial match, case insensitive) |
+| `.search(name)` | `str` | Director name (partial match, case insensitive) |
 | `.city(city)` | `str` | City filter |
 | `.state(stateprov)` | `str` | State/province code (e.g., "IL", "WA") |
 | `.country(code)` | `str` | Country name or code (e.g., "US", "CA") |
@@ -106,7 +106,7 @@ ca_directors: DirectorSearchResponse = us_query.state("CA").limit(25).get()
 
 !!! info "Migration from 0.2.x"
     The `client.director.search(name="Josh")` method was removed in v0.3.0.
-    Use the fluent query builder instead: `client.director.query("Josh").get()`
+    Use the fluent query builder instead: `client.director.search("Josh").get()`
 
 ## Individual Director Operations
 
@@ -469,7 +469,7 @@ from ifpa_api.models.director import DirectorSearchResponse
 client: IfpaClient = IfpaClient()
 
 # Create a base query for US directors
-us_query = client.director.query().country("US")
+us_query = client.director.search().country("US")
 
 # Derive specific state queries
 il_directors: DirectorSearchResponse = us_query.state("IL").limit(50).get()
@@ -531,7 +531,7 @@ print(f"  Unique Players: {director.stats.unique_player_count}")
     results: DirectorSearchResponse = client.director.search(name="Josh", country="US")
 
     # New (0.3.0+):
-    results: DirectorSearchResponse = client.director.query("Josh").country("US").get()
+    results: DirectorSearchResponse = client.director.search("Josh").country("US").get()
     ```
 
     Chained filters:
@@ -541,7 +541,7 @@ print(f"  Unique Players: {director.stats.unique_player_count}")
     results = client.director.search(name="Sharpe", city="Chicago", stateprov="IL")
 
     # New (0.3.0+):
-    results = client.director.query("Sharpe").city("Chicago").state("IL").get()
+    results = client.director.search("Sharpe").city("Chicago").state("IL").get()
     ```
 
     The query builder is immutable and chainable, enabling query reuse and better type safety.
