@@ -4,12 +4,12 @@ This module contains base models, shared enums, and common structures used
 throughout the SDK.
 """
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict
 
 
-class TimePeriod(str, Enum):
+class TimePeriod(StrEnum):
     """Time period filter for tournament and event queries.
 
     Attributes:
@@ -21,7 +21,7 @@ class TimePeriod(str, Enum):
     FUTURE = "future"
 
 
-class RankingSystem(str, Enum):
+class RankingSystem(StrEnum):
     """IFPA ranking system types.
 
     Attributes:
@@ -39,7 +39,7 @@ class RankingSystem(str, Enum):
     PRO = "pro"
 
 
-class ResultType(str, Enum):
+class ResultType(StrEnum):
     """Tournament result activity status.
 
     Attributes:
@@ -53,7 +53,7 @@ class ResultType(str, Enum):
     INACTIVE = "inactive"
 
 
-class TournamentType(str, Enum):
+class TournamentType(StrEnum):
     """Tournament category types.
 
     Attributes:
@@ -65,7 +65,7 @@ class TournamentType(str, Enum):
     WOMEN = "women"
 
 
-class StatsRankType(str, Enum):
+class StatsRankType(StrEnum):
     """Ranking type filter for statistical queries.
 
     Attributes:
@@ -77,7 +77,7 @@ class StatsRankType(str, Enum):
     WOMEN = "WOMEN"
 
 
-class SystemCode(str, Enum):
+class SystemCode(StrEnum):
     """System code for overall statistics queries.
 
     Note: As of 2025-11, API bug causes WOMEN to return OPEN data.
@@ -91,7 +91,7 @@ class SystemCode(str, Enum):
     WOMEN = "WOMEN"
 
 
-class MajorTournament(str, Enum):
+class MajorTournament(StrEnum):
     """Major tournament filter for tournament value queries.
 
     Attributes:
@@ -103,7 +103,7 @@ class MajorTournament(str, Enum):
     NO = "N"
 
 
-class RankingDivision(str, Enum):
+class RankingDivision(StrEnum):
     """Division filter for rankings queries.
 
     Used in rankings endpoints to filter by player division.
@@ -128,7 +128,7 @@ class RankingDivision(str, Enum):
     WOMEN = "WOMEN"
 
 
-class TournamentSearchType(str, Enum):
+class TournamentSearchType(StrEnum):
     """Tournament type filter for search queries.
 
     Used in tournament search to filter by tournament type/format.
