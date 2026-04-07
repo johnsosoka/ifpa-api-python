@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ifpa-api"
-version = "0.4.3"
+version = "0.4.4"
 description = "Typed Python client for the IFPA (International Flipper Pinball Association) API"
 authors = ["John Sosoka <im@johnsosoka.com>"]
 readme = "README.md"
@@ -42,7 +42,7 @@ ruff = ">=0.14.5,<0.16.0"
 black = "^24.0.0"
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
-datamodel-code-generator = ">=0.25,<0.36"
+datamodel-code-generator = ">=0.25,<0.57"
 types-requests = "^2.31.0"
 
 [tool.poetry.group.test]

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-04-07
+
+### Changed
+
+- Updated development dependencies (datamodel-code-generator, types-requests, development-dependencies group)
+
+### Fixed
+
+- Fixed pre-commit.ci configuration to target develop branch instead of main
+
 ## [0.4.2] - 2026-03-26
 
 ### Security
