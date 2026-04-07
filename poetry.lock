@@ -389,14 +389,14 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.35.0"
+version = "0.56.0"
 description = "Datamodel Code Generator"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "datamodel_code_generator-0.35.0-py3-none-any.whl", hash = "sha256:c356d1e4a555f86667a4262db03d4598a30caeda8f51786555fd269c8abb806b"},
-    {file = "datamodel_code_generator-0.35.0.tar.gz", hash = "sha256:46805fa2515d3871f6bfafce9aa63128e735a7a6a4cfcbf9c27b3794ee4ea846"},
+    {file = "datamodel_code_generator-0.56.0-py3-none-any.whl", hash = "sha256:a0559683fbe90cdf2ce9b6637e3adae3e3a8056a8d0516df581d486e2834ead2"},
+    {file = "datamodel_code_generator-0.56.0.tar.gz", hash = "sha256:e7c003fb5421b890aabe12f66ae65b57198b04cfe1da7c40810798020835b3a8"},
 ]
 
 [package.dependencies]
@@ -404,20 +404,24 @@ argcomplete = ">=2.10.1,<4"
 black = ">=19.10b0"
 genson = ">=1.2.1,<2"
 inflect = ">=4.1,<8"
-isort = ">=4.3.21,<7"
+isort = ">=4.3.21,<9"
 jinja2 = ">=2.10.1,<4"
-packaging = "*"
-pydantic = ">=1.5"
+pydantic = [
+    {version = ">=2.12,<3", markers = "python_version >= \"3.14\""},
+    {version = ">=2,<3", markers = "python_version < \"3.14\""},
+]
 pyyaml = ">=6.0.1"
 tomli = {version = ">=2.2.1,<3", markers = "python_version <= \"3.11\""}
 
 [package.extras]
-all = ["graphql-core (>=3.2.3)", "httpx (>=0.24.1)", "openapi-spec-validator (>=0.2.8,<0.7)", "prance (>=0.18.2)", "pysnooper (>=0.4.1,<2)", "ruff (>=0.9.10)"]
+all = ["graphql-core (>=3.2.3)", "httpx (>=0.24.1)", "openapi-spec-validator (>=0.2.8,<0.8)", "prance (>=0.18.2)", "pysnooper (>=0.4.1,<2)", "ruff (>=0.9.10)", "watchfiles (>=1.1)"]
 debug = ["pysnooper (>=0.4.1,<2)"]
 graphql = ["graphql-core (>=3.2.3)"]
 http = ["httpx (>=0.24.1)"]
 ruff = ["ruff (>=0.9.10)"]
-validation = ["openapi-spec-validator (>=0.2.8,<0.7)", "prance (>=0.18.2)"]
+ryaml = ["ryaml (>=0.5.1)"]
+validation = ["openapi-spec-validator (>=0.2.8,<0.8)", "prance (>=0.18.2)"]
+watch = ["watchfiles (>=1.1)"]
 
 [[package]]
 name = "distlib"
@@ -1679,4 +1683,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "4d639d827d5314ee9e5bc90084c2eef19d0f2c69a50ffbec88a6c5b19a812e29"
+content-hash = "7923315a6a029f0eecc27facafbf6d0c559644301670332b69ae52b00e53f1f7"
