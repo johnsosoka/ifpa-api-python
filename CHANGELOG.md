@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-04-18
+
+### Fixed
+
+- Fixed "Add to sosoka-ops" workflow failing on Dependabot PRs by adding conditional to skip when actor is dependabot[bot]
+
+### Changed
+
+- Updated development dependencies (GitHub Actions, types-requests, development-dependencies group)
+
 ## [0.4.4] - 2026-04-07
 
 ### Changed
