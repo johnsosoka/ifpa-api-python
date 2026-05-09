@@ -7,6 +7,7 @@
 [![codecov](https://codecov.io/gh/johnsosoka/ifpa-api-python/branch/main/graph/badge.svg)](https://codecov.io/gh/johnsosoka/ifpa-api-python)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://johnsosoka.github.io/ifpa-api-python/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![AI Code Review](https://github.com/johnsosoka/ifpa-api-python/actions/workflows/ai-code-review.yml/badge.svg)
 
 **Unofficial** Python client for the [IFPA (International Flipper Pinball Association) API](https://api.ifpapinball.com/).
 
@@ -80,6 +81,12 @@ for result in results.results[:5]:
 - [API Reference](https://johnsosoka.github.io/ifpa-api-python/api-client-reference/client/)
 - [Practical Examples](https://johnsosoka.github.io/ifpa-api-python/guides/practical-examples/)
 - [Migration Guide](https://johnsosoka.github.io/ifpa-api-python/api-client-reference/changelog/) (0.2.x → 0.4.x)
+
+## AI Code Review
+
+All pull requests are automatically reviewed by GPT-4o via [ai-code-review](https://github.com/AleksandrFurmenkovOfficial/ai-code-review). The AI checks for code quality, security issues, performance concerns, and maintainability.
+
+Reviews run on every PR open and update. Results are posted as inline comments on the pull request.
 
 ## License
 
