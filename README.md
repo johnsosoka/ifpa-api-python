@@ -95,4 +95,3 @@ MIT License — see [LICENSE](LICENSE) file.
 ---
 
 *Not affiliated with or endorsed by IFPA.*
-
