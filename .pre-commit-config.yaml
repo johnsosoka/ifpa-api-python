@@ -35,7 +35,7 @@ ci:
   autofix_commit_msg: |
     chore(pre-commit): auto fixes from hooks
   autofix_prs: true
-  autoupdate_branch: ''
+  autoupdate_branch: 'develop'
   autoupdate_commit_msg: 'chore(pre-commit): autoupdate'
   autoupdate_schedule: weekly
   skip: []
