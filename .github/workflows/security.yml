@@ -57,6 +57,7 @@ jobs:
           vulnerability-service: pypi
           # Don't fail CI on vulnerabilities, create issues instead
           require-hashes: false
+        continue-on-error: true
 
       - name: Run pip-audit and save output
         id: pip-audit-report
