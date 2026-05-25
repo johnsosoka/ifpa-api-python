@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   review:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'dependabot-preview[bot]'
     uses: johnsosoka/.github/.github/workflows/ai-code-review.yml@main
     secrets:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
