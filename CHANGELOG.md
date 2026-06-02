@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.9] - 2026-06-02
+
+### Changed
+
+- Updated pre-commit hooks
+- Updated development dependencies (ruff, datamodel-code-generator, types-requests)
+- Updated GitHub Actions (gitleaks/gitleaks-action from 2 to 3)
+
 ## [0.4.5] - 2026-04-18
 
 ### Fixed
