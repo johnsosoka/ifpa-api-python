@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.10] - 2026-07-15
+
+### Changed
+
+- Migrated from legacy single-pass GPT reviewer to AI Council v0.2.0
+- Updated GitHub Actions to latest major versions
+  - `actions/checkout` v4 → v7
+  - `actions/setup-python` v5 → v6
+  - `actions/cache` v5 → v6
+  - `codecov/codecov-action` v6 → v7
+  - `actions/upload-artifact` v4 → v7
+  - `actions/download-artifact` v4 → v8
+  - `actions/github-script` v7 → v9
+- Updated pre-commit hooks
+- Updated development dependencies (ruff, datamodel-code-generator)
+
 ## [0.4.9] - 2026-06-02
 
 ### Changed
@@ -988,7 +1004,9 @@ profile = client.player(123).details()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.10...HEAD
+[0.4.10]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.9...v0.4.10
+[0.4.9]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.5...v0.4.9
 [0.4.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.2.1...v0.2.2
