@@ -389,14 +389,14 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 
 [[package]]
 name = "datamodel-code-generator"
-version = "0.69.0"
+version = "0.71.0"
 description = "Datamodel Code Generator"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "datamodel_code_generator-0.69.0-py3-none-any.whl", hash = "sha256:a7463d7c6db2d8109f783edca41247e24fb5d9a8544909eb2354aa33bb50fcc1"},
-    {file = "datamodel_code_generator-0.69.0.tar.gz", hash = "sha256:04bb408ecfac2773a8accd14de20ded4c08bd2814fc5ea354e7fd476442b46aa"},
+    {file = "datamodel_code_generator-0.71.0-py3-none-any.whl", hash = "sha256:680b68338d59e98a0559eeb54d8e5ca33c35b3ec0bef922ec2cc783f2cb28e9a"},
+    {file = "datamodel_code_generator-0.71.0.tar.gz", hash = "sha256:d27cd7a0d10f9b2db74a41db7f3e050c226da9cf0afb4916a7ab56275ebacbf2"},
 ]
 
 [package.dependencies]
@@ -1647,4 +1647,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "7b630b33f95ffdad5a9386f356b1c64719825caba2f88a0939eff16e1e22c3b9"
+content-hash = "931d55a5b5d027f23a7ba7189cc761811a8873ab54a565a02b7ca940afb1b442"
