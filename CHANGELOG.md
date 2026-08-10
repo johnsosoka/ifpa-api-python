@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.12] - 2026-08-10
+
+### Changed
+
+- Updated ruff from 0.15.22 to 0.16.0
+- Updated datamodel-code-generator from 0.69.0 to 0.72.2
+- Updated pre-commit hooks (ruff-pre-commit v0.15.22 to v0.16.1)
+
 ## [0.4.11] - 2026-07-23
 
 ### Changed
@@ -1012,7 +1020,8 @@ profile = client.player(123).details()
 - `GET /reference/countries` - List of countries
 - `GET /reference/states` - List of states/provinces
 
-[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.11...HEAD
+[Unreleased]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.12...HEAD
+[0.4.12]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.11...v0.4.12
 [0.4.11]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.10...v0.4.11
 [0.4.10]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.9...v0.4.10
 [0.4.9]: https://github.com/johnsosoka/ifpa-api-python/compare/v0.4.5...v0.4.9
