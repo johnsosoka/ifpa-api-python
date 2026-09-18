@@ -55,7 +55,7 @@ from ifpa_api.models.common import (
     TournamentType,
 )
 
-__version__ = "0.4.12"
+__version__ = "0.4.13"
 
 __all__ = [
     # Main client
