@@ -1,3 +1,5 @@
+# Managed by Devin / Sosoka Labs
+
 name: Security Scanning
 
 on:
@@ -91,7 +93,7 @@ jobs:
             echo "Found ${VULN_COUNT} vulnerabilities"
             exit 1
           fi
-          echo "No vulnerabilities found"
+          echo "No vulnerabilities found in audited dependencies (check parser output for skipped ones)"
 
       - name: Create issue for vulnerabilities
         if: failure() && github.event_name == 'schedule' && steps.check-vulns.outputs.vuln-count > 0

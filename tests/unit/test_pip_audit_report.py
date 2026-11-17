@@ -1,3 +1,4 @@
+# Managed by Devin / Sosoka Labs
 """Tests for the pip-audit report parser used by the security workflow.
 
 All reports below are synthetic fixtures shaped like ``pip-audit --format json``
@@ -124,6 +125,10 @@ class TestSummarizeReport:
             pytest.param(None, id="null"),
             pytest.param({"dependencies": {}}, id="dependencies-not-a-list"),
             pytest.param({"dependencies": []}, id="no-dependencies-audited"),
+            pytest.param(
+                {"dependencies": [{"name": "example-a", "skip_reason": "not found on PyPI"}]},
+                id="all-dependencies-skipped",
+            ),
             pytest.param({"dependencies": ["example-a"]}, id="dependency-not-an-object"),
             pytest.param({"dependencies": [{"vulns": []}]}, id="dependency-missing-name"),
             pytest.param({"dependencies": [{"name": "example-a"}]}, id="missing-vulns-and-skip"),
@@ -159,6 +164,17 @@ class TestLoadReport:
         with pytest.raises(parser.AuditReportError, match="not valid JSON"):
             parser.load_report(write_report(tmp_path, content))
 
+    def test_unreadable_path_raises(self, tmp_path: Path) -> None:
+        with pytest.raises(parser.AuditReportError, match="could not be read"):
+            parser.load_report(tmp_path)
+
+    def test_undecodable_bytes_raise(self, tmp_path: Path) -> None:
+        report_path = tmp_path / "audit-report.json"
+        report_path.write_bytes(b"\xff\xfe\x00{")
+
+        with pytest.raises(parser.AuditReportError, match="not valid UTF-8"):
+            parser.load_report(report_path)
+
 
 class TestMain:
     def test_prints_count_and_exits_zero_for_valid_report(
@@ -183,6 +199,46 @@ class TestMain:
         assert exit_code == parser.EXIT_INVALID_REPORT
         assert captured.out == ""
         assert "dependencies" in captured.err
+
+    def test_reports_partial_coverage_when_some_dependencies_skipped(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        report = make_report(
+            make_dependency("example-a"),
+            {"name": "example-local", "skip_reason": "not found on PyPI"},
+        )
+        report_path = write_report(tmp_path, json.dumps(report))
+
+        exit_code = parser.main([str(report_path)])
+
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        assert captured.out.strip() == "0"
+        assert "partial coverage" in captured.err.lower()
+        assert "example-local" in captured.err
+
+    def test_exits_invalid_with_no_count_for_unreadable_path(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        exit_code = parser.main([str(tmp_path)])
+
+        captured = capsys.readouterr()
+        assert exit_code == parser.EXIT_INVALID_REPORT
+        assert captured.out == ""
+        assert "could not be read" in captured.err
+
+    def test_exits_invalid_with_no_count_for_undecodable_report(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        report_path = tmp_path / "audit-report.json"
+        report_path.write_bytes(b"\xff\xfe\x00{")
+
+        exit_code = parser.main([str(report_path)])
+
+        captured = capsys.readouterr()
+        assert exit_code == parser.EXIT_INVALID_REPORT
+        assert captured.out == ""
+        assert "not valid UTF-8" in captured.err
 
 
 def test_security_workflow_counts_vulnerabilities_with_parser() -> None:

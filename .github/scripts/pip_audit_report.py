@@ -1,15 +1,20 @@
+# Managed by Devin / Sosoka Labs
 """Count unique vulnerabilities in a ``pip-audit --format json`` report.
 
 Used by ``.github/workflows/security.yml``. pip-audit nests findings under
 ``dependencies[].vulns``; this parser counts unique package/advisory pairs, merging
-advisories whose ID or aliases overlap, and fails closed on a missing or malformed
-report so a broken audit can never read as a clean one.
+advisories whose ID or aliases overlap, and fails closed on a missing, unreadable, or
+malformed report so a broken audit can never read as a clean one.
+
+Dependencies pip-audit skipped (``skip_reason``) are unaudited. A report in which every
+dependency was skipped is rejected; a report with some skipped is valid but is labelled
+partial coverage on stderr, and its count covers only the audited dependencies.
 
 Usage: ``python pip_audit_report.py REPORT``
 
 Exit codes:
     0  Report is valid; the vulnerability count (possibly 0) is printed to stdout.
-    2  Report is missing or malformed; nothing is printed to stdout.
+    2  Report is missing, unreadable, or malformed; nothing is printed to stdout.
 
 Standard library only: the workflow runs this on the runner's bare Python.
 """
@@ -57,6 +62,10 @@ def load_report(path: Path) -> object:
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError as exc:
         raise AuditReportError(f"pip-audit report not found: {path}") from exc
+    except OSError as exc:
+        raise AuditReportError(f"pip-audit report could not be read: {path}: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise AuditReportError(f"pip-audit report is not valid UTF-8: {path}: {exc}") from exc
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
@@ -76,6 +85,8 @@ def summarize_report(report: object) -> AuditSummary:
         package_advisories = advisory_ids_by_package.setdefault(_normalize_name(name), [])
         for ids in vuln_ids:
             _merge_advisory(package_advisories, ids)
+    if len(skipped) == len(dependencies):
+        raise AuditReportError("pip-audit report skipped every dependency; nothing was audited")
     advisories = tuple(
         Advisory(package, ids)
         for package, id_groups in sorted(advisory_ids_by_package.items())
@@ -139,10 +150,13 @@ def _normalize_name(name: str) -> str:
 
 
 def _describe(summary: AuditSummary) -> str:
-    lines = [f"{summary.vulnerability_count} unique vulnerabilities found"]
+    lines = [f"{summary.vulnerability_count} unique vulnerabilities found in audited dependencies"]
     lines += [f"  {a.package}: {', '.join(sorted(a.ids))}" for a in summary.advisories]
     if summary.skipped_dependencies:
-        lines.append(f"Skipped by pip-audit: {', '.join(summary.skipped_dependencies)}")
+        lines.append(
+            "WARNING: partial coverage; these dependencies were skipped by pip-audit and not "
+            f"audited: {', '.join(summary.skipped_dependencies)}"
+        )
     return "\n".join(lines)
 
 
