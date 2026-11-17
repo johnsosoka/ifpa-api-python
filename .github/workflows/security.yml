@@ -80,20 +80,21 @@ jobs:
       - name: Check for vulnerabilities
         id: check-vulns
         run: |
-          if [ -f audit-report.json ]; then
-            VULN_COUNT=$(python -c "import sys, json; data=json.load(open('audit-report.json')); print(len(data.get('vulnerabilities', [])))")
-            echo "vuln-count=${VULN_COUNT}" >> "$GITHUB_OUTPUT"
-
-            if [ "$VULN_COUNT" -gt 0 ]; then
-              echo "Found ${VULN_COUNT} vulnerabilities"
-              exit 1
-            else
-              echo "No vulnerabilities found"
-            fi
+          # Fail closed: a missing or malformed report must never read as zero vulnerabilities.
+          if ! VULN_COUNT=$(python .github/scripts/pip_audit_report.py audit-report.json); then
+            echo "::error::pip-audit report is missing or malformed; dependency audit result is unknown"
+            exit 2
           fi
+          echo "vuln-count=${VULN_COUNT}" >> "$GITHUB_OUTPUT"
+
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            echo "Found ${VULN_COUNT} vulnerabilities"
+            exit 1
+          fi
+          echo "No vulnerabilities found"
 
       - name: Create issue for vulnerabilities
-        if: failure() && github.event_name == 'schedule'
+        if: failure() && github.event_name == 'schedule' && steps.check-vulns.outputs.vuln-count > 0
         uses: actions/github-script@v9
         with:
           script: |
